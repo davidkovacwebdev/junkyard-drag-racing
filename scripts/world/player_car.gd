@@ -54,6 +54,41 @@ func _notification(what: int) -> void:
 		velocity = Vector2.ZERO
 		_space_pressed_last = false
 
+## Left-click is how you deal with a person rather than a place (the junkyard's
+## scrap dealer). It's a point query into the physics world, not a mouse-over
+## test, because the *car* is what has to be in reach: clicking him only counts
+## if he's also showing up in the interaction zone, so you can't reach across
+## the yard. Anything the click handles is consumed so it can't double up with
+## the space path.
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		var click := event as InputEventMouseButton
+		if click.button_index == MOUSE_BUTTON_LEFT and click.pressed:
+			var target := _clicked_interactable(get_global_mouse_position())
+			if target != null:
+				_activate(target)
+				get_viewport().set_input_as_handled()
+
+## The thing under the cursor, but only if the car is close enough to it to be
+## showing it in the interaction zone. Hit colliders are walked back up to the
+## node that owns the interaction protocol, so clicking a character's click box
+## or a child collision shape resolves to the same target the zone knows.
+func _clicked_interactable(point: Vector2) -> Object:
+	var reachable := _find_interactables()
+	if reachable.is_empty():
+		return null
+	var params := PhysicsPointQueryParameters2D.new()
+	params.position = point
+	params.collide_with_bodies = true
+	params.collide_with_areas = true
+	for hit in get_world_2d().direct_space_state.intersect_point(params):
+		var node := hit.get("collider") as Node
+		while node != null:
+			if reachable.has(node):
+				return node
+			node = node.get_parent()
+	return null
+
 func _physics_process(delta: float) -> void:
 	var input_dir := Vector2.ZERO
 	if Input.is_physical_key_pressed(KEY_A) or Input.is_physical_key_pressed(KEY_LEFT):
@@ -84,30 +119,49 @@ func _physics_process(delta: float) -> void:
 
 	# The only thing looting actually tracks right now — a plain running
 	# total, no distinct item types yet — so this is the whole HUD for now.
-	_scrap_label.text = "Scrap: %d" % Inventory.scrap
+	# Money joins it because the scrap dealer at the junkyard pays out.
+	_scrap_label.text = "Scrap: %d    $%d" % [Inventory.scrap, Inventory.money]
 
 	_process_interaction(delta)
 
 ## Nearby buildings are just StaticBody2Ds with a non-empty `display_name`
 ## property (duck-typed, not a shared base class) that overlap this zone.
-func _find_interactable() -> Object:
+## Returns all of them, in physics order: the zone can overlap two things at
+## once (parked between the scrap dealer and the crane, say), and the caller
+## needs to know about the others to pick one that answers to the space bar.
+func _find_interactables() -> Array[Object]:
+	var found: Array[Object] = []
 	for body in _interaction_zone.get_overlapping_bodies():
 		var target_name = body.get("display_name")
 		if typeof(target_name) == TYPE_STRING and target_name != "":
-			return body
-	return null
+			found.append(body)
+	return found
 
 func _process_interaction(delta: float) -> void:
-	var target := _find_interactable()
-	var hold_duration := _hold_duration_for(target)
+	var candidates := _find_interactables()
 
-	if target != null:
-		var verb_prompt := "Hold" if hold_duration > 0.0 else "Press"
-		_tooltip_label.text = "%s: %s space to %s" % [target.display_name, verb_prompt, _interact_verb(target)]
+	# Prefer something the space bar can actually work on. A click-only target
+	# (the scrap dealer says so via uses_click_interaction()) is never activated
+	# by space, so letting it shadow a normal target nearby would make the space
+	# bar stop working for no visible reason — but it still gets the tooltip
+	# while nothing else is in reach, otherwise there'd be nothing to tell you
+	# the dealer is clickable at all.
+	var target: Object = null
+	for candidate in candidates:
+		if not _is_click_only(candidate):
+			target = candidate
+			break
+	var prompt_target: Object = target
+	if prompt_target == null and not candidates.is_empty():
+		prompt_target = candidates[0]
+
+	if prompt_target != null:
+		_tooltip_label.text = _interact_prompt(prompt_target)
 		_tooltip_label.visible = true
 	else:
 		_tooltip_label.visible = false
 
+	var hold_duration := _hold_duration_for(target)
 	var space_pressed := Input.is_physical_key_pressed(KEY_SPACE)
 
 	if target != null and space_pressed and hold_duration > 0.0:
@@ -129,6 +183,25 @@ func _process_interaction(delta: float) -> void:
 		_hide_hold_bar()
 
 	_space_pressed_last = space_pressed
+
+## True for a target that only answers to a mouse click. It still advertises
+## `display_name` (so the car can find it and click it) but the space prompt
+## and the hold bar are skipped for it.
+func _is_click_only(target: Object) -> bool:
+	if target != null and target.has_method("uses_click_interaction"):
+		return bool(target.call("uses_click_interaction"))
+	return false
+
+## The tooltip line. The default is about the space key, which is the wrong
+## thing to say about a click-only target, so a target can write its own
+## (the dealer's doubles as the "how much scrap have I got" readout).
+func _interact_prompt(target: Object) -> String:
+	if target.has_method("get_interact_prompt"):
+		var line: Variant = target.call("get_interact_prompt")
+		if typeof(line) == TYPE_STRING and line != "":
+			return line
+	var verb_prompt := "Hold" if _hold_duration_for(target) > 0.0 else "Press"
+	return "%s: %s space to %s" % [target.display_name, verb_prompt, _interact_verb(target)]
 
 ## 0 means instant activation (buildings you just walk into); a target can
 ## opt into a hold-to-activate delay (roadside trash props do, so a

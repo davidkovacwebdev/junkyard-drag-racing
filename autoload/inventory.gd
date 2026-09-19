@@ -17,15 +17,27 @@ extends Node
 var garage_capacity: int = 2
 var owned_cars: Array[CarModelData] = []
 var selected_index: int = 0
-## Loose trash hauled out of roadside bins. No sink for it yet — nothing spends
-## scrap — so this is just a running total for now, but it's the natural thing
-## for a future parts trader or repair cost to draw on.
+## Loose trash hauled out of roadside bins. Sold to the scrap dealer at the
+## junkyard for cash; until you sell it, it's just weight in the trunk.
 var scrap: int = 0
+## Cash. Only the scrap dealer puts money in here so far, and nothing spends it
+## yet — but this is what parts, repairs and race entry fees will draw on.
+var money: int = 0
 
 ## Add to the scrap tally. Returns the new total.
 func add_scrap(amount: int) -> int:
 	scrap += amount
 	return scrap
+
+## Sell the whole scrap pile at `rate` cash per scrap. Empties `scrap`, banks
+## the cash, and returns what was earned so the caller can show it.
+func sell_scrap(rate: int = 1) -> int:
+	if scrap <= 0:
+		return 0
+	var earned := scrap * rate
+	scrap = 0
+	money += earned
+	return earned
 
 ## The starter car the player already owns — always in slot 0.
 const STARTER_BODY := "res://scenes/parts/bodies/body_classic.tscn"
