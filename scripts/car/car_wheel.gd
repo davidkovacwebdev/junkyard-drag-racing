@@ -21,6 +21,12 @@ extends RigidBody2D
 
 @export var part_data: WheelPartData
 
+## The rigid body this wheel is jointed to, set by CarAssembler. Plain
+## rolling wheels never need it — they push the car purely through
+## ground friction — but a subclass like CarPaddle uses it to shove the
+## chassis directly. Optional so a wheel scene still works standalone.
+var chassis: RigidBody2D
+
 ## Rotation speed (rad/s) this wheel's motor targets. Positive spins the
 ## wheel clockwise, which rolls the car toward +x (forward/right).
 var target_angular_velocity: float = 0.0

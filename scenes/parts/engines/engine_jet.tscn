@@ -15,13 +15,12 @@ power = 8.0
 
 [node name="EngineJet" type="Node2D"]
 script = ExtResource("1")
-position = Vector2(0, -38)
 part_data = SubResource("Resource_jet")
 
 [node name="Body" type="Polygon2D" parent="."]
 color = Color(0.5, 0.55, 0.6, 1)
-polygon = PackedVector2Array(-30, -14, 15, -20, 15, 20, -30, 14)
+polygon = PackedVector2Array(-30, -34, 15, -40, 15, 0, -30, -6)
 
 [node name="Intake" type="Polygon2D" parent="."]
 color = Color(0.1, 0.1, 0.12, 1)
-polygon = PackedVector2Array(27, 0, 23, 8, 15, 12, 7, 8, 3, 0, 7, -8, 15, -12, 23, -8)
+polygon = PackedVector2Array(27, -20, 23, -12, 15, -8, 7, -12, 3, -20, 7, -28, 15, -32, 23, -28)

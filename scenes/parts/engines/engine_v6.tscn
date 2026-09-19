@@ -15,21 +15,20 @@ power = 3.5
 
 [node name="EngineV6" type="Node2D"]
 script = ExtResource("1")
-position = Vector2(0, -38)
 part_data = SubResource("Resource_v6")
 
 [node name="Block" type="Polygon2D" parent="."]
 color = Color(0.7, 0.15, 0.1, 1)
-polygon = PackedVector2Array(-38, -23, 38, -23, 38, 23, -38, 23)
+polygon = PackedVector2Array(-38, -46, 38, -46, 38, 0, -38, 0)
 
 [node name="Cylinder0" type="Polygon2D" parent="."]
 color = Color(0.2, 0.2, 0.2, 1)
-polygon = PackedVector2Array(-34, -38, -19, -38, -19, -23, -34, -23)
+polygon = PackedVector2Array(-34, -61, -19, -61, -19, -46, -34, -46)
 
 [node name="Cylinder1" type="Polygon2D" parent="."]
 color = Color(0.2, 0.2, 0.2, 1)
-polygon = PackedVector2Array(-8, -38, 8, -38, 8, -23, -8, -23)
+polygon = PackedVector2Array(-8, -61, 8, -61, 8, -46, -8, -46)
 
 [node name="Cylinder2" type="Polygon2D" parent="."]
 color = Color(0.2, 0.2, 0.2, 1)
-polygon = PackedVector2Array(19, -38, 34, -38, 34, -23, 19, -23)
+polygon = PackedVector2Array(19, -61, 34, -61, 34, -46, 19, -46)
