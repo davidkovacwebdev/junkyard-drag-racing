@@ -20,7 +20,7 @@ func _ready() -> void:
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	var car := Inventory.get_selected_car()
 	if car != null:
-		$Visual.set_body_color(car.body_color)
+		$Visual.build_from(car)
 	# Coming back from a place (garage, drag strip race): reappear where we
 	# left the map instead of at the scene's default spawn.
 	if WorldState.has_player_position:

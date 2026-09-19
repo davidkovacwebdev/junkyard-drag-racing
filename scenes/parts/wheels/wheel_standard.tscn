@@ -1,0 +1,27 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_wheel.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/wheel_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_standard"]
+script = ExtResource("2")
+id = &"wheel_standard"
+display_name = "Standard Wheel"
+mass = 4.0
+durability = 60.0
+material_type = 4
+
+[node name="WheelStandard" type="RigidBody2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_standard")
+
+[node name="Polygon2D" type="Polygon2D" parent="."]
+color = Color(0.15, 0.15, 0.16, 1)
+polygon = PackedVector2Array(36, 0, 31.17, 18, 18, 31.17, 0, 36, -18, 31.17, -31.17, 18, -36, 0, -31.17, -18, -18, -31.17, 0, -36, 18, -31.17, 31.17, -18)
+
+[node name="Hub" type="Polygon2D" parent="."]
+color = Color(0.7, 0.7, 0.72, 1)
+polygon = PackedVector2Array(12, 0, 8.49, 8.49, 0, 12, -8.49, 8.49, -12, 0, -8.49, -8.49, 0, -12, 8.49, -8.49)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(36, 0, 31.17, 18, 18, 31.17, 0, 36, -18, 31.17, -31.17, 18, -36, 0, -31.17, -18, -18, -31.17, 0, -36, 18, -31.17, 31.17, -18)

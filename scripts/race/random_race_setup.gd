@@ -47,7 +47,20 @@ func _ready() -> void:
 	add_child(cars_container)
 
 	var camera_targets: Array[Node2D] = []
-	for i in CAR_COUNT:
+
+	# The player's own garage car races in the top lane, so whatever they
+	# assembled in the garage is what they drive here too.
+	var lane := 0
+	var player_car := Inventory.get_selected_car()
+	if player_car != null and player_car.body != null and not player_car.body.scene_path.is_empty():
+		var car := _assemble_player_car(player_car, cars_container, lane)
+		var car_name := "Player_%s" % player_car.display_name
+		car.root.name = car_name
+		race_controller.register_car(car_name, car)
+		camera_targets.append(car.body)
+		lane += 1
+
+	for i in range(lane, CAR_COUNT):
 		var body_scene: PackedScene = body_scenes[randi() % body_scenes.size()]
 		var wheel_front: PackedScene = wheel_scenes[randi() % wheel_scenes.size()]
 		var wheel_back: PackedScene = wheel_scenes[randi() % wheel_scenes.size()]
@@ -70,3 +83,18 @@ func _ready() -> void:
 
 	if camera != null:
 		camera.targets = camera_targets
+
+## Builds the player's selected garage car into the race. Reuses the exact
+## part scene paths stored on the CarModelData, so the racing rig is the
+## same body/wheels/engine the garage preview (and world player) show.
+func _assemble_player_car(car_data: CarModelData, parent: Node2D, lane: int) -> CarAssembler.AssembledCar:
+	var body_scene: PackedScene = load(car_data.body.scene_path)
+	var wheel_scenes: Array[PackedScene] = []
+	for wheel in car_data.wheels:
+		if wheel != null and not wheel.scene_path.is_empty():
+			wheel_scenes.append(load(wheel.scene_path))
+	var engine_scene: PackedScene = null
+	if car_data.engine != null and not car_data.engine.scene_path.is_empty():
+		engine_scene = load(car_data.engine.scene_path)
+	var spawn_position := Vector2(SPAWN_X, lane * LANE_HEIGHT - SPAWN_HEIGHT_ABOVE_LANE)
+	return CarAssembler.assemble(body_scene, wheel_scenes, engine_scene, parent, spawn_position)

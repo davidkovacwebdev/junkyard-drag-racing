@@ -9,6 +9,7 @@ var wheels: Array[WheelPartData] = []
 var engines: Array[EnginePartData] = []
 
 const _BODY_SCENES := [
+	"res://scenes/parts/bodies/body_classic.tscn",
 	"res://scenes/parts/bodies/body_wrecked_car.tscn",
 	"res://scenes/parts/bodies/body_fridge.tscn",
 	"res://scenes/parts/bodies/body_plank.tscn",
@@ -16,6 +17,7 @@ const _BODY_SCENES := [
 	"res://scenes/parts/bodies/body_sofa.tscn",
 ]
 const _WHEEL_SCENES := [
+	"res://scenes/parts/wheels/wheel_standard.tscn",
 	"res://scenes/parts/wheels/wheel_bicycle.tscn",
 	"res://scenes/parts/wheels/wheel_square.tscn",
 	"res://scenes/parts/wheels/wheel_triangle.tscn",
@@ -32,19 +34,32 @@ const _ENGINE_SCENES := [
 
 func _ready() -> void:
 	for path in _BODY_SCENES:
-		bodies.append(_extract_part_data(path) as BodyPartData)
+		bodies.append(load_part_data(path) as BodyPartData)
 	for path in _WHEEL_SCENES:
-		wheels.append(_extract_part_data(path) as WheelPartData)
+		wheels.append(load_part_data(path) as WheelPartData)
 	for path in _ENGINE_SCENES:
-		engines.append(_extract_part_data(path) as EnginePartData)
+		engines.append(load_part_data(path) as EnginePartData)
 
-## Each part scene is a full physics rig (RigidBody2D + shape/visual) with
-## its PartData as one exported sub-resource — instantiate just long
-## enough to pull that resource back out, since it's the only part of the
-## scene the garage browser actually needs.
-func _extract_part_data(scene_path: String) -> PartData:
-	var instance := (load(scene_path) as PackedScene).instantiate()
-	var data: PartData = instance.part_data
+## Instances a part scene just long enough to pull its PartData back out,
+## tagging it with the scene it came from. The catalog and car-building
+## code both need that scene_path so they can instantiate the real part.
+static func load_part_data(scene_path: String) -> PartData:
+	var instance: Node = (load(scene_path) as PackedScene).instantiate()
+	var data: PartData = instance.get("part_data") as PartData
 	data.scene_path = scene_path
 	instance.free()
 	return data
+
+## How many wheel mounts the body's scene actually declares (its
+## "WheelMount*" Marker2D children), used to keep a CarModelData's wheels
+## array sized to whatever body is currently equipped.
+static func wheel_mount_count(body: BodyPartData) -> int:
+	if body == null or body.scene_path.is_empty():
+		return 0
+	var instance: Node = (load(body.scene_path) as PackedScene).instantiate()
+	var body_instance := instance as CarBody
+	var count := 0
+	if body_instance != null:
+		count = body_instance.get_wheel_mounts().size()
+	instance.free()
+	return count

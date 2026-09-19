@@ -18,48 +18,49 @@ var garage_capacity: int = 2
 var owned_cars: Array[CarModelData] = []
 var selected_index: int = 0
 
-## The car the player already had and liked before this system existed —
-## always owned, always in slot 0, never part of the random draw.
-const _STARTER_CAR := {"id": &"bumper_special", "name": "Bumper Special", "color": Color(0.6, 0.15, 0.15)}
-
-## Extra bodies that can fill the garage's other, random slots.
-const _RANDOM_BODY_POOL := [
-	{"id": &"rustbucket", "name": "Rustbucket", "color": Color(0.55, 0.32, 0.18)},
-	{"id": &"blue_streak", "name": "Blue Streak", "color": Color(0.2, 0.35, 0.6)},
-	{"id": &"junker", "name": "Junker", "color": Color(0.35, 0.4, 0.28)},
-	{"id": &"sunburst", "name": "Sunburst", "color": Color(0.75, 0.55, 0.15)},
-]
+## The starter car the player already owns — always in slot 0.
+const STARTER_BODY := "res://scenes/parts/bodies/body_classic.tscn"
+const STARTER_ENGINE := "res://scenes/parts/engines/engine_v6.tscn"
+const STARTER_WHEEL := "res://scenes/parts/wheels/wheel_standard.tscn"
 
 func _ready() -> void:
-	owned_cars.append(_build_car(_STARTER_CAR))
-	var pool := _RANDOM_BODY_POOL.duplicate()
+	owned_cars.append(_build_car(STARTER_BODY, STARTER_ENGINE, STARTER_WHEEL))
+	var pool: Array[BodyPartData] = []
+	for body in PartDatabase.bodies:
+		if body.id != &"body_classic":
+			pool.append(body)
 	pool.shuffle()
-	for entry in pool.slice(0, garage_capacity - 1):
-		owned_cars.append(_build_car(entry))
+	for body in pool.slice(0, garage_capacity - 1):
+		owned_cars.append(_build_random_car(body))
 
 func get_selected_car() -> CarModelData:
 	if owned_cars.is_empty():
 		return null
 	return owned_cars[clampi(selected_index, 0, owned_cars.size() - 1)]
 
-func _build_car(entry: Dictionary) -> CarModelData:
-	var body := BodyPartData.new()
-	body.id = entry["id"]
-	body.display_name = entry["name"]
-	body.color = entry["color"]
-
-	body.default_engine = EnginePartData.new()
-	body.default_engine.id = StringName("%s_engine" % entry["id"])
-	body.default_engine.display_name = "%s Engine" % entry["name"]
-
+func _build_car(body_path: String, engine_path: String, wheel_path: String) -> CarModelData:
 	var car := CarModelData.new()
-	car.body = body
-	car.engine = body.default_engine
-	car.wheels = [_make_standard_wheel(), _make_standard_wheel()]
+	car.body = PartDatabase.load_part_data(body_path) as BodyPartData
+	car.engine = PartDatabase.load_part_data(engine_path) as EnginePartData
+	var wheel := PartDatabase.load_part_data(wheel_path) as WheelPartData
+	car.wheels = []
+	car.wheels.append(wheel)
+	car.wheels.append(wheel.duplicate())
 	return car
 
-func _make_standard_wheel() -> WheelPartData:
-	var wheel := WheelPartData.new()
-	wheel.id = &"standard_wheel"
-	wheel.display_name = "Standard Wheel"
-	return wheel
+func _build_random_car(body: BodyPartData) -> CarModelData:
+	var car := CarModelData.new()
+	car.body = body.duplicate() as BodyPartData
+	car.engine = _random_engine().duplicate()
+	var wheel := _random_wheel()
+	var mount_count := PartDatabase.wheel_mount_count(car.body)
+	car.wheels = []
+	for i in mount_count:
+		car.wheels.append(wheel.duplicate())
+	return car
+
+func _random_engine() -> EnginePartData:
+	return PartDatabase.engines[randi() % PartDatabase.engines.size()]
+
+func _random_wheel() -> WheelPartData:
+	return PartDatabase.wheels[randi() % PartDatabase.wheels.size()]
