@@ -9,6 +9,21 @@ extends CharacterBody2D
 @export var max_speed: float = 420.0
 @export var acceleration: float = 1800.0
 @export var friction: float = 1800.0
+## Top speed multipliers depending on whether the car's current position
+## is on a road (see RoadNetwork.is_on_road()) — pavement is faster,
+## sand is a drag.
+@export var on_road_speed_multiplier: float = 1.2
+@export var off_road_speed_multiplier: float = 0.9
+## How quickly velocity can actually change — both speeding up and
+## changing direction — as a multiplier on acceleration/friction. Off
+## the road this is cut down, so the car feels loose and slow to turn on
+## sand instead of the crisp, immediate response pavement gives.
+@export var on_road_handling_multiplier: float = 1.0
+@export var off_road_handling_multiplier: float = 0.5
+## Same convention as TrashSpawner.roads_path: the exported path first,
+## falling back to searching the scene for any RoadNetwork if it doesn't
+## resolve (e.g. this scene got reparented).
+@export var roads_path: NodePath = ^"../Roads"
 
 var _facing_right: bool = true
 var _space_pressed_last: bool = false
@@ -24,8 +39,11 @@ var _hold_progress: float = 0.0
 @onready var _hold_bar_fill: Control = $UI/HoldBarBg/HoldBarFill
 @onready var _scrap_label: Label = $UI/ScrapLabel
 
+var _road_network: RoadNetwork = null
+
 func _ready() -> void:
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
+	_road_network = _resolve_roads()
 	var car := Inventory.get_selected_car()
 	if car != null:
 		$Visual.build_from(car)
@@ -71,10 +89,16 @@ func _physics_process(delta: float) -> void:
 		_facing_right = false
 	$Visual.scale.x = 1.0 if _facing_right else -1.0
 
+	# One on-road check feeds both multipliers, rather than querying the
+	# road network twice for the same answer.
+	var on_road := _road_network != null and _road_network.is_on_road(global_position)
+
 	var target_velocity := Vector2.ZERO
 	if input_dir != Vector2.ZERO:
-		target_velocity = input_dir.normalized() * max_speed
-	var accel_rate := acceleration if input_dir != Vector2.ZERO else friction
+		var speed_multiplier := on_road_speed_multiplier if on_road else off_road_speed_multiplier
+		target_velocity = input_dir.normalized() * max_speed * speed_multiplier
+	var handling_multiplier := on_road_handling_multiplier if on_road else off_road_handling_multiplier
+	var accel_rate := (acceleration if input_dir != Vector2.ZERO else friction) * handling_multiplier
 	velocity = velocity.move_toward(target_velocity, accel_rate * delta)
 	move_and_slide()
 
@@ -87,6 +111,24 @@ func _physics_process(delta: float) -> void:
 	_scrap_label.text = "Scrap: %d" % Inventory.scrap
 
 	_process_interaction(delta)
+
+## Same resolution TrashSpawner uses: the exported path first, falling back
+## to searching the current scene for any RoadNetwork.
+func _resolve_roads() -> RoadNetwork:
+	var node := get_node_or_null(roads_path)
+	if node is RoadNetwork:
+		return node
+	var scene := get_tree().current_scene
+	if scene == null:
+		scene = get_parent()
+	var stack: Array[Node] = [scene]
+	while not stack.is_empty():
+		var current: Node = stack.pop_back()
+		if current is RoadNetwork:
+			return current
+		for child in current.get_children():
+			stack.append(child)
+	return null
 
 ## Nearby buildings are just StaticBody2Ds with a non-empty `display_name`
 ## property (duck-typed, not a shared base class) that overlap this zone.
