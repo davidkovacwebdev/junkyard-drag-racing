@@ -7,6 +7,12 @@ extends StaticBody2D
 
 @export var size: Vector2 = Vector2(200, 200)
 @export var rect_color: Color = Color(0.45, 0.35, 0.25)
+## Non-empty makes this interactable: the player gets a "Press space to
+## enter" tooltip near it and its name is what gets printed on activation.
+@export var display_name: String = ""
+## Optional: if set, activating this also switches to that scene (e.g.
+## the garage interior).
+@export var interior_scene: PackedScene
 
 func _ready() -> void:
 	var visual: ColorRect = $ColorRect
