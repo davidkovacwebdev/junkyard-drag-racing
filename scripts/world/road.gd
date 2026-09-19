@@ -161,6 +161,54 @@ func _rebuild_bounds() -> void:
 			rect = rect.expand(point)
 		_road_bounds.append(rect.grow(margin))
 
+# --- Queries for other systems -------------------------------------------------
+
+## Build now instead of waiting for `_ready()`. Idempotent, and safe to call
+## from a sibling that needs roads already laid out (the roadside prop spawner
+## does this, rather than depending on the order siblings happen to be read in).
+func ensure_built() -> void:
+	if _roads.is_empty():
+		_rebuild()
+
+## Every road as a polyline in this node's local space. Callers should not
+## modify the result — it's the network's own working data.
+func get_road_polylines() -> Array[PackedVector2Array]:
+	return _roads
+
+## Distance from a road's centreline out to the far edge of its shoulder. Add a
+## gutter to this to sit a prop just off the tarmac.
+func road_edge_offset() -> float:
+	return road_width * 0.5 + shoulder_width
+
+## True if `point` lands on a road, using the same clearance the lane markings
+## respect. `extra` widens the test, e.g. to keep a wide prop's footprint clear.
+func is_on_road(point: Vector2, extra: float = 0.0) -> bool:
+	var threshold := road_edge_offset() + extra
+	for road in _roads:
+		if _polyline_within(point, road, threshold):
+			return true
+	return false
+
+## Unit direction of the road nearest `point`, or `fallback` if nothing is
+## nearby. Lets a prop sit parallel to whatever street it was dropped beside.
+func nearest_road_direction(point: Vector2, fallback: Vector2 = Vector2.RIGHT) -> Vector2:
+	var best := INF
+	var direction := fallback
+	for road in _roads:
+		for i in range(road.size() - 1):
+			var a := road[i]
+			var b := road[i + 1]
+			var distance := _distance_squared_to_segment(point, a, b)
+			if distance < best:
+				best = distance
+				if not a.is_equal_approx(b):
+					direction = (b - a).normalized()
+	return direction
+
+## Centres of the generated roundabouts, so callers can keep clear of islands.
+func get_roundabouts() -> Array[Vector2]:
+	return _roundabouts
+
 # --- Authoring -----------------------------------------------------------------
 
 ## Sample a Path2D's curve into a polyline in this node's space, so a hand-drawn
