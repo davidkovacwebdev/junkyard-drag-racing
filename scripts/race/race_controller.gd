@@ -18,6 +18,15 @@ extends Node2D
 ## Y the camera locks to (at x = finish_x) once the first car crosses —
 ## should sit roughly centered across the lanes.
 @export var camera_focus_y: float = 575.0
+## If set, the game changes back to this scene once the race ends — used by
+## the world map's drag strip so finishing a race drops you back onto the
+## map instead of leaving you stranded on the track. Empty falls back to
+## DEFAULT_EXIT_SCENE. Headless runs always just quit instead.
+@export_file("*.tscn") var exit_scene_path: String = ""
+## Where Escape (and the end-of-race handoff) goes when `exit_scene_path`
+## isn't set. Escape always has to get you out of a race, so there's a hard
+## fallback rather than a dead key on the standalone test scenes.
+const DEFAULT_EXIT_SCENE := "res://scenes/world/main.tscn"
 
 var camera: CameraFollow
 var _entries: Array[Dictionary] = []
@@ -25,6 +34,9 @@ var _elapsed := 0.0
 var _race_over := false
 var _winner_name := ""
 var _log_timer := 0.0
+## Set the moment we start leaving, so Escape and the end-of-race handoff
+## can both fire without queueing two scene changes.
+var _exiting := false
 const LOG_INTERVAL := 1.0
 
 func _ready() -> void:
@@ -42,6 +54,18 @@ func _ready() -> void:
 
 func register_car(car_name: String, car: CarAssembler.AssembledCar) -> void:
 	_entries.append({"name": car_name, "car": car, "finished": false})
+
+## Escape always leaves the race — mid-race, after the flag, or while the
+## cars are still assembling. Handled in _input rather than _unhandled_input
+## so no on-screen UI can swallow the key first. Matches the physical-key
+## style used elsewhere (garage.gd) plus the built-in ui_cancel action.
+func _input(event: InputEvent) -> void:
+	if not event.is_pressed() or event.is_echo():
+		return
+	if event.is_action("ui_cancel") \
+			or (event is InputEventKey and event.physical_keycode == KEY_ESCAPE):
+		get_viewport().set_input_as_handled()
+		exit_race()
 
 func _physics_process(delta: float) -> void:
 	if _race_over:
@@ -104,8 +128,16 @@ func _end_race(reason: String) -> void:
 			print("    %s DESTROYED" % entry["name"])
 			continue
 		print("    %s final x=%.1f%s" % [entry["name"], car.body.global_position.x, " [finished]" if entry["finished"] else ""])
-	_maybe_quit()
+	exit_race()
 
-func _maybe_quit() -> void:
+## Single way out of a race: back to `exit_scene_path`, or DEFAULT_EXIT_SCENE
+## when the scene doesn't set one. Headless runs quit so test runs don't hang.
+func exit_race() -> void:
+	if _exiting:
+		return
+	_exiting = true
 	if DisplayServer.get_name() == "headless":
 		get_tree().quit()
+		return
+	var path := exit_scene_path if not exit_scene_path.is_empty() else DEFAULT_EXIT_SCENE
+	get_tree().change_scene_to_file(path)

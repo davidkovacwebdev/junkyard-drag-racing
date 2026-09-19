@@ -17,6 +17,7 @@ script = ExtResource("3")
 finish_x = 5400.0
 max_duration = 90.0
 camera_path = NodePath("../MainCamera")
+exit_scene_path = "res://scenes/world/main.tscn"
 
 [node name="MainCamera" type="Camera2D" parent="."]
 position = Vector2(400, 575)

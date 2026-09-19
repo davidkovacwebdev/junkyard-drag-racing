@@ -15,9 +15,13 @@ extends StaticBody2D
 @export var interior_scene: PackedScene
 
 func _ready() -> void:
-	var visual: ColorRect = $ColorRect
-	visual.color = rect_color
-	visual.size = size
-	visual.position = -size / 2.0
+	# `ColorRect` is optional: a subclass scene may draw its own art in
+	# _draw() instead (see RegistrationBooth), in which case there's no
+	# placeholder rect to size — only the collision shape still needs it.
+	var visual: ColorRect = get_node_or_null("ColorRect")
+	if visual != null:
+		visual.color = rect_color
+		visual.size = size
+		visual.position = -size / 2.0
 	var shape: RectangleShape2D = $CollisionShape2D.shape
 	shape.size = size

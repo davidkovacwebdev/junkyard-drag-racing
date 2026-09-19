@@ -21,9 +21,14 @@ func _ready() -> void:
 	var car := Inventory.get_selected_car()
 	if car != null:
 		$Visual.set_body_color(car.body_color)
-	if WorldState.has_return_position:
-		global_position = WorldState.return_position
-		WorldState.has_return_position = false
+	# Coming back from a place (garage, drag strip race): reappear where we
+	# left the map instead of at the scene's default spawn.
+	if WorldState.has_player_position:
+		global_position = WorldState.player_position
+	# If space was still held when the previous scene ended, don't let it
+	# count as a fresh press here — that would instantly re-enter the place
+	# we just exited.
+	_space_pressed_last = Input.is_physical_key_pressed(KEY_SPACE)
 
 const _DRIVE_KEYS := [KEY_W, KEY_A, KEY_S, KEY_D, KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT, KEY_SPACE]
 
@@ -65,6 +70,10 @@ func _physics_process(delta: float) -> void:
 	velocity = velocity.move_toward(target_velocity, accel_rate * delta)
 	move_and_slide()
 
+	# Keep the saved spot current so entering any place (or any other scene
+	# change) returns us to exactly here.
+	WorldState.remember_player(global_position)
+
 	_process_interaction()
 
 ## Nearby buildings are just StaticBody2Ds with a non-empty `display_name`
@@ -89,7 +98,5 @@ func _process_interaction() -> void:
 		print(target.display_name)
 		var interior = target.get("interior_scene")
 		if interior is PackedScene:
-			WorldState.return_position = global_position
-			WorldState.has_return_position = true
 			get_tree().change_scene_to_packed(interior)
 	_space_pressed_last = space_pressed
