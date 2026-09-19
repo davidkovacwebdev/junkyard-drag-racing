@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/world/player_car.tscn" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/world/obstacle.tscn" id="2"]
@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://scripts/world/road.gd" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/world/drag_strip.tscn" id="5"]
 [ext_resource type="PackedScene" path="res://scenes/world/pause_menu.tscn" id="6"]
+[ext_resource type="PackedScene" path="res://scenes/world/junkyard.tscn" id="7"]
 
 [node name="Main" type="Node2D"]
 
@@ -33,5 +34,8 @@ size = Vector2(320, 220)
 rect_color = Color(0.2, 0.55, 0.25, 1)
 display_name = "Garage"
 interior_scene = ExtResource("3")
+
+[node name="Junkyard" parent="Sortables" instance=ExtResource("7")]
+position = Vector2(-500, 350)
 
 [node name="PauseMenu" parent="." instance=ExtResource("6")]
