@@ -18,6 +18,14 @@ var _space_pressed_last: bool = false
 
 func _ready() -> void:
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
+	# Coming back from a place (garage, drag strip race): reappear where we
+	# left the map instead of at the scene's default spawn.
+	if WorldState.has_player_position:
+		global_position = WorldState.player_position
+	# If space was still held when the previous scene ended, don't let it
+	# count as a fresh press here — that would instantly re-enter the place
+	# we just exited.
+	_space_pressed_last = Input.is_physical_key_pressed(KEY_SPACE)
 
 const _DRIVE_KEYS := [KEY_W, KEY_A, KEY_S, KEY_D, KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT, KEY_SPACE]
 
@@ -58,6 +66,10 @@ func _physics_process(delta: float) -> void:
 	var accel_rate := acceleration if input_dir != Vector2.ZERO else friction
 	velocity = velocity.move_toward(target_velocity, accel_rate * delta)
 	move_and_slide()
+
+	# Keep the saved spot current so entering any place (or any other scene
+	# change) returns us to exactly here.
+	WorldState.remember_player(global_position)
 
 	_process_interaction()
 
