@@ -1,0 +1,78 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_body.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/body_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_bathtub"]
+script = ExtResource("2")
+id = &"body_bathtub"
+display_name = "Junkyard Bathtub"
+mass = 24.0
+durability = 120.0
+material_type = 0
+max_wheels = 2
+
+[node name="BodyBathtub" type="RigidBody2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_bathtub")
+
+[node name="TubOuter" type="Polygon2D" parent="."]
+color = Color(0.82, 0.82, 0.78, 1)
+polygon = PackedVector2Array(-70, -40, 70, -40, 66, -4, 58, 10, -58, 10, -66, -4)
+
+[node name="Rim" type="Polygon2D" parent="."]
+color = Color(0.92, 0.92, 0.88, 1)
+polygon = PackedVector2Array(-72, -44, 72, -44, 72, -36, -72, -36)
+
+[node name="RustPatch1" type="Polygon2D" parent="."]
+color = Color(0.55, 0.3, 0.15, 1)
+polygon = PackedVector2Array(-40, -2, -22, -4, -18, 6, -34, 8)
+
+[node name="RustPatch2" type="Polygon2D" parent="."]
+color = Color(0.55, 0.3, 0.15, 1)
+polygon = PackedVector2Array(30, -30, 44, -32, 46, -18, 34, -16)
+
+[node name="RustPatch3" type="Polygon2D" parent="."]
+color = Color(0.45, 0.25, 0.12, 1)
+polygon = PackedVector2Array(-14, -34, 0, -34, 2, -28, -12, -26)
+
+[node name="DuckBody" type="Polygon2D" parent="."]
+color = Color(1, 0.85, 0.15, 1)
+polygon = PackedVector2Array(8, -58, 28, -58, 30, -50, 24, -44, 12, -44, 6, -50)
+
+[node name="DuckHead" type="Polygon2D" parent="."]
+color = Color(1, 0.85, 0.15, 1)
+polygon = PackedVector2Array(22, -70, 32, -70, 32, -60, 22, -60)
+
+[node name="DuckBeak" type="Polygon2D" parent="."]
+color = Color(1, 0.55, 0.1, 1)
+polygon = PackedVector2Array(32, -66, 39, -66, 39, -62, 32, -62)
+
+[node name="FaucetStem" type="Polygon2D" parent="."]
+color = Color(0.6, 0.55, 0.4, 1)
+polygon = PackedVector2Array(-74, -60, -66, -60, -66, -44, -74, -44)
+
+[node name="FaucetSpout" type="Polygon2D" parent="."]
+color = Color(0.6, 0.55, 0.4, 1)
+polygon = PackedVector2Array(-74, -60, -50, -60, -50, -54, -74, -54)
+
+[node name="FaucetKnob" type="Polygon2D" parent="."]
+color = Color(0.75, 0.2, 0.15, 1)
+polygon = PackedVector2Array(-76, -68, -64, -68, -64, -60, -76, -60)
+
+[node name="FootLeft" type="Polygon2D" parent="."]
+color = Color(0.35, 0.3, 0.25, 1)
+polygon = PackedVector2Array(-68, 8, -56, 8, -54, 20, -60, 22, -70, 20)
+
+[node name="FootRight" type="Polygon2D" parent="."]
+color = Color(0.35, 0.3, 0.25, 1)
+polygon = PackedVector2Array(56, 8, 68, 8, 70, 20, 60, 22, 54, 20)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(-72, -44, 72, -44, 66, -4, 58, 10, -58, 10, -66, -4)
+
+[node name="WheelMount0" type="Marker2D" parent="."]
+position = Vector2(-44, 16)
+
+[node name="WheelMount1" type="Marker2D" parent="."]
+position = Vector2(44, 16)

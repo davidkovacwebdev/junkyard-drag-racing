@@ -12,10 +12,11 @@ const _BODY_SCENES := [
 	"res://scenes/parts/bodies/body_classic.tscn",
 	"res://scenes/parts/bodies/body_wrecked_car.tscn",
 	"res://scenes/parts/bodies/body_fridge.tscn",
-	"res://scenes/parts/bodies/body_pipes.tscn",
 	"res://scenes/parts/bodies/body_plank.tscn",
 	"res://scenes/parts/bodies/body_boat.tscn",
 	"res://scenes/parts/bodies/body_sofa.tscn",
+	"res://scenes/parts/bodies/body_pipes.tscn",
+	"res://scenes/parts/bodies/body_bathtub.tscn",
 ]
 const _WHEEL_SCENES := [
 	"res://scenes/parts/wheels/wheel_standard.tscn",
