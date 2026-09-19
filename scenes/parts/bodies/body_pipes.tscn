@@ -1,0 +1,105 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_body.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/body_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_pipes"]
+script = ExtResource("2")
+id = &"body_pipes"
+display_name = "Pipe Network"
+mass = 16.0
+durability = 80.0
+material_type = 0
+max_wheels = 3
+
+[node name="BodyPipes" type="RigidBody2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_pipes")
+
+[node name="MainPipe" type="Polygon2D" parent="."]
+color = Color(0.45, 0.5, 0.48, 1)
+polygon = PackedVector2Array(-100, -16, 100, -16, 100, 16, -100, 16)
+
+[node name="BranchLeft" type="Polygon2D" parent="."]
+color = Color(0.45, 0.5, 0.48, 1)
+polygon = PackedVector2Array(-84, -60, -56, -60, -56, -16, -84, -16)
+
+[node name="BranchLeftTop" type="Polygon2D" parent="."]
+color = Color(0.45, 0.5, 0.48, 1)
+polygon = PackedVector2Array(-102, -84, -38, -84, -38, -56, -102, -56)
+
+[node name="BranchRight" type="Polygon2D" parent="."]
+color = Color(0.45, 0.5, 0.48, 1)
+polygon = PackedVector2Array(40, -48, 68, -48, 68, -16, 40, -16)
+
+[node name="BranchRightArm" type="Polygon2D" parent="."]
+color = Color(0.45, 0.5, 0.48, 1)
+polygon = PackedVector2Array(68, -48, 104, -48, 104, -26, 68, -26)
+
+[node name="FlangeMainLeft" type="Polygon2D" parent="."]
+color = Color(0.3, 0.33, 0.32, 1)
+polygon = PackedVector2Array(-106, -20, -100, -20, -100, 20, -106, 20)
+
+[node name="FlangeMainRight" type="Polygon2D" parent="."]
+color = Color(0.3, 0.33, 0.32, 1)
+polygon = PackedVector2Array(100, -20, 106, -20, 106, 20, 100, 20)
+
+[node name="JointLeft" type="Polygon2D" parent="."]
+color = Color(0.3, 0.33, 0.32, 1)
+polygon = PackedVector2Array(-88, -22, -52, -22, -52, -16, -88, -16)
+
+[node name="JointRight" type="Polygon2D" parent="."]
+color = Color(0.3, 0.33, 0.32, 1)
+polygon = PackedVector2Array(36, -22, 72, -22, 72, -16, 36, -16)
+
+[node name="FlangeTopLeft" type="Polygon2D" parent="."]
+color = Color(0.3, 0.33, 0.32, 1)
+polygon = PackedVector2Array(-108, -88, -102, -88, -102, -52, -108, -52)
+
+[node name="FlangeTopRight" type="Polygon2D" parent="."]
+color = Color(0.3, 0.33, 0.32, 1)
+polygon = PackedVector2Array(-38, -88, -32, -88, -32, -52, -38, -52)
+
+[node name="FlangeArm" type="Polygon2D" parent="."]
+color = Color(0.3, 0.33, 0.32, 1)
+polygon = PackedVector2Array(104, -52, 110, -52, 110, -22, 104, -22)
+
+[node name="ShineMain" type="Polygon2D" parent="."]
+color = Color(0.62, 0.67, 0.64, 1)
+polygon = PackedVector2Array(-100, -10, 100, -10, 100, -6, -100, -6)
+
+[node name="ShineLeft" type="Polygon2D" parent="."]
+color = Color(0.62, 0.67, 0.64, 1)
+polygon = PackedVector2Array(-78, -56, -74, -56, -74, -16, -78, -16)
+
+[node name="ShineLeftTop" type="Polygon2D" parent="."]
+color = Color(0.62, 0.67, 0.64, 1)
+polygon = PackedVector2Array(-102, -78, -38, -78, -38, -74, -102, -74)
+
+[node name="ShineRight" type="Polygon2D" parent="."]
+color = Color(0.62, 0.67, 0.64, 1)
+polygon = PackedVector2Array(46, -44, 50, -44, 50, -16, 46, -16)
+
+[node name="CollisionMain" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(-100, -16, 100, -16, 100, 16, -100, 16)
+
+[node name="CollisionBranchLeft" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(-84, -60, -56, -60, -56, -16, -84, -16)
+
+[node name="CollisionBranchLeftTop" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(-102, -84, -38, -84, -38, -56, -102, -56)
+
+[node name="CollisionBranchRight" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(40, -48, 68, -48, 68, -16, 40, -16)
+
+[node name="CollisionBranchRightArm" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(68, -48, 104, -48, 104, -26, 68, -26)
+
+[node name="WheelMount0" type="Marker2D" parent="."]
+position = Vector2(-70, 16)
+
+[node name="WheelMount1" type="Marker2D" parent="."]
+position = Vector2(0, 16)
+
+[node name="WheelMount2" type="Marker2D" parent="."]
+position = Vector2(70, 16)

@@ -15,9 +15,31 @@ material_type = 3
 script = ExtResource("1")
 part_data = SubResource("Resource_toilet")
 
-[node name="Polygon2D" type="Polygon2D" parent="."]
-color = Color(0.93, 0.93, 0.9, 1)
-polygon = PackedVector2Array(-30, 20, -38, 5, -34, -15, -15, -30, 10, -32, 28, -20, 35, 0, 30, 18, 15, 28, -10, 28)
+[node name="Base" type="Polygon2D" parent="."]
+color = Color(0.82, 0.82, 0.8, 1)
+polygon = PackedVector2Array(-8, 18, 8, 18, 13, 32, -13, 32)
 
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
-polygon = PackedVector2Array(-30, 20, -38, 5, -34, -15, -15, -30, 10, -32, 28, -20, 35, 0, 30, 18, 15, 28, -10, 28)
+[node name="Tank" type="Polygon2D" parent="."]
+color = Color(0.93, 0.93, 0.9, 1)
+polygon = PackedVector2Array(-35, -32, -14, -32, -14, -6, -35, -6)
+
+[node name="Bowl" type="Polygon2D" parent="."]
+color = Color(0.95, 0.95, 0.92, 1)
+polygon = PackedVector2Array(-14, -8, 34, -8, 37, -2, 32, 8, 20, 18, 8, 22, -4, 22, -14, 22)
+
+[node name="Seat" type="Polygon2D" parent="."]
+color = Color(0.85, 0.85, 0.82, 1)
+polygon = PackedVector2Array(-12, -13, 34, -13, 37, -8, -14, -8)
+
+[node name="Lid" type="Polygon2D" parent="."]
+color = Color(0.88, 0.88, 0.85, 1)
+polygon = PackedVector2Array(-37, -36, -12, -36, -12, -32, -37, -32)
+
+[node name="CollisionTank" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(-37, -36, -12, -36, -14, -6, -35, -6)
+
+[node name="CollisionBowl" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(-14, -13, 34, -13, 37, -2, 32, 8, 20, 18, 8, 22, -14, 22)
+
+[node name="CollisionBase" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(-8, 18, 8, 18, 13, 32, -13, 32)
