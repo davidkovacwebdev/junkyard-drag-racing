@@ -14,13 +14,12 @@ power = 0.8
 
 [node name="EngineSail" type="Node2D"]
 script = ExtResource("1")
-position = Vector2(0, -38)
 part_data = SubResource("Resource_sail")
 
 [node name="Mast" type="Polygon2D" parent="."]
 color = Color(0.4, 0.25, 0.15, 1)
-polygon = PackedVector2Array(-2, -45, 2, -45, 2, 15, -2, 15)
+polygon = PackedVector2Array(-2, -60, 2, -60, 2, 0, -2, 0)
 
 [node name="Cloth" type="Polygon2D" parent="."]
 color = Color(0.92, 0.9, 0.85, 1)
-polygon = PackedVector2Array(2, -40, 2, 10, 40, -5)
+polygon = PackedVector2Array(2, -55, 2, -5, 40, -20)

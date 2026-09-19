@@ -14,17 +14,16 @@ power = 5.5
 
 [node name="EnginePropeller" type="Node2D"]
 script = ExtResource("1")
-position = Vector2(0, -38)
 part_data = SubResource("Resource_propeller")
 
 [node name="BladeV" type="Polygon2D" parent="."]
 color = Color(0.6, 0.6, 0.65, 1)
-polygon = PackedVector2Array(-5, -30, 5, -30, 5, 30, -5, 30)
+polygon = PackedVector2Array(-5, -60, 5, -60, 5, 0, -5, 0)
 
 [node name="BladeH" type="Polygon2D" parent="."]
 color = Color(0.6, 0.6, 0.65, 1)
-polygon = PackedVector2Array(-30, -5, 30, -5, 30, 5, -30, 5)
+polygon = PackedVector2Array(-30, -35, 30, -35, 30, -25, -30, -25)
 
 [node name="Hub" type="Polygon2D" parent="."]
 color = Color(0.3, 0.3, 0.32, 1)
-polygon = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+polygon = PackedVector2Array(-8, -38, 8, -38, 8, -22, -8, -22)

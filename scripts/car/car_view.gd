@@ -15,7 +15,6 @@ extends Node2D
 ## PartData.Category value. Drawn by _draw() in this node's local space.
 var highlight: int = -1
 
-const ENGINE_OFFSET := Vector2(0, -38)   # where engine scenes sit on the body
 const _HIGHLIGHT_RADIUS := 40.0
 
 var _fit: Node2D
@@ -23,7 +22,9 @@ var _body: CarBody
 var _wheels: Array[Node2D] = []
 var _engine: Node2D
 var _mounts_local: Array[Vector2] = []
+var _engine_mount_raw: Vector2 = Vector2.ZERO
 var _engine_mount_local: Vector2 = Vector2.ZERO
+var _has_engine_mount: bool = false
 
 func _ready() -> void:
 	_ensure_fit()
@@ -67,9 +68,18 @@ func build_from(car: CarModelData) -> void:
 			_fit.add_child(wheel)
 			_wheels.append(wheel)
 
+	var engine_mount := _body.get_engine_mount()
+	_has_engine_mount = engine_mount != null
+	if _has_engine_mount:
+		_engine_mount_raw = engine_mount.position
+
 	if car.engine != null and not car.engine.scene_path.is_empty():
 		_engine = _instance_visual(car.engine.scene_path)
 		_body.add_child(_engine)
+		# Engines are authored with their origin at the mounting base, so
+		# snapping to this body's EngineMount seats them on the hood/top/
+		# stern/... instead of straddling the body origin.
+		_body.place_engine(_engine)
 
 	_apply_fit(raw_positions)
 	queue_redraw()
@@ -86,6 +96,9 @@ func _clear() -> void:
 	_wheels.clear()
 	_engine = null
 	_mounts_local.clear()
+	_has_engine_mount = false
+	_engine_mount_raw = Vector2.ZERO
+	_engine_mount_local = Vector2.ZERO
 
 func _instance_visual(scene_path: String) -> Node2D:
 	var instance: Node2D = (load(scene_path) as PackedScene).instantiate()
@@ -115,7 +128,7 @@ func _apply_fit(raw_mounts: Array[Vector2]) -> void:
 	_mounts_local.clear()
 	for m in raw_mounts:
 		_mounts_local.append(_fit.position + m * scale)
-	_engine_mount_local = _fit.position + ENGINE_OFFSET * scale
+	_engine_mount_local = _fit.position + _engine_mount_raw * scale
 
 func _points_bounds(points: PackedVector2Array) -> Rect2:
 	var r := Rect2()
@@ -146,7 +159,8 @@ func _draw() -> void:
 			for m in _mounts_local:
 				_draw_ring(m)
 		PartData.Category.ENGINE:
-			_draw_ring(_engine_mount_local)
+			if _has_engine_mount:
+				_draw_ring(_engine_mount_local)
 		PartData.Category.BODY:
 			_draw_body_outline()
 

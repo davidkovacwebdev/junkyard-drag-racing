@@ -76,3 +76,6 @@ position = Vector2(-44, 16)
 
 [node name="WheelMount1" type="Marker2D" parent="."]
 position = Vector2(44, 16)
+
+[node name="EngineMount" type="Marker2D" parent="."]
+position = Vector2(0, -28)

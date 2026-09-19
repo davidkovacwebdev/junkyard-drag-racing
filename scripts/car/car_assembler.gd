@@ -47,6 +47,9 @@ static func assemble(body_scene: PackedScene, wheel_scenes: Array[PackedScene], 
 	if engine_scene != null:
 		engine_instance = engine_scene.instantiate()
 		body_instance.add_child(engine_instance)
+		# Ride on the body's EngineMount so the engine sits where THIS
+		# body's art says it goes (hood/top/stern), not on the body origin.
+		body_instance.place_engine(engine_instance)
 		var engine_data: EnginePartData = engine_instance.get("part_data")
 		if engine_data != null:
 			engine_power = engine_data.power

@@ -32,3 +32,25 @@ func get_wheel_mounts() -> Array[Marker2D]:
 		if child is Marker2D and child.name.begins_with("WheelMount"):
 			mounts.append(child)
 	return mounts
+
+## Returns this body's "EngineMount" marker — the spot on this body's art
+## where an installed engine belongs (a car's hood, a fridge's top, a
+## boat's stern, ...). Null if the body declares none.
+func get_engine_mount() -> Marker2D:
+	for child in get_children():
+		if child is Marker2D and child.name.begins_with("EngineMount"):
+			return child
+	return null
+
+## Snaps an installed engine (or other mount decoration) onto this body's
+## EngineMount so it sits where the body's art expects it instead of on
+## the body's origin. Engines are authored with their origin at their
+## mounting base (+y down, body extending up), so no extra offset is
+## needed. Falls back to leaving the engine at its own position when the
+## body has no mount.
+func place_engine(engine: Node2D) -> void:
+	var mount := get_engine_mount()
+	if mount == null:
+		return
+	engine.position = mount.position
+	engine.rotation = mount.rotation

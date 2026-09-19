@@ -14,13 +14,12 @@ power = 1.5
 
 [node name="EngineBoiler" type="Node2D"]
 script = ExtResource("1")
-position = Vector2(0, -38)
 part_data = SubResource("Resource_boiler")
 
 [node name="Tank" type="Polygon2D" parent="."]
 color = Color(0.55, 0.3, 0.15, 1)
-polygon = PackedVector2Array(-32, -10, 32, -10, 32, 26, -32, 26)
+polygon = PackedVector2Array(-32, -36, 32, -36, 32, 0, -32, 0)
 
 [node name="Chimney" type="Polygon2D" parent="."]
 color = Color(0.25, 0.2, 0.18, 1)
-polygon = PackedVector2Array(-6, -38, 6, -38, 6, -10, -6, -10)
+polygon = PackedVector2Array(-6, -64, 6, -64, 6, -36, -6, -36)
