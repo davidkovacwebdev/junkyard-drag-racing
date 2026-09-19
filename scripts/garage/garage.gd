@@ -11,6 +11,7 @@ var _index: int = 0
 var _escape_pressed_last: bool = false
 
 func _ready() -> void:
+	_index = clampi(Inventory.selected_index, 0, maxi(Inventory.owned_cars.size() - 1, 0))
 	_refresh()
 
 func _process(_delta: float) -> void:
@@ -30,6 +31,7 @@ func _cycle(step: int) -> void:
 	if count == 0:
 		return
 	_index = (_index + step + count) % count
+	Inventory.selected_index = _index
 	_refresh()
 
 func _refresh() -> void:

@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/back_button.gd" id="1"]
+
+[node name="BackButton" type="Button"]
+offset_right = 120.0
+offset_bottom = 30.0
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+theme_override_colors/font_hover_color = Color(1, 0.8, 0.2, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.8, 0.2, 1)
+theme_override_colors/font_focus_color = Color(0.85, 0.85, 0.85, 1)
+flat = true
+text = "< Back"
+script = ExtResource("1")

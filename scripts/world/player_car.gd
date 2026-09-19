@@ -18,6 +18,12 @@ var _space_pressed_last: bool = false
 
 func _ready() -> void:
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
+	var car := Inventory.get_selected_car()
+	if car != null:
+		$Visual.set_body_color(car.body_color)
+	if WorldState.has_return_position:
+		global_position = WorldState.return_position
+		WorldState.has_return_position = false
 
 const _DRIVE_KEYS := [KEY_W, KEY_A, KEY_S, KEY_D, KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT, KEY_SPACE]
 
@@ -83,5 +89,7 @@ func _process_interaction() -> void:
 		print(target.display_name)
 		var interior = target.get("interior_scene")
 		if interior is PackedScene:
+			WorldState.return_position = global_position
+			WorldState.has_return_position = true
 			get_tree().change_scene_to_packed(interior)
 	_space_pressed_last = space_pressed
