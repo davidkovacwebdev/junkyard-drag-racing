@@ -12,9 +12,17 @@ extends CharacterBody2D
 
 var _facing_right: bool = true
 var _space_pressed_last: bool = false
+## Which target the current hold is building up against, and how far
+## along it is (seconds held). Resets to null/0 the instant space is
+## released or the player looks away from that target.
+var _holding_target: Object = null
+var _hold_progress: float = 0.0
 
 @onready var _interaction_zone: Area2D = $InteractionZone
 @onready var _tooltip_label: Label = $UI/TooltipLabel
+@onready var _hold_bar_bg: Control = $UI/HoldBarBg
+@onready var _hold_bar_fill: Control = $UI/HoldBarBg/HoldBarFill
+@onready var _scrap_label: Label = $UI/ScrapLabel
 
 func _ready() -> void:
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
@@ -74,7 +82,11 @@ func _physics_process(delta: float) -> void:
 	# change) returns us to exactly here.
 	WorldState.remember_player(global_position)
 
-	_process_interaction()
+	# The only thing looting actually tracks right now — a plain running
+	# total, no distinct item types yet — so this is the whole HUD for now.
+	_scrap_label.text = "Scrap: %d" % Inventory.scrap
+
+	_process_interaction(delta)
 
 ## Nearby buildings are just StaticBody2Ds with a non-empty `display_name`
 ## property (duck-typed, not a shared base class) that overlap this zone.
@@ -85,18 +97,57 @@ func _find_interactable() -> Object:
 			return body
 	return null
 
-func _process_interaction() -> void:
+func _process_interaction(delta: float) -> void:
 	var target := _find_interactable()
+	var hold_duration := _hold_duration_for(target)
+
 	if target != null:
-		_tooltip_label.text = "%s: Press space to %s" % [target.display_name, _interact_verb(target)]
+		var verb_prompt := "Hold" if hold_duration > 0.0 else "Press"
+		_tooltip_label.text = "%s: %s space to %s" % [target.display_name, verb_prompt, _interact_verb(target)]
 		_tooltip_label.visible = true
 	else:
 		_tooltip_label.visible = false
 
 	var space_pressed := Input.is_physical_key_pressed(KEY_SPACE)
-	if space_pressed and not _space_pressed_last and target != null:
+
+	if target != null and space_pressed and hold_duration > 0.0:
+		if _holding_target != target:
+			_holding_target = target
+			_hold_progress = 0.0
+		_hold_progress += delta
+		_set_hold_bar(_hold_progress / hold_duration)
+		if _hold_progress >= hold_duration:
+			_activate(target)
+			_holding_target = null
+			_hide_hold_bar()
+	elif target != null and space_pressed and not _space_pressed_last:
 		_activate(target)
+		_holding_target = null
+		_hide_hold_bar()
+	else:
+		_holding_target = null
+		_hide_hold_bar()
+
 	_space_pressed_last = space_pressed
+
+## 0 means instant activation (buildings you just walk into); a target can
+## opt into a hold-to-activate delay (roadside trash props do, so a
+## drive-by tap doesn't loot them by accident) via get_interact_hold_duration().
+func _hold_duration_for(target: Object) -> float:
+	if target != null and target.has_method("get_interact_hold_duration"):
+		var d: Variant = target.call("get_interact_hold_duration")
+		if typeof(d) == TYPE_FLOAT or typeof(d) == TYPE_INT:
+			return float(d)
+	return 0.0
+
+func _set_hold_bar(fraction: float) -> void:
+	_hold_bar_bg.visible = true
+	_hold_bar_fill.anchor_right = clampf(fraction, 0.0, 1.0)
+
+func _hide_hold_bar() -> void:
+	_hold_bar_bg.visible = false
+	_hold_bar_fill.anchor_right = 0.0
+	_hold_progress = 0.0
 
 ## What the prompt offers for a target. Places you walk into are "entered";
 ## something that acts on the spot (a trash bin being looted) can say otherwise
