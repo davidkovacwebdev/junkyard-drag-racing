@@ -1,0 +1,31 @@
+[gd_scene load_steps=2 format=3]
+
+[sub_resource type="RectangleShape2D" id="Shape_floor"]
+size = Vector2(6000, 60)
+
+[node name="TrackTest" type="Node2D"]
+
+[node name="FloorLaneA" type="StaticBody2D" parent="."]
+position = Vector2(3000, 30)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="FloorLaneA"]
+shape = SubResource("Shape_floor")
+
+[node name="Polygon2D" type="Polygon2D" parent="FloorLaneA"]
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-3000, -30, 3000, -30, 3000, 30, -3000, 30)
+
+[node name="FloorLaneB" type="StaticBody2D" parent="."]
+position = Vector2(3000, 250)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="FloorLaneB"]
+shape = SubResource("Shape_floor")
+
+[node name="Polygon2D" type="Polygon2D" parent="FloorLaneB"]
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-3000, -30, 3000, -30, 3000, 30, -3000, 30)
+
+[node name="FinishLine" type="Polygon2D" parent="."]
+position = Vector2(5400, 0)
+color = Color(1, 1, 1, 0.6)
+polygon = PackedVector2Array(-6, -60, 6, -60, 6, 320, -6, 320)

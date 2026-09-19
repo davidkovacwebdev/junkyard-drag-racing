@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_body.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/body_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_fridge"]
+script = ExtResource("2")
+id = &"body_fridge"
+display_name = "Fridge"
+mass = 18.0
+durability = 110.0
+material_type = 0
+max_wheels = 2
+
+[node name="BodyFridge" type="RigidBody2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_fridge")
+
+[node name="Polygon2D" type="Polygon2D" parent="."]
+color = Color(0.85, 0.85, 0.88, 1)
+polygon = PackedVector2Array(-60, 16, -60, -80, 60, -80, 60, 16)
+
+[node name="DoorSeam" type="Polygon2D" parent="."]
+color = Color(0.6, 0.6, 0.63, 1)
+polygon = PackedVector2Array(-60, -22, 60, -22, 60, -16, -60, -16)
+
+[node name="Handle" type="Polygon2D" parent="."]
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(40, -66, 48, -66, 48, -30, 40, -30)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(-60, 16, -60, -80, 60, -80, 60, 16)
+
+[node name="WheelMount0" type="Marker2D" parent="."]
+position = Vector2(-40, 16)
+
+[node name="WheelMount1" type="Marker2D" parent="."]
+position = Vector2(40, 16)

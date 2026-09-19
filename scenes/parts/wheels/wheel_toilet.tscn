@@ -1,0 +1,23 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_wheel.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/wheel_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_toilet"]
+script = ExtResource("2")
+id = &"wheel_toilet"
+display_name = "Toilet Bowl Wheel"
+mass = 8.0
+durability = 25.0
+material_type = 3
+
+[node name="WheelToilet" type="RigidBody2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_toilet")
+
+[node name="Polygon2D" type="Polygon2D" parent="."]
+color = Color(0.93, 0.93, 0.9, 1)
+polygon = PackedVector2Array(-30, 20, -38, 5, -34, -15, -15, -30, 10, -32, 28, -20, 35, 0, 30, 18, 15, 28, -10, 28)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(-30, 20, -38, 5, -34, -15, -15, -30, 10, -32, 28, -20, 35, 0, 30, 18, 15, 28, -10, 28)

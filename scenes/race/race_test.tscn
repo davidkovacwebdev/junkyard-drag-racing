@@ -1,0 +1,25 @@
+[gd_scene load_steps=6 format=3 uid="uid://dc3x3yyh8w8yg"]
+
+[ext_resource type="Script" uid="uid://4c501krrbwml" path="res://scripts/race/race_controller.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/race/track_test.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/car/car_test_bicycle.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/car/car_test_square.tscn" id="4"]
+[ext_resource type="Script" uid="uid://daxmnxgvm6578" path="res://scripts/race/camera_follow.gd" id="5"]
+
+[node name="RaceTest" type="Node2D"]
+script = ExtResource("1")
+finish_x = 5400.0
+max_duration = 45.0
+camera_path = NodePath("MainCamera")
+
+[node name="Track" parent="." instance=ExtResource("2")]
+
+[node name="CarBicycle" parent="." instance=ExtResource("3")]
+position = Vector2(150, -90)
+
+[node name="CarSquare" parent="." instance=ExtResource("4")]
+position = Vector2(150, 160)
+
+[node name="MainCamera" type="Camera2D" parent="."]
+position = Vector2(500, 125)
+script = ExtResource("5")
