@@ -29,6 +29,10 @@ WorldState="*res://autoload/world_state.gd"
 
 enabled=PackedStringArray("res://addons/character_creator/plugin.cfg")
 
+[gui]
+
+theme/custom_font="res://assets/fonts/Poco.ttf"
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
