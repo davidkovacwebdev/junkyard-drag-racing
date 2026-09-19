@@ -11,12 +11,12 @@ extends Node2D
 ## Local x of the staging/start line and the checkered finish line.
 @export var start_x: float = -1150.0
 @export var finish_x: float = 1200.0
-@export var asphalt_color: Color = Color(0.3, 0.3, 0.32, 1)
-@export var shoulder_color: Color = Color(0.22, 0.22, 0.24, 1)
+@export var asphalt_color: Color = Color(0.45, 0.45, 0.48, 1)
+@export var shoulder_color: Color = Color(0.56, 0.52, 0.46, 1)
 @export var edge_color: Color = Color(1, 1, 1, 0.85)
-@export var divider_color: Color = Color(1, 1, 0.2, 0.65)
-@export var burnout_color: Color = Color(0.18, 0.18, 0.2, 1)
-@export var stand_color: Color = Color(0.45, 0.4, 0.35, 1)
+@export var divider_color: Color = Color(1, 1, 0.2, 0.6)
+@export var burnout_color: Color = Color(0.34, 0.34, 0.37, 1)
+@export var stand_color: Color = Color(0.55, 0.5, 0.44, 1)
 ## Number of checker rows across the strip's width (columns is always 2).
 @export var checker_rows: int = 16
 
