@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_legs_peg"]
+script = ExtResource("2")
+id = &"legs_peg"
+display_name = "Peg Legs"
+slot = 0
+
+[node name="PegLegs" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_legs_peg")
+
+[node name="PegLeft" type="Polygon2D" parent="."]
+color = Color(0.5, 0.36, 0.2, 1)
+polygon = PackedVector2Array(-15, -96, -9, -96, -10, -14, -14, -14)
+
+[node name="PegRight" type="Polygon2D" parent="."]
+color = Color(0.5, 0.36, 0.2, 1)
+polygon = PackedVector2Array(9, -96, 15, -96, 14, -14, 10, -14)
+
+[node name="StrapLeft" type="Polygon2D" parent="."]
+color = Color(0.3, 0.2, 0.1, 1)
+polygon = PackedVector2Array(-22, -92, -8, -92, -8, -80, -22, -80)
+
+[node name="StrapRight" type="Polygon2D" parent="."]
+color = Color(0.3, 0.2, 0.1, 1)
+polygon = PackedVector2Array(8, -92, 22, -92, 22, -80, 8, -80)

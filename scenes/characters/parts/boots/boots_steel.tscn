@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_boots_steel"]
+script = ExtResource("2")
+id = &"boots_steel"
+display_name = "Steel-Toe Boots"
+slot = 1
+
+[node name="Steel-toeBoots" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_boots_steel")
+
+[node name="BootLeft" type="Polygon2D" parent="."]
+color = Color(0.28, 0.24, 0.2, 1)
+polygon = PackedVector2Array(-26, -30, -3, -30, -3, -8, 4, -8, 4, 0, -26, 0)
+
+[node name="BootRight" type="Polygon2D" parent="."]
+color = Color(0.28, 0.24, 0.2, 1)
+polygon = PackedVector2Array(26, -30, 3, -30, 3, -8, -4, -8, -4, 0, 26, 0)
+
+[node name="CapLeft" type="Polygon2D" parent="."]
+color = Color(0.7, 0.73, 0.78, 1)
+polygon = PackedVector2Array(-8, -16, 4, -16, 4, -4, -8, -4)
+
+[node name="CapRight" type="Polygon2D" parent="."]
+color = Color(0.7, 0.73, 0.78, 1)
+polygon = PackedVector2Array(8, -16, -4, -16, -4, -4, 8, -4)
+
+[node name="SoleLeft" type="Polygon2D" parent="."]
+color = Color(0.15, 0.13, 0.11, 1)
+polygon = PackedVector2Array(-26, -4, 4, -4, 4, 0, -26, 0)
+
+[node name="SoleRight" type="Polygon2D" parent="."]
+color = Color(0.15, 0.13, 0.11, 1)
+polygon = PackedVector2Array(26, -4, -4, -4, -4, 0, 26, 0)

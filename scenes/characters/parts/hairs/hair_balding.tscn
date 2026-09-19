@@ -1,0 +1,26 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_hair_balding"]
+script = ExtResource("2")
+id = &"hair_balding"
+display_name = "Balding"
+slot = 4
+
+[node name="Balding" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_hair_balding")
+
+[node name="SideLeft" type="Polygon2D" parent="."]
+color = Color(0.6, 0.58, 0.55, 1)
+polygon = PackedVector2Array(-24, -234, -19, -234, -19, -214, -24, -214)
+
+[node name="SideRight" type="Polygon2D" parent="."]
+color = Color(0.6, 0.58, 0.55, 1)
+polygon = PackedVector2Array(19, -234, 24, -234, 24, -214, 19, -214)
+
+[node name="CombOver" type="Polygon2D" parent="."]
+color = Color(0.55, 0.53, 0.5, 1)
+polygon = PackedVector2Array(-15, -240, -2, -244, 15, -238, 11, -233, -9, -235)

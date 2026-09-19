@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_eyes_sad"]
+script = ExtResource("2")
+id = &"eyes_sad"
+display_name = "Sad Eyes"
+slot = 5
+
+[node name="SadEyes" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_eyes_sad")
+
+[node name="LidLeft" type="Polygon2D" parent="."]
+color = Color(0.1, 0.1, 0.14, 1)
+polygon = PackedVector2Array(-18, -222, -5, -218, -5, -215, -18, -219)
+
+[node name="LidRight" type="Polygon2D" parent="."]
+color = Color(0.1, 0.1, 0.14, 1)
+polygon = PackedVector2Array(5, -218, 18, -222, 18, -219, 5, -215)
+
+[node name="WhiteLeft" type="Polygon2D" parent="."]
+color = Color(0.92, 0.92, 0.94, 1)
+polygon = PackedVector2Array(-16, -218, -5, -218, -5, -211, -16, -211)
+
+[node name="WhiteRight" type="Polygon2D" parent="."]
+color = Color(0.92, 0.92, 0.94, 1)
+polygon = PackedVector2Array(5, -218, 16, -218, 16, -211, 5, -211)
+
+[node name="PupilLeft" type="Polygon2D" parent="."]
+color = Color(0.06, 0.06, 0.08, 1)
+polygon = PackedVector2Array(-7.4, -214, -8.162, -212.162, -10, -211.4, -11.838, -212.162, -12.6, -214, -11.838, -215.838, -10, -216.6, -8.162, -215.838)
+
+[node name="PupilRight" type="Polygon2D" parent="."]
+color = Color(0.06, 0.06, 0.08, 1)
+polygon = PackedVector2Array(12.6, -214, 11.838, -212.162, 10, -211.4, 8.162, -212.162, 7.4, -214, 8.162, -215.838, 10, -216.6, 11.838, -215.838)

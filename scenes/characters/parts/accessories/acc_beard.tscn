@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_acc_beard"]
+script = ExtResource("2")
+id = &"acc_beard"
+display_name = "Beard"
+slot = 6
+
+[node name="Beard" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_acc_beard")
+
+[node name="Beard" type="Polygon2D" parent="."]
+color = Color(0.3, 0.22, 0.15, 1)
+polygon = PackedVector2Array(-22, -206, -15, -216, 15, -216, 22, -206, 18, -180, -18, -180)
+
+[node name="Moustache" type="Polygon2D" parent="."]
+color = Color(0.24, 0.17, 0.11, 1)
+polygon = PackedVector2Array(-15, -208, -4, -212, 4, -212, 15, -208, 10, -203, -10, -203)

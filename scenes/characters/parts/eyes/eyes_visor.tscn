@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_eyes_visor"]
+script = ExtResource("2")
+id = &"eyes_visor"
+display_name = "Visor"
+slot = 5
+
+[node name="EyesVisor" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_eyes_visor")
+
+[node name="Visor" type="Polygon2D" parent="."]
+color = Color(0.06, 0.35, 0.4, 1)
+polygon = PackedVector2Array(-24, -224, 24, -224, 24, -210, -24, -210)
+
+[node name="Glint" type="Polygon2D" parent="."]
+color = Color(0.5, 0.9, 0.95, 0.8)
+polygon = PackedVector2Array(-20, -220, 20, -220, 20, -216, -20, -216)

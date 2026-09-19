@@ -1,0 +1,42 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_hair_dreads"]
+script = ExtResource("2")
+id = &"hair_dreads"
+display_name = "Dreadlocks"
+slot = 4
+
+[node name="Dreadlocks" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_hair_dreads")
+
+[node name="Cap" type="Polygon2D" parent="."]
+color = Color(0.2, 0.16, 0.12, 1)
+polygon = PackedVector2Array(-24, -230, -19, -242, 19, -242, 24, -230, 21, -220, -21, -220)
+
+[node name="Dread0" type="Polygon2D" parent="."]
+color = Color(0.26, 0.21, 0.16, 1)
+polygon = PackedVector2Array(-24, -238, -19, -238, -19, -190, -24, -190)
+
+[node name="Dread1" type="Polygon2D" parent="."]
+color = Color(0.26, 0.21, 0.16, 1)
+polygon = PackedVector2Array(-17, -238, -12, -238, -12, -196, -17, -196)
+
+[node name="Dread2" type="Polygon2D" parent="."]
+color = Color(0.26, 0.21, 0.16, 1)
+polygon = PackedVector2Array(-10, -238, -5, -238, -5, -202, -10, -202)
+
+[node name="Dread3" type="Polygon2D" parent="."]
+color = Color(0.26, 0.21, 0.16, 1)
+polygon = PackedVector2Array(4, -238, 9, -238, 9, -190, 4, -190)
+
+[node name="Dread4" type="Polygon2D" parent="."]
+color = Color(0.26, 0.21, 0.16, 1)
+polygon = PackedVector2Array(11, -238, 16, -238, 16, -196, 11, -196)
+
+[node name="Dread5" type="Polygon2D" parent="."]
+color = Color(0.26, 0.21, 0.16, 1)
+polygon = PackedVector2Array(18, -238, 23, -238, 23, -202, 18, -202)

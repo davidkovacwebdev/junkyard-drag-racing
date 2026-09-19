@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_hair_ponytail"]
+script = ExtResource("2")
+id = &"hair_ponytail"
+display_name = "Ponytail"
+slot = 4
+
+[node name="HairPonytail" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_hair_ponytail")
+
+[node name="Cap" type="Polygon2D" parent="."]
+color = Color(0.9, 0.72, 0.25, 1)
+polygon = PackedVector2Array(-25, -230, -20, -244, 20, -244, 25, -230, 20, -222, -20, -222)
+
+[node name="Tail" type="Polygon2D" parent="."]
+color = Color(0.8, 0.62, 0.18, 1)
+polygon = PackedVector2Array(-24, -238, -38, -224, -36, -192, -26, -196, -20, -226)

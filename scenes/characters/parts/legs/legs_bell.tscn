@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_legs_bell"]
+script = ExtResource("2")
+id = &"legs_bell"
+display_name = "Bell Bottoms"
+slot = 0
+
+[node name="BellBottoms" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_legs_bell")
+
+[node name="ThighLeft" type="Polygon2D" parent="."]
+color = Color(0.35, 0.3, 0.5, 1)
+polygon = PackedVector2Array(-20, -96, -8, -96, -8, -52, -20, -52)
+
+[node name="ThighRight" type="Polygon2D" parent="."]
+color = Color(0.35, 0.3, 0.5, 1)
+polygon = PackedVector2Array(8, -96, 20, -96, 20, -52, 8, -52)
+
+[node name="FlareLeft" type="Polygon2D" parent="."]
+color = Color(0.42, 0.36, 0.58, 1)
+polygon = PackedVector2Array(-30, -52, -4, -52, -4, -14, -30, -14)
+
+[node name="FlareRight" type="Polygon2D" parent="."]
+color = Color(0.42, 0.36, 0.58, 1)
+polygon = PackedVector2Array(4, -52, 30, -52, 30, -14, 4, -14)

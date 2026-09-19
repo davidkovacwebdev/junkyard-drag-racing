@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_legs_track"]
+script = ExtResource("2")
+id = &"legs_track"
+display_name = "Track Pants"
+slot = 0
+
+[node name="TrackPants" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_legs_track")
+
+[node name="LegLeft" type="Polygon2D" parent="."]
+color = Color(0.2, 0.3, 0.45, 1)
+polygon = PackedVector2Array(-23, -96, -7, -96, -7, -14, -23, -14)
+
+[node name="LegRight" type="Polygon2D" parent="."]
+color = Color(0.2, 0.3, 0.45, 1)
+polygon = PackedVector2Array(7, -96, 23, -96, 23, -14, 7, -14)
+
+[node name="StripeLeft" type="Polygon2D" parent="."]
+color = Color(0.9, 0.9, 0.95, 1)
+polygon = PackedVector2Array(-23, -96, -20, -96, -20, -14, -23, -14)
+
+[node name="StripeRight" type="Polygon2D" parent="."]
+color = Color(0.9, 0.9, 0.95, 1)
+polygon = PackedVector2Array(20, -96, 23, -96, 23, -14, 20, -14)

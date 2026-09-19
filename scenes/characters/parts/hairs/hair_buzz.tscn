@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_hair_buzz"]
+script = ExtResource("2")
+id = &"hair_buzz"
+display_name = "Buzz Cut"
+slot = 4
+
+[node name="BuzzCut" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_hair_buzz")
+
+[node name="Cap" type="Polygon2D" parent="."]
+color = Color(0.3, 0.22, 0.16, 1)
+polygon = PackedVector2Array(-23, -236, -18, -244, 18, -244, 23, -236, 20, -228, -20, -228)

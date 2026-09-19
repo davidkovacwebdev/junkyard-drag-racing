@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://c1nb07tqxjni8"]
+
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/boots/boots_work.tscn" id="1_sh5f3"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/eyes/eyes_dots.tscn" id="2_s4wsj"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/hairs/hair_mohawk.tscn" id="3_nqrq8"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/heads/head_square.tscn" id="4_3hwuf"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/legs/legs_standard.tscn" id="5_6hkfd"]
+[ext_resource type="Script" uid="uid://ckj8s3h32w3wv" path="res://scripts/character/character_data.gd" id="6_5quu4"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/torsos/torso_box.tscn" id="7_3ito7"]
+
+[resource]
+script = ExtResource("6_5quu4")
+display_name = "punker"
+legs_scene = ExtResource("5_6hkfd")
+boots_scene = ExtResource("1_sh5f3")
+torso_scene = ExtResource("7_3ito7")
+head_scene = ExtResource("4_3hwuf")
+hair_scene = ExtResource("3_nqrq8")
+eyes_scene = ExtResource("2_s4wsj")

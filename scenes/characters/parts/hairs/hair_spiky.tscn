@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_hair_spiky"]
+script = ExtResource("2")
+id = &"hair_spiky"
+display_name = "Spiky Hair"
+slot = 4
+
+[node name="SpikyHair" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_hair_spiky")
+
+[node name="Cap" type="Polygon2D" parent="."]
+color = Color(0.9, 0.5, 0.2, 1)
+polygon = PackedVector2Array(-24, -230, -18, -240, 18, -240, 24, -230, 20, -220, -20, -220)
+
+[node name="Spike0" type="Polygon2D" parent="."]
+color = Color(0.98, 0.6, 0.28, 1)
+polygon = PackedVector2Array(-22, -240, -16, -240, -19, -256)
+
+[node name="Spike1" type="Polygon2D" parent="."]
+color = Color(0.98, 0.6, 0.28, 1)
+polygon = PackedVector2Array(-12, -240, -6, -240, -9, -258)
+
+[node name="Spike2" type="Polygon2D" parent="."]
+color = Color(0.98, 0.6, 0.28, 1)
+polygon = PackedVector2Array(-2, -240, 4, -240, 1, -258)
+
+[node name="Spike3" type="Polygon2D" parent="."]
+color = Color(0.98, 0.6, 0.28, 1)
+polygon = PackedVector2Array(7, -240, 13, -240, 10, -256)
+
+[node name="Spike4" type="Polygon2D" parent="."]
+color = Color(0.98, 0.6, 0.28, 1)
+polygon = PackedVector2Array(16, -240, 22, -240, 19, -254)

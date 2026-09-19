@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_legs_cargo"]
+script = ExtResource("2")
+id = &"legs_cargo"
+display_name = "Cargo Pants"
+slot = 0
+
+[node name="CargoPants" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_legs_cargo")
+
+[node name="LegLeft" type="Polygon2D" parent="."]
+color = Color(0.45, 0.42, 0.28, 1)
+polygon = PackedVector2Array(-25, -96, -6, -96, -6, -14, -25, -14)
+
+[node name="LegRight" type="Polygon2D" parent="."]
+color = Color(0.45, 0.42, 0.28, 1)
+polygon = PackedVector2Array(6, -96, 25, -96, 25, -14, 6, -14)
+
+[node name="PocketLeft" type="Polygon2D" parent="."]
+color = Color(0.38, 0.35, 0.23, 1)
+polygon = PackedVector2Array(-25, -76, -12, -76, -12, -58, -25, -58)
+
+[node name="PocketRight" type="Polygon2D" parent="."]
+color = Color(0.38, 0.35, 0.23, 1)
+polygon = PackedVector2Array(12, -76, 25, -76, 25, -58, 12, -58)

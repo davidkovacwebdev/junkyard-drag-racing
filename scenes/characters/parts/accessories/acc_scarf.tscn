@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_acc_scarf"]
+script = ExtResource("2")
+id = &"acc_scarf"
+display_name = "Scarf"
+slot = 6
+
+[node name="Scarf" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_acc_scarf")
+
+[node name="Wrap" type="Polygon2D" parent="."]
+color = Color(0.75, 0.25, 0.3, 1)
+polygon = PackedVector2Array(-26, -172, -18, -181, 18, -181, 26, -172, 24, -159, -24, -159)
+
+[node name="Tail" type="Polygon2D" parent="."]
+color = Color(0.68, 0.2, 0.26, 1)
+polygon = PackedVector2Array(-14, -159, -4, -159, -6, -122, -16, -126)

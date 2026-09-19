@@ -1,0 +1,26 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_hair_bun"]
+script = ExtResource("2")
+id = &"hair_bun"
+display_name = "Top Bun"
+slot = 4
+
+[node name="TopBun" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_hair_bun")
+
+[node name="Cap" type="Polygon2D" parent="."]
+color = Color(0.4, 0.28, 0.18, 1)
+polygon = PackedVector2Array(-23, -234, -18, -242, 18, -242, 23, -234, 20, -224, -20, -224)
+
+[node name="Band" type="Polygon2D" parent="."]
+color = Color(0.6, 0.45, 0.25, 1)
+polygon = PackedVector2Array(-12, -244, 12, -244, 12, -239, -12, -239)
+
+[node name="Bun" type="Polygon2D" parent="."]
+color = Color(0.48, 0.33, 0.21, 1)
+polygon = PackedVector2Array(10, -252, 7.071, -244.929, 0, -242, -7.071, -244.929, -10, -252, -7.071, -259.071, 0, -262, 7.071, -259.071)

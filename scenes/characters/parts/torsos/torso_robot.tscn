@@ -1,0 +1,42 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_torso_robot"]
+script = ExtResource("2")
+id = &"torso_robot"
+display_name = "Robot Torso"
+slot = 2
+
+[node name="RobotTorso" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_torso_robot")
+
+[node name="Chassis" type="Polygon2D" parent="."]
+color = Color(0.62, 0.66, 0.72, 1)
+polygon = PackedVector2Array(-28, -172, 28, -172, 28, -96, -28, -96)
+
+[node name="Panel" type="Polygon2D" parent="."]
+color = Color(0.28, 0.31, 0.36, 1)
+polygon = PackedVector2Array(-16, -158, 16, -158, 16, -124, -16, -124)
+
+[node name="Core" type="Polygon2D" parent="."]
+color = Color(0.3, 0.85, 0.9, 1)
+polygon = PackedVector2Array(-8, -150, 8, -150, 8, -142, -8, -142)
+
+[node name="ArmLeft" type="Polygon2D" parent="."]
+color = Color(0.55, 0.59, 0.65, 1)
+polygon = PackedVector2Array(-42, -170, -28, -170, -28, -106, -42, -106)
+
+[node name="ArmRight" type="Polygon2D" parent="."]
+color = Color(0.55, 0.59, 0.65, 1)
+polygon = PackedVector2Array(28, -170, 42, -170, 42, -106, 28, -106)
+
+[node name="JointLeft" type="Polygon2D" parent="."]
+color = Color(0.35, 0.38, 0.44, 1)
+polygon = PackedVector2Array(-42, -140, -28, -140, -28, -132, -42, -132)
+
+[node name="JointRight" type="Polygon2D" parent="."]
+color = Color(0.35, 0.38, 0.44, 1)
+polygon = PackedVector2Array(28, -140, 42, -140, 42, -132, 28, -132)

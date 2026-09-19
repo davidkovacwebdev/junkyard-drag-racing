@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_acc_antenna"]
+script = ExtResource("2")
+id = &"acc_antenna"
+display_name = "Antenna"
+slot = 6
+
+[node name="Antenna" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_acc_antenna")
+
+[node name="Stem" type="Polygon2D" parent="."]
+color = Color(0.5, 0.5, 0.55, 1)
+polygon = PackedVector2Array(-2, -240, 2, -240, 2, -268, -2, -268)
+
+[node name="Ball" type="Polygon2D" parent="."]
+color = Color(0.95, 0.4, 0.4, 1)
+polygon = PackedVector2Array(6, -271, 4.243, -266.757, 0, -265, -4.243, -266.757, -6, -271, -4.243, -275.243, 0, -277, 4.243, -275.243)

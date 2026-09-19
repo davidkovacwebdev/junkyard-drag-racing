@@ -1,0 +1,50 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_torso_hoodie"]
+script = ExtResource("2")
+id = &"torso_hoodie"
+display_name = "Hoodie Torso"
+slot = 2
+
+[node name="HoodieTorso" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_torso_hoodie")
+
+[node name="Hood" type="Polygon2D" parent="."]
+color = Color(0.3, 0.36, 0.5, 1)
+polygon = PackedVector2Array(-26, -182, -14, -176, 14, -176, 26, -182, 28, -164, -28, -164)
+
+[node name="Body" type="Polygon2D" parent="."]
+color = Color(0.35, 0.42, 0.58, 1)
+polygon = PackedVector2Array(-26, -170, 26, -170, 26, -96, -26, -96)
+
+[node name="ArmLeft" type="Polygon2D" parent="."]
+color = Color(0.3, 0.36, 0.5, 1)
+polygon = PackedVector2Array(-42, -168, -26, -168, -26, -110, -42, -110)
+
+[node name="ArmRight" type="Polygon2D" parent="."]
+color = Color(0.3, 0.36, 0.5, 1)
+polygon = PackedVector2Array(26, -168, 42, -168, 42, -110, 26, -110)
+
+[node name="HandLeft" type="Polygon2D" parent="."]
+color = Color(0.85, 0.68, 0.55, 1)
+polygon = PackedVector2Array(-42, -110, -26, -110, -26, -102, -42, -102)
+
+[node name="HandRight" type="Polygon2D" parent="."]
+color = Color(0.85, 0.68, 0.55, 1)
+polygon = PackedVector2Array(26, -110, 42, -110, 42, -102, 26, -102)
+
+[node name="Pocket" type="Polygon2D" parent="."]
+color = Color(0.28, 0.34, 0.47, 1)
+polygon = PackedVector2Array(-16, -118, 16, -118, 16, -102, -16, -102)
+
+[node name="StringLeft" type="Polygon2D" parent="."]
+color = Color(0.85, 0.85, 0.88, 1)
+polygon = PackedVector2Array(-8, -166, -5, -166, -5, -140, -8, -140)
+
+[node name="StringRight" type="Polygon2D" parent="."]
+color = Color(0.85, 0.85, 0.88, 1)
+polygon = PackedVector2Array(5, -166, 8, -166, 8, -140, 5, -140)

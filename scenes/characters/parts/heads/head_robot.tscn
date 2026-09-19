@@ -1,0 +1,34 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_head_robot"]
+script = ExtResource("2")
+id = &"head_robot"
+display_name = "Robot Head"
+slot = 3
+
+[node name="RobotHead" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_head_robot")
+
+[node name="Neck" type="Polygon2D" parent="."]
+color = Color(0.4, 0.43, 0.48, 1)
+polygon = PackedVector2Array(-8, -182, 8, -182, 8, -166, -8, -166)
+
+[node name="Skull" type="Polygon2D" parent="."]
+color = Color(0.6, 0.64, 0.7, 1)
+polygon = PackedVector2Array(-24, -236, 24, -236, 24, -178, -24, -178)
+
+[node name="Antenna" type="Polygon2D" parent="."]
+color = Color(0.35, 0.38, 0.44, 1)
+polygon = PackedVector2Array(-2, -236, 2, -236, 2, -258, -2, -258)
+
+[node name="AntennaTip" type="Polygon2D" parent="."]
+color = Color(0.9, 0.3, 0.3, 1)
+polygon = PackedVector2Array(4, -262, 2.828, -259.172, 0, -258, -2.828, -259.172, -4, -262, -2.828, -264.828, 0, -266, 2.828, -264.828)
+
+[node name="Speaker" type="Polygon2D" parent="."]
+color = Color(0.28, 0.31, 0.36, 1)
+polygon = PackedVector2Array(-14, -190, 14, -190, 14, -182, -14, -182)
