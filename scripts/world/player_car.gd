@@ -88,15 +88,35 @@ func _find_interactable() -> Object:
 func _process_interaction() -> void:
 	var target := _find_interactable()
 	if target != null:
-		_tooltip_label.text = "%s: Press space to enter" % target.display_name
+		_tooltip_label.text = "%s: Press space to %s" % [target.display_name, _interact_verb(target)]
 		_tooltip_label.visible = true
 	else:
 		_tooltip_label.visible = false
 
 	var space_pressed := Input.is_physical_key_pressed(KEY_SPACE)
 	if space_pressed and not _space_pressed_last and target != null:
-		print(target.display_name)
-		var interior = target.get("interior_scene")
-		if interior is PackedScene:
-			get_tree().change_scene_to_packed(interior)
+		_activate(target)
 	_space_pressed_last = space_pressed
+
+## What the prompt offers for a target. Places you walk into are "entered";
+## something that acts on the spot (a trash bin being looted) can say otherwise
+## by implementing `get_interact_verb()`.
+func _interact_verb(target: Object) -> String:
+	if target.has_method("get_interact_verb"):
+		var verb: Variant = target.call("get_interact_verb")
+		if typeof(verb) == TYPE_STRING and verb != "":
+			return verb
+	return "enter"
+
+## Something in reach was just activated. A target implementing `interact()`
+## handles it itself — that's how roadside props do their looting — otherwise
+## fall back to the place behaviour: print the name and switch to its interior
+## scene, if it has one.
+func _activate(target: Object) -> void:
+	if target.has_method("interact"):
+		target.call("interact", self)
+		return
+	print(target.display_name)
+	var interior = target.get("interior_scene")
+	if interior is PackedScene:
+		get_tree().change_scene_to_packed(interior)

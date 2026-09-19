@@ -1,0 +1,32 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/trash_prop.gd" id="1"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_container"]
+resource_local_to_scene = true
+size = Vector2(150, 22)
+
+[node name="TrashContainer" type="StaticBody2D"]
+script = ExtResource("1")
+kind = 0
+display_name = "Trash Container"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_container")
+position = Vector2(0, -11)
+
+[node name="Popup" type="Label" parent="."]
+z_index = 20
+z_as_relative = false
+offset_left = -130.0
+offset_top = -176.0
+offset_right = 130.0
+offset_bottom = -144.0
+theme_override_colors/font_color = Color(1, 0.97, 0.85, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.08, 0.05, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 18
+text = "+2 scrap"
+horizontal_alignment = 1
+vertical_alignment = 1
+visible = false
