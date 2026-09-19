@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_boots_work"]
+script = ExtResource("2")
+id = &"boots_work"
+display_name = "Work Boots"
+slot = 1
+
+[node name="BootsWork" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_boots_work")
+
+[node name="BootLeft" type="Polygon2D" parent="."]
+color = Color(0.32, 0.2, 0.12, 1)
+polygon = PackedVector2Array(-26, -18, -2, -18, -2, -6, 6, -6, 6, 0, -26, 0)
+
+[node name="BootRight" type="Polygon2D" parent="."]
+color = Color(0.32, 0.2, 0.12, 1)
+polygon = PackedVector2Array(26, -18, 2, -18, 2, -6, -6, -6, -6, 0, 26, 0)
+
+[node name="SoleLeft" type="Polygon2D" parent="."]
+color = Color(0.12, 0.1, 0.08, 1)
+polygon = PackedVector2Array(-26, -3, 6, -3, 6, 0, -26, 0)
+
+[node name="SoleRight" type="Polygon2D" parent="."]
+color = Color(0.12, 0.1, 0.08, 1)
+polygon = PackedVector2Array(26, -3, -6, -3, -6, 0, 26, 0)

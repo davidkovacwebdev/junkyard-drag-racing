@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_torso_barrel"]
+script = ExtResource("2")
+id = &"torso_barrel"
+display_name = "Barrel Torso"
+slot = 2
+
+[node name="TorsoBarrel" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_torso_barrel")
+
+[node name="Belly" type="Polygon2D" parent="."]
+color = Color(0.32, 0.5, 0.35, 1)
+polygon = PackedVector2Array(-26, -160, -16, -172, 16, -172, 26, -160, 26, -108, 16, -96, -16, -96, -26, -108)
+
+[node name="ArmLeft" type="Polygon2D" parent="."]
+color = Color(0.27, 0.43, 0.3, 1)
+polygon = PackedVector2Array(-40, -168, -26, -168, -26, -114, -40, -114)
+
+[node name="ArmRight" type="Polygon2D" parent="."]
+color = Color(0.27, 0.43, 0.3, 1)
+polygon = PackedVector2Array(26, -168, 40, -168, 40, -114, 26, -114)
+
+[node name="HandLeft" type="Polygon2D" parent="."]
+color = Color(0.85, 0.68, 0.55, 1)
+polygon = PackedVector2Array(-40, -114, -26, -114, -26, -106, -40, -106)
+
+[node name="HandRight" type="Polygon2D" parent="."]
+color = Color(0.85, 0.68, 0.55, 1)
+polygon = PackedVector2Array(26, -114, 40, -114, 40, -106, 26, -106)
+
+[node name="Collar" type="Polygon2D" parent="."]
+color = Color(0.22, 0.36, 0.25, 1)
+polygon = PackedVector2Array(-11, -176, 11, -176, 11, -168, -11, -168)

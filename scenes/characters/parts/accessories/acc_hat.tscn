@@ -1,0 +1,26 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_acc_hat"]
+script = ExtResource("2")
+id = &"acc_hat"
+display_name = "Top Hat"
+slot = 6
+
+[node name="AccessoryHat" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_acc_hat")
+
+[node name="Brim" type="Polygon2D" parent="."]
+color = Color(0.06, 0.06, 0.1, 1)
+polygon = PackedVector2Array(-34, -246, 34, -246, 34, -240, -34, -240)
+
+[node name="Crown" type="Polygon2D" parent="."]
+color = Color(0.1, 0.1, 0.15, 1)
+polygon = PackedVector2Array(-20, -274, 20, -274, 20, -246, -20, -246)
+
+[node name="Band" type="Polygon2D" parent="."]
+color = Color(0.6, 0.15, 0.18, 1)
+polygon = PackedVector2Array(-20, -252, 20, -252, 20, -246, -20, -246)

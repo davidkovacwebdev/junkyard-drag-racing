@@ -1,0 +1,46 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_torso_trench"]
+script = ExtResource("2")
+id = &"torso_trench"
+display_name = "Trenchcoat Torso"
+slot = 2
+
+[node name="TrenchcoatTorso" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_torso_trench")
+
+[node name="Coat" type="Polygon2D" parent="."]
+color = Color(0.4, 0.35, 0.28, 1)
+polygon = PackedVector2Array(-28, -172, 28, -172, 32, -62, -32, -62)
+
+[node name="LapelLeft" type="Polygon2D" parent="."]
+color = Color(0.32, 0.28, 0.22, 1)
+polygon = PackedVector2Array(-20, -172, -4, -172, -10, -140, -22, -150)
+
+[node name="LapelRight" type="Polygon2D" parent="."]
+color = Color(0.32, 0.28, 0.22, 1)
+polygon = PackedVector2Array(4, -172, 20, -172, 22, -150, 10, -140)
+
+[node name="Belt" type="Polygon2D" parent="."]
+color = Color(0.22, 0.19, 0.15, 1)
+polygon = PackedVector2Array(-28, -124, 28, -124, 28, -114, -28, -114)
+
+[node name="ArmLeft" type="Polygon2D" parent="."]
+color = Color(0.36, 0.31, 0.25, 1)
+polygon = PackedVector2Array(-46, -170, -28, -170, -28, -108, -46, -108)
+
+[node name="ArmRight" type="Polygon2D" parent="."]
+color = Color(0.36, 0.31, 0.25, 1)
+polygon = PackedVector2Array(28, -170, 46, -170, 46, -108, 28, -108)
+
+[node name="HandLeft" type="Polygon2D" parent="."]
+color = Color(0.85, 0.68, 0.55, 1)
+polygon = PackedVector2Array(-46, -108, -28, -108, -28, -100, -46, -100)
+
+[node name="HandRight" type="Polygon2D" parent="."]
+color = Color(0.85, 0.68, 0.55, 1)
+polygon = PackedVector2Array(28, -108, 46, -108, 46, -100, 28, -100)

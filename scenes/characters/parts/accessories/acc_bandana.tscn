@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_acc_bandana"]
+script = ExtResource("2")
+id = &"acc_bandana"
+display_name = "Bandana"
+slot = 6
+
+[node name="Bandana" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_acc_bandana")
+
+[node name="Band" type="Polygon2D" parent="."]
+color = Color(0.8, 0.2, 0.25, 1)
+polygon = PackedVector2Array(-25, -234, -21, -243, 21, -243, 25, -234, 22, -229, -22, -229)
+
+[node name="Knot" type="Polygon2D" parent="."]
+color = Color(0.7, 0.16, 0.2, 1)
+polygon = PackedVector2Array(22, -241, 35, -246, 35, -232, 22, -234)

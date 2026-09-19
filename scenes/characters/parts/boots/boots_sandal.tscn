@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_boots_sandal"]
+script = ExtResource("2")
+id = &"boots_sandal"
+display_name = "Sandals"
+slot = 1
+
+[node name="Sandals" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_boots_sandal")
+
+[node name="SoleLeft" type="Polygon2D" parent="."]
+color = Color(0.5, 0.35, 0.22, 1)
+polygon = PackedVector2Array(-26, -6, 6, -6, 6, 0, -26, 0)
+
+[node name="SoleRight" type="Polygon2D" parent="."]
+color = Color(0.5, 0.35, 0.22, 1)
+polygon = PackedVector2Array(26, -6, -6, -6, -6, 0, 26, 0)
+
+[node name="ToeLeft" type="Polygon2D" parent="."]
+color = Color(0.85, 0.68, 0.55, 1)
+polygon = PackedVector2Array(-16, -18, -4, -18, -4, -6, -16, -6)
+
+[node name="ToeRight" type="Polygon2D" parent="."]
+color = Color(0.85, 0.68, 0.55, 1)
+polygon = PackedVector2Array(16, -18, 4, -18, 4, -6, 16, -6)
+
+[node name="StrapLeft" type="Polygon2D" parent="."]
+color = Color(0.3, 0.2, 0.12, 1)
+polygon = PackedVector2Array(-21, -16, -2, -16, -2, -9, -21, -9)
+
+[node name="StrapRight" type="Polygon2D" parent="."]
+color = Color(0.3, 0.2, 0.12, 1)
+polygon = PackedVector2Array(21, -16, 2, -16, 2, -9, 21, -9)

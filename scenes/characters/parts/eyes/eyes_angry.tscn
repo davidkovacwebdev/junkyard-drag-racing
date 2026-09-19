@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_eyes_angry"]
+script = ExtResource("2")
+id = &"eyes_angry"
+display_name = "Angry Eyes"
+slot = 5
+
+[node name="AngryEyes" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_eyes_angry")
+
+[node name="BrowLeft" type="Polygon2D" parent="."]
+color = Color(0.1, 0.1, 0.14, 1)
+polygon = PackedVector2Array(-18, -228, -4, -219, -4, -215, -18, -224)
+
+[node name="BrowRight" type="Polygon2D" parent="."]
+color = Color(0.1, 0.1, 0.14, 1)
+polygon = PackedVector2Array(18, -228, 4, -219, 4, -215, 18, -224)
+
+[node name="WhiteLeft" type="Polygon2D" parent="."]
+color = Color(0.92, 0.92, 0.94, 1)
+polygon = PackedVector2Array(-15, -219, -6, -219, -6, -212, -15, -212)
+
+[node name="WhiteRight" type="Polygon2D" parent="."]
+color = Color(0.92, 0.92, 0.94, 1)
+polygon = PackedVector2Array(6, -219, 15, -219, 15, -212, 6, -212)
+
+[node name="PupilLeft" type="Polygon2D" parent="."]
+color = Color(0.06, 0.06, 0.08, 1)
+polygon = PackedVector2Array(-12, -218, -8, -218, -8, -213, -12, -213)
+
+[node name="PupilRight" type="Polygon2D" parent="."]
+color = Color(0.06, 0.06, 0.08, 1)
+polygon = PackedVector2Array(8, -218, 12, -218, 12, -213, 8, -213)

@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_eyes_zombie"]
+script = ExtResource("2")
+id = &"eyes_zombie"
+display_name = "Zombie Eyes"
+slot = 5
+
+[node name="ZombieEyes" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_eyes_zombie")
+
+[node name="WhiteLeft" type="Polygon2D" parent="."]
+color = Color(0.85, 0.88, 0.8, 1)
+polygon = PackedVector2Array(-4, -217, -6.05, -212.05, -11, -210, -15.95, -212.05, -18, -217, -15.95, -221.95, -11, -224, -6.05, -221.95)
+
+[node name="WhiteRight" type="Polygon2D" parent="."]
+color = Color(0.85, 0.88, 0.8, 1)
+polygon = PackedVector2Array(17, -212, 15.243, -207.757, 11, -206, 6.757, -207.757, 5, -212, 6.757, -216.243, 11, -218, 15.243, -216.243)
+
+[node name="PupilLeft" type="Polygon2D" parent="."]
+color = Color(0.8, 0.12, 0.12, 1)
+polygon = PackedVector2Array(-10.4, -217, -11.162, -215.162, -13, -214.4, -14.838, -215.162, -15.6, -217, -14.838, -218.838, -13, -219.6, -11.162, -218.838)
+
+[node name="PupilRight" type="Polygon2D" parent="."]
+color = Color(0.8, 0.12, 0.12, 1)
+polygon = PackedVector2Array(15.6, -212, 14.838, -210.162, 13, -209.4, 11.162, -210.162, 10.4, -212, 11.162, -213.838, 13, -214.6, 14.838, -213.838)

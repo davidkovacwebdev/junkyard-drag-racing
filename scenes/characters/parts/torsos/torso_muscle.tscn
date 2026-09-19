@@ -1,0 +1,42 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_torso_muscle"]
+script = ExtResource("2")
+id = &"torso_muscle"
+display_name = "Muscle Torso"
+slot = 2
+
+[node name="MuscleTorso" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_torso_muscle")
+
+[node name="Chest" type="Polygon2D" parent="."]
+color = Color(0.78, 0.52, 0.4, 1)
+polygon = PackedVector2Array(-30, -172, 30, -172, 20, -96, -20, -96)
+
+[node name="Pecs" type="Polygon2D" parent="."]
+color = Color(0.7, 0.45, 0.34, 1)
+polygon = PackedVector2Array(-19, -166, 19, -166, 19, -150, -19, -150)
+
+[node name="ArmLeft" type="Polygon2D" parent="."]
+color = Color(0.7, 0.45, 0.34, 1)
+polygon = PackedVector2Array(-46, -170, -30, -170, -30, -108, -46, -108)
+
+[node name="ArmRight" type="Polygon2D" parent="."]
+color = Color(0.7, 0.45, 0.34, 1)
+polygon = PackedVector2Array(30, -170, 46, -170, 46, -108, 30, -108)
+
+[node name="HandLeft" type="Polygon2D" parent="."]
+color = Color(0.85, 0.68, 0.55, 1)
+polygon = PackedVector2Array(-46, -108, -30, -108, -30, -100, -46, -100)
+
+[node name="HandRight" type="Polygon2D" parent="."]
+color = Color(0.85, 0.68, 0.55, 1)
+polygon = PackedVector2Array(30, -108, 46, -108, 46, -100, 30, -100)
+
+[node name="Collar" type="Polygon2D" parent="."]
+color = Color(0.55, 0.35, 0.26, 1)
+polygon = PackedVector2Array(-11, -176, 11, -176, 11, -168, -11, -168)

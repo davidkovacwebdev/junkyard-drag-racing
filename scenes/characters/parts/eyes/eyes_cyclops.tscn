@@ -1,0 +1,26 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_eyes_cyclops"]
+script = ExtResource("2")
+id = &"eyes_cyclops"
+display_name = "Cyclops Eye"
+slot = 5
+
+[node name="CyclopsEye" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_eyes_cyclops")
+
+[node name="White" type="Polygon2D" parent="."]
+color = Color(0.95, 0.95, 0.96, 1)
+polygon = PackedVector2Array(11, -216, 7.778, -208.222, 0, -205, -7.778, -208.222, -11, -216, -7.778, -223.778, 0, -227, 7.778, -223.778)
+
+[node name="Iris" type="Polygon2D" parent="."]
+color = Color(0.25, 0.45, 0.75, 1)
+polygon = PackedVector2Array(6, -216, 4.243, -211.757, 0, -210, -4.243, -211.757, -6, -216, -4.243, -220.243, 0, -222, 4.243, -220.243)
+
+[node name="Pupil" type="Polygon2D" parent="."]
+color = Color(0.06, 0.06, 0.08, 1)
+polygon = PackedVector2Array(3, -216, 2.121, -213.879, 0, -213, -2.121, -213.879, -3, -216, -2.121, -218.121, 0, -219, 2.121, -218.121)

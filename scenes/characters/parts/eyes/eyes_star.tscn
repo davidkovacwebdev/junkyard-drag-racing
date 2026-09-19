@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_eyes_star"]
+script = ExtResource("2")
+id = &"eyes_star"
+display_name = "Star Eyes"
+slot = 5
+
+[node name="StarEyes" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_eyes_star")
+
+[node name="StarLeft" type="Polygon2D" parent="."]
+color = Color(0.98, 0.85, 0.25, 1)
+polygon = PackedVector2Array(-11, -224, -9.002, -218.751, -3.392, -218.472, -7.766, -214.949, -6.298, -209.528, -11, -212.6, -15.702, -209.528, -14.234, -214.949, -18.608, -218.472, -12.998, -218.751)
+
+[node name="StarRight" type="Polygon2D" parent="."]
+color = Color(0.98, 0.85, 0.25, 1)
+polygon = PackedVector2Array(11, -224, 12.998, -218.751, 18.608, -218.472, 14.234, -214.949, 15.702, -209.528, 11, -212.6, 6.298, -209.528, 7.766, -214.949, 3.392, -218.472, 9.002, -218.751)

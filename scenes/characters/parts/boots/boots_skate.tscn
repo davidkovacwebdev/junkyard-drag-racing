@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_boots_skate"]
+script = ExtResource("2")
+id = &"boots_skate"
+display_name = "Roller Skates"
+slot = 1
+
+[node name="RollerSkates" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_boots_skate")
+
+[node name="BootLeft" type="Polygon2D" parent="."]
+color = Color(0.85, 0.3, 0.35, 1)
+polygon = PackedVector2Array(-24, -30, -4, -30, -4, -12, 4, -12, 4, -8, -24, -8)
+
+[node name="BootRight" type="Polygon2D" parent="."]
+color = Color(0.85, 0.3, 0.35, 1)
+polygon = PackedVector2Array(24, -30, 4, -30, 4, -12, -4, -12, -4, -8, 24, -8)
+
+[node name="WheelLeftA" type="Polygon2D" parent="."]
+color = Color(0.2, 0.2, 0.24, 1)
+polygon = PackedVector2Array(-14, -4, -15.172, -1.172, -18, 0, -20.828, -1.172, -22, -4, -20.828, -6.828, -18, -8, -15.172, -6.828)
+
+[node name="WheelLeftB" type="Polygon2D" parent="."]
+color = Color(0.2, 0.2, 0.24, 1)
+polygon = PackedVector2Array(-4, -4, -5.172, -1.172, -8, 0, -10.828, -1.172, -12, -4, -10.828, -6.828, -8, -8, -5.172, -6.828)
+
+[node name="WheelRightA" type="Polygon2D" parent="."]
+color = Color(0.2, 0.2, 0.24, 1)
+polygon = PackedVector2Array(22, -4, 20.828, -1.172, 18, 0, 15.172, -1.172, 14, -4, 15.172, -6.828, 18, -8, 20.828, -6.828)
+
+[node name="WheelRightB" type="Polygon2D" parent="."]
+color = Color(0.2, 0.2, 0.24, 1)
+polygon = PackedVector2Array(12, -4, 10.828, -1.172, 8, 0, 5.172, -1.172, 4, -4, 5.172, -6.828, 8, -8, 10.828, -6.828)

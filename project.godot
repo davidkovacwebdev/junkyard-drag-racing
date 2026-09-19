@@ -8,6 +8,10 @@
 
 config_version=5
 
+[animation]
+
+compatibility/default_parent_skeleton_in_mesh_instance_3d=true
+
 [application]
 
 config/name="Junkyard drag racing"
@@ -18,6 +22,10 @@ config/icon="res://icon.svg"
 [autoload]
 
 PartDatabase="*res://autoload/part_database.gd"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/character_creator/plugin.cfg")
 
 [rendering]
 

@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_eyes_sleepy"]
+script = ExtResource("2")
+id = &"eyes_sleepy"
+display_name = "Sleepy Eyes"
+slot = 5
+
+[node name="EyesSleepy" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_eyes_sleepy")
+
+[node name="EyeLeft" type="Polygon2D" parent="."]
+color = Color(0.1, 0.1, 0.14, 1)
+polygon = PackedVector2Array(-16, -218, -4, -218, -4, -213, -16, -213)
+
+[node name="EyeRight" type="Polygon2D" parent="."]
+color = Color(0.1, 0.1, 0.14, 1)
+polygon = PackedVector2Array(4, -218, 16, -218, 16, -213, 4, -213)

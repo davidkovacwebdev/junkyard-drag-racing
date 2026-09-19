@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://cobcx88o4gg2f"]
+
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/accessories/acc_beard.tscn" id="1_emshl"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/boots/boots_work.tscn" id="2_ts6ou"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/eyes/eyes_squint.tscn" id="3_h3awq"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/heads/head_big.tscn" id="4_kuct0"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/legs/legs_skinny.tscn" id="5_60ojq"]
+[ext_resource type="Script" uid="uid://ckj8s3h32w3wv" path="res://scripts/character/character_data.gd" id="6_aaos2"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/torsos/torso_hazmat.tscn" id="7_ppmwt"]
+
+[resource]
+script = ExtResource("6_aaos2")
+display_name = "Mr White"
+legs_scene = ExtResource("5_60ojq")
+boots_scene = ExtResource("2_ts6ou")
+torso_scene = ExtResource("7_ppmwt")
+head_scene = ExtResource("4_kuct0")
+eyes_scene = ExtResource("3_h3awq")
+accessory_scene = ExtResource("1_emshl")

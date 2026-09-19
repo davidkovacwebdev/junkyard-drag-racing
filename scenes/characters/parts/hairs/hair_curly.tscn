@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_hair_curly"]
+script = ExtResource("2")
+id = &"hair_curly"
+display_name = "Curly Hair"
+slot = 4
+
+[node name="CurlyHair" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_hair_curly")
+
+[node name="Cap" type="Polygon2D" parent="."]
+color = Color(0.35, 0.2, 0.12, 1)
+polygon = PackedVector2Array(-25, -230, -20, -242, 20, -242, 25, -230, 22, -220, -22, -220)
+
+[node name="CurlLeft" type="Polygon2D" parent="."]
+color = Color(0.42, 0.25, 0.15, 1)
+polygon = PackedVector2Array(-13, -242, -15.05, -237.05, -20, -235, -24.95, -237.05, -27, -242, -24.95, -246.95, -20, -249, -15.05, -246.95)
+
+[node name="CurlTop" type="Polygon2D" parent="."]
+color = Color(0.42, 0.25, 0.15, 1)
+polygon = PackedVector2Array(8, -250, 5.657, -244.343, 0, -242, -5.657, -244.343, -8, -250, -5.657, -255.657, 0, -258, 5.657, -255.657)
+
+[node name="CurlRight" type="Polygon2D" parent="."]
+color = Color(0.42, 0.25, 0.15, 1)
+polygon = PackedVector2Array(27, -242, 24.95, -237.05, 20, -235, 15.05, -237.05, 13, -242, 15.05, -246.95, 20, -249, 24.95, -246.95)

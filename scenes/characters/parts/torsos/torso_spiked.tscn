@@ -1,0 +1,46 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_torso_spiked"]
+script = ExtResource("2")
+id = &"torso_spiked"
+display_name = "Spiked Jacket"
+slot = 2
+
+[node name="SpikedJacket" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_torso_spiked")
+
+[node name="Body" type="Polygon2D" parent="."]
+color = Color(0.2, 0.2, 0.24, 1)
+polygon = PackedVector2Array(-26, -170, 26, -170, 26, -96, -26, -96)
+
+[node name="Zip" type="Polygon2D" parent="."]
+color = Color(0.6, 0.6, 0.65, 1)
+polygon = PackedVector2Array(-3, -170, 3, -170, 3, -96, -3, -96)
+
+[node name="SpikeLeft1" type="Polygon2D" parent="."]
+color = Color(0.75, 0.78, 0.82, 1)
+polygon = PackedVector2Array(-40, -176, -34, -188, -28, -176)
+
+[node name="SpikeLeft2" type="Polygon2D" parent="."]
+color = Color(0.75, 0.78, 0.82, 1)
+polygon = PackedVector2Array(-30, -176, -24, -188, -18, -176)
+
+[node name="SpikeRight1" type="Polygon2D" parent="."]
+color = Color(0.75, 0.78, 0.82, 1)
+polygon = PackedVector2Array(18, -176, 24, -188, 30, -176)
+
+[node name="SpikeRight2" type="Polygon2D" parent="."]
+color = Color(0.75, 0.78, 0.82, 1)
+polygon = PackedVector2Array(28, -176, 34, -188, 40, -176)
+
+[node name="ArmLeft" type="Polygon2D" parent="."]
+color = Color(0.16, 0.16, 0.2, 1)
+polygon = PackedVector2Array(-44, -172, -26, -172, -26, -108, -44, -108)
+
+[node name="ArmRight" type="Polygon2D" parent="."]
+color = Color(0.16, 0.16, 0.2, 1)
+polygon = PackedVector2Array(26, -172, 44, -172, 44, -108, 26, -108)

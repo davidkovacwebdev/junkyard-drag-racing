@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_eyes_crossed"]
+script = ExtResource("2")
+id = &"eyes_crossed"
+display_name = "Crossed Eyes"
+slot = 5
+
+[node name="CrossedEyes" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_eyes_crossed")
+
+[node name="WhiteLeft" type="Polygon2D" parent="."]
+color = Color(0.95, 0.95, 0.96, 1)
+polygon = PackedVector2Array(-5, -216, -6.757, -211.757, -11, -210, -15.243, -211.757, -17, -216, -15.243, -220.243, -11, -222, -6.757, -220.243)
+
+[node name="WhiteRight" type="Polygon2D" parent="."]
+color = Color(0.95, 0.95, 0.96, 1)
+polygon = PackedVector2Array(17, -216, 15.243, -211.757, 11, -210, 6.757, -211.757, 5, -216, 6.757, -220.243, 11, -222, 15.243, -220.243)
+
+[node name="PupilLeft" type="Polygon2D" parent="."]
+color = Color(0.06, 0.06, 0.08, 1)
+polygon = PackedVector2Array(-4, -215, -4.879, -212.879, -7, -212, -9.121, -212.879, -10, -215, -9.121, -217.121, -7, -218, -4.879, -217.121)
+
+[node name="PupilRight" type="Polygon2D" parent="."]
+color = Color(0.06, 0.06, 0.08, 1)
+polygon = PackedVector2Array(10, -215, 9.121, -212.879, 7, -212, 4.879, -212.879, 4, -215, 4.879, -217.121, 7, -218, 9.121, -217.121)

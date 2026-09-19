@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_legs_shorts"]
+script = ExtResource("2")
+id = &"legs_shorts"
+display_name = "Shorts"
+slot = 0
+
+[node name="Shorts" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_legs_shorts")
+
+[node name="ShortLeft" type="Polygon2D" parent="."]
+color = Color(0.3, 0.45, 0.62, 1)
+polygon = PackedVector2Array(-24, -96, -6, -96, -6, -52, -24, -52)
+
+[node name="ShortRight" type="Polygon2D" parent="."]
+color = Color(0.3, 0.45, 0.62, 1)
+polygon = PackedVector2Array(6, -96, 24, -96, 24, -52, 6, -52)
+
+[node name="ShinLeft" type="Polygon2D" parent="."]
+color = Color(0.85, 0.68, 0.55, 1)
+polygon = PackedVector2Array(-19, -52, -9, -52, -9, -14, -19, -14)
+
+[node name="ShinRight" type="Polygon2D" parent="."]
+color = Color(0.85, 0.68, 0.55, 1)
+polygon = PackedVector2Array(9, -52, 19, -52, 19, -14, 9, -14)

@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_acc_cape"]
+script = ExtResource("2")
+id = &"acc_cape"
+display_name = "Cape"
+slot = 6
+z_offset = -5
+
+[node name="Cape" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_acc_cape")
+
+[node name="Cape" type="Polygon2D" parent="."]
+color = Color(0.6, 0.12, 0.16, 1)
+polygon = PackedVector2Array(-30, -172, -14, -177, 14, -177, 30, -172, 36, -58, -36, -58)
