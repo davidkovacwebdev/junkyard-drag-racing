@@ -1,43 +1,40 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://d4m14mwwl3oim"]
 
-[ext_resource type="Script" path="res://scripts/car/car_body.gd" id="1"]
-[ext_resource type="Script" path="res://scripts/parts/body_part_data.gd" id="2"]
+[ext_resource type="Script" uid="uid://blaa280k1rqwg" path="res://scripts/car/car_body.gd" id="1"]
+[ext_resource type="Script" uid="uid://baxc83cuw3lof" path="res://scripts/parts/body_part_data.gd" id="2"]
 
 [sub_resource type="Resource" id="Resource_classic"]
 script = ExtResource("2")
+color = Color(0.78, 0.18, 0.2, 1)
 id = &"body_classic"
 display_name = "Classic Car"
 mass = 18.0
-durability = 100.0
-material_type = 0
-max_wheels = 2
-color = Color(0.78, 0.18, 0.2, 1)
 
-[node name="BodyClassic" type="RigidBody2D"]
+[node name="BodyClassic" type="RigidBody2D" unique_id=1723387921]
 script = ExtResource("1")
 part_data = SubResource("Resource_classic")
 
-[node name="Polygon2D" type="Polygon2D" parent="."]
+[node name="Polygon2D" type="Polygon2D" parent="." unique_id=8580758]
 color = Color(0.78, 0.18, 0.2, 1)
 polygon = PackedVector2Array(-130, 16, -130, -4, -112, -10, -72, -14, -56, -14, -46, -42, 44, -42, 58, -14, 72, -14, 112, -10, 130, -4, 130, 16)
 
-[node name="Windshield" type="Polygon2D" parent="."]
+[node name="Windshield" type="Polygon2D" parent="." unique_id=869208145]
 color = Color(0.55, 0.75, 0.8, 0.85)
 polygon = PackedVector2Array(-40, -38, 40, -38, 52, -15, -52, -15)
 
-[node name="Headlight" type="Polygon2D" parent="."]
+[node name="Headlight" type="Polygon2D" parent="." unique_id=300326524]
 position = Vector2(118, -4)
 color = Color(1, 0.9, 0.55, 1)
 polygon = PackedVector2Array(0, -5, 12, -3, 12, 3, 0, 5)
 
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="." unique_id=2054283367]
 polygon = PackedVector2Array(-130, 16, -130, -4, -112, -10, -72, -14, -56, -14, -46, -42, 44, -42, 58, -14, 72, -14, 112, -10, 130, -4, 130, 16)
 
-[node name="WheelMount0" type="Marker2D" parent="."]
+[node name="WheelMount0" type="Marker2D" parent="." unique_id=1782967951]
 position = Vector2(-95, 16)
 
-[node name="WheelMount1" type="Marker2D" parent="."]
+[node name="WheelMount1" type="Marker2D" parent="." unique_id=1468694000]
 position = Vector2(95, 16)
 
-[node name="EngineMount" type="Marker2D" parent="."]
-position = Vector2(70, -13)
+[node name="EngineMount" type="Marker2D" parent="." unique_id=915073870]
+position = Vector2(-92, -10)
