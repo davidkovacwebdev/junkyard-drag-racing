@@ -32,6 +32,7 @@ static func assemble(body_scene: PackedScene, wheel_scenes: Array[PackedScene], 
 		var wheel_instance := wheel_scenes[i].instantiate() as CarWheel
 		root.add_child(wheel_instance)
 		wheel_instance.global_position = mount.global_position
+		wheel_instance.chassis = body_instance
 		wheels.append(wheel_instance)
 
 		var joint := PinJoint2D.new()

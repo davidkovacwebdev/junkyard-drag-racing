@@ -25,6 +25,7 @@ const _WHEEL_SCENES := [
 	"res://scenes/parts/wheels/wheel_triangle.tscn",
 	"res://scenes/parts/wheels/wheel_tv.tscn",
 	"res://scenes/parts/wheels/wheel_toilet.tscn",
+	"res://scenes/parts/wheels/wheel_paddle.tscn",
 ]
 const _ENGINE_SCENES := [
 	"res://scenes/parts/engines/engine_v6.tscn",
