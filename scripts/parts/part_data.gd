@@ -15,3 +15,6 @@ enum MaterialType { METAL, WOOD, PLASTIC, CERAMIC, RUBBER, GLASS, FABRIC }
 @export var mass: float = 10.0
 @export var durability: float = 100.0
 @export var material_type: MaterialType = MaterialType.METAL
+## Scene this part's actual visual/physics rig lives in — set by whatever
+## loads the part (PartDatabase), not authored on the resource itself.
+@export var scene_path: String = ""

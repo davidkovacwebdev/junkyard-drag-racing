@@ -25,6 +25,13 @@ PartDatabase="*res://autoload/part_database.gd"
 Inventory="*res://autoload/inventory.gd"
 WorldState="*res://autoload/world_state.gd"
 
+[display]
+
+window/size/viewport_width=1152
+window/size/viewport_height=648
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/character_creator/plugin.cfg")
