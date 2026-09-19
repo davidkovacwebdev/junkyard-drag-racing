@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/player_car.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/world/car_visual.tscn" id="2"]
+[ext_resource type="Script" path="res://scripts/world/world_camera.gd" id="3"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
 size = Vector2(90, 32)
@@ -19,6 +20,7 @@ shape = SubResource("RectangleShape2D_1")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position_smoothing_enabled = true
+script = ExtResource("3")
 
 [node name="InteractionZone" type="Area2D" parent="."]
 
