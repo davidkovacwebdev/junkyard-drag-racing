@@ -9,6 +9,7 @@ id = &"body_fridge"
 display_name = "Fridge"
 mass = 18.0
 durability = 110.0
+speed = 2.0
 material_type = 0
 max_wheels = 2
 

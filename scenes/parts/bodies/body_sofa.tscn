@@ -9,6 +9,7 @@ id = &"body_sofa"
 display_name = "Sofa Chair"
 mass = 10.0
 durability = 40.0
+speed = 3.0
 material_type = 6
 max_wheels = 2
 

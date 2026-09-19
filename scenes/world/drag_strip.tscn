@@ -13,6 +13,7 @@ script = ExtResource("1")
 position = Vector2(-1150, -270)
 display_name = "Drag Strip"
 interior_scene = ExtResource("3")
+collision_height_fraction = 1.0
 
 [node name="Sign" type="Label" parent="."]
 offset_left = -1420.0

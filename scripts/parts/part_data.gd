@@ -14,6 +14,10 @@ enum MaterialType { METAL, WOOD, PLASTIC, CERAMIC, RUBBER, GLASS, FABRIC }
 @export var category: Category = Category.BODY
 @export var mass: float = 10.0
 @export var durability: float = 100.0
+## How much this part contributes to top speed — an engine's is just its
+## power; a body/wheel's is a stand-in for drag/rolling efficiency until
+## those actually factor into open-world driving.
+@export var speed: float = 3.0
 @export var material_type: MaterialType = MaterialType.METAL
 ## Scene this part's actual visual/physics rig lives in — set by whatever
 ## loads the part (PartDatabase), not authored on the resource itself.

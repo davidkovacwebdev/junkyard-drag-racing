@@ -9,7 +9,7 @@ extends Control
 
 @onready var _car_view: CarView = $CarPreview
 @onready var _name_label: Label = $NameLabel
-@onready var _parts_list: VBoxContainer = $PartsScroll/PartsList
+@onready var _parts_list: GridContainer = $PartsScroll/PartsList
 @onready var _body_filter_button: Button = $BodyFilterButton
 @onready var _engine_filter_button: Button = $EngineFilterButton
 @onready var _wheel_filter_button: Button = $WheelFilterButton

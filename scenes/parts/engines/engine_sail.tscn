@@ -9,6 +9,7 @@ id = &"engine_sail"
 display_name = "Sail"
 mass = 4.0
 durability = 20.0
+speed = 0.8
 material_type = 6
 power = 0.8
 

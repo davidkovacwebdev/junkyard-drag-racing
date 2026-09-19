@@ -9,6 +9,7 @@ id = &"body_wrecked_car"
 display_name = "Wrecked Car"
 mass = 20.0
 durability = 100.0
+speed = 3.0
 material_type = 0
 max_wheels = 2
 

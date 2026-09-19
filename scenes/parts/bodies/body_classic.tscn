@@ -9,6 +9,7 @@ id = &"body_classic"
 display_name = "Classic Car"
 mass = 18.0
 durability = 100.0
+speed = 4.0
 material_type = 0
 max_wheels = 2
 color = Color(0.78, 0.18, 0.2, 1)

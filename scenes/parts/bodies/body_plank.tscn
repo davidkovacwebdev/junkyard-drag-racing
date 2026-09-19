@@ -9,6 +9,7 @@ id = &"body_plank"
 display_name = "Plank"
 mass = 14.0
 durability = 60.0
+speed = 5.5
 material_type = 1
 max_wheels = 2
 

@@ -9,6 +9,7 @@ id = &"engine_boiler"
 display_name = "Boiler"
 mass = 22.0
 durability = 140.0
+speed = 1.5
 material_type = 0
 power = 1.5
 

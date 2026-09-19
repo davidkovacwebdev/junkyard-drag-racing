@@ -9,6 +9,7 @@ id = &"wheel_square"
 display_name = "Square Wheel"
 mass = 5.0
 durability = 90.0
+speed = 1.0
 material_type = 0
 
 [node name="WheelSquare" type="RigidBody2D"]

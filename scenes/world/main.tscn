@@ -24,9 +24,12 @@ width = 100.0
 [node name="DragStrip" parent="." instance=ExtResource("5")]
 position = Vector2(3200, 0)
 
-[node name="PlayerCar" parent="." instance=ExtResource("1")]
+[node name="Sortables" type="Node2D" parent="."]
+y_sort_enabled = true
 
-[node name="House" parent="." instance=ExtResource("2")]
+[node name="PlayerCar" parent="Sortables" instance=ExtResource("1")]
+
+[node name="House" parent="Sortables" instance=ExtResource("2")]
 position = Vector2(300, 0)
 size = Vector2(320, 220)
 rect_color = Color(0.2, 0.55, 0.25, 1)

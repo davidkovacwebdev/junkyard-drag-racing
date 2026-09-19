@@ -9,6 +9,7 @@ id = &"engine_jet"
 display_name = "Jet Engine"
 mass = 16.0
 durability = 90.0
+speed = 8.0
 material_type = 0
 power = 8.0
 

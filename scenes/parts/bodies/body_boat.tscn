@@ -9,6 +9,7 @@ id = &"body_boat"
 display_name = "Boat"
 mass = 12.0
 durability = 55.0
+speed = 3.5
 material_type = 1
 max_wheels = 2
 

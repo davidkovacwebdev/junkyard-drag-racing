@@ -9,6 +9,7 @@ id = &"wheel_toilet"
 display_name = "Toilet Bowl Wheel"
 mass = 8.0
 durability = 25.0
+speed = 1.5
 material_type = 3
 
 [node name="WheelToilet" type="RigidBody2D"]

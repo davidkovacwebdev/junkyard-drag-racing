@@ -9,6 +9,7 @@ id = &"engine_propeller"
 display_name = "Propeller"
 mass = 7.0
 durability = 50.0
+speed = 5.5
 material_type = 0
 power = 5.5
 

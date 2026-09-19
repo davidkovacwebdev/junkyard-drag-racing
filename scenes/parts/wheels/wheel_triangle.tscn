@@ -9,6 +9,7 @@ id = &"wheel_triangle"
 display_name = "Triangle Wheel"
 mass = 6.0
 durability = 70.0
+speed = 2.0
 material_type = 2
 
 [node name="WheelTriangle" type="RigidBody2D"]
