@@ -1,0 +1,27 @@
+[gd_scene format=3 uid="uid://b0aid0btqddo0"]
+
+[ext_resource type="Script" uid="uid://gt4eirw7ijwd" path="res://scripts/world/registration_booth.gd" id="1"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_booth"]
+resource_local_to_scene = true
+size = Vector2(180, 140)
+
+[node name="RegistrationBooth" type="StaticBody2D" unique_id=2003303893]
+script = ExtResource("1")
+size = Vector2(180, 140)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=143336513]
+shape = SubResource("RectangleShape2D_booth")
+
+[node name="SignLabel" type="Label" parent="." unique_id=1055351566]
+offset_left = -90.0
+offset_top = -32.0
+offset_right = 90.0
+offset_bottom = -10.0
+theme_override_colors/font_color = Color(1, 0.98, 0.9, 1)
+theme_override_colors/font_outline_color = Color(0.26, 0.06, 0.04, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 16
+text = "REGISTRATION"
+horizontal_alignment = 1
+vertical_alignment = 1

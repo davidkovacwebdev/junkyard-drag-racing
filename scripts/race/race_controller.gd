@@ -18,6 +18,11 @@ extends Node2D
 ## Y the camera locks to (at x = finish_x) once the first car crosses —
 ## should sit roughly centered across the lanes.
 @export var camera_focus_y: float = 575.0
+## If set, the game changes back to this scene once the race ends — used by
+## the world map's drag strip so finishing a race drops you back onto the
+## map instead of leaving you stranded on the track. Empty means "stay put"
+## (standalone test scenes). Headless runs always just quit instead.
+@export_file("*.tscn") var exit_scene_path: String = ""
 
 var camera: CameraFollow
 var _entries: Array[Dictionary] = []
@@ -109,3 +114,5 @@ func _end_race(reason: String) -> void:
 func _maybe_quit() -> void:
 	if DisplayServer.get_name() == "headless":
 		get_tree().quit()
+	elif not exit_scene_path.is_empty():
+		get_tree().change_scene_to_file(exit_scene_path)
