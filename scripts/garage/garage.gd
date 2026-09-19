@@ -16,7 +16,6 @@ extends Control
 @onready var _car_drop_zone: CarDropZone = $CarDropZone
 
 var _index: int = 0
-var _escape_pressed_last: bool = false
 var _wheel_mount_zones: Array[WheelMountZone] = []
 
 const _INACTIVE_FILTER_COLOR := Color(0.85, 0.85, 0.85, 1)
@@ -32,11 +31,6 @@ func _ready() -> void:
 	_show_category(PartData.Category.BODY)
 
 func _process(_delta: float) -> void:
-	var escape_pressed := Input.is_physical_key_pressed(KEY_ESCAPE)
-	if escape_pressed and not _escape_pressed_last:
-		get_tree().change_scene_to_file("res://scenes/world/main.tscn")
-	_escape_pressed_last = escape_pressed
-
 	# While dragging a catalog part, light up the valid drop spots on the
 	# car (wheel mounts, engine bay, or the whole body) based on category.
 	# get_viewport() returns null while the scene is being torn down right
