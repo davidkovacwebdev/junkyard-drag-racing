@@ -12,6 +12,8 @@ extends Resource
 @export var garage_capacity: int = 2
 @export var scrap: int = 0
 @export var money: int = 0
+## Parts the junkyard crane has fished out of the heap for the player.
+@export var spare_parts: Array[PartData] = []
 @export var player_position: Vector2 = Vector2.ZERO
 @export var has_player_position: bool = false
 ## Ids of looted trash props — see WorldState.get_looted_snapshot().

@@ -37,6 +37,7 @@ func save_game() -> void:
 	data.garage_capacity = Inventory.garage_capacity
 	data.scrap = Inventory.scrap
 	data.money = Inventory.money
+	data.spare_parts = Inventory.spare_parts
 	data.player_position = WorldState.player_position
 	data.has_player_position = WorldState.has_player_position
 	data.looted = WorldState.get_looted_snapshot()
@@ -59,6 +60,7 @@ func load_game() -> bool:
 	Inventory.garage_capacity = data.garage_capacity
 	Inventory.scrap = data.scrap
 	Inventory.money = data.money
+	Inventory.spare_parts = data.spare_parts
 	WorldState.player_position = data.player_position
 	WorldState.has_player_position = data.has_player_position
 	WorldState.restore_looted(data.looted)

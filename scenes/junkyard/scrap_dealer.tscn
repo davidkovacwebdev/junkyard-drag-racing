@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/junkyard/scrap_dealer.gd" id="1_dealer"]
 [ext_resource type="Script" path="res://scripts/character/character_rig.gd" id="2_rig"]
@@ -6,6 +6,22 @@
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_dealer"]
 size = Vector2(96, 140)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dialog"]
+content_margin_left = 22.0
+content_margin_top = 16.0
+content_margin_right = 22.0
+content_margin_bottom = 18.0
+bg_color = Color(0.13, 0.11, 0.09, 0.94)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.58, 0.44, 0.2, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
 
 [node name="ScrapDealer" type="StaticBody2D"]
 script = ExtResource("1_dealer")
@@ -32,3 +48,59 @@ theme_override_font_sizes/font_size = 18
 horizontal_alignment = 1
 vertical_alignment = 1
 visible = false
+
+[node name="Dialog" type="CanvasLayer" parent="."]
+layer = 4
+visible = false
+
+[node name="Panel" type="PanelContainer" parent="Dialog"]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -350.0
+offset_top = -258.0
+offset_right = 350.0
+offset_bottom = -26.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_dialog")
+
+[node name="Layout" type="VBoxContainer" parent="Dialog/Panel"]
+theme_override_constants/separation = 8
+
+[node name="NameLabel" type="Label" parent="Dialog/Panel/Layout"]
+theme_override_colors/font_color = Color(1, 0.85, 0.42, 1)
+theme_override_font_sizes/font_size = 22
+text = "SCRAP DEALER"
+
+[node name="LineLabel" type="Label" parent="Dialog/Panel/Layout"]
+custom_minimum_size = Vector2(0, 52)
+theme_override_colors/font_color = Color(0.87, 0.85, 0.8, 1)
+theme_override_font_sizes/font_size = 17
+text = "Scrap or salvage?"
+autowrap_mode = 3
+
+[node name="StatsLabel" type="Label" parent="Dialog/Panel/Layout"]
+theme_override_colors/font_color = Color(0.62, 0.68, 0.58, 1)
+theme_override_font_sizes/font_size = 15
+text = "Scrap 0   $0   Spare parts 0"
+
+[node name="SellButton" type="Button" parent="Dialog/Panel/Layout"]
+custom_minimum_size = Vector2(0, 44)
+theme_override_font_sizes/font_size = 19
+text = "Sell scrap"
+
+[node name="CraneButton" type="Button" parent="Dialog/Panel/Layout"]
+custom_minimum_size = Vector2(0, 44)
+theme_override_font_sizes/font_size = 19
+text = "Grab parts with the crane"
+
+[node name="LeaveButton" type="Button" parent="Dialog/Panel/Layout"]
+custom_minimum_size = Vector2(0, 44)
+theme_override_font_sizes/font_size = 19
+text = "Walk away"
+
+[connection signal="pressed" from="Dialog/Panel/Layout/SellButton" to="." method="_on_sell_pressed"]
+[connection signal="pressed" from="Dialog/Panel/Layout/CraneButton" to="." method="_on_crane_pressed"]
+[connection signal="pressed" from="Dialog/Panel/Layout/LeaveButton" to="." method="_on_leave_pressed"]

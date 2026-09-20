@@ -72,8 +72,11 @@ func _spawn_junk_chunk() -> void:
 	chunk.add_child(collision)
 
 ## Real body/wheel/engine scenes pulled from the same catalog the
-## garage browses, just scaled down and scattered like junk — the same
-## parts you could equip in the garage are lying around here too.
+## garage browses, scattered like junk — the same parts you could equip
+## in the garage are lying around here too. They go down at
+## PartScale.WORLD_SCALE, i.e. the size the player's car wears them at,
+## so a whole car body in the mound is about one car wide rather than
+## looming over the one you're driving.
 func _spawn_random_part() -> void:
 	var pool: Array[PartData] = []
 	pool.append_array(PartDatabase.bodies)
@@ -90,4 +93,4 @@ func _spawn_random_part() -> void:
 	add_child(instance)
 	instance.position = _random_point_in_pile()
 	instance.rotation = randf_range(0.0, TAU)
-	instance.scale = Vector2.ONE * randf_range(0.35, 0.5)
+	PartScale.apply_to(instance)
