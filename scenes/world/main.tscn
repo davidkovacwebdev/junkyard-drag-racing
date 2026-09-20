@@ -39,7 +39,7 @@ interior_scene = ExtResource("3")
 [node name="Trash" type="Node2D" parent="Sortables" unique_id=260557314]
 script = ExtResource("7")
 
-[node name="Junkyard" parent="Sortables" instance=ExtResource("8")]
+[node name="Junkyard" parent="Sortables" unique_id=446594018 instance=ExtResource("8")]
 position = Vector2(-500, 350)
 
 [node name="PauseMenu" parent="." unique_id=1833115279 instance=ExtResource("6")]

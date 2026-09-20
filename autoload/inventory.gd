@@ -20,14 +20,41 @@ var selected_index: int = 0
 ## Loose trash hauled out of roadside bins. Sold to the scrap dealer at the
 ## junkyard for cash; until you sell it, it's just weight in the trunk.
 var scrap: int = 0
-## Cash. Only the scrap dealer puts money in here so far, and nothing spends it
-## yet — but this is what parts, repairs and race entry fees will draw on.
+## Cash, from selling scrap. The junkyard's crane charges for a grab, and this
+## is what parts, repairs and race entry fees will draw on.
 var money: int = 0
+## Parts pulled out of the junkyard heap by the crane: owned, but not fitted to
+## anything. Keeping them here (rather than only in the catalog) is what makes
+## "what you grab is what you get" mean something.
+var spare_parts: Array[PartData] = []
 
 ## Add to the scrap tally. Returns the new total.
 func add_scrap(amount: int) -> int:
 	scrap += amount
 	return scrap
+
+## Bank a part the crane fished out of the heap. Returns the stash size.
+func add_part(part: PartData) -> int:
+	if part != null:
+		spare_parts.append(part)
+	return spare_parts.size()
+
+## Try to pay `amount`. False and no charge when the player can't afford it, so
+## callers can turn the service down instead of putting them in debt.
+func spend_money(amount: int) -> bool:
+	if amount <= 0:
+		return true
+	if money < amount:
+		return false
+	money -= amount
+	return true
+
+## Whether `amount` is covered, without spending anything. For callers that need
+## to know *before* they commit to something they can't undo — the crane checks
+## this up front so it doesn't sink its jaws into the heap and only then find out
+## the player can't pay.
+func can_afford(amount: int) -> bool:
+	return amount <= 0 or money >= amount
 
 ## Sell the whole scrap pile at `rate` cash per scrap. Empties `scrap`, banks
 ## the cash, and returns what was earned so the caller can show it.
@@ -51,6 +78,7 @@ func reset() -> void:
 	selected_index = 0
 	scrap = 0
 	money = 0
+	spare_parts.clear()
 
 	var starter := _build_starter_car()
 	owned_cars.append(starter)
