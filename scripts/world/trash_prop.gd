@@ -48,6 +48,10 @@ enum Kind {
 ## doesn't come out looking identical. Set by the spawner; 0 falls back to
 ## `loot_id` so a hand-placed prop is still stable.
 @export var variant_seed: int = 0
+## How rounded the collision footprint's corners are — see RoundedRectShape.
+## Keeps the car from catching and stopping dead on a sharp corner; it slides
+## past instead.
+@export_range(0.0, 20.0) var corner_radius: float = 6.0
 
 @export_group("Colors")
 @export var body_color: Color = Color(0.34, 0.42, 0.4, 1)
@@ -126,11 +130,9 @@ func _apply_state() -> void:
 	display_name = _prompt_name if filled else ""
 	var shape := get_node_or_null("CollisionShape2D") as CollisionShape2D
 	if shape != null:
-		var rect := shape.shape as RectangleShape2D
-		if rect != null:
-			var footprint := footprint_for(kind)
-			rect.size = footprint
-			shape.position = Vector2(0.0, -footprint.y * 0.5)
+		var footprint := footprint_for(kind)
+		shape.shape = RoundedRectShape.build(footprint, corner_radius)
+		shape.position = Vector2(0.0, -footprint.y * 0.5)
 	queue_redraw()
 
 # --- Interaction ---------------------------------------------------------------

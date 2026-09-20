@@ -25,6 +25,10 @@ extends StaticBody2D
 ## bottom edge — the building's footprint. Set to 1.0 for a flat prop
 ## with no "behind it" to walk into.
 @export_range(0.0, 1.0) var collision_height_fraction: float = 0.35
+## How rounded the collision footprint's corners are — see RoundedRectShape.
+## Keeps the car from catching and stopping dead on a sharp corner; it slides
+## past instead.
+@export_range(0.0, 100.0) var corner_radius: float = 20.0
 
 func _ready() -> void:
 	# `ColorRect` is optional: a subclass scene may draw its own art in
@@ -35,7 +39,6 @@ func _ready() -> void:
 		visual.color = rect_color
 		visual.size = size
 		visual.position = -size / 2.0
-	var shape: RectangleShape2D = $CollisionShape2D.shape
 	var collision_height := size.y * collision_height_fraction
-	shape.size = Vector2(size.x, collision_height)
+	$CollisionShape2D.shape = RoundedRectShape.build(Vector2(size.x, collision_height), corner_radius)
 	$CollisionShape2D.position = Vector2(0.0, size.y / 2.0 - collision_height / 2.0)

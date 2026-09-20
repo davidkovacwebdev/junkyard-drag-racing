@@ -24,6 +24,7 @@ config/icon="res://icon.svg"
 PartDatabase="*res://autoload/part_database.gd"
 Inventory="*res://autoload/inventory.gd"
 WorldState="*res://autoload/world_state.gd"
+SaveSystem="*res://autoload/save_system.gd"
 
 [display]
 

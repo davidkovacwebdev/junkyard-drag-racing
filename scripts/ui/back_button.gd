@@ -10,6 +10,9 @@ extends Button
 @export_file("*.tscn") var target_scene: String = "res://scenes/world/main.tscn"
 
 func _pressed() -> void:
+	# No-ops if there's no active session (e.g. Settings reached straight
+	# from the main menu) — see SaveSystem's own guard.
+	SaveSystem.save_game()
 	get_tree().change_scene_to_file(target_scene)
 
 func _unhandled_input(event: InputEvent) -> void:

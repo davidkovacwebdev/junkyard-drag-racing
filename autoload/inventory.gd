@@ -10,9 +10,9 @@ extends Node
 ## entries in a CarModelData's .engine/.wheels — no new plumbing needed
 ## when a garage customization UI shows up.
 ##
-## No save/load yet — that's planned, not built. When it lands, this
-## state (owned_cars, garage_capacity, selected_index) is already just
-## Resources + ints, so it can go straight to ResourceSaver/JSON.
+## Save/load lives in SaveSystem, which reads/writes these fields
+## directly — they're already just Resources + ints, exactly so that
+## could happen without restructuring anything here.
 
 var garage_capacity: int = 2
 var owned_cars: Array[CarModelData] = []
@@ -39,16 +39,24 @@ func sell_scrap(rate: int = 1) -> int:
 	money += earned
 	return earned
 
-## The starter car the player already owns — always in slot 0.
-const STARTER_BODY := "res://scenes/parts/bodies/body_classic.tscn"
-const STARTER_ENGINE := "res://scenes/parts/engines/engine_v6.tscn"
-const STARTER_WHEEL := "res://scenes/parts/wheels/wheel_standard.tscn"
-
 func _ready() -> void:
-	owned_cars.append(_build_car(STARTER_BODY, STARTER_ENGINE, STARTER_WHEEL))
+	reset()
+
+## Wipe everything back to a fresh start: the worst-stats starter car,
+## a random pair to fill out the rest of the garage, and empty pockets.
+## Called on boot and again by MainMenu's New Game, since SaveSystem's
+## Continue only overwrites these fields rather than re-running _ready().
+func reset() -> void:
+	owned_cars.clear()
+	selected_index = 0
+	scrap = 0
+	money = 0
+
+	var starter := _build_starter_car()
+	owned_cars.append(starter)
 	var pool: Array[BodyPartData] = []
 	for body in PartDatabase.bodies:
-		if body.id != &"body_classic":
+		if body.id != starter.body.id:
 			pool.append(body)
 	pool.shuffle()
 	for body in pool.slice(0, garage_capacity - 1):
@@ -59,15 +67,33 @@ func get_selected_car() -> CarModelData:
 		return null
 	return owned_cars[clampi(selected_index, 0, owned_cars.size() - 1)]
 
-func _build_car(body_path: String, engine_path: String, wheel_path: String) -> CarModelData:
+## You start in a junkyard, so you start in a heap — the worst body,
+## engine and wheel in the whole catalog, not a random one.
+func _build_starter_car() -> CarModelData:
+	var body := _worst(PartDatabase.bodies) as BodyPartData
+	var engine := _worst(PartDatabase.engines) as EnginePartData
+	var wheel := _worst(PartDatabase.wheels) as WheelPartData
 	var car := CarModelData.new()
-	car.body = PartDatabase.load_part_data(body_path) as BodyPartData
-	car.engine = PartDatabase.load_part_data(engine_path) as EnginePartData
-	var wheel := PartDatabase.load_part_data(wheel_path) as WheelPartData
+	car.body = body.duplicate() as BodyPartData
+	car.engine = engine.duplicate() as EnginePartData
+	var mount_count := PartDatabase.wheel_mount_count(car.body)
 	car.wheels = []
-	car.wheels.append(wheel)
-	car.wheels.append(wheel.duplicate())
+	for i in mount_count:
+		car.wheels.append(wheel.duplicate())
 	return car
+
+## "Worst" = lowest durability + speed (the two catalog stats with an
+## obvious better/worse direction). Mass isn't weighted either way —
+## heavier isn't inherently worse, just heavier.
+static func _worst(parts: Array) -> PartData:
+	var worst: PartData = null
+	var worst_score := INF
+	for part in parts:
+		var score: float = part.durability + part.speed
+		if score < worst_score:
+			worst_score = score
+			worst = part
+	return worst
 
 func _build_random_car(body: BodyPartData) -> CarModelData:
 	var car := CarModelData.new()

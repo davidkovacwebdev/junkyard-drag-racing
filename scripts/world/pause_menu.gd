@@ -34,7 +34,9 @@ func _on_return_to_menu_pressed() -> void:
 ## already paused/frozen (its buttons included).
 func _leave_to(scene_path: String) -> void:
 	get_tree().paused = false
+	SaveSystem.save_game()
 	get_tree().change_scene_to_file(scene_path)
 
 func _on_quit_pressed() -> void:
+	SaveSystem.save_game()
 	get_tree().quit()

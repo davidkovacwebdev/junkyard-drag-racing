@@ -87,6 +87,7 @@ flat = true
 text = "Quit"
 
 [connection signal="pressed" from="NewGameButton" to="." method="_on_new_game_pressed"]
+[connection signal="pressed" from="ContinueButton" to="." method="_on_continue_pressed"]
 [connection signal="pressed" from="SettingsButton" to="." method="_on_settings_pressed"]
 [connection signal="pressed" from="CreditsButton" to="." method="_on_credits_pressed"]
 [connection signal="pressed" from="QuitButton" to="." method="_on_quit_pressed"]

@@ -36,6 +36,14 @@ func is_looted(id: String) -> bool:
 func looted_count() -> int:
 	return _looted.size()
 
+## Snapshot of looted ids, for SaveSystem to write out.
+func get_looted_snapshot() -> Dictionary:
+	return _looted.duplicate()
+
+## Restore a previously-saved snapshot (SaveSystem on Continue).
+func restore_looted(snapshot: Dictionary) -> void:
+	_looted = snapshot.duplicate()
+
 ## Forget the saved spot — next map load starts at the scene's own spawn.
 ## Not used yet; here so a future "new game"/teleport doesn't leave a stale
 ## position behind.
