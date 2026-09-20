@@ -16,3 +16,5 @@ extends Resource
 @export var has_player_position: bool = false
 ## Ids of looted trash props — see WorldState.get_looted_snapshot().
 @export var looted: Dictionary = {}
+@export var day: int = 1
+@export var time_of_day: float = 0.0

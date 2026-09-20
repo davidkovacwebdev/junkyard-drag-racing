@@ -14,6 +14,7 @@ func _ready() -> void:
 func _on_new_game_pressed() -> void:
 	Inventory.reset()
 	WorldState.clear()
+	DayNightCycle.reset()
 	SaveSystem.delete_save()
 	get_tree().change_scene_to_file("res://scenes/world/main.tscn")
 

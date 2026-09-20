@@ -40,6 +40,8 @@ func save_game() -> void:
 	data.player_position = WorldState.player_position
 	data.has_player_position = WorldState.has_player_position
 	data.looted = WorldState.get_looted_snapshot()
+	data.day = DayNightCycle.day
+	data.time_of_day = DayNightCycle.time_of_day
 	var err := ResourceSaver.save(data, SAVE_PATH)
 	if err != OK:
 		push_warning("SaveSystem: save failed (error %d)" % err)
@@ -60,6 +62,8 @@ func load_game() -> bool:
 	WorldState.player_position = data.player_position
 	WorldState.has_player_position = data.has_player_position
 	WorldState.restore_looted(data.looted)
+	DayNightCycle.day = data.day
+	DayNightCycle.time_of_day = data.time_of_day
 	return true
 
 ## Called by New Game so starting over doesn't leave a stale save

@@ -25,6 +25,7 @@ PartDatabase="*res://autoload/part_database.gd"
 Inventory="*res://autoload/inventory.gd"
 WorldState="*res://autoload/world_state.gd"
 SaveSystem="*res://autoload/save_system.gd"
+DayNightCycle="*res://autoload/day_night_cycle.gd"
 
 [display]
 

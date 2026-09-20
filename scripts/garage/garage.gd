@@ -98,8 +98,10 @@ func equip_part(category: PartData.Category, part: PartData, wheel_index: int = 
 		PartData.Category.BODY:
 			car.body = part.duplicate() as BodyPartData
 			_resize_wheels(car)
+			DayNightCycle.advance_hours(4.0)
 		PartData.Category.ENGINE:
 			car.engine = part.duplicate() as EnginePartData
+			DayNightCycle.advance_hours(4.0)
 		PartData.Category.WHEEL:
 			var wheel := part.duplicate() as WheelPartData
 			var mount_count := PartDatabase.wheel_mount_count(car.body)
@@ -109,6 +111,7 @@ func equip_part(category: PartData.Category, part: PartData, wheel_index: int = 
 			else:
 				for i in mount_count:
 					car.wheels[i] = wheel.duplicate()
+			DayNightCycle.advance_hours(1.0)
 	_refresh()
 
 func _resize_wheels(car: CarModelData) -> void:

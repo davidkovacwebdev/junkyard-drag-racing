@@ -40,6 +40,7 @@ var _exiting := false
 const LOG_INTERVAL := 1.0
 
 func _ready() -> void:
+	DayNightCycle.advance_hours(4.0)
 	camera = get_node_or_null(camera_path) as CameraFollow
 	# CarRig children finish assembling in their own _ready() before this
 	# one runs (Godot calls _ready bottom-up), so `assembled` is populated.
