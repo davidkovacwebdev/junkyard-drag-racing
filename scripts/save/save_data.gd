@@ -16,7 +16,9 @@ extends Resource
 @export var spare_parts: Array[PartData] = []
 @export var player_position: Vector2 = Vector2.ZERO
 @export var has_player_position: bool = false
-## Ids of looted trash props — see WorldState.get_looted_snapshot().
+## Restock state of the city's trash — which props are empty and which have come
+## back. See WorldState.get_looted_snapshot(); older saves store a plain set of
+## looted ids here and are upgraded on load.
 @export var looted: Dictionary = {}
 @export var day: int = 1
 @export var time_of_day: float = 0.0

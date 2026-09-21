@@ -24,6 +24,11 @@ const DEBUG_FAST_FORWARD_SCALE := 24.0
 ## Every new day starts at 8 AM (right as night ends) rather than midnight.
 const START_TIME := NIGHT_END
 
+## Fired the moment the calendar rolls over, so the world can restock itself:
+## roadside bins ask whether their patch has come back full (see WorldState).
+## Not fired by `reset()`, which is a fresh start rather than a new day.
+signal day_changed(day: int)
+
 var day: int = 1
 var time_of_day: float = START_TIME ## Seconds into the current day, [0, DAY_LENGTH).
 
@@ -33,6 +38,7 @@ func _process(delta: float) -> void:
 	if time_of_day >= DAY_LENGTH:
 		time_of_day -= DAY_LENGTH
 		day += 1
+		day_changed.emit(day)
 
 ## Called on New Game — Continue restores day/time_of_day from SaveSystem
 ## instead, never through here.
@@ -48,9 +54,13 @@ func advance_hours(hours: float) -> void:
 
 func advance_seconds(seconds: float) -> void:
 	time_of_day += seconds
+	var rolled := false
 	while time_of_day >= DAY_LENGTH:
 		time_of_day -= DAY_LENGTH
 		day += 1
+		rolled = true
+	if rolled:
+		day_changed.emit(day)
 
 ## 0 = full day, 1 = full night, ramping linearly across the two
 ## TRANSITION-second windows centred on dusk (NIGHT_START) and dawn

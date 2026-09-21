@@ -8,7 +8,7 @@
 [ext_resource type="PackedScene" path="res://scenes/world/pause_menu.tscn" id="6"]
 [ext_resource type="Script" uid="uid://cxavmo7w253pf" path="res://scripts/world/trash_spawner.gd" id="7"]
 [ext_resource type="PackedScene" path="res://scenes/world/junkyard.tscn" id="8"]
-[ext_resource type="Script" path="res://scripts/world/house_spawner.gd" id="9"]
+[ext_resource type="Script" uid="uid://ndh2o15pw6to" path="res://scripts/world/house_spawner.gd" id="9"]
 
 [node name="Main" type="Node2D" unique_id=1332585834]
 
@@ -40,7 +40,7 @@ interior_scene = ExtResource("3")
 [node name="Trash" type="Node2D" parent="Sortables" unique_id=260557314]
 script = ExtResource("7")
 
-[node name="Houses" type="Node2D" parent="Sortables"]
+[node name="Houses" type="Node2D" parent="Sortables" unique_id=1527741676]
 script = ExtResource("9")
 
 [node name="Junkyard" parent="Sortables" unique_id=446594018 instance=ExtResource("8")]

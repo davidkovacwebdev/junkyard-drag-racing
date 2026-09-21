@@ -48,10 +48,21 @@ extends Node2D
 ## spinning wheel and swing its art around the axle instead of just moving it,
 ## which is what broke the first attempt at this.
 ##
-## The road is displaced by that same function, which is why it has to be a strip
+## The road art is displaced by that same function, which is why it has to be a strip
 ## of vertices rather than a slab: the road's height under a piece is then exactly
 ## the offset that piece is drawn with, by construction, rather than two numbers
 ## that have to be kept in agreement by hand. See _setup_road_strip/_bend_road.
+##
+## --- What the player actually sees ---------------------------------------------
+##
+## Lanes/LaneN/Road is *hidden* on track_multi_test.tscn. That art exists to
+## describe the drift, not to be looked at: the road a car is drawn on top of is
+## the straight strip painted by drag_track_art.gd, which never moves. So the
+## wander is visible on the cars alone — five cars weaving across a dead-straight,
+## five-lane strip and trading paint when they get close — and nothing about the
+## track itself bends. Switch `visible` back on for a lane's Road to lay the
+## drift's own reference over the top of it, which is the quickest way to see what
+## the bump is doing.
 ##
 ## --- Why a bump, rather than one offset per lane -------------------------------
 ##
@@ -130,16 +141,17 @@ const SPAWN_STAGGER_X := 300.0
 ## --- Cosmetic up/down drift ---------------------------------------------------
 
 ## Peak height of the drift bump, in px: how far a piece sitting at the bump's
-## centre is drawn off its own lane. Barely under half the lane spacing on
-## purpose: two neighbours bumping toward each other can end up roughly a wheel's
-## width apart, which is what "touching" should look like, without the lanes'
-## drawn roads ever crossing.
+## centre is drawn off its own lane. Barely under three quarters of the lane
+## spacing on purpose: two neighbours bumping toward each other can end up roughly
+## a wheel's width apart, which is what "touching" should look like. Any wider and
+## the cars themselves would be drawn overlapping, which reads as a collision
+## rather than as trading paint.
 const DRIFT_AMPLITUDE := 140.0
 ## How fast the bump's height eases toward its next target; slower than the
 ## targets change, so it reads as wandering rather than snapping.
-const DRIFT_STEER_SPEED := 90.0
-const DRIFT_HOLD_MIN := 0.4
-const DRIFT_HOLD_MAX := 1.4
+const DRIFT_STEER_SPEED := 50.0
+const DRIFT_HOLD_MIN := 0.8
+const DRIFT_HOLD_MAX := 2.0
 ## Forward speed (px/s) a piece has to be doing before it can be followed, and so
 ## before its lane gets a bump at all. Drifting is part of driving, so a car that
 ## is stopped — wrecked, flipped, jammed against the wall, still dropping in at the
@@ -563,6 +575,12 @@ func _setup_road_strip(state: LaneState) -> void:
 ## the road they're standing on can't disagree, because there's only one rule.
 func _bend_road(state: LaneState) -> void:
 	if state.road == null or not is_instance_valid(state.road):
+		return
+	# A hidden road has nobody looking at it: on track_multi_test.tscn these strips
+	# are the drift's own reference and are switched off, because the road the
+	# player sees is the straight one painted by drag_track_art.gd. Rebuilding a
+	# polygon nothing draws sixty times a second is just work for nothing.
+	if not state.road.visible:
 		return
 	var columns := state.road_x.size()
 	var points := PackedVector2Array()
