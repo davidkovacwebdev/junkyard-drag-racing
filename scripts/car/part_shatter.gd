@@ -35,6 +35,11 @@ static func shatter(part: RigidBody2D, color: Color, parent: Node) -> void:
 		collision.polygon = poly
 		frag.add_child(collision)
 
+		# Rubble lands and stops where the part it came off would have, so it
+		# inherits the part's layers rather than jumping to the default bit.
+		frag.collision_layer = part.collision_layer
+		frag.collision_mask = part.collision_mask
+
 		parent.add_child(frag)
 		frag.global_position = origin + Vector2(randf_range(-8.0, 8.0), randf_range(-8.0, 8.0))
 

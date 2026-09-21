@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3]
 
-[sub_resource type="RectangleShape2D" id="Shape_floor"]
+[sub_resource type="RectangleShape2D" id="Shape_ground"]
 size = Vector2(6800, 60)
 
 [sub_resource type="RectangleShape2D" id="Shape_wall"]
@@ -8,61 +8,11 @@ size = Vector2(100, 980)
 
 [node name="TrackMulti" type="Node2D"]
 
-[node name="Floor" type="StaticBody2D" parent="."]
-position = Vector2(3400,430)
-
-[node name="CollisionShape2D0" type="CollisionShape2D" parent="Floor"]
-position = Vector2(0,-400)
-shape = SubResource("Shape_floor")
-
-[node name="CollisionShape2D1" type="CollisionShape2D" parent="Floor"]
-position = Vector2(0,-200)
-shape = SubResource("Shape_floor")
-
-[node name="CollisionShape2D2" type="CollisionShape2D" parent="Floor"]
-position = Vector2(0,0)
-shape = SubResource("Shape_floor")
-
-[node name="CollisionShape2D3" type="CollisionShape2D" parent="Floor"]
-position = Vector2(0,200)
-shape = SubResource("Shape_floor")
-
-[node name="CollisionShape2D4" type="CollisionShape2D" parent="Floor"]
-position = Vector2(0,400)
-shape = SubResource("Shape_floor")
-
-[node name="Lane0" type="Polygon2D" parent="Floor"]
-position = Vector2(0,-400)
-color = Color(0.3, 0.3, 0.32, 1)
-polygon = PackedVector2Array(-3400, -30, 3400, -30, 3400, 30, -3400, 30)
-
-[node name="Lane1" type="Polygon2D" parent="Floor"]
-position = Vector2(0,-200)
-color = Color(0.3, 0.3, 0.32, 1)
-polygon = PackedVector2Array(-3400, -30, 3400, -30, 3400, 30, -3400, 30)
-
-[node name="Lane2" type="Polygon2D" parent="Floor"]
-position = Vector2(0,0)
-color = Color(0.3, 0.3, 0.32, 1)
-polygon = PackedVector2Array(-3400, -30, 3400, -30, 3400, 30, -3400, 30)
-
-[node name="Lane3" type="Polygon2D" parent="Floor"]
-position = Vector2(0,200)
-color = Color(0.3, 0.3, 0.32, 1)
-polygon = PackedVector2Array(-3400, -30, 3400, -30, 3400, 30, -3400, 30)
-
-[node name="Lane4" type="Polygon2D" parent="Floor"]
-position = Vector2(0,400)
-color = Color(0.3, 0.3, 0.32, 1)
-polygon = PackedVector2Array(-3400, -30, 3400, -30, 3400, 30, -3400, 30)
-
-[node name="FinishLine" type="Polygon2D" parent="."]
-position = Vector2(5400, 430)
-color = Color(1, 1, 1, 0.6)
-polygon = PackedVector2Array(-6, -490, 6, -490, 6, 490, -6, 490)
-
 [node name="EndWall" type="StaticBody2D" parent="."]
+z_index = -1
 position = Vector2(6300, 430)
+collision_layer = 64
+collision_mask = 0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="EndWall"]
 shape = SubResource("Shape_wall")
@@ -74,3 +24,102 @@ polygon = PackedVector2Array(-50, -490, 50, -490, 50, 490, -50, 490)
 [node name="Stripe" type="Polygon2D" parent="EndWall"]
 color = Color(0.95, 0.8, 0.1, 1)
 polygon = PackedVector2Array(-5, -490, 5, -490, 5, 490, -5, 490)
+
+[node name="FinishLine" type="Polygon2D" parent="."]
+z_index = 5
+position = Vector2(5400, 430)
+color = Color(1, 1, 1, 0.6)
+polygon = PackedVector2Array(-6, -490, 6, -490, 6, 490, -6, 490)
+
+[node name="Lanes" type="Node2D" parent="."]
+; Drawn lanes only. The harness rebuilds each Road polygon as a strip it bends up
+; and down, so nothing with physics in it may live under one - see
+; single_lane_race_setup.gd.
+
+[node name="Lane0" type="Node2D" parent="Lanes"]
+
+[node name="Road" type="Polygon2D" parent="Lanes/Lane0"]
+position = Vector2(3400, 30)
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-3400, -30, 2850, -30, 2850, 30, -3400, 30)
+
+[node name="Slabs" type="Node2D" parent="."]
+; One collision bit per lane (2, 4, 8, 16, 32), in the same order as `Lanes`.
+; Static on purpose: each car is put on its own lane's bit, which is what lets
+; drifting cars overlap on screen while the physics never sees two lanes at once.
+
+[node name="Slab0" type="StaticBody2D" parent="Slabs"]
+position = Vector2(3400, 30)
+collision_layer = 2
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Slabs/Slab0"]
+shape = SubResource("Shape_ground")
+
+[node name="Lane1" type="Node2D" parent="Lanes"]
+z_index = 1
+position = Vector2(0, 200)
+
+[node name="Road" type="Polygon2D" parent="Lanes/Lane1"]
+position = Vector2(3400, 30)
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-3400, -30, 2850, -30, 2850, 30, -3400, 30)
+
+[node name="Slab1" type="StaticBody2D" parent="Slabs"]
+position = Vector2(3400, 230)
+collision_layer = 4
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Slabs/Slab1"]
+shape = SubResource("Shape_ground")
+
+[node name="Lane2" type="Node2D" parent="Lanes"]
+z_index = 2
+position = Vector2(0, 400)
+
+[node name="Road" type="Polygon2D" parent="Lanes/Lane2"]
+position = Vector2(3400, 30)
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-3400, -30, 2850, -30, 2850, 30, -3400, 30)
+
+[node name="Slab2" type="StaticBody2D" parent="Slabs"]
+position = Vector2(3400, 430)
+collision_layer = 8
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Slabs/Slab2"]
+shape = SubResource("Shape_ground")
+
+[node name="Lane3" type="Node2D" parent="Lanes"]
+z_index = 3
+position = Vector2(0, 600)
+
+[node name="Road" type="Polygon2D" parent="Lanes/Lane3"]
+position = Vector2(3400, 30)
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-3400, -30, 2850, -30, 2850, 30, -3400, 30)
+
+[node name="Slab3" type="StaticBody2D" parent="Slabs"]
+position = Vector2(3400, 630)
+collision_layer = 16
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Slabs/Slab3"]
+shape = SubResource("Shape_ground")
+
+[node name="Lane4" type="Node2D" parent="Lanes"]
+z_index = 4
+position = Vector2(0, 800)
+
+[node name="Road" type="Polygon2D" parent="Lanes/Lane4"]
+position = Vector2(3400, 30)
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-3400, -30, 2850, -30, 2850, 30, -3400, 30)
+
+[node name="Slab4" type="StaticBody2D" parent="Slabs"]
+position = Vector2(3400, 830)
+collision_layer = 32
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Slabs/Slab4"]
+shape = SubResource("Shape_ground")
