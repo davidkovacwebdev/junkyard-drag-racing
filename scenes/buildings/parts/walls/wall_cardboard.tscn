@@ -1,0 +1,47 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/building_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/building_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_wall_cardboard"]
+script = ExtResource("2")
+id = &"wall_cardboard"
+display_name = "Cardboard Shanty Wall"
+slot = 0
+
+[node name="CardboardWall" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_wall_cardboard")
+footprint_size = Vector2(190, 180)
+
+[node name="Body" type="Polygon2D" parent="."]
+color = Color(0.68, 0.52, 0.34, 1)
+polygon = PackedVector2Array(-95, -180, 95, -180, 95, 0, -95, 0)
+
+[node name="BoxA" type="Polygon2D" parent="."]
+color = Color(0.6, 0.45, 0.28, 1)
+polygon = PackedVector2Array(-95, -180, -20, -180, -20, -110, -95, -110)
+
+[node name="BoxB" type="Polygon2D" parent="."]
+color = Color(0.74, 0.58, 0.38, 1)
+polygon = PackedVector2Array(-20, -180, 55, -180, 55, -125, -20, -125)
+
+[node name="BoxC" type="Polygon2D" parent="."]
+color = Color(0.63, 0.47, 0.3, 1)
+polygon = PackedVector2Array(55, -180, 95, -180, 95, -95, 55, -95)
+
+[node name="BoxD" type="Polygon2D" parent="."]
+color = Color(0.71, 0.55, 0.36, 1)
+polygon = PackedVector2Array(-95, -110, 30, -110, 30, -40, -95, -40)
+
+[node name="BoxE" type="Polygon2D" parent="."]
+color = Color(0.58, 0.43, 0.27, 1)
+polygon = PackedVector2Array(30, -95, 95, -95, 95, -30, 30, -30)
+
+[node name="TapeH" type="Polygon2D" parent="."]
+color = Color(0.75, 0.73, 0.68, 0.85)
+polygon = PackedVector2Array(-95, -113, 95, -113, 95, -107, -95, -107)
+
+[node name="TapeV" type="Polygon2D" parent="."]
+color = Color(0.75, 0.73, 0.68, 0.85)
+polygon = PackedVector2Array(27, -180, 33, -180, 33, -30, 27, -30)

@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/building_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/building_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_door_broken_hanging"]
+script = ExtResource("2")
+id = &"door_broken_hanging"
+display_name = "Broken Hanging Door"
+slot = 2
+
+[node name="BrokenHangingDoor" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_door_broken_hanging")
+
+[node name="Doorway" type="Polygon2D" parent="."]
+color = Color(0.05, 0.05, 0.06, 1)
+polygon = PackedVector2Array(-28, -73, 28, -73, 28, 0, -28, 0)
+
+[node name="Panel" type="Polygon2D" parent="."]
+color = Color(0.34, 0.23, 0.16, 1)
+polygon = PackedVector2Array(-28, -70, 20, -78, 26, -14, -22, -4)
+
+[node name="HingeTop" type="Polygon2D" parent="."]
+color = Color(0.2, 0.2, 0.22, 1)
+polygon = PackedVector2Array(-30, -72, -25, -72, -25, -66, -30, -66)
+
+[node name="Gap" type="Polygon2D" parent="."]
+color = Color(0.02, 0.02, 0.02, 0.6)
+polygon = PackedVector2Array(20, -78, 28, -73, 26, -14, 26, -20)

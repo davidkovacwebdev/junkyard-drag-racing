@@ -1,0 +1,42 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/building_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/building_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_roof_patched"]
+script = ExtResource("2")
+id = &"roof_patched"
+display_name = "Salvage Patch Roof"
+slot = 1
+
+[node name="PatchedRoof" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_roof_patched")
+
+[node name="PatchA" type="Polygon2D" parent="."]
+color = Color(0.58, 0.58, 0.6, 1)
+polygon = PackedVector2Array(-150, -204, -75, -204, -75, -180, -150, -180)
+
+[node name="PatchB" type="Polygon2D" parent="."]
+color = Color(0.45, 0.35, 0.3, 1)
+polygon = PackedVector2Array(-75, -210, 10, -210, 10, -180, -75, -180)
+
+[node name="PatchC" type="Polygon2D" parent="."]
+color = Color(0.35, 0.42, 0.3, 1)
+polygon = PackedVector2Array(10, -198, 80, -198, 80, -180, 10, -180)
+
+[node name="PatchD" type="Polygon2D" parent="."]
+color = Color(0.55, 0.3, 0.2, 1)
+polygon = PackedVector2Array(80, -206, 150, -206, 150, -180, 80, -180)
+
+[node name="SeamA" type="Polygon2D" parent="."]
+color = Color(0.15, 0.15, 0.16, 1)
+polygon = PackedVector2Array(-77, -210, -73, -210, -73, -180, -77, -180)
+
+[node name="SeamB" type="Polygon2D" parent="."]
+color = Color(0.15, 0.15, 0.16, 1)
+polygon = PackedVector2Array(8, -210, 12, -210, 12, -180, 8, -180)
+
+[node name="SeamC" type="Polygon2D" parent="."]
+color = Color(0.15, 0.15, 0.16, 1)
+polygon = PackedVector2Array(78, -210, 82, -210, 82, -180, 78, -180)

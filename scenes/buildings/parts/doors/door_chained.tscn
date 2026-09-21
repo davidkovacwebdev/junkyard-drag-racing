@@ -1,0 +1,46 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/building_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/building_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_door_chained"]
+script = ExtResource("2")
+id = &"door_chained"
+display_name = "Chained Door"
+slot = 2
+
+[node name="ChainedDoor" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_door_chained")
+
+[node name="Frame" type="Polygon2D" parent="."]
+color = Color(0.96, 0.93, 0.85, 1)
+polygon = PackedVector2Array(-28, -73, 28, -73, 28, 0, -28, 0)
+
+[node name="Panel" type="Polygon2D" parent="."]
+color = Color(0.33, 0.22, 0.16, 1)
+polygon = PackedVector2Array(-25, -70, 25, -70, 25, 0, -25, 0)
+
+[node name="ChainLink1" type="Polygon2D" parent="."]
+color = Color(0.55, 0.55, 0.58, 1)
+polygon = PackedVector2Array(-22, -58, -16, -58, -16, -52, -22, -52)
+
+[node name="ChainLink2" type="Polygon2D" parent="."]
+color = Color(0.55, 0.55, 0.58, 1)
+polygon = PackedVector2Array(-13, -48, -7, -48, -7, -42, -13, -42)
+
+[node name="ChainLink3" type="Polygon2D" parent="."]
+color = Color(0.55, 0.55, 0.58, 1)
+polygon = PackedVector2Array(-4, -38, 2, -38, 2, -32, -4, -32)
+
+[node name="ChainLink4" type="Polygon2D" parent="."]
+color = Color(0.55, 0.55, 0.58, 1)
+polygon = PackedVector2Array(5, -28, 11, -28, 11, -22, 5, -22)
+
+[node name="ChainLink5" type="Polygon2D" parent="."]
+color = Color(0.55, 0.55, 0.58, 1)
+polygon = PackedVector2Array(14, -18, 20, -18, 20, -12, 14, -12)
+
+[node name="Padlock" type="Polygon2D" parent="."]
+color = Color(0.75, 0.65, 0.2, 1)
+polygon = PackedVector2Array(-4, -14, 6, -14, 6, -4, -4, -4)

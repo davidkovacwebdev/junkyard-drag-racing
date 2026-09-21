@@ -1,0 +1,26 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/building_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/building_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_roof_peaked"]
+script = ExtResource("2")
+id = &"roof_peaked"
+display_name = "Peaked Roof"
+slot = 1
+
+[node name="PeakedRoof" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_roof_peaked")
+
+[node name="SlopeLeft" type="Polygon2D" parent="."]
+color = Color(0.35, 0.3, 0.28, 1)
+polygon = PackedVector2Array(-150, -180, 0, -240, 0, -180)
+
+[node name="SlopeRight" type="Polygon2D" parent="."]
+color = Color(0.28, 0.24, 0.22, 1)
+polygon = PackedVector2Array(0, -180, 0, -240, 150, -180)
+
+[node name="RidgeCap" type="Polygon2D" parent="."]
+color = Color(0.96, 0.93, 0.85, 1)
+polygon = PackedVector2Array(-6, -244, 6, -244, 6, -236, -6, -236)

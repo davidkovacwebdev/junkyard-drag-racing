@@ -1,0 +1,46 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/building_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/building_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_window_square"]
+script = ExtResource("2")
+id = &"window_square"
+display_name = "Square Windows"
+slot = 3
+
+[node name="SquareWindows" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_window_square")
+
+[node name="TrimLeft" type="Polygon2D" parent="."]
+color = Color(0.96, 0.93, 0.85, 1)
+polygon = PackedVector2Array(-79, -143, -41, -143, -41, -105, -79, -105)
+
+[node name="GlassLeft" type="Polygon2D" parent="."]
+color = Color(0.62, 0.79, 0.86, 1)
+polygon = PackedVector2Array(-76, -140, -44, -140, -44, -108, -76, -108)
+
+[node name="CrossLeftV" type="Polygon2D" parent="."]
+color = Color(0.96, 0.93, 0.85, 1)
+polygon = PackedVector2Array(-61.5, -140, -58.5, -140, -58.5, -108, -61.5, -108)
+
+[node name="CrossLeftH" type="Polygon2D" parent="."]
+color = Color(0.96, 0.93, 0.85, 1)
+polygon = PackedVector2Array(-76, -125.5, -44, -125.5, -44, -122.5, -76, -122.5)
+
+[node name="TrimRight" type="Polygon2D" parent="."]
+color = Color(0.96, 0.93, 0.85, 1)
+polygon = PackedVector2Array(41, -143, 79, -143, 79, -105, 41, -105)
+
+[node name="GlassRight" type="Polygon2D" parent="."]
+color = Color(0.62, 0.79, 0.86, 1)
+polygon = PackedVector2Array(44, -140, 76, -140, 76, -108, 44, -108)
+
+[node name="CrossRightV" type="Polygon2D" parent="."]
+color = Color(0.96, 0.93, 0.85, 1)
+polygon = PackedVector2Array(58.5, -140, 61.5, -140, 61.5, -108, 58.5, -108)
+
+[node name="CrossRightH" type="Polygon2D" parent="."]
+color = Color(0.96, 0.93, 0.85, 1)
+polygon = PackedVector2Array(44, -125.5, 76, -125.5, 76, -122.5, 44, -122.5)

@@ -1,0 +1,51 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/building_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/building_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_wall_tarp"]
+script = ExtResource("2")
+id = &"wall_tarp"
+display_name = "Tarp Shack Wall"
+slot = 0
+
+[node name="TarpWall" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_wall_tarp")
+footprint_size = Vector2(200, 180)
+
+[node name="FrameLeft" type="Polygon2D" parent="."]
+color = Color(0.35, 0.26, 0.16, 1)
+polygon = PackedVector2Array(-100, -180, -92, -180, -92, 0, -100, 0)
+
+[node name="FrameRight" type="Polygon2D" parent="."]
+color = Color(0.35, 0.26, 0.16, 1)
+polygon = PackedVector2Array(92, -180, 100, -180, 100, 0, 92, 0)
+
+[node name="Tarp" type="Polygon2D" parent="."]
+color = Color(0.16, 0.42, 0.55, 1)
+polygon = PackedVector2Array(-92, -178, 92, -178, 92, -2, -92, -2)
+
+[node name="WrinkleA" type="Polygon2D" parent="."]
+color = Color(0.22, 0.5, 0.63, 0.8)
+polygon = PackedVector2Array(-70, -178, -55, -178, -65, -2, -80, -2)
+
+[node name="WrinkleB" type="Polygon2D" parent="."]
+color = Color(0.1, 0.3, 0.4, 0.7)
+polygon = PackedVector2Array(10, -178, 25, -178, 15, -2, 0, -2)
+
+[node name="WrinkleC" type="Polygon2D" parent="."]
+color = Color(0.22, 0.5, 0.63, 0.7)
+polygon = PackedVector2Array(55, -178, 68, -178, 60, -2, 47, -2)
+
+[node name="GrommetA" type="Polygon2D" parent="."]
+color = Color(0.2, 0.2, 0.22, 1)
+polygon = PackedVector2Array(-68, -175, -62, -175, -62, -169, -68, -169)
+
+[node name="GrommetB" type="Polygon2D" parent="."]
+color = Color(0.2, 0.2, 0.22, 1)
+polygon = PackedVector2Array(-3, -175, 3, -175, 3, -169, -3, -169)
+
+[node name="GrommetC" type="Polygon2D" parent="."]
+color = Color(0.2, 0.2, 0.22, 1)
+polygon = PackedVector2Array(62, -175, 68, -175, 68, -169, 62, -169)

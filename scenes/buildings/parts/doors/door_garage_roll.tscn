@@ -1,0 +1,42 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/building_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/building_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_door_garage_roll"]
+script = ExtResource("2")
+id = &"door_garage_roll"
+display_name = "Roll-Up Garage Door"
+slot = 2
+
+[node name="GarageRollDoor" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_door_garage_roll")
+
+[node name="Frame" type="Polygon2D" parent="."]
+color = Color(0.4, 0.4, 0.42, 1)
+polygon = PackedVector2Array(-38, -88, 38, -88, 38, 0, -38, 0)
+
+[node name="Panel" type="Polygon2D" parent="."]
+color = Color(0.55, 0.55, 0.58, 1)
+polygon = PackedVector2Array(-35, -85, 35, -85, 35, 0, -35, 0)
+
+[node name="Slat1" type="Polygon2D" parent="."]
+color = Color(0.45, 0.45, 0.48, 1)
+polygon = PackedVector2Array(-35, -73, 35, -73, 35, -68, -35, -68)
+
+[node name="Slat2" type="Polygon2D" parent="."]
+color = Color(0.45, 0.45, 0.48, 1)
+polygon = PackedVector2Array(-35, -55, 35, -55, 35, -50, -35, -50)
+
+[node name="Slat3" type="Polygon2D" parent="."]
+color = Color(0.45, 0.45, 0.48, 1)
+polygon = PackedVector2Array(-35, -37, 35, -37, 35, -32, -35, -32)
+
+[node name="Slat4" type="Polygon2D" parent="."]
+color = Color(0.45, 0.45, 0.48, 1)
+polygon = PackedVector2Array(-35, -19, 35, -19, 35, -14, -35, -14)
+
+[node name="Handle" type="Polygon2D" parent="."]
+color = Color(0.2, 0.2, 0.22, 1)
+polygon = PackedVector2Array(-6, -45, 6, -45, 6, -41, -6, -41)

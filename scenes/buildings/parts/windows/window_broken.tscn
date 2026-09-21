@@ -1,0 +1,42 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/building_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/building_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_window_broken"]
+script = ExtResource("2")
+id = &"window_broken"
+display_name = "Broken Windows"
+slot = 3
+
+[node name="BrokenWindows" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_window_broken")
+
+[node name="TrimLeft" type="Polygon2D" parent="."]
+color = Color(0.7, 0.68, 0.63, 1)
+polygon = PackedVector2Array(-79, -143, -41, -143, -41, -105, -79, -105)
+
+[node name="GlassLeft" type="Polygon2D" parent="."]
+color = Color(0.4, 0.5, 0.52, 1)
+polygon = PackedVector2Array(-76, -140, -44, -140, -44, -108, -76, -108)
+
+[node name="ShardGapLeft" type="Polygon2D" parent="."]
+color = Color(0.08, 0.07, 0.06, 1)
+polygon = PackedVector2Array(-60, -140, -44, -136, -50, -120, -66, -122)
+
+[node name="CrackLeft" type="Polygon2D" parent="."]
+color = Color(0.15, 0.16, 0.16, 1)
+polygon = PackedVector2Array(-70, -108, -66, -114, -58, -112, -52, -120, -48, -117, -55, -108)
+
+[node name="TrimRight" type="Polygon2D" parent="."]
+color = Color(0.7, 0.68, 0.63, 1)
+polygon = PackedVector2Array(41, -143, 79, -143, 79, -105, 41, -105)
+
+[node name="GlassRight" type="Polygon2D" parent="."]
+color = Color(0.4, 0.5, 0.52, 1)
+polygon = PackedVector2Array(44, -140, 76, -140, 76, -108, 44, -108)
+
+[node name="CrackRight" type="Polygon2D" parent="."]
+color = Color(0.15, 0.16, 0.16, 1)
+polygon = PackedVector2Array(48, -138, 58, -128, 52, -122, 64, -114, 60, -110, 50, -117, 56, -126, 46, -134)

@@ -1,0 +1,39 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/building_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/building_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_wall_cracked_concrete"]
+script = ExtResource("2")
+id = &"wall_cracked_concrete"
+display_name = "Cracked Concrete Wall"
+slot = 0
+
+[node name="CrackedConcreteWall" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_wall_cracked_concrete")
+footprint_size = Vector2(230, 180)
+
+[node name="Body" type="Polygon2D" parent="."]
+color = Color(0.62, 0.61, 0.58, 1)
+polygon = PackedVector2Array(-115, -180, 115, -180, 115, 0, -115, 0)
+
+[node name="Skirt" type="Polygon2D" parent="."]
+color = Color(0.48, 0.47, 0.44, 1)
+polygon = PackedVector2Array(-115, -16, 115, -16, 115, 0, -115, 0)
+
+[node name="WaterStain1" type="Polygon2D" parent="."]
+color = Color(0.4, 0.4, 0.36, 0.45)
+polygon = PackedVector2Array(-40, -180, -18, -180, -26, -60, -34, -60)
+
+[node name="WaterStain2" type="Polygon2D" parent="."]
+color = Color(0.4, 0.4, 0.36, 0.35)
+polygon = PackedVector2Array(55, -180, 70, -180, 64, -100, 58, -100)
+
+[node name="Crack1" type="Polygon2D" parent="."]
+color = Color(0.35, 0.34, 0.32, 1)
+polygon = PackedVector2Array(-100, -60, -95, -50, -102, -35, -96, -20, -104, -4, -108, -4, -100, -22, -106, -36, -99, -51, -105, -60)
+
+[node name="Crack2" type="Polygon2D" parent="."]
+color = Color(0.35, 0.34, 0.32, 1)
+polygon = PackedVector2Array(80, -180, 85, -160, 78, -145, 84, -130, 80, -130, 73, -144, 81, -159, 75, -180)

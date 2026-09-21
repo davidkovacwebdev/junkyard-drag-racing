@@ -1,0 +1,43 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/building_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/building_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_wall_pallet"]
+script = ExtResource("2")
+id = &"wall_pallet"
+display_name = "Pallet Wall"
+slot = 0
+
+[node name="PalletWall" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_wall_pallet")
+footprint_size = Vector2(220, 180)
+
+[node name="Backing" type="Polygon2D" parent="."]
+color = Color(0.2, 0.19, 0.17, 1)
+polygon = PackedVector2Array(-110, -180, 110, -180, 110, 0, -110, 0)
+
+[node name="PostLeft" type="Polygon2D" parent="."]
+color = Color(0.42, 0.32, 0.2, 1)
+polygon = PackedVector2Array(-110, -180, -98, -180, -98, 0, -110, 0)
+
+[node name="PostRight" type="Polygon2D" parent="."]
+color = Color(0.42, 0.32, 0.2, 1)
+polygon = PackedVector2Array(98, -180, 110, -180, 110, 0, 98, 0)
+
+[node name="Plank1" type="Polygon2D" parent="."]
+color = Color(0.62, 0.48, 0.3, 1)
+polygon = PackedVector2Array(-98, -172, 98, -172, 98, -142, -98, -142)
+
+[node name="Plank2" type="Polygon2D" parent="."]
+color = Color(0.58, 0.44, 0.27, 1)
+polygon = PackedVector2Array(-98, -130, 98, -130, 98, -100, -98, -100)
+
+[node name="Plank3" type="Polygon2D" parent="."]
+color = Color(0.62, 0.48, 0.3, 1)
+polygon = PackedVector2Array(-98, -88, 98, -88, 98, -58, -98, -58)
+
+[node name="Plank4" type="Polygon2D" parent="."]
+color = Color(0.58, 0.44, 0.27, 1)
+polygon = PackedVector2Array(-98, -46, 98, -46, 98, -16, -98, -16)

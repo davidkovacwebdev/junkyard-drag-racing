@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/building_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/building_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_door_curtain_beads"]
+script = ExtResource("2")
+id = &"door_curtain_beads"
+display_name = "Bead Curtain Doorway"
+slot = 2
+
+[node name="BeadCurtainDoor" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_door_curtain_beads")
+
+[node name="Opening" type="Polygon2D" parent="."]
+color = Color(0.06, 0.06, 0.07, 1)
+polygon = PackedVector2Array(-28, -75, 28, -75, 28, 0, -28, 0)
+
+[node name="StrandA" type="Polygon2D" parent="."]
+color = Color(0.7, 0.3, 0.25, 1)
+polygon = PackedVector2Array(-22, -70, -18, -70, -18, -4, -22, -4)
+
+[node name="StrandB" type="Polygon2D" parent="."]
+color = Color(0.85, 0.65, 0.2, 1)
+polygon = PackedVector2Array(-11, -70, -7, -70, -7, -4, -11, -4)
+
+[node name="StrandC" type="Polygon2D" parent="."]
+color = Color(0.3, 0.55, 0.35, 1)
+polygon = PackedVector2Array(0, -70, 4, -70, 4, -4, 0, -4)
+
+[node name="StrandD" type="Polygon2D" parent="."]
+color = Color(0.85, 0.65, 0.2, 1)
+polygon = PackedVector2Array(11, -70, 15, -70, 15, -4, 11, -4)
+
+[node name="StrandE" type="Polygon2D" parent="."]
+color = Color(0.7, 0.3, 0.25, 1)
+polygon = PackedVector2Array(21, -70, 25, -70, 25, -4, 21, -4)

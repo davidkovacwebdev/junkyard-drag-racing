@@ -1,0 +1,51 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/building_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/building_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_wall_plywood"]
+script = ExtResource("2")
+id = &"wall_plywood"
+display_name = "Plywood Patchwork Wall"
+slot = 0
+
+[node name="PlywoodWall" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_wall_plywood")
+footprint_size = Vector2(210, 180)
+
+[node name="Body" type="Polygon2D" parent="."]
+color = Color(0.72, 0.62, 0.42, 1)
+polygon = PackedVector2Array(-105, -180, 105, -180, 105, 0, -105, 0)
+
+[node name="Patch" type="Polygon2D" parent="."]
+color = Color(0.58, 0.46, 0.3, 1)
+polygon = PackedVector2Array(-80, -140, -40, -140, -40, -90, -80, -90)
+
+[node name="Patch2" type="Polygon2D" parent="."]
+color = Color(0.62, 0.52, 0.34, 1)
+polygon = PackedVector2Array(50, -170, 90, -170, 90, -120, 50, -120)
+
+[node name="Seam1" type="Polygon2D" parent="."]
+color = Color(0.42, 0.33, 0.21, 1)
+polygon = PackedVector2Array(-53, -180, -51, -180, -51, 0, -53, 0)
+
+[node name="Seam2" type="Polygon2D" parent="."]
+color = Color(0.42, 0.33, 0.21, 1)
+polygon = PackedVector2Array(-18, -180, -16, -180, -16, 0, -18, 0)
+
+[node name="Seam3" type="Polygon2D" parent="."]
+color = Color(0.42, 0.33, 0.21, 1)
+polygon = PackedVector2Array(18, -180, 20, -180, 20, 0, 18, 0)
+
+[node name="Seam4" type="Polygon2D" parent="."]
+color = Color(0.42, 0.33, 0.21, 1)
+polygon = PackedVector2Array(53, -180, 55, -180, 55, 0, 53, 0)
+
+[node name="NailA" type="Polygon2D" parent="."]
+color = Color(0.25, 0.25, 0.26, 1)
+polygon = PackedVector2Array(-78, -135, -75, -135, -75, -132, -78, -132)
+
+[node name="NailB" type="Polygon2D" parent="."]
+color = Color(0.25, 0.25, 0.26, 1)
+polygon = PackedVector2Array(-45, -96, -42, -96, -42, -93, -45, -93)

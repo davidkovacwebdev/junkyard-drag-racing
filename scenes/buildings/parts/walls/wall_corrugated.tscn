@@ -1,0 +1,51 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/building_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/building_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_wall_corrugated"]
+script = ExtResource("2")
+id = &"wall_corrugated"
+display_name = "Corrugated Tin Wall"
+slot = 0
+
+[node name="CorrugatedWall" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_wall_corrugated")
+footprint_size = Vector2(230, 180)
+
+[node name="Body" type="Polygon2D" parent="."]
+color = Color(0.58, 0.58, 0.6, 1)
+polygon = PackedVector2Array(-115, -180, 115, -180, 115, 0, -115, 0)
+
+[node name="Ridge1" type="Polygon2D" parent="."]
+color = Color(0.68, 0.68, 0.7, 1)
+polygon = PackedVector2Array(-92, -180, -86, -180, -86, 0, -92, 0)
+
+[node name="Ridge2" type="Polygon2D" parent="."]
+color = Color(0.68, 0.68, 0.7, 1)
+polygon = PackedVector2Array(-55, -180, -49, -180, -49, 0, -55, 0)
+
+[node name="Ridge3" type="Polygon2D" parent="."]
+color = Color(0.68, 0.68, 0.7, 1)
+polygon = PackedVector2Array(-18, -180, -12, -180, -12, 0, -18, 0)
+
+[node name="Ridge4" type="Polygon2D" parent="."]
+color = Color(0.68, 0.68, 0.7, 1)
+polygon = PackedVector2Array(19, -180, 25, -180, 25, 0, 19, 0)
+
+[node name="Ridge5" type="Polygon2D" parent="."]
+color = Color(0.68, 0.68, 0.7, 1)
+polygon = PackedVector2Array(56, -180, 62, -180, 62, 0, 56, 0)
+
+[node name="Ridge6" type="Polygon2D" parent="."]
+color = Color(0.68, 0.68, 0.7, 1)
+polygon = PackedVector2Array(93, -180, 99, -180, 99, 0, 93, 0)
+
+[node name="RustStreak1" type="Polygon2D" parent="."]
+color = Color(0.5, 0.28, 0.15, 0.75)
+polygon = PackedVector2Array(-72, -180, -64, -180, -68, -30, -76, -30)
+
+[node name="RustStreak2" type="Polygon2D" parent="."]
+color = Color(0.5, 0.28, 0.15, 0.7)
+polygon = PackedVector2Array(38, -140, 46, -140, 50, -20, 34, -20)

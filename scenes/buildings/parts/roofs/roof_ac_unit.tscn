@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/building_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/building_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_roof_ac_unit"]
+script = ExtResource("2")
+id = &"roof_ac_unit"
+display_name = "Roof With AC Unit"
+slot = 1
+
+[node name="AcUnitRoof" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_roof_ac_unit")
+
+[node name="Band" type="Polygon2D" parent="."]
+color = Color(0.3, 0.3, 0.33, 1)
+polygon = PackedVector2Array(-150, -204, 150, -204, 150, -180, -150, -180)
+
+[node name="Fascia" type="Polygon2D" parent="."]
+color = Color(0.96, 0.93, 0.85, 1)
+polygon = PackedVector2Array(-150, -184, 150, -184, 150, -180, -150, -180)
+
+[node name="AcBody" type="Polygon2D" parent="."]
+color = Color(0.68, 0.7, 0.68, 1)
+polygon = PackedVector2Array(-60, -234, 10, -234, 10, -204, -60, -204)
+
+[node name="AcVentA" type="Polygon2D" parent="."]
+color = Color(0.4, 0.42, 0.4, 1)
+polygon = PackedVector2Array(-54, -228, -14, -228, -14, -224, -54, -224)
+
+[node name="AcVentB" type="Polygon2D" parent="."]
+color = Color(0.4, 0.42, 0.4, 1)
+polygon = PackedVector2Array(-54, -218, -14, -218, -14, -214, -54, -214)
+
+[node name="RustDrip" type="Polygon2D" parent="."]
+color = Color(0.5, 0.28, 0.15, 0.6)
+polygon = PackedVector2Array(-30, -204, -22, -204, -25, -180, -33, -180)

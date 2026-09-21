@@ -1,0 +1,46 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/building_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/building_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_roof_corrugated_tin"]
+script = ExtResource("2")
+id = &"roof_corrugated_tin"
+display_name = "Corrugated Tin Roof"
+slot = 1
+
+[node name="CorrugatedTinRoof" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_roof_corrugated_tin")
+
+[node name="Band" type="Polygon2D" parent="."]
+color = Color(0.6, 0.62, 0.6, 1)
+polygon = PackedVector2Array(-155, -206, 155, -206, 155, -180, -155, -180)
+
+[node name="Stripe1" type="Polygon2D" parent="."]
+color = Color(0.72, 0.74, 0.72, 1)
+polygon = PackedVector2Array(-140, -206, -132, -206, -132, -180, -140, -180)
+
+[node name="Stripe2" type="Polygon2D" parent="."]
+color = Color(0.72, 0.74, 0.72, 1)
+polygon = PackedVector2Array(-90, -206, -82, -206, -82, -180, -90, -180)
+
+[node name="Stripe3" type="Polygon2D" parent="."]
+color = Color(0.72, 0.74, 0.72, 1)
+polygon = PackedVector2Array(-40, -206, -32, -206, -32, -180, -40, -180)
+
+[node name="Stripe4" type="Polygon2D" parent="."]
+color = Color(0.72, 0.74, 0.72, 1)
+polygon = PackedVector2Array(10, -206, 18, -206, 18, -180, 10, -180)
+
+[node name="Stripe5" type="Polygon2D" parent="."]
+color = Color(0.72, 0.74, 0.72, 1)
+polygon = PackedVector2Array(60, -206, 68, -206, 68, -180, 60, -180)
+
+[node name="Stripe6" type="Polygon2D" parent="."]
+color = Color(0.72, 0.74, 0.72, 1)
+polygon = PackedVector2Array(110, -206, 118, -206, 118, -180, 110, -180)
+
+[node name="RustDrip" type="Polygon2D" parent="."]
+color = Color(0.5, 0.28, 0.15, 0.7)
+polygon = PackedVector2Array(-10, -206, 0, -206, -4, -180, -14, -180)

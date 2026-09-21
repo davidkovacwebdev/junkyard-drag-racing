@@ -1,0 +1,34 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/building_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/building_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_decoration_warning_sign"]
+script = ExtResource("2")
+id = &"decoration_warning_sign"
+display_name = "Warning Sign"
+slot = 4
+
+[node name="WarningSign" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_decoration_warning_sign")
+
+[node name="Post" type="Polygon2D" parent="."]
+color = Color(0.4, 0.38, 0.34, 1)
+polygon = PackedVector2Array(90, -100, 96, -100, 96, 0, 90, 0)
+
+[node name="SignBoard" type="Polygon2D" parent="."]
+color = Color(0.95, 0.75, 0.1, 1)
+polygon = PackedVector2Array(65, -138, 121, -138, 121, -98, 65, -98)
+
+[node name="SignBorder" type="Polygon2D" parent="."]
+color = Color(0.15, 0.14, 0.13, 1)
+polygon = PackedVector2Array(65, -138, 121, -138, 121, -132, 65, -132)
+
+[node name="Triangle" type="Polygon2D" parent="."]
+color = Color(0.15, 0.14, 0.13, 1)
+polygon = PackedVector2Array(93, -128, 106, -106, 80, -106)
+
+[node name="Bang" type="Polygon2D" parent="."]
+color = Color(0.95, 0.75, 0.1, 1)
+polygon = PackedVector2Array(91, -122, 95, -122, 94, -113, 92, -113)

@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/building_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/building_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_window_boarded"]
+script = ExtResource("2")
+id = &"window_boarded"
+display_name = "Boarded-Up Windows"
+slot = 3
+
+[node name="BoardedWindows" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_window_boarded")
+
+[node name="OpeningLeft" type="Polygon2D" parent="."]
+color = Color(0.08, 0.07, 0.06, 1)
+polygon = PackedVector2Array(-79, -143, -41, -143, -41, -105, -79, -105)
+
+[node name="PlankLeftA" type="Polygon2D" parent="."]
+color = Color(0.56, 0.43, 0.27, 1)
+polygon = PackedVector2Array(-79, -137, -70, -143, -41, -117, -50, -111)
+
+[node name="PlankLeftB" type="Polygon2D" parent="."]
+color = Color(0.5, 0.38, 0.23, 1)
+polygon = PackedVector2Array(-79, -117, -70, -123, -41, -111, -50, -105)
+
+[node name="OpeningRight" type="Polygon2D" parent="."]
+color = Color(0.08, 0.07, 0.06, 1)
+polygon = PackedVector2Array(41, -143, 79, -143, 79, -105, 41, -105)
+
+[node name="PlankRightA" type="Polygon2D" parent="."]
+color = Color(0.56, 0.43, 0.27, 1)
+polygon = PackedVector2Array(41, -137, 50, -143, 79, -117, 70, -111)
+
+[node name="PlankRightB" type="Polygon2D" parent="."]
+color = Color(0.5, 0.38, 0.23, 1)
+polygon = PackedVector2Array(41, -117, 50, -123, 79, -111, 70, -105)

@@ -1,0 +1,54 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/building_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/building_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_window_barred"]
+script = ExtResource("2")
+id = &"window_barred"
+display_name = "Barred Windows"
+slot = 3
+
+[node name="BarredWindows" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_window_barred")
+
+[node name="TrimLeft" type="Polygon2D" parent="."]
+color = Color(0.7, 0.68, 0.63, 1)
+polygon = PackedVector2Array(-79, -143, -41, -143, -41, -105, -79, -105)
+
+[node name="GlassLeft" type="Polygon2D" parent="."]
+color = Color(0.55, 0.7, 0.75, 1)
+polygon = PackedVector2Array(-76, -140, -44, -140, -44, -108, -76, -108)
+
+[node name="BarL1" type="Polygon2D" parent="."]
+color = Color(0.18, 0.18, 0.2, 1)
+polygon = PackedVector2Array(-68, -140, -66, -140, -66, -108, -68, -108)
+
+[node name="BarL2" type="Polygon2D" parent="."]
+color = Color(0.18, 0.18, 0.2, 1)
+polygon = PackedVector2Array(-61, -140, -59, -140, -59, -108, -61, -108)
+
+[node name="BarL3" type="Polygon2D" parent="."]
+color = Color(0.18, 0.18, 0.2, 1)
+polygon = PackedVector2Array(-54, -140, -52, -140, -52, -108, -54, -108)
+
+[node name="TrimRight" type="Polygon2D" parent="."]
+color = Color(0.7, 0.68, 0.63, 1)
+polygon = PackedVector2Array(41, -143, 79, -143, 79, -105, 41, -105)
+
+[node name="GlassRight" type="Polygon2D" parent="."]
+color = Color(0.55, 0.7, 0.75, 1)
+polygon = PackedVector2Array(44, -140, 76, -140, 76, -108, 44, -108)
+
+[node name="BarR1" type="Polygon2D" parent="."]
+color = Color(0.18, 0.18, 0.2, 1)
+polygon = PackedVector2Array(52, -140, 54, -140, 54, -108, 52, -108)
+
+[node name="BarR2" type="Polygon2D" parent="."]
+color = Color(0.18, 0.18, 0.2, 1)
+polygon = PackedVector2Array(59, -140, 61, -140, 61, -108, 59, -108)
+
+[node name="BarR3" type="Polygon2D" parent="."]
+color = Color(0.18, 0.18, 0.2, 1)
+polygon = PackedVector2Array(66, -140, 68, -140, 68, -108, 66, -108)

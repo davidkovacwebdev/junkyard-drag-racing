@@ -1,0 +1,39 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/building_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/building_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_wall_cinderblock"]
+script = ExtResource("2")
+id = &"wall_cinderblock"
+display_name = "Cinderblock Wall"
+slot = 0
+
+[node name="CinderblockWall" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_wall_cinderblock")
+footprint_size = Vector2(240, 180)
+
+[node name="Body" type="Polygon2D" parent="."]
+color = Color(0.55, 0.54, 0.52, 1)
+polygon = PackedVector2Array(-120, -180, 120, -180, 120, 0, -120, 0)
+
+[node name="Mortar1" type="Polygon2D" parent="."]
+color = Color(0.68, 0.67, 0.65, 1)
+polygon = PackedVector2Array(-120, -136, 120, -136, 120, -132, -120, -132)
+
+[node name="Mortar2" type="Polygon2D" parent="."]
+color = Color(0.68, 0.67, 0.65, 1)
+polygon = PackedVector2Array(-120, -92, 120, -92, 120, -88, -120, -88)
+
+[node name="Mortar3" type="Polygon2D" parent="."]
+color = Color(0.68, 0.67, 0.65, 1)
+polygon = PackedVector2Array(-120, -48, 120, -48, 120, -44, -120, -44)
+
+[node name="Skirt" type="Polygon2D" parent="."]
+color = Color(0.42, 0.41, 0.4, 1)
+polygon = PackedVector2Array(-120, -16, 120, -16, 120, 0, -120, 0)
+
+[node name="WaterStain" type="Polygon2D" parent="."]
+color = Color(0.38, 0.4, 0.36, 0.5)
+polygon = PackedVector2Array(-70, -136, -50, -136, -56, -60, -66, -60)

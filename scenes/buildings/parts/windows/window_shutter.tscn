@@ -1,0 +1,54 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/building_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/building_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_window_shutter"]
+script = ExtResource("2")
+id = &"window_shutter"
+display_name = "Shuttered Windows"
+slot = 3
+
+[node name="ShutterWindows" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_window_shutter")
+
+[node name="TrimLeft" type="Polygon2D" parent="."]
+color = Color(0.6, 0.58, 0.53, 1)
+polygon = PackedVector2Array(-79, -143, -41, -143, -41, -105, -79, -105)
+
+[node name="ShutterLeft" type="Polygon2D" parent="."]
+color = Color(0.36, 0.4, 0.36, 1)
+polygon = PackedVector2Array(-76, -140, -44, -140, -44, -108, -76, -108)
+
+[node name="SlatL1" type="Polygon2D" parent="."]
+color = Color(0.28, 0.32, 0.28, 1)
+polygon = PackedVector2Array(-76, -132, -44, -132, -44, -129, -76, -129)
+
+[node name="SlatL2" type="Polygon2D" parent="."]
+color = Color(0.28, 0.32, 0.28, 1)
+polygon = PackedVector2Array(-76, -123, -44, -123, -44, -120, -76, -120)
+
+[node name="SlatL3" type="Polygon2D" parent="."]
+color = Color(0.28, 0.32, 0.28, 1)
+polygon = PackedVector2Array(-76, -114, -44, -114, -44, -111, -76, -111)
+
+[node name="TrimRight" type="Polygon2D" parent="."]
+color = Color(0.6, 0.58, 0.53, 1)
+polygon = PackedVector2Array(41, -143, 79, -143, 79, -105, 41, -105)
+
+[node name="ShutterRight" type="Polygon2D" parent="."]
+color = Color(0.36, 0.4, 0.36, 1)
+polygon = PackedVector2Array(44, -140, 76, -140, 76, -108, 44, -108)
+
+[node name="SlatR1" type="Polygon2D" parent="."]
+color = Color(0.28, 0.32, 0.28, 1)
+polygon = PackedVector2Array(44, -132, 76, -132, 76, -129, 44, -129)
+
+[node name="SlatR2" type="Polygon2D" parent="."]
+color = Color(0.28, 0.32, 0.28, 1)
+polygon = PackedVector2Array(44, -123, 76, -123, 76, -120, 44, -120)
+
+[node name="SlatR3" type="Polygon2D" parent="."]
+color = Color(0.28, 0.32, 0.28, 1)
+polygon = PackedVector2Array(44, -114, 76, -114, 76, -111, 44, -111)

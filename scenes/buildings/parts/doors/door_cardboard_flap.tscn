@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/building_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/building_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_door_cardboard_flap"]
+script = ExtResource("2")
+id = &"door_cardboard_flap"
+display_name = "Cardboard Flap Door"
+slot = 2
+
+[node name="CardboardFlapDoor" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_door_cardboard_flap")
+
+[node name="Opening" type="Polygon2D" parent="."]
+color = Color(0.06, 0.06, 0.07, 1)
+polygon = PackedVector2Array(-27, -70, 27, -70, 27, 0, -27, 0)
+
+[node name="Flap" type="Polygon2D" parent="."]
+color = Color(0.66, 0.5, 0.32, 1)
+polygon = PackedVector2Array(-27, -68, 24, -70, 27, -30, -25, -22, -20, 4, -27, 2)
+
+[node name="TapeA" type="Polygon2D" parent="."]
+color = Color(0.75, 0.73, 0.68, 0.85)
+polygon = PackedVector2Array(-15, -68, -9, -68, -12, -20, -18, -20)
+
+[node name="TapeB" type="Polygon2D" parent="."]
+color = Color(0.75, 0.73, 0.68, 0.85)
+polygon = PackedVector2Array(6, -69, 12, -69, 15, -25, 9, -25)

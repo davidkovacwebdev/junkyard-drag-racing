@@ -1,0 +1,26 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/building_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/building_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_decoration_pipe"]
+script = ExtResource("2")
+id = &"decoration_pipe"
+display_name = "Exterior Pipe"
+slot = 4
+
+[node name="ExteriorPipe" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_decoration_pipe")
+
+[node name="Pipe" type="Polygon2D" parent="."]
+color = Color(0.3, 0.32, 0.35, 1)
+polygon = PackedVector2Array(-100, -175, -88, -175, -88, 0, -100, 0)
+
+[node name="Bracket1" type="Polygon2D" parent="."]
+color = Color(0.2, 0.21, 0.23, 1)
+polygon = PackedVector2Array(-104, -150, -84, -150, -84, -144, -104, -144)
+
+[node name="Bracket2" type="Polygon2D" parent="."]
+color = Color(0.2, 0.21, 0.23, 1)
+polygon = PackedVector2Array(-104, -60, -84, -60, -84, -54, -104, -54)

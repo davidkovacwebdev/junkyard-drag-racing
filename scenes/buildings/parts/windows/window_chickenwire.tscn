@@ -1,0 +1,54 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/building_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/building_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_window_chickenwire"]
+script = ExtResource("2")
+id = &"window_chickenwire"
+display_name = "Chicken-Wire Windows"
+slot = 3
+
+[node name="ChickenwireWindows" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_window_chickenwire")
+
+[node name="TrimLeft" type="Polygon2D" parent="."]
+color = Color(0.7, 0.68, 0.63, 1)
+polygon = PackedVector2Array(-79, -143, -41, -143, -41, -105, -79, -105)
+
+[node name="GlassLeft" type="Polygon2D" parent="."]
+color = Color(0.55, 0.65, 0.6, 0.8)
+polygon = PackedVector2Array(-76, -140, -44, -140, -44, -108, -76, -108)
+
+[node name="WireDiagLeftA" type="Polygon2D" parent="."]
+color = Color(0.3, 0.3, 0.28, 0.7)
+polygon = PackedVector2Array(-76, -140, -73, -140, -44, -111, -47, -108)
+
+[node name="WireDiagLeftB" type="Polygon2D" parent="."]
+color = Color(0.3, 0.3, 0.28, 0.7)
+polygon = PackedVector2Array(-63, -140, -60, -140, -44, -124, -44, -121)
+
+[node name="WireDiagLeftC" type="Polygon2D" parent="."]
+color = Color(0.3, 0.3, 0.28, 0.7)
+polygon = PackedVector2Array(-76, -125, -76, -122, -60, -108, -63, -108)
+
+[node name="TrimRight" type="Polygon2D" parent="."]
+color = Color(0.7, 0.68, 0.63, 1)
+polygon = PackedVector2Array(41, -143, 79, -143, 79, -105, 41, -105)
+
+[node name="GlassRight" type="Polygon2D" parent="."]
+color = Color(0.55, 0.65, 0.6, 0.8)
+polygon = PackedVector2Array(44, -140, 76, -140, 76, -108, 44, -108)
+
+[node name="WireDiagRightA" type="Polygon2D" parent="."]
+color = Color(0.3, 0.3, 0.28, 0.7)
+polygon = PackedVector2Array(44, -140, 47, -140, 76, -111, 73, -108)
+
+[node name="WireDiagRightB" type="Polygon2D" parent="."]
+color = Color(0.3, 0.3, 0.28, 0.7)
+polygon = PackedVector2Array(57, -140, 60, -140, 76, -124, 76, -121)
+
+[node name="WireDiagRightC" type="Polygon2D" parent="."]
+color = Color(0.3, 0.3, 0.28, 0.7)
+polygon = PackedVector2Array(44, -125, 44, -122, 60, -108, 57, -108)

@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/building_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/building_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_roof_barrels"]
+script = ExtResource("2")
+id = &"roof_barrels"
+display_name = "Roof With Stacked Barrels"
+slot = 1
+
+[node name="BarrelRoof" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_roof_barrels")
+
+[node name="Band" type="Polygon2D" parent="."]
+color = Color(0.27, 0.27, 0.31, 1)
+polygon = PackedVector2Array(-150, -204, 150, -204, 150, -180, -150, -180)
+
+[node name="Fascia" type="Polygon2D" parent="."]
+color = Color(0.96, 0.93, 0.85, 1)
+polygon = PackedVector2Array(-150, -184, 150, -184, 150, -180, -150, -180)
+
+[node name="BarrelBlue" type="Polygon2D" parent="."]
+color = Color(0.16, 0.35, 0.5, 1)
+polygon = PackedVector2Array(-110, -244, -78, -244, -78, -204, -110, -204)
+
+[node name="BarrelBlueBand" type="Polygon2D" parent="."]
+color = Color(0.1, 0.24, 0.36, 1)
+polygon = PackedVector2Array(-110, -228, -78, -228, -78, -224, -110, -224)
+
+[node name="BarrelRust" type="Polygon2D" parent="."]
+color = Color(0.55, 0.32, 0.18, 1)
+polygon = PackedVector2Array(-70, -238, -42, -238, -42, -204, -70, -204)
+
+[node name="BarrelRustBand" type="Polygon2D" parent="."]
+color = Color(0.4, 0.22, 0.12, 1)
+polygon = PackedVector2Array(-70, -224, -42, -224, -42, -220, -70, -220)
