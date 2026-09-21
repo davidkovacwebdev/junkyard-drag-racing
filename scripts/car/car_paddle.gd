@@ -72,14 +72,39 @@ var _wobble_target: float = 0.0
 var _wobble_timer: float = 0.0
 var _intro: float = 0.0
 
+## ---- Physics-free preview (the world map's CarView) --------------------
+## A race paddle reads engine power for its cadence (see the class docs), but
+## the map's car has no engine and no physics at all. Out there the car's own
+## movement sets the beat instead: one full back-and-forth per
+## `stroke_distance` pixels travelled, so it rows in proportion to the ground
+## it covers and settles to hanging straight down the moment it stops.
+
+## World pixels of travel per full stroke on the map. Tuned to about the
+## starter V6's race cadence (~1.4 strokes a second flat out).
+@export var stroke_distance: float = 300.0
+
+## Preview-only swing state, deliberately kept apart from the physics
+## `_phase`/`_amp` so showing the car on the map can't disturb a race.
+## `_visual_amp` is how much of the full swing to show: 0 hangs the blade
+## straight down, 1 gives it the whole arc.
+var _visual_phase: float = 0.0
+var _visual_amp: float = 0.0
+
 func _ready() -> void:
 	super()
 	_rng.randomize()
-	# Start mid-swing so a car's paddles never row in lockstep.
+	# Start mid-swing so a car's paddles never row in lockstep — true of the
+	# map's preview too, or a two-paddle car would row like a machine.
 	_phase = _rng.randf() * TAU
+	_visual_phase = _rng.randf() * TAU
 	_wobble_target = _rng.randf_range(-wobble, wobble)
 
 func _integrate_forces(state: PhysicsDirectBodyState2D) -> void:
+	# Frozen = decoration in a preview (the world map's CarView). The swing
+	# belongs to animate_visual() there, so don't read engine power that isn't
+	# coming and park the blade back at 0 underneath it.
+	if freeze:
+		return
 	var step := state.get_step()
 
 	if target_angular_velocity == 0.0:
@@ -136,3 +161,17 @@ func _integrate_forces(state: PhysicsDirectBodyState2D) -> void:
 		# centre of mass, so the car noses up on each power stroke.
 		var blade_world: Vector2 = state.transform * Vector2(0.0, 25.0)
 		chassis.apply_force(push, blade_world - chassis.global_position)
+
+## Overrides CarWheel.animate_visual: a paddle doesn't roll, it rows. Distance
+## converted straight into stroke phase means the cadence follows the car's
+## speed for free, and the blade is always at a believable point of its arc
+## rather than mid-turn like a wheel would be.
+func animate_visual(distance: float, delta: float) -> void:
+	var moving := absf(distance) > 0.0001
+	if moving:
+		_visual_phase = fmod(_visual_phase + distance / maxf(stroke_distance, 1.0) * TAU, TAU)
+	# Ease in and out over intro_time, sharing the race rig's meaning for it: a
+	# set-off doesn't snap the blade into full swing, and a stop parks it back
+	# at hanging straight down instead of freezing it mid-stroke.
+	_visual_amp = move_toward(_visual_amp, 1.0 if moving else 0.0, delta / maxf(intro_time, 0.001))
+	rotation = sin(_visual_phase) * swing_angle * _visual_amp

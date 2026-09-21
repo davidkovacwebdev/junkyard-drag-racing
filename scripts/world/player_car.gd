@@ -34,6 +34,7 @@ var _test_pressed_last: bool = false
 var _holding_target: Object = null
 var _hold_progress: float = 0.0
 
+@onready var _visual: CarView = $Visual as CarView
 @onready var _interaction_zone: Area2D = $InteractionZone
 @onready var _tooltip_label: Label = $UI/TooltipLabel
 @onready var _hold_bar_bg: Control = $UI/HoldBarBg
@@ -48,7 +49,7 @@ func _ready() -> void:
 	_road_network = _resolve_roads()
 	var car := Inventory.get_selected_car()
 	if car != null:
-		$Visual.build_from(car)
+		_visual.build_from(car)
 	# Coming back from a place (garage, drag strip race): reappear where we
 	# left the map instead of at the scene's default spawn.
 	if WorldState.has_player_position:
@@ -126,7 +127,7 @@ func _physics_process(delta: float) -> void:
 		_facing_right = true
 	elif input_dir.x < 0.0:
 		_facing_right = false
-	$Visual.scale.x = 1.0 if _facing_right else -1.0
+	_visual.scale.x = 1.0 if _facing_right else -1.0
 
 	# One on-road check feeds both multipliers, rather than querying the
 	# road network twice for the same answer.
@@ -140,6 +141,16 @@ func _physics_process(delta: float) -> void:
 	var accel_rate := (acceleration if input_dir != Vector2.ZERO else friction) * handling_multiplier
 	velocity = velocity.move_toward(target_velocity, accel_rate * delta)
 	move_and_slide()
+
+	# The map car has no physics at all, so its wheels are animated by hand
+	# from the ground it just covered. Each wheel decides what that means — a
+	# plain one rolls, a paddle swings (see CarWheel.animate_visual).
+	# move_and_slide() has already trimmed velocity for anything we slid
+	# against, so the wheels stop turning against a wall. Signed for facing
+	# because the facing flip is a scale.x mirror, which would otherwise make
+	# a rolling wheel look like it's spinning backwards.
+	var facing_sign := 1.0 if _facing_right else -1.0
+	_visual.animate_wheels(velocity.x * delta * facing_sign, delta)
 
 	# Keep the saved spot current so entering any place (or any other scene
 	# change) returns us to exactly here.

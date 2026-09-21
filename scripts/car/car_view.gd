@@ -89,8 +89,30 @@ func build_from(car: CarModelData) -> void:
 func get_wheel_mounts() -> Array[Vector2]:
 	return _mounts_local.duplicate()
 
+## Animates every wheel over `distance` world pixels of travel along the car's
+## facing: positive moves the car toward its facing (+x) side, negative
+## reverses. No physics happens in the map car, so this is what sells the
+## motion.
+##
+## The wheels animate themselves — this just feeds them the movement, looked
+## up by name so a wheel scene only has to implement `animate_visual(distance,
+## delta)` to bring itself to life (a plain wheel rolls, a paddle swings).
+## Nothing here assumes it knows how a given part moves.
+##
+## The facing flip is a `Visual.scale.x = -1` mirror, which also flips any
+## wheel's on-screen motion, so the caller passes velocity already signed for
+## facing and every wheel reads as moving the right way from either direction.
+func animate_wheels(distance: float, delta: float) -> void:
+	for wheel in _wheels:
+		if wheel.has_method("animate_visual"):
+			wheel.call("animate_visual", distance, delta)
+
 func _clear() -> void:
 	for child in _fit.get_children():
+		# Detach as well as free: queue_free() leaves the node in the tree
+		# until the end of the frame, and _apply_fit() measures these children
+		# to size the fit — so leaving the old car in place would measure it.
+		_fit.remove_child(child)
 		child.queue_free()
 	_body = null
 	_wheels.clear()
@@ -116,9 +138,9 @@ func _neutralize_physics(node: Node) -> void:
 func _apply_fit(raw_mounts: Array[Vector2]) -> void:
 	_fit.scale = Vector2.ONE
 	_fit.position = Vector2.ZERO
-	var points := PackedVector2Array()
-	_gather_points(_fit, points)
-	var bounds := _points_bounds(points)
+	# PartScale.measure_bounds measures a part the same way the wheels measure
+	# their own rolling radius, so there's one answer to "how big is this art".
+	var bounds := PartScale.measure_bounds(_fit)
 	var scale := 1.0
 	if auto_fit_width > 0.0 and bounds.size.x > 0.0:
 		scale = auto_fit_width / bounds.size.x
@@ -129,29 +151,6 @@ func _apply_fit(raw_mounts: Array[Vector2]) -> void:
 	for m in raw_mounts:
 		_mounts_local.append(_fit.position + m * scale)
 	_engine_mount_local = _fit.position + _engine_mount_raw * scale
-
-func _points_bounds(points: PackedVector2Array) -> Rect2:
-	var r := Rect2()
-	var has := false
-	for p in points:
-		if has:
-			r = r.expand(p)
-		else:
-			r = Rect2(p, Vector2.ZERO)
-			has = true
-	return r
-
-func _gather_points(node: Node, out: PackedVector2Array) -> void:
-	_gather_recursive(node, Transform2D.IDENTITY, out)
-
-func _gather_recursive(node: Node, xform: Transform2D, out: PackedVector2Array) -> void:
-	if node is Node2D:
-		xform = xform * node.get_transform()
-	if node is Polygon2D:
-		for p in node.polygon:
-			out.append(xform * p)
-	for child in node.get_children():
-		_gather_recursive(child, xform, out)
 
 func _draw() -> void:
 	match highlight:
