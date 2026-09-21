@@ -20,6 +20,9 @@ extends CharacterBody2D
 ## sand instead of the crisp, immediate response pavement gives.
 @export var on_road_handling_multiplier: float = 1.0
 @export var off_road_handling_multiplier: float = 0.5
+## Top speed multiplier while Shift is held, stacking on top of the
+## on/off-road multiplier above.
+@export var sprint_speed_multiplier: float = 3.0
 ## Same convention as TrashSpawner.roads_path: the exported path first,
 ## falling back to searching the scene for any RoadNetwork if it doesn't
 ## resolve (e.g. this scene got reparented).
@@ -136,6 +139,8 @@ func _physics_process(delta: float) -> void:
 	var target_velocity := Vector2.ZERO
 	if input_dir != Vector2.ZERO:
 		var speed_multiplier := on_road_speed_multiplier if on_road else off_road_speed_multiplier
+		if Input.is_physical_key_pressed(KEY_SHIFT):
+			speed_multiplier *= sprint_speed_multiplier
 		target_velocity = input_dir.normalized() * max_speed * speed_multiplier
 	var handling_multiplier := on_road_handling_multiplier if on_road else off_road_handling_multiplier
 	var accel_rate := (acceleration if input_dir != Vector2.ZERO else friction) * handling_multiplier
