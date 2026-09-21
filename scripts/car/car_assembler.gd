@@ -107,8 +107,11 @@ static func assemble(body_scene: PackedScene, wheel_scenes: Array[PackedScene], 
 	result.engine = engine_instance
 	return result
 
+## The part's own art colour, taken off its first Polygon2D. Nested search on
+## purpose: the race harness reparents a part's art under a wrapper node, and
+## the colour is read again later, when a part shatters.
 static func _get_part_color(node: Node) -> Color:
-	for child in node.get_children():
+	for child in node.find_children("*", "Polygon2D", true, false):
 		if child is Polygon2D:
-			return child.color
+			return (child as Polygon2D).color
 	return Color(0.5, 0.5, 0.5, 1.0)
