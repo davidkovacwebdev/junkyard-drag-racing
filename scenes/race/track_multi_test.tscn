@@ -1,0 +1,76 @@
+[gd_scene load_steps=3 format=3]
+
+[sub_resource type="RectangleShape2D" id="Shape_floor"]
+size = Vector2(6800, 60)
+
+[sub_resource type="RectangleShape2D" id="Shape_wall"]
+size = Vector2(100, 980)
+
+[node name="TrackMulti" type="Node2D"]
+
+[node name="Floor" type="StaticBody2D" parent="."]
+position = Vector2(3400,430)
+
+[node name="CollisionShape2D0" type="CollisionShape2D" parent="Floor"]
+position = Vector2(0,-400)
+shape = SubResource("Shape_floor")
+
+[node name="CollisionShape2D1" type="CollisionShape2D" parent="Floor"]
+position = Vector2(0,-200)
+shape = SubResource("Shape_floor")
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="Floor"]
+position = Vector2(0,0)
+shape = SubResource("Shape_floor")
+
+[node name="CollisionShape2D3" type="CollisionShape2D" parent="Floor"]
+position = Vector2(0,200)
+shape = SubResource("Shape_floor")
+
+[node name="CollisionShape2D4" type="CollisionShape2D" parent="Floor"]
+position = Vector2(0,400)
+shape = SubResource("Shape_floor")
+
+[node name="Lane0" type="Polygon2D" parent="Floor"]
+position = Vector2(0,-400)
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-3400, -30, 3400, -30, 3400, 30, -3400, 30)
+
+[node name="Lane1" type="Polygon2D" parent="Floor"]
+position = Vector2(0,-200)
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-3400, -30, 3400, -30, 3400, 30, -3400, 30)
+
+[node name="Lane2" type="Polygon2D" parent="Floor"]
+position = Vector2(0,0)
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-3400, -30, 3400, -30, 3400, 30, -3400, 30)
+
+[node name="Lane3" type="Polygon2D" parent="Floor"]
+position = Vector2(0,200)
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-3400, -30, 3400, -30, 3400, 30, -3400, 30)
+
+[node name="Lane4" type="Polygon2D" parent="Floor"]
+position = Vector2(0,400)
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-3400, -30, 3400, -30, 3400, 30, -3400, 30)
+
+[node name="FinishLine" type="Polygon2D" parent="."]
+position = Vector2(5400, 430)
+color = Color(1, 1, 1, 0.6)
+polygon = PackedVector2Array(-6, -490, 6, -490, 6, 490, -6, 490)
+
+[node name="EndWall" type="StaticBody2D" parent="."]
+position = Vector2(6300, 430)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EndWall"]
+shape = SubResource("Shape_wall")
+
+[node name="Polygon2D" type="Polygon2D" parent="EndWall"]
+color = Color(0.7, 0.1, 0.1, 1)
+polygon = PackedVector2Array(-50, -490, 50, -490, 50, 490, -50, 490)
+
+[node name="Stripe" type="Polygon2D" parent="EndWall"]
+color = Color(0.95, 0.8, 0.1, 1)
+polygon = PackedVector2Array(-5, -490, 5, -490, 5, 490, -5, 490)

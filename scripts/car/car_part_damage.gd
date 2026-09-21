@@ -28,7 +28,11 @@ func _ready() -> void:
 		current_durability = part_data.durability
 
 func _physics_process(_delta: float) -> void:
-	if is_broken or target == null:
+	# is_instance_valid, not a plain null check: target is a dangling
+	# reference (not nulled out) once queue_free()'d, which a `== null`
+	# check doesn't catch — surfaced by chaotic multi-car pileups where
+	# a wheel/body can get freed out from under its own damage tracker.
+	if is_broken or not is_instance_valid(target):
 		return
 	var velocity := target.linear_velocity
 	var delta_v := (velocity - _prev_velocity).length()

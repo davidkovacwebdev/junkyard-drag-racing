@@ -1,24 +1,28 @@
 extends Node
 ## Tracks in-game time (autoload singleton "DayNightCycle"). A day lasts
-## DAY_LENGTH seconds, the last NIGHT_LENGTH of which are night.
-## get_night_factor() blends smoothly from 0 (day) to 1
-## (night) across a TRANSITION-second window straddling both the start and
-## the end of night — 1 minute before the boundary and 1 minute after it —
-## so a screen-space shader (see NightOverlay) can fade in/out instead of
-## snapping the instant the clock crosses it.
+## DAY_LENGTH seconds, mapped onto a 24-hour clock. Night runs from
+## NIGHT_START_HOUR (9 PM) to NIGHT_END_HOUR (8 AM) — that span straddles
+## midnight, so unlike a simpler "last N seconds of the day" scheme, night
+## isn't at the day's edges; the day/time_of_day rollover point (24:00 ->
+## 0:00) instead falls in the *middle* of the full-night stretch.
+## get_night_factor() blends smoothly from 0 (day) to 1 (night) across a
+## TRANSITION-second window centred on each boundary — 1 minute before it
+## and 1 minute after — so a screen-space shader (see NightOverlay) can
+## fade in/out instead of snapping the instant the clock crosses it.
 
-const DAY_LENGTH := 720.0   ## 12 minutes.
-const NIGHT_LENGTH := 240.0 ## 4 minutes, at the end of the day.
+const DAY_LENGTH := 720.0   ## 12 minutes = 24 in-game hours.
+const SECONDS_PER_HOUR := DAY_LENGTH / 24.0
 const TRANSITION := 60.0    ## 1 minute either side of each night boundary.
-const NIGHT_START := DAY_LENGTH - NIGHT_LENGTH ## 480s into the day.
+const NIGHT_START := 21.0 * SECONDS_PER_HOUR ## 9 PM.
+const NIGHT_END := 8.0 * SECONDS_PER_HOUR    ## 8 AM, the following morning.
 
 ## Testing aid: hold K to fast-forward the clock 24x so a full day/night
 ## cycle takes 30 seconds instead of 12 minutes.
 const DEBUG_FAST_FORWARD_KEY := KEY_K
 const DEBUG_FAST_FORWARD_SCALE := 24.0
 
-## Every new day starts at 8 AM rather than midnight.
-const START_TIME := (DAY_LENGTH / 24.0) * 8.0
+## Every new day starts at 8 AM (right as night ends) rather than midnight.
+const START_TIME := NIGHT_END
 
 var day: int = 1
 var time_of_day: float = START_TIME ## Seconds into the current day, [0, DAY_LENGTH).
@@ -50,20 +54,20 @@ func advance_seconds(seconds: float) -> void:
 
 ## 0 = full day, 1 = full night, ramping linearly across the two
 ## TRANSITION-second windows centred on dusk (NIGHT_START) and dawn
-## (DAY_LENGTH, wrapping around to 0).
+## (NIGHT_END). Both windows sit comfortably clear of the 0/DAY_LENGTH
+## rollover point, so — unlike the old scheme — this never needs to
+## handle a transition wrapping across midnight itself.
 func get_night_factor() -> float:
 	var t := time_of_day
 	var dusk_start := NIGHT_START - TRANSITION
 	var dusk_end := NIGHT_START + TRANSITION
-	var dawn_start := DAY_LENGTH - TRANSITION
-	if t < TRANSITION:
-		# Tail of the dawn ramp, wrapped over from the end of the previous day.
-		return 1.0 - (t + TRANSITION) / (TRANSITION * 2.0)
+	var dawn_start := NIGHT_END - TRANSITION
+	var dawn_end := NIGHT_END + TRANSITION
+	if t < dawn_start or t >= dusk_end:
+		return 1.0
+	elif t < dawn_end:
+		return 1.0 - (t - dawn_start) / (TRANSITION * 2.0)
 	elif t < dusk_start:
 		return 0.0
-	elif t < dusk_end:
-		return (t - dusk_start) / (TRANSITION * 2.0)
-	elif t < dawn_start:
-		return 1.0
 	else:
-		return 1.0 - (t - dawn_start) / (TRANSITION * 2.0)
+		return (t - dusk_start) / (TRANSITION * 2.0)

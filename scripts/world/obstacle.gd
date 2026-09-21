@@ -21,6 +21,10 @@ extends StaticBody2D
 ## Optional: if set, activating this also switches to that scene (e.g.
 ## the garage interior).
 @export var interior_scene: PackedScene
+## Optional: if set, holding/pressing T near this (instead of Space)
+## switches to this scene instead — a second, parallel entry point for
+## testing an alternate version of a place without disturbing the real one.
+@export var test_interior_scene: PackedScene
 ## Fraction of the visual height that's actually solid, hugging the
 ## bottom edge — the building's footprint. Set to 1.0 for a flat prop
 ## with no "behind it" to walk into.

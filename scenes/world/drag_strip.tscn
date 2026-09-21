@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/drag_strip.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/world/registration_booth.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/race/race_random_test.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/race/race_test_lane.tscn" id="4"]
 
 [node name="DragStrip" type="Node2D"]
 
@@ -13,6 +14,7 @@ script = ExtResource("1")
 position = Vector2(-1150, -270)
 display_name = "Drag Strip"
 interior_scene = ExtResource("3")
+test_interior_scene = ExtResource("4")
 collision_height_fraction = 1.0
 
 [node name="Sign" type="Label" parent="."]

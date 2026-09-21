@@ -27,6 +27,7 @@ extends CharacterBody2D
 
 var _facing_right: bool = true
 var _space_pressed_last: bool = false
+var _test_pressed_last: bool = false
 ## Which target the current hold is building up against, and how far
 ## along it is (seconds held). Resets to null/0 the instant space is
 ## released or the player looks away from that target.
@@ -56,8 +57,9 @@ func _ready() -> void:
 	# count as a fresh press here — that would instantly re-enter the place
 	# we just exited.
 	_space_pressed_last = Input.is_physical_key_pressed(KEY_SPACE)
+	_test_pressed_last = Input.is_physical_key_pressed(KEY_T)
 
-const _DRIVE_KEYS := [KEY_W, KEY_A, KEY_S, KEY_D, KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT, KEY_SPACE]
+const _DRIVE_KEYS := [KEY_W, KEY_A, KEY_S, KEY_D, KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT, KEY_SPACE, KEY_T]
 
 func _notification(what: int) -> void:
 	# If the window loses OS focus while a key is held, no key-up event
@@ -72,6 +74,7 @@ func _notification(what: int) -> void:
 			Input.parse_input_event(ev)
 		velocity = Vector2.ZERO
 		_space_pressed_last = false
+		_test_pressed_last = false
 
 ## Left-click is how you deal with a person rather than a place (the junkyard's
 ## scrap dealer). It's a point query into the physics world, not a mouse-over
@@ -228,6 +231,15 @@ func _process_interaction(delta: float) -> void:
 
 	_space_pressed_last = space_pressed
 
+	# A second, parallel entry point: T opens a target's test_interior_scene
+	# instead of its real interior_scene, if it has one — lets a place like
+	# the drag strip offer an in-progress alternate version to try without
+	# touching what Space drops you into.
+	var test_pressed := Input.is_physical_key_pressed(KEY_T)
+	if target != null and test_pressed and not _test_pressed_last:
+		_activate_test(target)
+	_test_pressed_last = test_pressed
+
 ## True for a target that only answers to a mouse click. It still advertises
 ## `display_name` (so the car can find it and click it) but the space prompt
 ## and the hold bar are skipped for it.
@@ -286,5 +298,12 @@ func _activate(target: Object) -> void:
 		return
 	print(target.display_name)
 	var interior = target.get("interior_scene")
+	if interior is PackedScene:
+		get_tree().change_scene_to_packed(interior)
+
+## T's counterpart to _activate(): only ever switches scene, since a
+## test entry point has no loot-style interact() of its own to call.
+func _activate_test(target: Object) -> void:
+	var interior = target.get("test_interior_scene")
 	if interior is PackedScene:
 		get_tree().change_scene_to_packed(interior)

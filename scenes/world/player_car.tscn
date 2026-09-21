@@ -29,7 +29,6 @@ auto_fit_width = 90.0
 shape = SubResource("RectangleShape2D_1")
 
 [node name="Camera2D" type="Camera2D" parent="."]
-position_smoothing_enabled = true
 script = ExtResource("3")
 
 [node name="InteractionZone" type="Area2D" parent="."]
