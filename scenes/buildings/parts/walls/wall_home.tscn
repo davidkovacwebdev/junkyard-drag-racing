@@ -1,0 +1,47 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/building_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/building_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_wall_home"]
+script = ExtResource("2")
+id = &"wall_home"
+display_name = "Home Siding Wall"
+slot = 0
+
+[node name="HomeWall" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_wall_home")
+footprint_size = Vector2(300, 180)
+
+[node name="Body" type="Polygon2D" parent="."]
+color = Color(0.42, 0.5, 0.48, 1)
+polygon = PackedVector2Array(-150, -180, 150, -180, 150, 0, -150, 0)
+
+[node name="Skirt" type="Polygon2D" parent="."]
+color = Color(0.3, 0.36, 0.35, 1)
+polygon = PackedVector2Array(-150, -16, 150, -16, 150, 0, -150, 0)
+
+[node name="CornerLeft" type="Polygon2D" parent="."]
+color = Color(0.95, 0.93, 0.88, 1)
+polygon = PackedVector2Array(-150, -180, -142, -180, -142, 0, -150, 0)
+
+[node name="CornerRight" type="Polygon2D" parent="."]
+color = Color(0.95, 0.93, 0.88, 1)
+polygon = PackedVector2Array(142, -180, 150, -180, 150, 0, 142, 0)
+
+[node name="TrimTop" type="Polygon2D" parent="."]
+color = Color(0.95, 0.93, 0.88, 1)
+polygon = PackedVector2Array(-150, -180, 150, -180, 150, -172, -150, -172)
+
+[node name="PlankLine1" type="Polygon2D" parent="."]
+color = Color(0.48, 0.56, 0.54, 1)
+polygon = PackedVector2Array(-142, -148, 142, -148, 142, -145, -142, -145)
+
+[node name="PlankLine2" type="Polygon2D" parent="."]
+color = Color(0.48, 0.56, 0.54, 1)
+polygon = PackedVector2Array(-142, -108, 142, -108, 142, -105, -142, -105)
+
+[node name="PlankLine3" type="Polygon2D" parent="."]
+color = Color(0.48, 0.56, 0.54, 1)
+polygon = PackedVector2Array(-142, -68, 142, -68, 142, -65, -142, -65)

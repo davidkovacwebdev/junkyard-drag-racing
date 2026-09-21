@@ -220,6 +220,7 @@ func _process_interaction(delta: float) -> void:
 
 	if prompt_target != null:
 		_tooltip_label.text = _interact_prompt(prompt_target)
+		_tooltip_label.add_theme_color_override("font_color", _interact_prompt_color(prompt_target))
 		_tooltip_label.visible = true
 	else:
 		_tooltip_label.visible = false
@@ -274,6 +275,16 @@ func _interact_prompt(target: Object) -> String:
 			return line
 	var verb_prompt := "Hold" if _hold_duration_for(target) > 0.0 else "Press"
 	return "%s: %s space to %s" % [target.display_name, verb_prompt, _interact_verb(target)]
+
+## Tooltip color. Defaults to the label's own authored white; a target can
+## override via the duck-typed get_interact_prompt_color() (the registration
+## booth turns its prompt red while closed overnight).
+func _interact_prompt_color(target: Object) -> Color:
+	if target != null and target.has_method("get_interact_prompt_color"):
+		var color: Variant = target.call("get_interact_prompt_color")
+		if typeof(color) == TYPE_COLOR:
+			return color
+	return Color(1, 1, 1, 1)
 
 ## 0 means instant activation (buildings you just walk into); a target can
 ## opt into a hold-to-activate delay (roadside trash props do, so a

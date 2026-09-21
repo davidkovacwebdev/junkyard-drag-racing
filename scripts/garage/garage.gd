@@ -17,6 +17,7 @@ extends Control
 
 var _index: int = 0
 var _wheel_mount_zones: Array[WheelMountZone] = []
+var _current_category: PartData.Category = PartData.Category.BODY
 
 const _INACTIVE_FILTER_COLOR := Color(0.85, 0.85, 0.85, 1)
 const _ACTIVE_FILTER_COLOR := Color(1, 0.8, 0.2, 1)
@@ -113,6 +114,10 @@ func equip_part(category: PartData.Category, part: PartData, wheel_index: int = 
 					car.wheels[i] = wheel.duplicate()
 			DayNightCycle.advance_hours(1.0)
 	_refresh()
+	# Ownership can shift with an equip (a swapped-out part that isn't in
+	# spare_parts drops out of what's ownable), so the list has to be
+	# rebuilt, not just left showing whatever was true a moment ago.
+	_show_category(_current_category)
 
 func _resize_wheels(car: CarModelData) -> void:
 	var mount_count := PartDatabase.wheel_mount_count(car.body)
@@ -126,6 +131,36 @@ func _ensure_wheel_count(car: CarModelData, count: int) -> void:
 func _default_wheel() -> WheelPartData:
 	return PartDatabase.load_part_data(_DEFAULT_WHEEL) as WheelPartData
 
+## Parts the player can actually pick from in this category: whatever's
+## currently mounted on ANY owned car (already theirs, just installed
+## somewhere else) plus anything loose in the spare-parts stash from a
+## crane dig. PartDatabase.bodies/wheels/engines (the full catalog) is
+## never shown outright — this isn't a shop, everything has to be earned
+## at the junkyard first. De-duplicated by id, since the same part can be
+## both installed and, after a fresh dig, sitting in spare_parts too.
+func _owned_parts(category: PartData.Category) -> Array:
+	var owned: Dictionary = {}
+	for car in Inventory.owned_cars:
+		match category:
+			PartData.Category.BODY:
+				if car.body != null:
+					owned[car.body.id] = car.body
+			PartData.Category.ENGINE:
+				if car.engine != null:
+					owned[car.engine.id] = car.engine
+			PartData.Category.WHEEL:
+				for wheel in car.wheels:
+					if wheel != null:
+						owned[wheel.id] = wheel
+	for part in Inventory.spare_parts:
+		if part != null and part.category == category:
+			owned[part.id] = part
+	var parts := owned.values()
+	parts.sort_custom(func(a: PartData, b: PartData) -> bool:
+		return a.display_name < b.display_name
+	)
+	return parts
+
 func _on_body_filter_pressed() -> void:
 	_show_category(PartData.Category.BODY)
 
@@ -136,19 +171,11 @@ func _on_wheel_filter_pressed() -> void:
 	_show_category(PartData.Category.WHEEL)
 
 func _show_category(category: PartData.Category) -> void:
+	_current_category = category
 	for child in _parts_list.get_children():
 		child.queue_free()
 
-	var parts: Array = []
-	match category:
-		PartData.Category.BODY:
-			parts = PartDatabase.bodies
-		PartData.Category.ENGINE:
-			parts = PartDatabase.engines
-		PartData.Category.WHEEL:
-			parts = PartDatabase.wheels
-
-	for part in parts:
+	for part in _owned_parts(category):
 		var slot: PartSlot = _PART_SLOT_SCENE.instantiate()
 		# Add before set_part(): PartIcon's @onready SubViewport ref only
 		# resolves once it's actually inside the live tree, which

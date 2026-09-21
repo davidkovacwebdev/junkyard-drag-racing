@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="BuildingData" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/building_data.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/walls/wall_home.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/roofs/roof_peaked.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/doors/door_garage_roll.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/windows/window_curtained.tscn" id="5"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/decorations/decoration_string_lights.tscn" id="6"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Home Garage"
+wall_scene = ExtResource("2")
+roof_scene = ExtResource("3")
+door_scene = ExtResource("4")
+window_scene = ExtResource("5")
+decoration_scene = ExtResource("6")

@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://cqencmktgf7ad"]
 
 [ext_resource type="PackedScene" path="res://scenes/world/player_car.tscn" id="1"]
-[ext_resource type="PackedScene" path="res://scenes/world/obstacle.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/world/composed_building.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/garage/garage.tscn" id="3"]
 [ext_resource type="Script" uid="uid://cu6o77berdu32" path="res://scripts/world/road.gd" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/world/drag_strip.tscn" id="5"]
@@ -9,6 +9,8 @@
 [ext_resource type="Script" uid="uid://cxavmo7w253pf" path="res://scripts/world/trash_spawner.gd" id="7"]
 [ext_resource type="PackedScene" path="res://scenes/world/junkyard.tscn" id="8"]
 [ext_resource type="Script" path="res://scripts/world/house_spawner.gd" id="9"]
+[ext_resource type="Resource" path="res://buildings/player_garage.tres" id="10"]
+[ext_resource type="Resource" path="res://buildings/player_garage_shed.tres" id="11"]
 
 [node name="Main" type="Node2D" unique_id=1332585834]
 
@@ -32,10 +34,16 @@ y_sort_enabled = true
 
 [node name="House" parent="Sortables" unique_id=1165133855 instance=ExtResource("2")]
 position = Vector2(260, -260)
-size = Vector2(320, 220)
-rect_color = Color(0.2, 0.55, 0.25, 1)
 display_name = "Garage"
 interior_scene = ExtResource("3")
+building_data = ExtResource("10")
+
+[node name="HouseShed" parent="Sortables" instance=ExtResource("2")]
+position = Vector2(515, -228.5)
+scale = Vector2(0.5, 0.5)
+display_name = "Garage"
+interior_scene = ExtResource("3")
+building_data = ExtResource("11")
 
 [node name="Trash" type="Node2D" parent="Sortables" unique_id=260557314]
 script = ExtResource("7")

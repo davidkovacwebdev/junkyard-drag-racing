@@ -42,6 +42,27 @@ func _ready() -> void:
 		wheels.append(load_part_data(path) as WheelPartData)
 	for path in _ENGINE_SCENES:
 		engines.append(load_part_data(path) as EnginePartData)
+	_assign_tiers(bodies)
+	_assign_tiers(wheels)
+	_assign_tiers(engines)
+
+## Ranks a category's parts by performance_score() and splits them into
+## PartData.TIER_COUNT roughly-even groups — a tier is a quartile within
+## its OWN category (comparing a wheel's mass to an engine's would be
+## meaningless), so "how good is this part" always means "compared to the
+## other parts you could put in the same slot". The lowest-scoring part
+## in any non-empty category always lands in tier 1, which is what makes
+## Inventory._worst() below safe to just look for tier == 1.
+static func _assign_tiers(parts: Array) -> void:
+	if parts.is_empty():
+		return
+	var ranked := parts.duplicate()
+	ranked.sort_custom(func(a: PartData, b: PartData) -> bool:
+		return a.performance_score() < b.performance_score()
+	)
+	for i in ranked.size():
+		var part: PartData = ranked[i]
+		part.tier = clampi(1 + (i * PartData.TIER_COUNT) / ranked.size(), 1, PartData.TIER_COUNT)
 
 ## Instances a part scene just long enough to pull its PartData back out,
 ## tagging it with the scene it came from. The catalog and car-building

@@ -1,0 +1,43 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/building_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/building_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_wall_home_shed"]
+script = ExtResource("2")
+id = &"wall_home_shed"
+display_name = "Home Shed Wall"
+slot = 0
+
+[node name="HomeShedWall" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_wall_home_shed")
+footprint_size = Vector2(180, 180)
+
+[node name="Body" type="Polygon2D" parent="."]
+color = Color(0.42, 0.5, 0.48, 1)
+polygon = PackedVector2Array(-90, -180, 90, -180, 90, 0, -90, 0)
+
+[node name="Skirt" type="Polygon2D" parent="."]
+color = Color(0.3, 0.36, 0.35, 1)
+polygon = PackedVector2Array(-90, -16, 90, -16, 90, 0, -90, 0)
+
+[node name="CornerLeft" type="Polygon2D" parent="."]
+color = Color(0.95, 0.93, 0.88, 1)
+polygon = PackedVector2Array(-90, -180, -82, -180, -82, 0, -90, 0)
+
+[node name="CornerRight" type="Polygon2D" parent="."]
+color = Color(0.95, 0.93, 0.88, 1)
+polygon = PackedVector2Array(82, -180, 90, -180, 90, 0, 82, 0)
+
+[node name="TrimTop" type="Polygon2D" parent="."]
+color = Color(0.95, 0.93, 0.88, 1)
+polygon = PackedVector2Array(-90, -180, 90, -180, 90, -172, -90, -172)
+
+[node name="PlankLine1" type="Polygon2D" parent="."]
+color = Color(0.48, 0.56, 0.54, 1)
+polygon = PackedVector2Array(-82, -128, 82, -128, 82, -125, -82, -125)
+
+[node name="PlankLine2" type="Polygon2D" parent="."]
+color = Color(0.48, 0.56, 0.54, 1)
+polygon = PackedVector2Array(-82, -68, 82, -68, 82, -65, -82, -65)

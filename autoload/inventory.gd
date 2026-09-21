@@ -69,26 +69,18 @@ func sell_scrap(rate: int = 1) -> int:
 func _ready() -> void:
 	reset()
 
-## Wipe everything back to a fresh start: the worst-stats starter car,
-## a random pair to fill out the rest of the garage, and empty pockets.
-## Called on boot and again by MainMenu's New Game, since SaveSystem's
-## Continue only overwrites these fields rather than re-running _ready().
+## Wipe everything back to a fresh start: one car built from the worst
+## (most basic) body/engine/wheel in the whole catalog, nothing else —
+## no spare parts, no scrap, no cash. Called on boot and again by
+## MainMenu's New Game, since SaveSystem's Continue only overwrites these
+## fields rather than re-running _ready().
 func reset() -> void:
 	owned_cars.clear()
 	selected_index = 0
 	scrap = 0
 	money = 0
 	spare_parts.clear()
-
-	var starter := _build_starter_car()
-	owned_cars.append(starter)
-	var pool: Array[BodyPartData] = []
-	for body in PartDatabase.bodies:
-		if body.id != starter.body.id:
-			pool.append(body)
-	pool.shuffle()
-	for body in pool.slice(0, garage_capacity - 1):
-		owned_cars.append(_build_random_car(body))
+	owned_cars.append(_build_starter_car())
 
 func get_selected_car() -> CarModelData:
 	if owned_cars.is_empty():
@@ -110,32 +102,13 @@ func _build_starter_car() -> CarModelData:
 		car.wheels.append(wheel.duplicate())
 	return car
 
-## "Worst" = lowest durability + speed (the two catalog stats with an
-## obvious better/worse direction). Mass isn't weighted either way —
-## heavier isn't inherently worse, just heavier.
+## "Worst" = tier 1 — the bottom quartile PartDatabase ranked this
+## category into (see PartDatabase._assign_tiers()), which always
+## includes at least the single lowest-scoring part for any non-empty
+## category. Falls back to the first part on an empty/untiered array so
+## this never returns null while the catalog has anything in it at all.
 static func _worst(parts: Array) -> PartData:
-	var worst: PartData = null
-	var worst_score := INF
 	for part in parts:
-		var score: float = part.durability + part.speed
-		if score < worst_score:
-			worst_score = score
-			worst = part
-	return worst
-
-func _build_random_car(body: BodyPartData) -> CarModelData:
-	var car := CarModelData.new()
-	car.body = body.duplicate() as BodyPartData
-	car.engine = _random_engine().duplicate()
-	var wheel := _random_wheel()
-	var mount_count := PartDatabase.wheel_mount_count(car.body)
-	car.wheels = []
-	for i in mount_count:
-		car.wheels.append(wheel.duplicate())
-	return car
-
-func _random_engine() -> EnginePartData:
-	return PartDatabase.engines[randi() % PartDatabase.engines.size()]
-
-func _random_wheel() -> WheelPartData:
-	return PartDatabase.wheels[randi() % PartDatabase.wheels.size()]
+		if part.tier == 1:
+			return part
+	return parts[0] if not parts.is_empty() else null

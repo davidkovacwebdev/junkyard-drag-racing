@@ -52,6 +52,13 @@ func advance_seconds(seconds: float) -> void:
 		time_of_day -= DAY_LENGTH
 		day += 1
 
+## Current hour of day, [0.0, 24.0) — plain clock time, not the
+## dusk/dawn-blended get_night_factor() below. For anything that opens
+## and closes on a fixed schedule (the drag strip, say) rather than
+## fading with the light.
+func get_hour() -> float:
+	return time_of_day / SECONDS_PER_HOUR
+
 ## 0 = full day, 1 = full night, ramping linearly across the two
 ## TRANSITION-second windows centred on dusk (NIGHT_START) and dawn
 ## (NIGHT_END). Both windows sit comfortably clear of the 0/DAY_LENGTH

@@ -8,6 +8,20 @@ extends Obstacle
 ## interaction the PlayerCar looks for — but this scene ships no `ColorRect`,
 ## it draws itself in _draw() instead. Obstacle._ready() tolerates the missing
 ## rect and still sizes the collision shape from `size`.
+##
+## Only staffed 8 AM to 8 PM. Outside those hours it overrides the default
+## "Press space to enter" prompt with a red closed notice (get_interact_prompt/
+## get_interact_prompt_color, both duck-typed hooks PlayerCar's tooltip reads)
+## and implements interact() itself so it can refuse to switch scenes — the
+## default Obstacle/PlayerCar activation path has no refusal hook at all, only
+## a target with its own interact() gets to say no.
+
+## When the booth is open, local clock hours [OPEN_HOUR, CLOSE_HOUR).
+const OPEN_HOUR := 8.0
+const CLOSE_HOUR := 20.0  ## 8 PM.
+const CLOSED_MESSAGE := "Closes at 8PM, open at 8AM"
+const CLOSED_COLOR := Color(0.95, 0.2, 0.2, 1)
+const OPEN_COLOR := Color(1, 1, 1, 1)
 
 @export var wall_color: Color = Color(0.74, 0.24, 0.2, 1)
 @export var roof_color: Color = Color(0.27, 0.27, 0.31, 1)
@@ -37,6 +51,28 @@ const FLAG_OUT := 4
 const POLE_COLOR := Color(0.72, 0.72, 0.75, 1)
 const CHECKER_LIGHT := Color(1, 1, 1, 1)
 const CHECKER_DARK := Color(0.08, 0.08, 0.09, 1)
+
+func _is_open() -> bool:
+	var hour := DayNightCycle.get_hour()
+	return hour >= OPEN_HOUR and hour < CLOSE_HOUR
+
+## Overrides PlayerCar's default prompt while closed; empty string when open
+## falls back to the default "Drag Strip: Press space to enter".
+func get_interact_prompt() -> String:
+	return "" if _is_open() else CLOSED_MESSAGE
+
+func get_interact_prompt_color() -> Color:
+	return OPEN_COLOR if _is_open() else CLOSED_COLOR
+
+## Owns activation outright (rather than letting PlayerCar's default
+## interior_scene switch run unconditionally) so it can refuse entry
+## overnight.
+func interact(_actor: Node = null) -> void:
+	if not _is_open():
+		return
+	print(display_name)
+	if interior_scene is PackedScene:
+		get_tree().change_scene_to_packed(interior_scene)
 
 func _draw() -> void:
 	var half := size / 2.0

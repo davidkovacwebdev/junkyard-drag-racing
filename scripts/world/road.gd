@@ -82,7 +82,10 @@ enum Mode {
 ## Plots roads must keep out of — a building footprint, say. A road that would
 ## clip one bends around it, which is how the garage ends up beside the street
 ## instead of on it. Update these if you move a building.
-@export var clear_areas: Array[Rect2] = [Rect2(100.0, -370.0, 320.0, 220.0)]
+@export var clear_areas: Array[Rect2] = [
+	Rect2(100.0, -370.0, 320.0, 220.0),  ## The house/garage.
+	Rect2(415.0, -360.0, 200.0, 200.0),  ## The shed beside it.
+]
 
 @export_group("Colors")
 ## Asphalt: #4a6e64.
