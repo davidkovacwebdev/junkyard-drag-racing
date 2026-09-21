@@ -27,6 +27,27 @@ extends CharacterBody2D
 ## falling back to searching the scene for any RoadNetwork if it doesn't
 ## resolve (e.g. this scene got reparented).
 @export var roads_path: NodePath = ^"../Roads"
+## Same resolution again, for the ground-decal layer skid marks are
+## drawn into (see SkidMarksLayer).
+@export var skid_marks_path: NodePath = ^"../SkidMarks"
+
+## A skid mark starts stamping once the car's current heading and the
+## player's new input direction diverge past this angle — "the car goes
+## one way, the player suddenly wants another" — and keeps stamping
+## until they realign. Speed-gated too, so crawling out of a three-point
+## turn doesn't leave rubber.
+@export var skid_angle_threshold: float = deg_to_rad(35.0)
+@export var skid_min_speed: float = 120.0
+@export var skid_mark_color: Color = Color(0.05, 0.05, 0.05, 0.55)
+@export var skid_mark_width: float = 6.0
+## World pixels a wheel has to travel since its last stamp before a new
+## segment is laid down — caps how many mark nodes a long skid spawns
+## without leaving visible gaps in the trail.
+@export var skid_mark_min_gap: float = 14.0
+## A stamped segment sits fully opaque this long, then eases out over
+## fade_time — hold + fade is the mark's total 5-second lifetime.
+@export var skid_mark_hold_time: float = 2.0
+@export var skid_mark_fade_time: float = 3.0
 
 var _facing_right: bool = true
 var _space_pressed_last: bool = false
@@ -46,10 +67,17 @@ var _hold_progress: float = 0.0
 @onready var _day_label: Label = $UI/DayLabel
 
 var _road_network: RoadNetwork = null
+var _skid_marks: SkidMarksLayer = null
+## Last stamped world position per wheel mount index; null means that
+## wheel isn't mid-skid (either never started, or realigned and got
+## cleared) so the next stamp starts fresh instead of drawing a long
+## connector line back to wherever the last skid happened to end.
+var _skid_last_stamp: Array = []
 
 func _ready() -> void:
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	_road_network = _resolve_roads()
+	_skid_marks = _resolve_skid_marks()
 	var car := Inventory.get_selected_car()
 	if car != null:
 		_visual.build_from(car)
@@ -132,6 +160,11 @@ func _physics_process(delta: float) -> void:
 		_facing_right = false
 	_visual.scale.x = 1.0 if _facing_right else -1.0
 
+	# Compared against velocity as it stood BEFORE this frame's move_toward
+	# touches it — "the car was already heading this way" — against the
+	# input direction just read above, "now the player wants that way".
+	var skidding := _is_skidding(input_dir)
+
 	# One on-road check feeds both multipliers, rather than querying the
 	# road network twice for the same answer.
 	var on_road := _road_network != null and _road_network.is_on_road(global_position)
@@ -156,6 +189,8 @@ func _physics_process(delta: float) -> void:
 	# a rolling wheel look like it's spinning backwards.
 	var facing_sign := 1.0 if _facing_right else -1.0
 	_visual.animate_wheels(velocity.x * delta * facing_sign, delta)
+
+	_update_skid_marks(skidding)
 
 	# Keep the saved spot current so entering any place (or any other scene
 	# change) returns us to exactly here.
@@ -186,6 +221,79 @@ func _resolve_roads() -> RoadNetwork:
 		for child in current.get_children():
 			stack.append(child)
 	return null
+
+## Same resolution again, for the ground-decal layer skid marks are drawn
+## into — a plain type search rather than a name lookup, matching
+## _resolve_roads().
+func _resolve_skid_marks() -> SkidMarksLayer:
+	var node := get_node_or_null(skid_marks_path)
+	if node is SkidMarksLayer:
+		return node
+	var scene := get_tree().current_scene
+	if scene == null:
+		scene = get_parent()
+	var stack: Array[Node] = [scene]
+	while not stack.is_empty():
+		var current: Node = stack.pop_back()
+		if current is SkidMarksLayer:
+			return current
+		for child in current.get_children():
+			stack.append(child)
+	return null
+
+## True when the car is moving at a real clip but the player just asked
+## for a meaningfully different direction — the tires are still carrying
+## the old momentum while the wheels have already turned toward the new
+## one, which is exactly what leaves rubber on the road.
+func _is_skidding(input_dir: Vector2) -> bool:
+	if input_dir == Vector2.ZERO or velocity.length() < skid_min_speed:
+		return false
+	return absf(velocity.normalized().angle_to(input_dir.normalized())) > skid_angle_threshold
+
+## Stamps a short mark segment behind each wheel mount while skidding,
+## picking up from wherever that wheel's last stamp landed so a fast
+## skid still reads as one continuous streak rather than dots. Wheels
+## that stop skidding just drop out of _skid_last_stamp (set back to
+## null) so the next skid starts its own fresh trail instead of drawing
+## one long connector across wherever the car drove in between.
+func _update_skid_marks(skidding: bool) -> void:
+	if _skid_marks == null:
+		return
+	var mounts := _visual.get_wheel_mounts()
+	if _skid_last_stamp.size() != mounts.size():
+		_skid_last_stamp.resize(mounts.size())
+	for i in mounts.size():
+		if not skidding:
+			_skid_last_stamp[i] = null
+			continue
+		var world_pos: Vector2 = _visual.to_global(mounts[i])
+		var last: Variant = _skid_last_stamp[i]
+		if last == null:
+			_skid_last_stamp[i] = world_pos
+			continue
+		var last_pos: Vector2 = last
+		if last_pos.distance_to(world_pos) >= skid_mark_min_gap:
+			_spawn_skid_segment(last_pos, world_pos)
+			_skid_last_stamp[i] = world_pos
+
+## One stamped segment: a short dark line from `a` to `b` in world space,
+## fully opaque for skid_mark_hold_time, then eased out over
+## skid_mark_fade_time and freed — a 5-second lifetime by default,
+## matching a real tire mark that lingers before weathering away.
+func _spawn_skid_segment(a: Vector2, b: Vector2) -> void:
+	var line := Line2D.new()
+	line.width = skid_mark_width
+	line.default_color = skid_mark_color
+	line.begin_cap_mode = Line2D.LINE_CAP_ROUND
+	line.end_cap_mode = Line2D.LINE_CAP_ROUND
+	line.antialiased = true
+	line.add_point(_skid_marks.to_local(a))
+	line.add_point(_skid_marks.to_local(b))
+	_skid_marks.add_child(line)
+	var tween := line.create_tween()
+	tween.tween_interval(skid_mark_hold_time)
+	tween.tween_property(line, "modulate:a", 0.0, skid_mark_fade_time)
+	tween.tween_callback(line.queue_free)
 
 ## Nearby buildings are just StaticBody2Ds with a non-empty `display_name`
 ## property (duck-typed, not a shared base class) that overlap this zone.

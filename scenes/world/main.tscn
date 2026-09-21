@@ -11,6 +11,7 @@
 [ext_resource type="Script" uid="uid://ndh2o15pw6to" path="res://scripts/world/house_spawner.gd" id="9"]
 [ext_resource type="Resource" path="res://buildings/player_garage.tres" id="10"]
 [ext_resource type="Resource" path="res://buildings/player_garage_shed.tres" id="11"]
+[ext_resource type="Script" path="res://scripts/world/skid_marks_layer.gd" id="12"]
 
 [node name="Main" type="Node2D" unique_id=1332585834]
 
@@ -23,6 +24,9 @@ color = Color(0.82, 0.7, 0.5, 1)
 
 [node name="Roads" type="Node2D" parent="." unique_id=1253797938]
 script = ExtResource("4")
+
+[node name="SkidMarks" type="Node2D" parent="."]
+script = ExtResource("12")
 
 [node name="DragStrip" parent="." unique_id=903706534 instance=ExtResource("5")]
 position = Vector2(3200, 0)
