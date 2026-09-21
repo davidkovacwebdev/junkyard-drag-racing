@@ -15,18 +15,3 @@ display_name = "Trash Bin"
 shape = SubResource("RectangleShape2D_bin")
 position = Vector2(0, -9)
 
-[node name="Popup" type="Label" parent="."]
-z_index = 20
-z_as_relative = false
-offset_left = -130.0
-offset_top = -128.0
-offset_right = 130.0
-offset_bottom = -96.0
-theme_override_colors/font_color = Color(1, 0.97, 0.85, 1)
-theme_override_colors/font_outline_color = Color(0.1, 0.08, 0.05, 1)
-theme_override_constants/outline_size = 5
-theme_override_font_sizes/font_size = 18
-text = "+2 scrap"
-horizontal_alignment = 1
-vertical_alignment = 1
-visible = false

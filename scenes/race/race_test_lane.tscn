@@ -18,9 +18,9 @@ finish_x = 5400.0
 max_duration = 90.0
 camera_path = NodePath("../MainCamera")
 exit_scene_path = "res://scenes/world/main.tscn"
-camera_focus_y = 430.0
+camera_focus_y = 400.0
 
 [node name="MainCamera" type="Camera2D" parent="."]
-position = Vector2(400, 430)
+position = Vector2(400, 400)
 zoom = Vector2(0.5, 0.5)
 script = ExtResource("4")
