@@ -17,6 +17,32 @@ extends Node2D
 ##
 ## Deterministic for a given `house_seed`, same idea as TrashSpawner's
 ## `prop_seed` — the same houses come back in the same spots every reload.
+##
+## Each placed house also records a `Plot` — where it landed, and which
+## stretch of kerb it fronts on. `TrashSpawner` reads those back (through
+## `get_plots()`) so it can drop exactly one bin at each house's kerb
+## instead of scattering bins at random along the roads.
+
+## Where one house ended up, plus the road it fronts on. Enough for a caller
+## to work out where that house's kerb-side bin belongs: the house's own
+## origin, a point on the road's centreline, the road's direction there,
+## which shoulder of that road the house is on, the house's half-extents
+## projected onto the road's along/cross axes, and which polyline of the
+## network that kerb belongs to plus how far along it the house sits — so a
+## caller can step along the road the same way this spawner walked it rather
+## than trusting a tangent that points off the road on a bend.
+class Plot:
+	var spot: Vector2
+	var road_point: Vector2
+	var direction: Vector2
+	var side: float
+	var along_reach: float
+	var cross_reach: float
+	## Index into `RoadNetwork.get_road_polylines()` of the road `road_point`
+	## lies on, or -1 if unknown.
+	var road_index: int = -1
+	## Distance along that polyline from its first point to `road_point`.
+	var road_distance: float = 0.0
 
 @export var wall_scenes: Array[PackedScene] = [
 	preload("res://scenes/buildings/parts/walls/wall_plank.tscn"),
@@ -115,15 +141,36 @@ extends Node2D
 	Rect2(-780.0, 180.0, 560.0, 340.0),
 ]
 
+## Every house placed, in placement order. Read by TrashSpawner to put a bin
+## at each house's kerb. Empty until the first `scatter()`.
+var _plots: Array[Plot] = []
+## Whether `scatter()` has run, so `ensure_scattered()` lays the houses out
+## exactly once no matter who asks for them first.
+var _scattered: bool = false
+
 func _ready() -> void:
 	# Deferred so it runs once the whole scene has come up: the road node is
 	# guaranteed to exist by then, and we're not adding children to a
 	# parent that is still mid-setup, which Godot refuses outright.
-	scatter.call_deferred()
+	ensure_scattered.call_deferred()
+
+## Lay the houses out, but only once. TrashSpawner calls this before reading
+## the plots — it may be read before this node's own deferred scatter, and
+## both paths have to produce exactly one set of houses.
+func ensure_scattered() -> void:
+	if _scattered:
+		return
+	scatter()
+
+## The houses placed by `scatter()`, in placement order. See `Plot`.
+func get_plots() -> Array[Plot]:
+	return _plots
 
 ## Place every house. Safe to call again — it clears what it made first, so
 ## it can be re-run from the editor or after changing the seed.
 func scatter() -> void:
+	_scattered = true
+	_plots.clear()
 	for child in get_parent().get_children():
 		if child.is_in_group(&"house"):
 			child.get_parent().remove_child(child)
@@ -140,23 +187,27 @@ func scatter() -> void:
 	rng.seed = house_seed
 	var placed: Array[Vector2] = []
 	var index := 0
-	for road in roads.get_road_polylines():
+	var polylines := roads.get_road_polylines()
+	for road_index in polylines.size():
+		var road: PackedVector2Array = polylines[road_index]
 		var length := _polyline_length(road)
 		if length < 300.0:
 			continue
 		var travelled := rng.randf_range(spacing_min, spacing_max)
 		while travelled < length and index < max_houses:
+			var along := travelled
 			var sample: Array = _sample_along(road, travelled)
 			travelled += rng.randf_range(spacing_min, spacing_max)
 			if rng.randf() < skip_chance:
 				continue
 			var data := _random_building(rng)
-			var found: Variant = _find_spot(roads, sample, data, rng, placed)
-			if typeof(found) != TYPE_VECTOR2:
+			var found: Variant = _find_spot(roads, sample, data, rng, placed, road_index, along)
+			if found == null:
 				continue
-			var spot: Vector2 = found
-			_place_house(spot, data, index)
-			placed.append(spot)
+			var plot: Plot = found
+			_place_house(plot.spot, data, index)
+			_plots.append(plot)
+			placed.append(plot.spot)
 			index += 1
 		if index >= max_houses:
 			break
@@ -194,28 +245,42 @@ func _random_building(rng: RandomNumberGenerator) -> BuildingData:
 		data.decoration_scene = decoration_scenes[rng.randi_range(0, decoration_scenes.size() - 1)]
 	return data
 
-## A spot beside the road for this house's footprint, or null if both sides
+## The plot beside the road for this house's footprint, or null if both sides
 ## are taken. Tries each side so a blocked shoulder still gets a fair
 ## chance — same shape as TrashSpawner._find_spot, sized off the building's
-## own footprint instead of a fixed prop size.
+## own footprint instead of a fixed prop size. Returns a `Plot` so a caller
+## can also work out where the house's kerb-side bin belongs. `road_index`
+## and `road_distance` say which road and where along it the kerb is.
 func _find_spot(roads: RoadNetwork, sample: Array, data: BuildingData,
-		rng: RandomNumberGenerator, placed: Array[Vector2]) -> Variant:
+		rng: RandomNumberGenerator, placed: Array[Vector2],
+		road_index: int, road_distance: float) -> Variant:
 	var point: Vector2 = sample[0]
 	var direction: Vector2 = sample[1]
 	if direction.length_squared() <= 0.0:
 		return null
 	var footprint := BuildingAssembler.get_footprint_size(data)
-	var normal := direction.normalized().orthogonal()
-	var reach := absf(normal.x) * footprint.x * 0.5 + absf(normal.y) * footprint.y * 0.5
+	var along_dir := direction.normalized()
+	var normal := along_dir.orthogonal()
+	var cross_reach := absf(normal.x) * footprint.x * 0.5 + absf(normal.y) * footprint.y * 0.5
+	var along_reach := absf(along_dir.x) * footprint.x * 0.5 + absf(along_dir.y) * footprint.y * 0.5
 	var radius := footprint.length() * 0.5
-	var offset := roads.road_edge_offset() + gutter + reach
+	var offset := roads.road_edge_offset() + gutter + cross_reach
 	var sides: Array[float] = [1.0, -1.0]
 	if rng.randf() < 0.5:
 		sides.reverse()
 	for side: float in sides:
 		var spot: Vector2 = point + normal * (side * offset)
-		if _is_clear(roads, spot, reach, radius, placed):
-			return spot
+		if _is_clear(roads, spot, cross_reach, radius, placed):
+			var plot := Plot.new()
+			plot.spot = spot
+			plot.road_point = point
+			plot.direction = along_dir
+			plot.side = side
+			plot.along_reach = along_reach
+			plot.cross_reach = cross_reach
+			plot.road_index = road_index
+			plot.road_distance = road_distance
+			return plot
 	return null
 
 func _is_clear(roads: RoadNetwork, spot: Vector2, reach: float, radius: float,
@@ -236,7 +301,7 @@ func _is_clear(roads: RoadNetwork, spot: Vector2, reach: float, radius: float,
 			return false
 	return true
 
-func _place_house(spot: Vector2, data: BuildingData, index: int) -> void:
+func _place_house(spot: Vector2, data: BuildingData, _index: int) -> void:
 	var house := house_scene.instantiate() as ComposedBuilding
 	if house == null:
 		return
