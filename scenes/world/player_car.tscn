@@ -21,7 +21,7 @@ shader_parameter/night_factor = 0.0
 script = ExtResource("1")
 
 [node name="Visual" parent="." instance=ExtResource("2")]
-auto_fit_width = 90.0
+auto_fit_width = 130.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_1")

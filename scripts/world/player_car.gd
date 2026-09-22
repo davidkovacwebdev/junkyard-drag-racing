@@ -2,9 +2,12 @@ class_name PlayerCar
 extends CharacterBody2D
 ## Side-view movement, not top-down: A/D (or Left/Right) move the car
 ## horizontally and flip it to face that direction; W/S (or Up/Down) move
-## it vertically with no flip and no rotation at all. Two independent
-## axes, no steering/turning-radius physics — there's no "reverse
-## steers backwards" case here since the car never rotates.
+## it vertically, leaning the car nose-up climbing and nose-down descending
+## (see `tilt_max_angle`) so it reads as driving up/down a slope instead of
+## the sprite sliding straight up the screen. Two independent axes, no
+## steering/turning-radius physics — there's no "reverse steers backwards"
+## case here, since the lean is cosmetic and the car's heading is still
+## only ever left or right.
 
 @export var max_speed: float = 420.0
 @export var acceleration: float = 1800.0
@@ -49,7 +52,19 @@ extends CharacterBody2D
 @export var skid_mark_hold_time: float = 2.0
 @export var skid_mark_fade_time: float = 3.0
 
+## How far the car leans at full vertical speed, in radians. Climbing W
+## tips the nose up, descending S tips it down; it eases back to level the
+## moment the vertical input stops. Deliberately small — it's a hint of a
+## slope, not a stunt. 0 leaves the car flat.
+@export var tilt_max_angle: float = deg_to_rad(8.0)
+## How fast the lean catches up to the current vertical speed. Low is
+## floaty and lazy, high snaps to the input the instant W/S is pressed.
+@export var tilt_response: float = 9.0
+
 var _facing_right: bool = true
+## Current lean in radians; eased toward the target each frame so the car
+## rocks into a climb/dive instead of snapping between angles.
+var _tilt: float = 0.0
 var _interact_pressed_last: bool = false
 var _test_pressed_last: bool = false
 ## Which target the current hold is building up against, and how far
@@ -192,7 +207,8 @@ func _physics_process(delta: float) -> void:
 	# because the facing flip is a scale.x mirror, which would otherwise make
 	# a rolling wheel look like it's spinning backwards.
 	var facing_sign := 1.0 if _facing_right else -1.0
-	_visual.animate_wheels(velocity.x * delta * facing_sign, delta)
+	_update_tilt(delta, facing_sign)
+	_visual.animate_wheels(_roll_distance(delta, facing_sign), delta)
 
 	_update_skid_marks(skidding)
 
@@ -207,6 +223,32 @@ func _physics_process(delta: float) -> void:
 	_day_label.text = "Day %d" % DayNightCycle.day
 
 	_process_interaction(delta)
+
+## Lean the whole car into its vertical movement: climbing (W/Up) tips the
+## nose up, descending (S/Down) tips it down, easing back to level the moment
+## the vertical input stops. The angle is capped at `tilt_max_angle` and
+## scaled by how close to full speed the climb/dive is, so a gentle nudge
+## only rocks the car a little.
+##
+## Multiplied by `facing_sign` because the facing flip is a `scale.x` mirror
+## on this same node: without it, a car facing left would tip the wrong way.
+func _update_tilt(delta: float, facing_sign: float) -> void:
+	var target := clampf(velocity.y / max_speed, -1.0, 1.0) * tilt_max_angle
+	_tilt = lerpf(_tilt, target, 1.0 - exp(-tilt_response * delta))
+	_visual.rotation = _tilt * facing_sign
+
+## How far the wheels turn this frame, in world pixels. The wheels roll on the
+## car's total travel — the vertical component included — so driving up or
+## down spins them instead of the car skating sideways on static wheels.
+## Signed so they still roll forwards along the facing direction and, when the
+## player actually reverses, backwards (the roll is fed through the wheel's
+## mirrored frame, so an always-positive distance would look reversed one way).
+func _roll_distance(delta: float, facing_sign: float) -> float:
+	var speed := velocity.length()
+	if speed <= 0.01:
+		return 0.0
+	var direction := 1.0 if velocity.x * facing_sign >= 0.0 else -1.0
+	return speed * direction * delta
 
 ## Same resolution TrashSpawner uses: the exported path first, falling back
 ## to searching the current scene for any RoadNetwork.
