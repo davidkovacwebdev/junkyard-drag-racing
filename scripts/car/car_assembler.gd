@@ -107,6 +107,27 @@ static func assemble(body_scene: PackedScene, wheel_scenes: Array[PackedScene], 
 	result.engine = engine_instance
 	return result
 
+## Same as assemble(), but starting from a saved CarModelData (the format
+## Inventory/the garage use) instead of separate body/wheel/engine scenes —
+## loads each part's own scene_path and hands off to assemble(). Every race
+## setup script that puts the player's own garage car on a track goes
+## through this, so there's one place that knows how a CarModelData turns
+## into a real rig. Returns null if the car has no body (or the body has
+## no scene of its own) rather than assembling something with nothing to
+## sit on.
+static func assemble_from_car_data(car_data: CarModelData, parent: Node, spawn_position: Vector2) -> AssembledCar:
+	if car_data == null or car_data.body == null or car_data.body.scene_path.is_empty():
+		return null
+	var body_scene: PackedScene = load(car_data.body.scene_path)
+	var wheel_scenes: Array[PackedScene] = []
+	for wheel in car_data.wheels:
+		if wheel != null and not wheel.scene_path.is_empty():
+			wheel_scenes.append(load(wheel.scene_path))
+	var engine_scene: PackedScene = null
+	if car_data.engine != null and not car_data.engine.scene_path.is_empty():
+		engine_scene = load(car_data.engine.scene_path)
+	return assemble(body_scene, wheel_scenes, engine_scene, parent, spawn_position)
+
 ## The part's own art colour, taken off its first Polygon2D. Nested search on
 ## purpose: the race harness reparents a part's art under a wrapper node, and
 ## the colour is read again later, when a part shatters.

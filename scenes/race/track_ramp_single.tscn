@@ -1,0 +1,144 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/race/surface_stripes.gd" id="1"]
+
+[sub_resource type="RectangleShape2D" id="Shape_start"]
+size = Vector2(800, 60)
+
+[sub_resource type="RectangleShape2D" id="Shape_runway"]
+size = Vector2(1000, 60)
+
+[sub_resource type="RectangleShape2D" id="Shape_lip"]
+size = Vector2(120, 60)
+
+[sub_resource type="RectangleShape2D" id="Shape_landing"]
+size = Vector2(4000, 60)
+
+[sub_resource type="RectangleShape2D" id="Shape_pit"]
+size = Vector2(4100, 60)
+
+[sub_resource type="RectangleShape2D" id="Shape_wall"]
+size = Vector2(80, 500)
+
+[node name="TrackRampSingle" type="Node2D"]
+
+[node name="Start" type="StaticBody2D" parent="."]
+position = Vector2(100, 30)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Start"]
+shape = SubResource("Shape_start")
+
+[node name="Polygon2D" type="Polygon2D" parent="Start"]
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-400, -30, 400, -30, 400, 30, -400, 30)
+
+[node name="Stripes" type="Node2D" parent="Start"]
+script = ExtResource("1")
+point_a = Vector2(-400, -30)
+point_b = Vector2(400, -30)
+
+[node name="Downhill" type="StaticBody2D" parent="."]
+position = Vector2(500, 0)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Downhill"]
+polygon = PackedVector2Array(0, 0, 2500, 1000, 0, 1000)
+
+[node name="Polygon2D" type="Polygon2D" parent="Downhill"]
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(0, 0, 2500, 1000, 0, 1000)
+
+[node name="Stripes" type="Node2D" parent="Downhill"]
+script = ExtResource("1")
+point_a = Vector2(0, 0)
+point_b = Vector2(2500, 1000)
+
+[node name="Runway" type="StaticBody2D" parent="."]
+position = Vector2(3500, 1030)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Runway"]
+shape = SubResource("Shape_runway")
+
+[node name="Polygon2D" type="Polygon2D" parent="Runway"]
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-500, -30, 500, -30, 500, 30, -500, 30)
+
+[node name="Stripes" type="Node2D" parent="Runway"]
+script = ExtResource("1")
+point_a = Vector2(-500, -30)
+point_b = Vector2(500, -30)
+
+[node name="Ramp" type="StaticBody2D" parent="."]
+position = Vector2(4000, 1000)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Ramp"]
+polygon = PackedVector2Array(0, 0, 650, 0, 650, -250)
+
+[node name="Polygon2D" type="Polygon2D" parent="Ramp"]
+color = Color(0.95, 0.55, 0.1, 1)
+polygon = PackedVector2Array(0, 0, 650, 0, 650, -250)
+
+[node name="Stripe" type="Polygon2D" parent="Ramp"]
+color = Color(0.1, 0.1, 0.1, 1)
+polygon = PackedVector2Array(15, -15, 45, -45, 35, -45, 5, -15)
+
+[node name="Stripes" type="Node2D" parent="Ramp"]
+script = ExtResource("1")
+point_a = Vector2(0, 0)
+point_b = Vector2(650, -250)
+interval = 100.0
+color = Color(0.1, 0.1, 0.1, 1)
+
+[node name="RampLip" type="StaticBody2D" parent="."]
+position = Vector2(4710, 780)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RampLip"]
+shape = SubResource("Shape_lip")
+
+[node name="Polygon2D" type="Polygon2D" parent="RampLip"]
+color = Color(0.95, 0.55, 0.1, 1)
+polygon = PackedVector2Array(-60, -30, 60, -30, 60, 30, -60, 30)
+
+[node name="Landing" type="StaticBody2D" parent="."]
+position = Vector2(6800, 800)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Landing"]
+shape = SubResource("Shape_landing")
+
+[node name="Polygon2D" type="Polygon2D" parent="Landing"]
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-2000, -30, 2000, -30, 2000, 30, -2000, 30)
+
+[node name="Stripes" type="Node2D" parent="Landing"]
+script = ExtResource("1")
+point_a = Vector2(-2000, -30)
+point_b = Vector2(2000, -30)
+
+[node name="PitFloor" type="StaticBody2D" parent="."]
+position = Vector2(6800, 1100)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PitFloor"]
+shape = SubResource("Shape_pit")
+
+[node name="Polygon2D" type="Polygon2D" parent="PitFloor"]
+color = Color(0.18, 0.16, 0.15, 1)
+polygon = PackedVector2Array(-2050, -30, 2050, -30, 2050, 30, -2050, 30)
+
+[node name="Stripes" type="Node2D" parent="PitFloor"]
+script = ExtResource("1")
+point_a = Vector2(-2050, -30)
+point_b = Vector2(2050, -30)
+color = Color(0.28, 0.24, 0.22, 1)
+
+[node name="EndWall" type="StaticBody2D" parent="."]
+position = Vector2(8800, 520)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EndWall"]
+shape = SubResource("Shape_wall")
+
+[node name="Polygon2D" type="Polygon2D" parent="EndWall"]
+color = Color(0.7, 0.1, 0.1, 1)
+polygon = PackedVector2Array(-40, -250, 40, -250, 40, 250, -40, 250)
+
+[node name="Stripe" type="Polygon2D" parent="EndWall"]
+color = Color(0.95, 0.8, 0.1, 1)
+polygon = PackedVector2Array(-4, -250, 4, -250, 4, 250, -4, 250)

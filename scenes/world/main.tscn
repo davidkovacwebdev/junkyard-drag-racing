@@ -12,6 +12,8 @@
 [ext_resource type="Resource" path="res://buildings/player_garage.tres" id="10"]
 [ext_resource type="Resource" path="res://buildings/player_garage_shed.tres" id="11"]
 [ext_resource type="Script" path="res://scripts/world/skid_marks_layer.gd" id="12"]
+[ext_resource type="PackedScene" path="res://scenes/world/obstacle.tscn" id="13"]
+[ext_resource type="PackedScene" path="res://scenes/race/race_ramp.tscn" id="14"]
 
 [node name="Main" type="Node2D" unique_id=1332585834]
 
@@ -57,5 +59,12 @@ script = ExtResource("9")
 
 [node name="Junkyard" parent="Sortables" unique_id=446594018 instance=ExtResource("8")]
 position = Vector2(-500, 350)
+
+[node name="Ramp" parent="Sortables" instance=ExtResource("13")]
+position = Vector2(400, 300)
+size = Vector2(220, 160)
+rect_color = Color(0.95, 0.55, 0.1, 1)
+display_name = "Ramp"
+interior_scene = ExtResource("14")
 
 [node name="PauseMenu" parent="." unique_id=1833115279 instance=ExtResource("6")]
