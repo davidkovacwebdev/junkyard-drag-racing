@@ -2,7 +2,7 @@ class_name ComposedBuilding
 extends Obstacle
 ## A building assembled at runtime from a BuildingData loadout — the
 ## Building Creator's counterpart to how CarAssembler turns a saved car
-## loadout into an actual car. The "Press space to enter" interaction and
+## loadout into an actual car. The "Press E to enter" interaction and
 ## interior_scene/test_interior_scene are inherited from Obstacle
 ## unchanged; this adds the part-swapping visual, and deliberately does
 ## NOT call Obstacle._ready() — see below.

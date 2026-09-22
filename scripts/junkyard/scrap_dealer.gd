@@ -1,8 +1,8 @@
 class_name ScrapDealer
 extends StaticBody2D
 ## The junkyard's buyer: the punker from the character creator, standing beside
-## the crane. Drive up to him and left-click for the dialog, which is where the
-## two things worth doing at the yard live:
+## the crane. Drive up to him and press E (or left-click) for the dialog,
+## which is where the two things worth doing at the yard live:
 ##
 ##   1. sell the whole scrap pile for cash,
 ##   2. point the player at the crane pen behind the yard, where they drive the
@@ -16,10 +16,9 @@ extends StaticBody2D
 ##
 ## Duck-typed for PlayerCar the same way TrashProp is:
 ##   - a non-empty `display_name` makes him an interaction target at all,
-##   - `uses_click_interaction()` keeps the space bar out of it (he's
-##     click-only, per the brief) while still letting the tooltip point at him,
-##   - `get_interact_prompt()` supplies the wording, because PlayerCar's default
-##     tooltip talks about the space key.
+##   - `get_interact_prompt()` supplies the wording, because talking to a
+##     person isn't "entering" him, which is PlayerCar's default verb,
+##   - `interact()` is what both E and a left-click end up calling.
 ## Being a StaticBody2D means two things: the car can't drive through him, and
 ## the click has an actual shape to hit — PlayerCar's click is a point query
 ## against the physics world, not a mouse-over test.
@@ -66,6 +65,13 @@ var _actor: Node2D = null
 @onready var _stats: Label = $Dialog/Panel/Layout/StatsLabel
 @onready var _sell_button: Button = $Dialog/Panel/Layout/SellButton
 @onready var _crane_button: Button = $Dialog/Panel/Layout/CraneButton
+@onready var _leave_button: Button = $Dialog/Panel/Layout/LeaveButton
+
+## Number-key shortcuts for the dialog's buttons, in the same top-to-bottom
+## order the numbers printed on them read (see _refresh()/the .tscn's
+## static "3. Walk away") — pressing 1/2/3 is the same as clicking the
+## button in that slot.
+const _OPTION_KEYS := [KEY_1, KEY_2, KEY_3]
 
 func _ready() -> void:
 	var popup := get_node_or_null("Popup") as Label
@@ -81,18 +87,34 @@ func _process(_delta: float) -> void:
 			or global_position.distance_to(_actor.global_position) > dialog_range:
 		_close()
 
-## PlayerCar skips its space-press activation for targets that answer yes here.
-func uses_click_interaction() -> bool:
-	return true
+## Lets the player pick a dialog option by number instead of clicking.
+## Only live while the dialog is actually open, and only consumes the
+## keys it recognizes, so it can't eat input meant for anything else.
+func _unhandled_input(event: InputEvent) -> void:
+	if not _is_open() or not event is InputEventKey or not event.pressed or event.echo:
+		return
+	var options := [_sell_button, _crane_button, _leave_button]
+	var index := _OPTION_KEYS.find(event.keycode)
+	if index == -1 or index >= options.size():
+		return
+	var button: Button = options[index]
+	if button.disabled:
+		return
+	# Marked handled BEFORE emitting: the crane option changes scenes from
+	# inside its own pressed handler, which can free this node (and with it
+	# the viewport reference) before emit() even returns — calling
+	# get_viewport() afterward hit exactly that null.
+	get_viewport().set_input_as_handled()
+	button.pressed.emit()
 
 ## Wording for PlayerCar's proximity tooltip. Shows the haul and the wallet, so
 ## the prompt doubles as the "what have I got" readout at the yard.
 func get_interact_prompt() -> String:
-	return "%s: left-click to talk (%d scrap, $%d)" % [
+	return "%s: E or left-click to talk (%d scrap, $%d)" % [
 		display_name, Inventory.scrap, Inventory.money]
 
-## Called by PlayerCar on a left-click. Opens the dialog rather than trading
-## straight away, because there are two things to do here now.
+## Called by PlayerCar on E or a left-click. Opens the dialog rather than
+## trading straight away, because there are two things to do here now.
 func interact(actor: Node = null) -> void:
 	if actor != null:
 		_actor = actor as Node2D
@@ -131,12 +153,14 @@ func _is_open() -> bool:
 	return is_instance_valid(_dialog) and _dialog.visible
 
 ## Reflect the world in the panel: what he'd pay for the scrap, what a grab
-## costs, and what the player is carrying.
+## costs, and what the player is carrying. Numbers stay pinned to the front
+## of each label (matching LeaveButton's static "3. Walk away") so the
+## _OPTION_KEYS shortcuts always point at the option they visibly label.
 func _refresh() -> void:
-	_sell_button.text = "Sell scrap (%d) for $%d" % [
+	_sell_button.text = "1. Sell scrap (%d) for $%d" % [
 		Inventory.scrap, Inventory.scrap * money_per_scrap]
 	_sell_button.disabled = Inventory.scrap <= 0
-	_crane_button.text = "Take the crane out back ($%d a dig)" % crane_cost
+	_crane_button.text = "2. Take the crane out back ($%d a dig)" % crane_cost
 	_stats.text = "Scrap %d   $%d   Spare parts %d" % [
 		Inventory.scrap, Inventory.money, Inventory.spare_parts.size()]
 

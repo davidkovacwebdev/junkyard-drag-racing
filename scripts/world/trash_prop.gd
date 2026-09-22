@@ -156,18 +156,18 @@ func _apply_state() -> void:
 
 # --- Interaction ---------------------------------------------------------------
 
-## Verb PlayerCar drops into its prompt ("Hold space to loot"). Duck-typed —
+## Verb PlayerCar drops into its prompt ("Hold E to loot"). Duck-typed —
 ## see PlayerCar._process_interaction().
 func get_interact_verb() -> String:
 	return "loot"
 
-## Seconds PlayerCar requires space to be held before looting fires — long
+## Seconds PlayerCar requires E to be held before looting fires — long
 ## enough that a drive-by tap doesn't loot it by accident. Duck-typed, same as
 ## get_interact_verb(); a target with no such method activates instantly.
 func get_interact_hold_duration() -> float:
 	return 0.2
 
-## Called by PlayerCar on space. Kept separate from `loot()` so a future prop
+## Called by PlayerCar on E. Kept separate from `loot()` so a future prop
 ## could interact differently without changing the car.
 func interact(_actor: Node = null) -> void:
 	loot()

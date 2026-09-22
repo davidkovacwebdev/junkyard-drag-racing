@@ -88,18 +88,21 @@ text = "Scrap 0   $0   Spare parts 0"
 
 [node name="SellButton" type="Button" parent="Dialog/Panel/Layout"]
 custom_minimum_size = Vector2(0, 44)
+alignment = 0
 theme_override_font_sizes/font_size = 19
-text = "Sell scrap"
+text = "1. Sell scrap"
 
 [node name="CraneButton" type="Button" parent="Dialog/Panel/Layout"]
 custom_minimum_size = Vector2(0, 44)
+alignment = 0
 theme_override_font_sizes/font_size = 19
-text = "Grab parts with the crane"
+text = "2. Grab parts with the crane"
 
 [node name="LeaveButton" type="Button" parent="Dialog/Panel/Layout"]
 custom_minimum_size = Vector2(0, 44)
+alignment = 0
 theme_override_font_sizes/font_size = 19
-text = "Walk away"
+text = "3. Walk away"
 
 [connection signal="pressed" from="Dialog/Panel/Layout/SellButton" to="." method="_on_sell_pressed"]
 [connection signal="pressed" from="Dialog/Panel/Layout/CraneButton" to="." method="_on_crane_pressed"]

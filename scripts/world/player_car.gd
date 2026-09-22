@@ -50,10 +50,10 @@ extends CharacterBody2D
 @export var skid_mark_fade_time: float = 3.0
 
 var _facing_right: bool = true
-var _space_pressed_last: bool = false
+var _interact_pressed_last: bool = false
 var _test_pressed_last: bool = false
 ## Which target the current hold is building up against, and how far
-## along it is (seconds held). Resets to null/0 the instant space is
+## along it is (seconds held). Resets to null/0 the instant E is
 ## released or the player looks away from that target.
 var _holding_target: Object = null
 var _hold_progress: float = 0.0
@@ -85,13 +85,17 @@ func _ready() -> void:
 	# left the map instead of at the scene's default spawn.
 	if WorldState.has_player_position:
 		global_position = WorldState.player_position
-	# If space was still held when the previous scene ended, don't let it
-	# count as a fresh press here — that would instantly re-enter the place
-	# we just exited.
-	_space_pressed_last = Input.is_physical_key_pressed(KEY_SPACE)
+	# If E was still held when the previous scene ended, don't let it count
+	# as a fresh press here — that would instantly re-enter the place we
+	# just exited.
+	_interact_pressed_last = Input.is_physical_key_pressed(KEY_E)
 	_test_pressed_last = Input.is_physical_key_pressed(KEY_T)
 
-const _DRIVE_KEYS := [KEY_W, KEY_A, KEY_S, KEY_D, KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT, KEY_SPACE, KEY_T]
+# KEY_SPACE stays in here even though nothing reads it for movement yet —
+# it's earmarked for braking (see player_car.gd's own history/notes), and
+# this list's whole job is releasing every drive-relevant key on focus
+# loss, brake included, the moment it starts doing something.
+const _DRIVE_KEYS := [KEY_W, KEY_A, KEY_S, KEY_D, KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT, KEY_SPACE, KEY_E, KEY_T]
 
 func _notification(what: int) -> void:
 	# If the window loses OS focus while a key is held, no key-up event
@@ -105,7 +109,7 @@ func _notification(what: int) -> void:
 			ev.pressed = false
 			Input.parse_input_event(ev)
 		velocity = Vector2.ZERO
-		_space_pressed_last = false
+		_interact_pressed_last = false
 		_test_pressed_last = false
 
 ## Left-click is how you deal with a person rather than a place (the junkyard's
@@ -113,7 +117,7 @@ func _notification(what: int) -> void:
 ## test, because the *car* is what has to be in reach: clicking him only counts
 ## if he's also showing up in the interaction zone, so you can't reach across
 ## the yard. Anything the click handles is consumed so it can't double up with
-## the space path.
+## the E path.
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var click := event as InputEventMouseButton
@@ -299,7 +303,7 @@ func _spawn_skid_segment(a: Vector2, b: Vector2) -> void:
 ## property (duck-typed, not a shared base class) that overlap this zone.
 ## Returns all of them, in physics order: the zone can overlap two things at
 ## once (parked between the scrap dealer and the crane, say), and the caller
-## needs to know about the others to pick one that answers to the space bar.
+## needs to know about the others to pick one that answers to E.
 func _find_interactables() -> Array[Object]:
 	var found: Array[Object] = []
 	for body in _interaction_zone.get_overlapping_bodies():
@@ -311,12 +315,12 @@ func _find_interactables() -> Array[Object]:
 func _process_interaction(delta: float) -> void:
 	var candidates := _find_interactables()
 
-	# Prefer something the space bar can actually work on. A click-only target
-	# (the scrap dealer says so via uses_click_interaction()) is never activated
-	# by space, so letting it shadow a normal target nearby would make the space
-	# bar stop working for no visible reason — but it still gets the tooltip
-	# while nothing else is in reach, otherwise there'd be nothing to tell you
-	# the dealer is clickable at all.
+	# Prefer something E can actually work on. A click-only target (the scrap
+	# dealer says so via uses_click_interaction()) is never activated by E,
+	# so letting it shadow a normal target nearby would make E stop working
+	# for no visible reason — but it still gets the tooltip while nothing
+	# else is in reach, otherwise there'd be nothing to tell you the dealer
+	# is clickable at all.
 	var target: Object = null
 	for candidate in candidates:
 		if not _is_click_only(candidate):
@@ -334,9 +338,9 @@ func _process_interaction(delta: float) -> void:
 		_tooltip_label.visible = false
 
 	var hold_duration := _hold_duration_for(target)
-	var space_pressed := Input.is_physical_key_pressed(KEY_SPACE)
+	var interact_pressed := Input.is_physical_key_pressed(KEY_E)
 
-	if target != null and space_pressed and hold_duration > 0.0:
+	if target != null and interact_pressed and hold_duration > 0.0:
 		if _holding_target != target:
 			_holding_target = target
 			_hold_progress = 0.0
@@ -346,7 +350,7 @@ func _process_interaction(delta: float) -> void:
 			_activate(target)
 			_holding_target = null
 			_hide_hold_bar()
-	elif target != null and space_pressed and not _space_pressed_last:
+	elif target != null and interact_pressed and not _interact_pressed_last:
 		_activate(target)
 		_holding_target = null
 		_hide_hold_bar()
@@ -354,26 +358,26 @@ func _process_interaction(delta: float) -> void:
 		_holding_target = null
 		_hide_hold_bar()
 
-	_space_pressed_last = space_pressed
+	_interact_pressed_last = interact_pressed
 
 	# A second, parallel entry point: T opens a target's test_interior_scene
 	# instead of its real interior_scene, if it has one — lets a place like
 	# the drag strip offer an in-progress alternate version to try without
-	# touching what Space drops you into.
+	# touching what E drops you into.
 	var test_pressed := Input.is_physical_key_pressed(KEY_T)
 	if target != null and test_pressed and not _test_pressed_last:
 		_activate_test(target)
 	_test_pressed_last = test_pressed
 
 ## True for a target that only answers to a mouse click. It still advertises
-## `display_name` (so the car can find it and click it) but the space prompt
+## `display_name` (so the car can find it and click it) but the E prompt
 ## and the hold bar are skipped for it.
 func _is_click_only(target: Object) -> bool:
 	if target != null and target.has_method("uses_click_interaction"):
 		return bool(target.call("uses_click_interaction"))
 	return false
 
-## The tooltip line. The default is about the space key, which is the wrong
+## The tooltip line. The default is about the E key, which is the wrong
 ## thing to say about a click-only target, so a target can write its own
 ## (the dealer's doubles as the "how much scrap have I got" readout).
 func _interact_prompt(target: Object) -> String:
@@ -382,7 +386,7 @@ func _interact_prompt(target: Object) -> String:
 		if typeof(line) == TYPE_STRING and line != "":
 			return line
 	var verb_prompt := "Hold" if _hold_duration_for(target) > 0.0 else "Press"
-	return "%s: %s space to %s" % [target.display_name, verb_prompt, _interact_verb(target)]
+	return "%s: %s E to %s" % [target.display_name, verb_prompt, _interact_verb(target)]
 
 ## Tooltip color. Defaults to the label's own authored white; a target can
 ## override via the duck-typed get_interact_prompt_color() (the registration
