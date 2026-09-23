@@ -1,0 +1,51 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/tree_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/tree_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_trunk_pine"]
+script = ExtResource("2")
+id = &"trunk_pine"
+display_name = "Pine Trunk"
+slot = 0
+
+[node name="PineTrunk" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_trunk_pine")
+footprint_size = Vector2(46, 36)
+
+[node name="Shadow" type="Polygon2D" parent="."]
+color = Color(0, 0, 0, 0.18)
+polygon = PackedVector2Array(-40, -1, -26, -6, 0, -8, 26, -6, 40, -1, 26, 3, 0, 4, -26, 3)
+
+[node name="Body" type="Polygon2D" parent="."]
+color = Color(0.36, 0.25, 0.18, 1)
+polygon = PackedVector2Array(-15, 0, 15, 0, 11, -205, -11, -205)
+
+[node name="Shade" type="Polygon2D" parent="."]
+color = Color(0.28, 0.19, 0.13, 1)
+polygon = PackedVector2Array(5, 0, 15, 0, 11, -205, 7, -205)
+
+[node name="RootLeft" type="Polygon2D" parent="."]
+color = Color(0.32, 0.22, 0.15, 1)
+polygon = PackedVector2Array(-15, 0, -15, -22, -32, 0)
+
+[node name="RootRight" type="Polygon2D" parent="."]
+color = Color(0.32, 0.22, 0.15, 1)
+polygon = PackedVector2Array(15, 0, 15, -22, 32, 0)
+
+[node name="Knot" type="Polygon2D" parent="."]
+color = Color(0.26, 0.18, 0.12, 1)
+polygon = PackedVector2Array(-6, -86, 6, -86, 6, -100, -6, -100)
+
+[node name="BarkDash1" type="Polygon2D" parent="."]
+color = Color(0.44, 0.32, 0.22, 1)
+polygon = PackedVector2Array(-12, -60, -2, -60, -2, -56, -12, -56)
+
+[node name="BarkDash2" type="Polygon2D" parent="."]
+color = Color(0.44, 0.32, 0.22, 1)
+polygon = PackedVector2Array(-8, -124, 4, -124, 4, -120, -8, -120)
+
+[node name="BarkDash3" type="Polygon2D" parent="."]
+color = Color(0.44, 0.32, 0.22, 1)
+polygon = PackedVector2Array(-12, -168, -3, -168, -3, -164, -12, -164)

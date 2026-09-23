@@ -1,3 +1,4 @@
+@tool
 class_name TrashProp
 extends StaticBody2D
 ## Roadside trash you can open: a big `CONTAINER` (open-top dumpster) or a small
@@ -63,7 +64,6 @@ enum Kind {
 @export_group("Colors")
 @export var body_color: Color = Color(0.34, 0.42, 0.4, 1)
 @export var lid_color: Color = Color(0.29, 0.35, 0.34, 1)
-@export var outline_color: Color = Color(0.14, 0.17, 0.16, 0.85)
 @export var trim_color: Color = Color(0.58, 0.6, 0.55, 1)
 ## Inside of the box, visible once the lid swings open.
 @export var interior_color: Color = Color(0.13, 0.15, 0.15, 1)
@@ -138,6 +138,12 @@ static func footprint_for(target: Kind) -> Vector2:
 
 func _ready() -> void:
 	_prompt_name = display_name
+	if Engine.is_editor_hint():
+		# Editor preview: draw the prop in whatever state is authored on the
+		# scene. WorldState isn't reachable from the editor, and nothing below
+		# runs, so merely opening the scene can't rewrite it.
+		queue_redraw()
+		return
 	# WorldState owns the answer to "is there anything in this one?" — it's the
 	# only thing that knows which props are empty and which have restocked.
 	filled = WorldState.is_prop_full(loot_id)
@@ -145,7 +151,15 @@ func _ready() -> void:
 
 ## Size the collision to this kind's footprint and decide whether the prop is
 ## still worth offering to the player.
+##
+## Editor mode only redraws: the derived collision and the blanked
+## `display_name` are runtime state, so writing them while editing would save
+## that state into the scene (and blanking a hand-placed prop's name would be
+## permanent, since `_prompt_name` is captured from it on load).
 func _apply_state() -> void:
+	if Engine.is_editor_hint():
+		queue_redraw()
+		return
 	display_name = _prompt_name if filled else ""
 	var shape := get_node_or_null("CollisionShape2D") as CollisionShape2D
 	if shape != null:
@@ -153,6 +167,17 @@ func _apply_state() -> void:
 		shape.shape = RoundedRectShape.build(footprint, corner_radius)
 		shape.position = Vector2(0.0, -footprint.y * 0.5)
 	queue_redraw()
+
+## Redraw when an exported property is changed in the editor, so swapping a bin
+## for a dumpster or editing one of the Colors updates the viewport straight
+## away instead of waiting for the next reload. `filled` has its own setter and
+## never gets here. Always returns false, i.e. "not handled", so Godot still
+## assigns the property itself — this only ever adds a redraw, never a state
+## change, and the guard keeps it out of the runtime path entirely.
+func _set(_property: StringName, _value: Variant) -> bool:
+	if Engine.is_editor_hint():
+		queue_redraw()
+	return false
 
 # --- Interaction ---------------------------------------------------------------
 
@@ -313,7 +338,8 @@ func _draw() -> void:
 		_draw_trash(top, height, lid_h, rng)
 	_draw_base(bottom)
 
-## The tapered steel box, plus ribs and rust patches.
+## The tapered steel box, plus a shaded side face, ribs and rust patches. Every
+## shape here is a flat fill — no outline strokes, matching the house/tree art.
 func _draw_body(bottom: float, top: float, height: float, rng: RandomNumberGenerator) -> void:
 	var body := PackedVector2Array([
 		Vector2(-bottom * 0.5, 0.0),
@@ -331,12 +357,31 @@ func _draw_body(bottom: float, top: float, height: float, rng: RandomNumberGener
 		Vector2(-top * 0.5, -height + height * 0.16),
 	]), body_color.lightened(0.12))
 
+	# Shaded side face, so the box reads as a solid volume instead of a flat
+	# outline drawing — the same trick the tree trunks use for their `Shade`
+	# panel.
+	var shade_share := 0.3
+	draw_colored_polygon(PackedVector2Array([
+		Vector2(bottom * 0.5 - bottom * shade_share, 0.0),
+		Vector2(bottom * 0.5, 0.0),
+		Vector2(top * 0.5, -height),
+		Vector2(top * 0.5 - top * shade_share, -height),
+	]), body_color.darkened(0.18))
+
+	# Panel seams as thin flat ridges rather than stroked lines.
 	var ribs := 4 if kind == Kind.CONTAINER else 2
+	var rib_half := 1.5
+	var rib_color := body_color.lightened(0.1)
 	for i in ribs:
 		var t := (float(i) + 0.5) / float(ribs)
-		var x := lerpf(-bottom * 0.5, bottom * 0.5, t)
-		draw_line(Vector2(x, -5.0), Vector2(x * (top / bottom), -height + 5.0),
-				body_color.darkened(0.24), 2.0)
+		var xb := lerpf(-bottom * 0.5, bottom * 0.5, t)
+		var xt := xb * (top / bottom)
+		draw_colored_polygon(PackedVector2Array([
+			Vector2(xb - rib_half, -5.0),
+			Vector2(xb + rib_half, -5.0),
+			Vector2(xt + rib_half, -height + 5.0),
+			Vector2(xt - rib_half, -height + 5.0),
+		]), rib_color)
 
 	var patches := 2 if kind == Kind.CONTAINER else 1
 	for i in patches:
@@ -344,9 +389,6 @@ func _draw_body(bottom: float, top: float, height: float, rng: RandomNumberGener
 			rng.randf_range(-bottom * 0.34, bottom * 0.34),
 			rng.randf_range(-height * 0.78, -height * 0.25))
 		draw_colored_polygon(_blob(center, bottom * 0.24, height * 0.24, rng), rust_color)
-
-	draw_polyline(PackedVector2Array([body[0], body[1], body[2], body[3], body[0]]),
-			outline_color, 2.0)
 
 ## The shaded inside of the box. Drawn before the lid, so a closed (full) lid
 ## hides it and an open (empty) lid leaves it plainly visible.
@@ -361,8 +403,14 @@ func _draw_interior(top: float, height: float) -> void:
 		Vector2(-half * 0.86, -height + depth),
 	])
 	draw_colored_polygon(inner, interior_color)
-	# A faint far wall, so it reads as a box with depth rather than a hole.
-	draw_line(inner[0], inner[1], interior_color.lightened(0.22), 3.0)
+	# A flat lighter far wall, so it reads as a box with depth rather than a
+	# hole. A filled band, not a stroked line — this art has no outlines.
+	draw_colored_polygon(PackedVector2Array([
+		inner[0],
+		inner[1],
+		inner[1] + Vector2(0.0, 5.0),
+		inner[0] + Vector2(0.0, 5.0),
+	]), interior_color.lightened(0.22))
 
 ## The lid, hinged at its left edge and rotated as a unit: nearly shut while
 ## there's trash holding it up, swung right back once the box is empty.
@@ -379,8 +427,21 @@ func _draw_lid(top: float, height: float, lid_h: float) -> void:
 		Vector2(0.0, -lid_h * 0.82),
 	])
 	draw_colored_polygon(lid, lid_color)
-	draw_polyline(PackedVector2Array([lid[0], lid[1], lid[2], lid[3], lid[0]]),
-			outline_color, 2.0)
+	# Flat shading bands instead of an outline: a lit top face and a darker
+	# front lip, the same way the crate/building parts model an edge.
+	var edge := 3.0
+	draw_colored_polygon(PackedVector2Array([
+		Vector2(0.0, 0.0),
+		Vector2(lid_w, -lid_h * 0.18),
+		Vector2(lid_w, -lid_h * 0.18 + edge),
+		Vector2(0.0, edge),
+	]), lid_color.darkened(0.22))
+	draw_colored_polygon(PackedVector2Array([
+		Vector2(0.0, -lid_h * 0.82),
+		Vector2(lid_w, -lid_h),
+		Vector2(lid_w, -lid_h + edge),
+		Vector2(0.0, -lid_h * 0.82 + edge),
+	]), lid_color.lightened(0.14))
 	# Grab handle on top, and the hinge pin at this end.
 	draw_rect(Rect2(lid_w * 0.5 - 13.0, -lid_h - 6.0, 26.0, 6.0), trim_color)
 	draw_circle(Vector2(0.0, -lid_h * 0.4), 4.0, trim_color)

@@ -1,0 +1,50 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/tree_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/tree_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_decoration_mushrooms"]
+script = ExtResource("2")
+id = &"decoration_mushrooms"
+display_name = "Mushrooms"
+slot = 2
+
+[node name="Mushrooms" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_decoration_mushrooms")
+
+[node name="Stem1" type="Polygon2D" parent="."]
+color = Color(0.86, 0.82, 0.7, 1)
+polygon = PackedVector2Array(-45, -2, -39, -2, -40, -13, -44, -13)
+
+[node name="Cap1" type="Polygon2D" parent="."]
+color = Color(0.72, 0.24, 0.19, 1)
+polygon = PackedVector2Array(-50, -12, -34, -12, -38, -23, -46, -23)
+
+[node name="Spot1" type="Polygon2D" parent="."]
+color = Color(0.95, 0.93, 0.86, 1)
+polygon = PackedVector2Array(-47, -16, -43, -16, -44, -19, -48, -19)
+
+[node name="Spot2" type="Polygon2D" parent="."]
+color = Color(0.95, 0.93, 0.86, 1)
+polygon = PackedVector2Array(-41, -19, -38, -19, -39, -22, -42, -22)
+
+[node name="Stem2" type="Polygon2D" parent="."]
+color = Color(0.86, 0.82, 0.7, 1)
+polygon = PackedVector2Array(-29, -2, -24, -2, -25, -9, -28, -9)
+
+[node name="Cap2" type="Polygon2D" parent="."]
+color = Color(0.72, 0.24, 0.19, 1)
+polygon = PackedVector2Array(-33, -9, -21, -9, -24, -17, -30, -17)
+
+[node name="Spot3" type="Polygon2D" parent="."]
+color = Color(0.95, 0.93, 0.86, 1)
+polygon = PackedVector2Array(-30, -12, -26, -12, -27, -15, -31, -15)
+
+[node name="Stem3" type="Polygon2D" parent="."]
+color = Color(0.86, 0.82, 0.7, 1)
+polygon = PackedVector2Array(-58, -1, -54, -1, -55, -6, -57, -6)
+
+[node name="Cap3" type="Polygon2D" parent="."]
+color = Color(0.72, 0.24, 0.19, 1)
+polygon = PackedVector2Array(-61, -6, -51, -6, -53, -12, -59, -12)

@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/tree_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/tree_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_decoration_nest"]
+script = ExtResource("2")
+id = &"decoration_nest"
+display_name = "Bird Nest"
+slot = 2
+
+[node name="BirdNest" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_decoration_nest")
+
+[node name="TwigLeft" type="Polygon2D" parent="."]
+color = Color(0.3, 0.24, 0.15, 1)
+polygon = PackedVector2Array(34, -238, 48, -232, 50, -230, 36, -236)
+
+[node name="TwigRight" type="Polygon2D" parent="."]
+color = Color(0.3, 0.24, 0.15, 1)
+polygon = PackedVector2Array(86, -238, 70, -232, 68, -230, 84, -236)
+
+[node name="Outer" type="Polygon2D" parent="."]
+color = Color(0.4, 0.32, 0.2, 1)
+polygon = PackedVector2Array(42, -228, 78, -228, 86, -238, 78, -248, 42, -248, 34, -238)
+
+[node name="Inner" type="Polygon2D" parent="."]
+color = Color(0.24, 0.19, 0.12, 1)
+polygon = PackedVector2Array(50, -234, 70, -234, 74, -240, 70, -245, 50, -245, 46, -240)
+
+[node name="Egg1" type="Polygon2D" parent="."]
+color = Color(0.9, 0.88, 0.78, 1)
+polygon = PackedVector2Array(54, -238, 60, -238, 61, -243, 57, -245, 54, -243)
+
+[node name="Egg2" type="Polygon2D" parent="."]
+color = Color(0.88, 0.86, 0.76, 1)
+polygon = PackedVector2Array(63, -238, 68, -238, 69, -243, 65, -245, 62, -243)

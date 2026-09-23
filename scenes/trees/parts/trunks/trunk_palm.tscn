@@ -1,0 +1,51 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/tree_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/tree_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_trunk_palm"]
+script = ExtResource("2")
+id = &"trunk_palm"
+display_name = "Palm Trunk"
+slot = 0
+
+[node name="PalmTrunk" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_trunk_palm")
+footprint_size = Vector2(48, 34)
+
+[node name="Shadow" type="Polygon2D" parent="."]
+color = Color(0, 0, 0, 0.18)
+polygon = PackedVector2Array(-40, -1, -26, -6, 0, -8, 26, -6, 40, -1, 26, 3, 0, 4, -26, 3)
+
+[node name="Body" type="Polygon2D" parent="."]
+color = Color(0.66, 0.53, 0.36, 1)
+polygon = PackedVector2Array(-14, 0, 14, 0, 18, -95, 20, -190, 6, -190, 2, -95)
+
+[node name="Shade" type="Polygon2D" parent="."]
+color = Color(0.56, 0.44, 0.29, 1)
+polygon = PackedVector2Array(6, 0, 14, 0, 18, -95, 20, -190, 16, -190, 14, -95)
+
+[node name="Ring1" type="Polygon2D" parent="."]
+color = Color(0.55, 0.43, 0.29, 1)
+polygon = PackedVector2Array(-7, -40, 15, -40, 15, -34, -7, -34)
+
+[node name="Ring2" type="Polygon2D" parent="."]
+color = Color(0.55, 0.43, 0.29, 1)
+polygon = PackedVector2Array(-1, -75, 16, -75, 16, -69, -1, -69)
+
+[node name="Ring3" type="Polygon2D" parent="."]
+color = Color(0.55, 0.43, 0.29, 1)
+polygon = PackedVector2Array(2, -110, 18, -110, 18, -104, 2, -104)
+
+[node name="Ring4" type="Polygon2D" parent="."]
+color = Color(0.55, 0.43, 0.29, 1)
+polygon = PackedVector2Array(4, -145, 18, -145, 18, -139, 4, -139)
+
+[node name="Ring5" type="Polygon2D" parent="."]
+color = Color(0.55, 0.43, 0.29, 1)
+polygon = PackedVector2Array(5, -180, 19, -180, 19, -174, 5, -174)
+
+[node name="CrownBase" type="Polygon2D" parent="."]
+color = Color(0.5, 0.38, 0.26, 1)
+polygon = PackedVector2Array(2, -186, 20, -186, 24, -198, 6, -202)

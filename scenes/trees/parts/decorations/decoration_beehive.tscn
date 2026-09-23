@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/tree_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/tree_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_decoration_beehive"]
+script = ExtResource("2")
+id = &"decoration_beehive"
+display_name = "Beehive"
+slot = 2
+
+[node name="Beehive" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_decoration_beehive")
+
+[node name="Hive" type="Polygon2D" parent="."]
+color = Color(0.62, 0.54, 0.38, 1)
+polygon = PackedVector2Array(52, -150, 46, -134, 30, -128, 14, -134, 8, -150, 14, -166, 30, -172, 46, -166)
+
+[node name="Band1" type="Polygon2D" parent="."]
+color = Color(0.52, 0.45, 0.32, 1)
+polygon = PackedVector2Array(9, -145, 51, -145, 51, -140, 9, -140)
+
+[node name="Band2" type="Polygon2D" parent="."]
+color = Color(0.52, 0.45, 0.32, 1)
+polygon = PackedVector2Array(9, -158, 51, -158, 51, -153, 9, -153)
+
+[node name="Entrance" type="Polygon2D" parent="."]
+color = Color(0.22, 0.18, 0.13, 1)
+polygon = PackedVector2Array(27, -141, 37, -141, 37, -149, 27, -149)

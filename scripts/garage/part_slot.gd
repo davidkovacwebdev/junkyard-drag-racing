@@ -6,7 +6,8 @@ extends PanelContainer
 ## just started from the other side — whichever PartSlot receives the
 ## drop just tells `garage` to equip the dragged part into the
 ## currently-viewed car's matching category, regardless of which slot
-## it lands on.
+## it lands on. A wheel dropped here has no mount to aim at, so it takes
+## the first mount not already wearing it, one drop per mount.
 ##
 ## Layout: icon on the left, title + Durability/Speed/Mass stat bars
 ## on the right.
@@ -57,16 +58,27 @@ func _on_mouse_exited() -> void:
 	_hovering = false
 	_animate_background()
 
-func set_part(new_part: PartData) -> void:
+func set_part(new_part: PartData, count: int = 1) -> void:
 	part = new_part
 	_icon.show_part(part.scene_path if part != null else "")
-	_title_label.text = part.display_name if part != null else "—"
+	_title_label.text = _title_for(part, count)
 	_durability_bar.set_rating(_rating(part.durability, PartData.DURABILITY_RANGE) if part != null else 0)
 	_speed_bar.set_rating(_rating(part.speed, PartData.SPEED_RANGE) if part != null else 0)
 	_mass_bar.set_rating(_rating(part.mass, PartData.MASS_RANGE) if part != null else 0)
 	if _style != null:
 		_style.border_color = PartData.tier_color(part.tier) if part != null else _base_panel_style.border_color
 	_animate_background()
+
+## "Standard Wheel x2" — how many copies of this part the player owns, fitted
+## or loose. Fitting MOVES a copy rather than cloning one, so the count is what
+## tells four tires apart from one; without it a lone tire looks like it should
+## be able to fill the car. One copy is the normal case, so it stays quiet.
+static func _title_for(shown: PartData, show_count: int) -> String:
+	if shown == null:
+		return "—"
+	if show_count <= 1:
+		return shown.display_name
+	return "%s x%d" % [shown.display_name, show_count]
 
 static func _rating(value: float, stat_range: Vector2) -> int:
 	var t := clampf((value - stat_range.x) / (stat_range.y - stat_range.x), 0.0, 1.0)

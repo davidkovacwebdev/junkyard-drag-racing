@@ -51,6 +51,11 @@ const POPUP_RISE := 42.0
 const POPUP_LIFETIME := 1.05
 const POPUP_WIDTH := 260.0
 
+## Opt out of `LIFETIME`'s cleanup. Set by the dev menu (see `DevMenu`): loot
+## spawned on purpose is there to be tested against, not to quietly evaporate
+## thirty seconds later while its owner is still reading the parts list.
+var persistent := false
+
 @export_group("Colors")
 ## Body of the ball. `PartPickup` retints this per part category, so the rare
 ## drops announce what they are at a glance.
@@ -145,14 +150,15 @@ func _process(delta: float) -> void:
 		return
 
 	_bob_phase += delta * BOB_SPEED
-	_age += delta
-	if _age >= LIFETIME:
-		queue_free()
-		return
-	# Fade out over the last stretch so an ignored orb quietly evaporates
-	# instead of vanishing on a frame boundary.
-	var remaining := LIFETIME - _age
-	modulate.a = clampf(remaining / FADE_TIME, 0.0, 1.0) if remaining < FADE_TIME else 1.0
+	if not persistent:
+		_age += delta
+		if _age >= LIFETIME:
+			queue_free()
+			return
+		# Fade out over the last stretch so an ignored orb quietly evaporates
+		# instead of vanishing on a frame boundary.
+		var remaining := LIFETIME - _age
+		modulate.a = clampf(remaining / FADE_TIME, 0.0, 1.0) if remaining < FADE_TIME else 1.0
 	_orb_offset = _rest_offset + Vector2(0.0, sin(_bob_phase) * BOB_HEIGHT)
 	_sync_icon()
 	queue_redraw()

@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/tree_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/tree_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_decoration_moss"]
+script = ExtResource("2")
+id = &"decoration_moss"
+display_name = "Moss"
+slot = 2
+
+[node name="Moss" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_decoration_moss")
+
+[node name="MoundLeft" type="Polygon2D" parent="."]
+color = Color(0.3, 0.42, 0.22, 1)
+polygon = PackedVector2Array(-48, 0, -34, -7, -14, -5, -4, 0)
+
+[node name="TuftLeft1" type="Polygon2D" parent="."]
+color = Color(0.36, 0.5, 0.26, 1)
+polygon = PackedVector2Array(-40, -2, -36, -14, -31, -2)
+
+[node name="TuftLeft2" type="Polygon2D" parent="."]
+color = Color(0.32, 0.45, 0.24, 1)
+polygon = PackedVector2Array(-30, -2, -25, -11, -21, -2)
+
+[node name="MoundRight" type="Polygon2D" parent="."]
+color = Color(0.3, 0.42, 0.22, 1)
+polygon = PackedVector2Array(6, 0, 18, -6, 36, -4, 46, 0)
+
+[node name="TuftRight1" type="Polygon2D" parent="."]
+color = Color(0.36, 0.5, 0.26, 1)
+polygon = PackedVector2Array(16, -1, 21, -12, 26, -1)
+
+[node name="TuftRight2" type="Polygon2D" parent="."]
+color = Color(0.32, 0.45, 0.24, 1)
+polygon = PackedVector2Array(28, -1, 33, -9, 38, -1)
