@@ -27,6 +27,15 @@ func _ready() -> void:
 	if part_data != null:
 		current_durability = part_data.durability
 
+## For a caller that pauses this tracker (set_physics_process(false)) for a
+## stretch and later re-arms it: without this, the first step back would
+## compare the part's current velocity against whatever _prev_velocity was
+## when it got paused, reading as one huge Δv spike and breaking the part
+## on a hit that never actually happened.
+func resync() -> void:
+	if is_instance_valid(target):
+		_prev_velocity = target.linear_velocity
+
 func _physics_process(_delta: float) -> void:
 	# is_instance_valid, not a plain null check: target is a dangling
 	# reference (not nulled out) once queue_free()'d, which a `== null`

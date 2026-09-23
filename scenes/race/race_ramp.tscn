@@ -18,6 +18,7 @@ finish_x = 100000.0
 max_duration = 100000.0
 camera_path = NodePath("../MainCamera")
 exit_scene_path = "res://scenes/world/main.tscn"
+end_delay = 3.0
 
 [node name="MainCamera" type="Camera2D" parent="."]
 position = Vector2(400, 150)

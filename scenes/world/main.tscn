@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" path="res://scenes/garage/garage.tscn" id="3"]
 [ext_resource type="Script" uid="uid://cu6o77berdu32" path="res://scripts/world/road.gd" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/world/drag_strip.tscn" id="5"]
-[ext_resource type="PackedScene" path="res://scenes/world/pause_menu.tscn" id="6"]
+[ext_resource type="PackedScene" uid="uid://bgff7e404jhvq" path="res://scenes/world/pause_menu.tscn" id="6"]
 [ext_resource type="Script" uid="uid://cxavmo7w253pf" path="res://scripts/world/trash_spawner.gd" id="7"]
 [ext_resource type="PackedScene" path="res://scenes/world/junkyard.tscn" id="8"]
 [ext_resource type="Script" uid="uid://ndh2o15pw6to" path="res://scripts/world/house_spawner.gd" id="9"]
@@ -175,7 +175,7 @@ script = ExtResource("9")
 [node name="Junkyard" parent="Sortables" unique_id=446594018 instance=ExtResource("8")]
 position = Vector2(-1200, 994)
 
-[node name="Ramp" parent="Sortables" instance=ExtResource("16")]
+[node name="Ramp" parent="Sortables" unique_id=1499947680 instance=ExtResource("16")]
 position = Vector2(400, 300)
 size = Vector2(220, 160)
 rect_color = Color(0.95, 0.55, 0.1, 1)

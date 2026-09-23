@@ -23,6 +23,15 @@ extends Node2D
 ## map instead of leaving you stranded on the track. Empty falls back to
 ## DEFAULT_EXIT_SCENE. Headless runs always just quit instead.
 @export_file("*.tscn") var exit_scene_path: String = ""
+## How long to sit on the finished/wrecked scene before actually leaving —
+## 0 keeps the original instant handoff (the drag strip: other cars are
+## usually still finishing, so the moment every one of them is done there's
+## nothing left to look at). A single-car scene needs this above 0: with
+## just one entry, that car being destroyed alone satisfies "all
+## finished" and would otherwise cut away the very same physics step the
+## crash happens, before PartShatter's pieces have even had a frame to
+## fly.
+@export var end_delay: float = 0.0
 ## Where Escape (and the end-of-race handoff) goes when `exit_scene_path`
 ## isn't set. Escape always has to get you out of a race, so there's a hard
 ## fallback rather than a dead key on the standalone test scenes.
@@ -129,7 +138,10 @@ func _end_race(reason: String) -> void:
 			print("    %s DESTROYED" % entry["name"])
 			continue
 		print("    %s final x=%.1f%s" % [entry["name"], car.body.global_position.x, " [finished]" if entry["finished"] else ""])
-	exit_race()
+	if end_delay > 0.0:
+		get_tree().create_timer(end_delay).timeout.connect(exit_race)
+	else:
+		exit_race()
 
 ## Single way out of a race: back to `exit_scene_path`, or DEFAULT_EXIT_SCENE
 ## when the scene doesn't set one. Headless runs quit so test runs don't hang.
