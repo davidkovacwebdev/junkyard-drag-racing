@@ -1,3 +1,4 @@
+@tool
 class_name JunkyardCrane
 extends Node2D
 ## The junkyard's scrap crane: crawler tracks, a turret, a lattice mast and a

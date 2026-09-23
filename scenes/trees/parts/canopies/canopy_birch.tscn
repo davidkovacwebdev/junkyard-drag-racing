@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/tree_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/tree_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_canopy_birch"]
+script = ExtResource("2")
+id = &"canopy_birch"
+display_name = "Birch Canopy"
+slot = 1
+
+[node name="BirchCanopy" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_canopy_birch")
+
+[node name="LobeMain" type="Polygon2D" parent="."]
+color = Color(0.44, 0.56, 0.26, 1)
+polygon = PackedVector2Array(70, -225, 49, -176, 0, -155, -49, -176, -70, -225, -49, -274, 0, -295, 49, -274)
+
+[node name="LobeLeft" type="Polygon2D" parent="."]
+color = Color(0.48, 0.6, 0.3, 1)
+polygon = PackedVector2Array(-4, -215, -18, -181, -52, -167, -86, -181, -100, -215, -86, -249, -52, -263, -18, -249)
+
+[node name="LobeRight" type="Polygon2D" parent="."]
+color = Color(0.52, 0.64, 0.33, 1)
+polygon = PackedVector2Array(104, -222, 90, -188, 56, -174, 22, -188, 8, -222, 22, -256, 56, -270, 90, -256)
+
+[node name="LobeTop" type="Polygon2D" parent="."]
+color = Color(0.56, 0.68, 0.36, 1)
+polygon = PackedVector2Array(44, -268, 32, -240, 4, -228, -24, -240, -36, -268, -24, -296, 4, -308, 32, -296)

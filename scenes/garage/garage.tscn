@@ -111,6 +111,17 @@ columns = 2
 theme_override_constants/h_separation = 14
 theme_override_constants/v_separation = 14
 
+[node name="PartsEmptyLabel" type="Label" parent="."]
+offset_left = 460.0
+offset_top = 90.0
+offset_right = 1140.0
+offset_bottom = 170.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.7, 0.68, 0.65, 1)
+theme_override_font_sizes/font_size = 18
+text = "No spare parts — everything you own is on a car."
+horizontal_alignment = 1
+
 [connection signal="pressed" from="PrevButton" to="." method="_on_prev_pressed"]
 [connection signal="pressed" from="NextButton" to="." method="_on_next_pressed"]
 [connection signal="pressed" from="BodyFilterButton" to="." method="_on_body_filter_pressed"]

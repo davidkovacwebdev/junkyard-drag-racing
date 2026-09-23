@@ -26,6 +26,8 @@ Inventory="*res://autoload/inventory.gd"
 WorldState="*res://autoload/world_state.gd"
 SaveSystem="*res://autoload/save_system.gd"
 DayNightCycle="*res://autoload/day_night_cycle.gd"
+Weather="*res://autoload/weather.gd"
+DevMenu="*res://scenes/ui/dev_menu.tscn"
 
 [display]
 
@@ -34,7 +36,7 @@ window/stretch/aspect="expand"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/building_creator/plugin.cfg", "res://addons/character_creator/plugin.cfg")
+enabled=PackedStringArray("res://addons/tree_creator/plugin.cfg")
 
 [gui]
 

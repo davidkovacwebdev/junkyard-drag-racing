@@ -9,6 +9,11 @@ extends CharacterBody2D
 ## case here, since the lean is cosmetic and the car's heading is still
 ## only ever left or right.
 
+## Group the player's car belongs to. It's how something with no path to the
+## world scene — the `DevMenu` autoload, say — finds the car to put things next
+## to, without guessing at node names or tree shape.
+const GROUP := &"player"
+
 @export var max_speed: float = 420.0
 @export var acceleration: float = 1800.0
 @export var friction: float = 1800.0
@@ -52,6 +57,20 @@ extends CharacterBody2D
 @export var skid_mark_hold_time: float = 2.0
 @export var skid_mark_fade_time: float = 3.0
 
+## Multiplier on handling while the car is standing in a puddle — how much
+## grip the water takes away. This scales the same rate that governs both
+## accelerating and changing direction, so a low value doesn't stop the car,
+## it makes it keep the momentum it already had and slide through a turn
+## instead of carving it. The puddles only appear once `Weather` has soaked
+## the road, so a dry map still grips normally.
+@export var puddle_slip_multiplier: float = 0.3
+## The heading change that starts a skid, on a wet patch. Much smaller than
+## the dry threshold, so the same input that grips on tarmac peels out here.
+@export var puddle_skid_angle_threshold: float = deg_to_rad(20.0)
+## Same resolution again, for the puddle layer the slip test reads. See
+## PuddleField.is_on_puddle().
+@export var puddles_path: NodePath = ^"../Puddles"
+
 ## How far the car leans at full vertical speed, in radians. Climbing W
 ## tips the nose up, descending S tips it down; it eases back to level the
 ## moment the vertical input stops. Deliberately small — it's a hint of a
@@ -83,6 +102,10 @@ var _hold_progress: float = 0.0
 
 var _road_network: RoadNetwork = null
 var _skid_marks: SkidMarksLayer = null
+## Standing water the car can lose grip on (see PuddleField). Null on a map
+## without a puddle layer — the drag strip races, say — which just means
+## nothing is ever wet.
+var _puddles: PuddleField = null
 ## Last stamped world position per wheel mount index; null means that
 ## wheel isn't mid-skid (either never started, or realigned and got
 ## cleared) so the next stamp starts fresh instead of drawing a long
@@ -91,8 +114,10 @@ var _skid_last_stamp: Array = []
 
 func _ready() -> void:
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
+	add_to_group(GROUP)
 	_road_network = _resolve_roads()
 	_skid_marks = _resolve_skid_marks()
+	_puddles = _resolve_puddles()
 	var car := Inventory.get_selected_car()
 	if car != null:
 		_visual.build_from(car)
@@ -179,14 +204,17 @@ func _physics_process(delta: float) -> void:
 		_facing_right = false
 	_visual.scale.x = 1.0 if _facing_right else -1.0
 
+	# One on-road check feeds both multipliers, rather than querying the
+	# road network twice for the same answer. The puddle check sits beside it
+	# and feeds the skid test too — standing water lets the tires go with far
+	# less provocation than dry tarmac.
+	var on_road := _road_network != null and _road_network.is_on_road(global_position)
+	var on_puddle := _puddles != null and _puddles.is_on_puddle(global_position)
+
 	# Compared against velocity as it stood BEFORE this frame's move_toward
 	# touches it — "the car was already heading this way" — against the
 	# input direction just read above, "now the player wants that way".
-	var skidding := _is_skidding(input_dir)
-
-	# One on-road check feeds both multipliers, rather than querying the
-	# road network twice for the same answer.
-	var on_road := _road_network != null and _road_network.is_on_road(global_position)
+	var skidding := _is_skidding(input_dir, on_puddle)
 
 	var target_velocity := Vector2.ZERO
 	if input_dir != Vector2.ZERO:
@@ -195,6 +223,10 @@ func _physics_process(delta: float) -> void:
 			speed_multiplier *= sprint_speed_multiplier
 		target_velocity = input_dir.normalized() * max_speed * speed_multiplier
 	var handling_multiplier := on_road_handling_multiplier if on_road else off_road_handling_multiplier
+	if on_puddle:
+		# Grip, not speed: the car can still carry its momentum, it just
+		# can't change what it's doing anything like as quickly.
+		handling_multiplier *= puddle_slip_multiplier
 	var accel_rate := (acceleration if input_dir != Vector2.ZERO else friction) * handling_multiplier
 	velocity = velocity.move_toward(target_velocity, accel_rate * delta)
 	move_and_slide()
@@ -287,14 +319,36 @@ func _resolve_skid_marks() -> SkidMarksLayer:
 			stack.append(child)
 	return null
 
+## And once more for the puddle layer the wet-road grip test reads. Null is a
+## valid answer (a scene with no puddles in it), which just means the car is
+## never on one.
+func _resolve_puddles() -> PuddleField:
+	var node := get_node_or_null(puddles_path)
+	if node is PuddleField:
+		return node
+	var scene := get_tree().current_scene
+	if scene == null:
+		scene = get_parent()
+	var stack: Array[Node] = [scene]
+	while not stack.is_empty():
+		var current: Node = stack.pop_back()
+		if current is PuddleField:
+			return current
+		for child in current.get_children():
+			stack.append(child)
+	return null
+
 ## True when the car is moving at a real clip but the player just asked
 ## for a meaningfully different direction — the tires are still carrying
 ## the old momentum while the wheels have already turned toward the new
-## one, which is exactly what leaves rubber on the road.
-func _is_skidding(input_dir: Vector2) -> bool:
+## one, which is exactly what leaves rubber on the road. Standing water
+## drops the bar sharply, so a puddle peels out under an input that dry
+## tarmac would have gripped through.
+func _is_skidding(input_dir: Vector2, on_puddle: bool = false) -> bool:
 	if input_dir == Vector2.ZERO or velocity.length() < skid_min_speed:
 		return false
-	return absf(velocity.normalized().angle_to(input_dir.normalized())) > skid_angle_threshold
+	var threshold := puddle_skid_angle_threshold if on_puddle else skid_angle_threshold
+	return absf(velocity.normalized().angle_to(input_dir.normalized())) > threshold
 
 ## Stamps a short mark segment behind each wheel mount while skidding,
 ## picking up from wherever that wheel's last stamp landed so a fast

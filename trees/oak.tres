@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="TreeData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/tree_data.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/trees/parts/trunks/trunk_oak.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/trees/parts/canopies/canopy_oak.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/trees/parts/decorations/decoration_moss.tscn" id="4"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Oak"
+trunk_scene = ExtResource("2")
+canopy_scene = ExtResource("3")
+decoration_scene = ExtResource("4")

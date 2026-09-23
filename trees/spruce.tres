@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="TreeData" format=3 uid="uid://cm4qhmwwrhvy0"]
+
+[ext_resource type="PackedScene" path="res://scenes/trees/parts/canopies/canopy_pine.tscn" id="1_5474t"]
+[ext_resource type="Script" uid="uid://c26n7p5xlosxt" path="res://scripts/world/tree_data.gd" id="2_a64li"]
+[ext_resource type="PackedScene" path="res://scenes/trees/parts/trunks/trunk_pine.tscn" id="3_tqll7"]
+
+[resource]
+script = ExtResource("2_a64li")
+display_name = "spruce"
+trunk_scene = ExtResource("3_tqll7")
+canopy_scene = ExtResource("1_5474t")

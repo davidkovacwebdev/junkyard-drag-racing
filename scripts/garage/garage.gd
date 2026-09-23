@@ -10,6 +10,7 @@ extends Control
 @onready var _car_view: CarView = $CarPreview
 @onready var _name_label: Label = $NameLabel
 @onready var _parts_list: GridContainer = $PartsScroll/PartsList
+@onready var _parts_empty_label: Label = $PartsEmptyLabel
 @onready var _body_filter_button: Button = $BodyFilterButton
 @onready var _engine_filter_button: Button = $EngineFilterButton
 @onready var _wheel_filter_button: Button = $WheelFilterButton
@@ -23,7 +24,14 @@ const _INACTIVE_FILTER_COLOR := Color(0.85, 0.85, 0.85, 1)
 const _ACTIVE_FILTER_COLOR := Color(1, 0.8, 0.2, 1)
 const _PART_SLOT_SCENE := preload("res://scenes/garage/part_slot.tscn")
 const _WHEEL_MOUNT_ZONE_SCENE := preload("res://scenes/garage/wheel_mount_zone.tscn")
-const _DEFAULT_WHEEL := "res://scenes/parts/wheels/wheel_standard.tscn"
+
+## Shown in place of the part rows when a tab has nothing to offer, so an empty
+## list reads as "you have no spares" rather than "the garage is broken".
+const _EMPTY_HINTS := {
+	PartData.Category.BODY: "No spare car bodies.\nDig one up at the junkyard.",
+	PartData.Category.ENGINE: "No spare engines.\nDig one up at the junkyard.",
+	PartData.Category.WHEEL: "No spare wheels.\nDig some up at the junkyard.",
+}
 
 func _ready() -> void:
 	_car_drop_zone.garage = self
@@ -87,79 +95,90 @@ func _clear_wheel_mount_zones() -> void:
 		zone.queue_free()
 	_wheel_mount_zones.clear()
 
-## Called by a drop zone when a part lands. `wheel_index` >= 0 means a
-## wheel dropped on that specific mount; -1 (whole-car drops) applies the
-## wheel to every mount, or the single body/engine for those categories.
+## Called by a drop zone when a part lands. `wheel_index` >= 0 means a wheel
+## dropped on that specific mount; -1 (a whole-car drop) sends it to the first
+## mount not already wearing it.
+##
+## The fit itself is Inventory.fit_part, which MOVES an owned copy rather than
+## cloning one — so the same tire can't be bolted on twice, one body can't end
+## up on two cars, and whatever gets swapped out is never lost. All this does
+## is charge the time, then rebuild the view.
 func equip_part(category: PartData.Category, part: PartData, wheel_index: int = -1) -> void:
-	var cars := Inventory.owned_cars
-	if cars.is_empty():
+	var car := _selected_car()
+	if car == null or not Inventory.fit_part(car, category, part, wheel_index):
 		return
-	var car: CarModelData = cars[_index]
-	match category:
-		PartData.Category.BODY:
-			car.body = part.duplicate() as BodyPartData
-			_resize_wheels(car)
-			DayNightCycle.advance_hours(4.0)
-		PartData.Category.ENGINE:
-			car.engine = part.duplicate() as EnginePartData
-			DayNightCycle.advance_hours(4.0)
-		PartData.Category.WHEEL:
-			var wheel := part.duplicate() as WheelPartData
-			var mount_count := PartDatabase.wheel_mount_count(car.body)
-			_ensure_wheel_count(car, mount_count)
-			if wheel_index >= 0 and wheel_index < mount_count:
-				car.wheels[wheel_index] = wheel
-			else:
-				for i in mount_count:
-					car.wheels[i] = wheel.duplicate()
-			DayNightCycle.advance_hours(1.0)
+	# A wheel swap is a minute's work; a body or an engine is most of a day.
+	DayNightCycle.advance_hours(1.0 if category == PartData.Category.WHEEL else 4.0)
 	_refresh()
-	# Ownership can shift with an equip (a swapped-out part that isn't in
-	# spare_parts drops out of what's ownable), so the list has to be
-	# rebuilt, not just left showing whatever was true a moment ago.
+	# Ownership changed — a copy moved out of the stash onto the car, or
+	# between two cars — so the list has to be rebuilt with fresh counts
+	# rather than left showing whatever was true a moment ago.
 	_show_category(_current_category)
 
-func _resize_wheels(car: CarModelData) -> void:
-	var mount_count := PartDatabase.wheel_mount_count(car.body)
-	_ensure_wheel_count(car, mount_count)
-	car.wheels.resize(mount_count)
+## The car the garage is showing, and the one PlayerCar drives in the world.
+func _selected_car() -> CarModelData:
+	if Inventory.owned_cars.is_empty():
+		return null
+	return Inventory.owned_cars[_index]
 
-func _ensure_wheel_count(car: CarModelData, count: int) -> void:
-	while car.wheels.size() < count:
-		car.wheels.append(_default_wheel())
-
-func _default_wheel() -> WheelPartData:
-	return PartDatabase.load_part_data(_DEFAULT_WHEEL) as WheelPartData
-
-## Parts the player can actually pick from in this category: whatever's
-## currently mounted on ANY owned car (already theirs, just installed
-## somewhere else) plus anything loose in the spare-parts stash from a
-## crane dig. PartDatabase.bodies/wheels/engines (the full catalog) is
-## never shown outright — this isn't a shop, everything has to be earned
-## at the junkyard first. De-duplicated by id, since the same part can be
-## both installed and, after a fresh dig, sitting in spare_parts too.
-func _owned_parts(category: PartData.Category) -> Array:
+## Parts the player can fit to the car being viewed: everything they own
+## EXCEPT what that car is already wearing — a part bolted to this car is on
+## the car, not in the parts list, and re-fitting it would only charge the
+## clock for a no-op. That means a car on its own (a fresh game) lists
+## nothing, which is correct: the starter body/engine/wheels live on the car.
+##
+## Everything else stays pickable, because parts are owned, not per-car: what
+## another car wears can be borrowed (fitting swaps the two over), and anything
+## loose in the spare-parts stash from a crane dig is fair game.
+## PartDatabase.bodies/wheels/engines (the full catalog) is never shown
+## outright — this isn't a shop, everything has to be earned at the
+## junkyard first.
+##
+## One row per part id, with how many copies are AVAILABLE to fit here. The
+## count is the whole point of the row now that fitting moves a copy instead
+## of cloning it: four identical tires and one tire look the same on the
+## icon, but only the first can fill four mounts, and a copy already on this
+## car can't fill another one. Rows are `{"part": PartData, "count": int}`.
+func _owned_parts(category: PartData.Category) -> Array[Dictionary]:
+	var viewed := _selected_car()
 	var owned: Dictionary = {}
+	var counts: Dictionary = {}
 	for car in Inventory.owned_cars:
+		# The viewed car's own parts are what it's wearing, not spares.
+		if car == viewed:
+			continue
 		match category:
 			PartData.Category.BODY:
-				if car.body != null:
-					owned[car.body.id] = car.body
+				_tally_owned(owned, counts, car.body)
 			PartData.Category.ENGINE:
-				if car.engine != null:
-					owned[car.engine.id] = car.engine
+				_tally_owned(owned, counts, car.engine)
 			PartData.Category.WHEEL:
 				for wheel in car.wheels:
-					if wheel != null:
-						owned[wheel.id] = wheel
+					_tally_owned(owned, counts, wheel)
 	for part in Inventory.spare_parts:
 		if part != null and part.category == category:
-			owned[part.id] = part
-	var parts := owned.values()
-	parts.sort_custom(func(a: PartData, b: PartData) -> bool:
-		return a.display_name < b.display_name
+			_tally_owned(owned, counts, part)
+	var rows: Array[Dictionary] = []
+	for id in owned:
+		rows.append({"part": owned[id], "count": counts[id]})
+	rows.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var left: PartData = a["part"]
+		var right: PartData = b["part"]
+		return left.display_name < right.display_name
 	)
-	return parts
+	return rows
+
+## Add one copy of `part` to the running tally, keyed by id — the same part
+## found twice (once fitted, once loose in the stash) is one row that knows
+## it's owned twice, not two identical rows.
+static func _tally_owned(owned: Dictionary, counts: Dictionary, part: PartData) -> void:
+	if part == null:
+		return
+	if owned.has(part.id):
+		counts[part.id] = int(counts[part.id]) + 1
+		return
+	owned[part.id] = part
+	counts[part.id] = 1
 
 func _on_body_filter_pressed() -> void:
 	_show_category(PartData.Category.BODY)
@@ -175,7 +194,10 @@ func _show_category(category: PartData.Category) -> void:
 	for child in _parts_list.get_children():
 		child.queue_free()
 
-	for part in _owned_parts(category):
+	var rows := _owned_parts(category)
+	_parts_empty_label.visible = rows.is_empty()
+	_parts_empty_label.text = _EMPTY_HINTS[category] if rows.is_empty() else ""
+	for row in rows:
 		var slot: PartSlot = _PART_SLOT_SCENE.instantiate()
 		# Add before set_part(): PartIcon's @onready SubViewport ref only
 		# resolves once it's actually inside the live tree, which
@@ -183,7 +205,7 @@ func _show_category(category: PartData.Category) -> void:
 		_parts_list.add_child(slot)
 		slot.category = category
 		slot.garage = self
-		slot.set_part(part)
+		slot.set_part(row["part"], row["count"])
 
 	_body_filter_button.add_theme_color_override("font_color", _ACTIVE_FILTER_COLOR if category == PartData.Category.BODY else _INACTIVE_FILTER_COLOR)
 	_engine_filter_button.add_theme_color_override("font_color", _ACTIVE_FILTER_COLOR if category == PartData.Category.ENGINE else _INACTIVE_FILTER_COLOR)
