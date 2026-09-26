@@ -1,0 +1,41 @@
+[gd_resource type="Theme" load_steps=7 format=3]
+
+[ext_resource type="FontFile" path="res://assets/fonts/Poco.ttf" id="1"]
+
+[sub_resource type="StyleBoxFlat" id="Track"]
+content_margin_left = 5.0
+content_margin_top = 5.0
+content_margin_right = 5.0
+content_margin_bottom = 5.0
+bg_color = Color(0.4, 0.29, 0.19, 1)
+
+[sub_resource type="StyleBoxFlat" id="Grabber"]
+bg_color = Color(0.68, 0.57, 0.41, 1)
+
+[sub_resource type="StyleBoxFlat" id="GrabberHover"]
+bg_color = Color(0.74, 0.63, 0.47, 1)
+
+[sub_resource type="StyleBoxFlat" id="GrabberPressed"]
+bg_color = Color(0.95, 0.75, 0.1, 1)
+
+[sub_resource type="StyleBoxFlat" id="Tooltip"]
+content_margin_left = 10.0
+content_margin_top = 6.0
+content_margin_right = 10.0
+content_margin_bottom = 6.0
+bg_color = Color(0.68, 0.57, 0.41, 1)
+
+[resource]
+default_font = ExtResource("1")
+VScrollBar/styles/scroll = SubResource("Track")
+VScrollBar/styles/scroll_focus = SubResource("Track")
+VScrollBar/styles/grabber = SubResource("Grabber")
+VScrollBar/styles/grabber_highlight = SubResource("GrabberHover")
+VScrollBar/styles/grabber_pressed = SubResource("GrabberPressed")
+HScrollBar/styles/scroll = SubResource("Track")
+HScrollBar/styles/scroll_focus = SubResource("Track")
+HScrollBar/styles/grabber = SubResource("Grabber")
+HScrollBar/styles/grabber_highlight = SubResource("GrabberHover")
+HScrollBar/styles/grabber_pressed = SubResource("GrabberPressed")
+TooltipPanel/styles/panel = SubResource("Tooltip")
+TooltipLabel/colors/font_color = Color(0.25, 0.16, 0.08, 1)

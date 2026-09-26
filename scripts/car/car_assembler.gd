@@ -44,13 +44,14 @@ static func assemble(body_scene: PackedScene, wheel_scenes: Array[PackedScene], 
 
 	var engine_instance: Node2D = null
 	var engine_power := 0.0
+	var engine_data: EnginePartData = null
 	if engine_scene != null:
 		engine_instance = engine_scene.instantiate()
 		body_instance.add_child(engine_instance)
 		# Ride on the body's EngineMount so the engine sits where THIS
 		# body's art says it goes (hood/top/stern), not on the body origin.
 		body_instance.place_engine(engine_instance)
-		var engine_data: EnginePartData = engine_instance.get("part_data")
+		engine_data = engine_instance.get("part_data")
 		if engine_data != null:
 			engine_power = engine_data.power
 
@@ -64,6 +65,15 @@ static func assemble(body_scene: PackedScene, wheel_scenes: Array[PackedScene], 
 	# wheel's shape can grip at that spin rate, not from a separate force.
 	for wheel in wheels:
 		wheel.target_angular_velocity = engine_power
+
+	RaceCarAudio.register(root)
+	var engine_sound_profile := EngineSoundProfile.for_engine(engine_data)
+	if engine_sound_profile != null:
+		var engine_audio := CarEngineAudio.new()
+		engine_audio.profile = engine_sound_profile
+		engine_audio.wheels = wheels
+		engine_audio.engine_power = engine_power
+		body_instance.add_child(engine_audio)
 
 	# Damage/shatter: a wheel breaking detaches just its own joint (the
 	# rest of the car keeps going, lopsided). The body breaking detaches
@@ -94,6 +104,8 @@ static func assemble(body_scene: PackedScene, wheel_scenes: Array[PackedScene], 
 		if not is_instance_valid(body_instance):
 			return
 		print("BREAK: ", root.name, " body destroyed!")
+		if engine_data != null:
+			RaceCarAudio.play(root, &"engine_stall", body_instance.global_position, -4.0)
 		for joint in joints:
 			if is_instance_valid(joint):
 				joint.queue_free()

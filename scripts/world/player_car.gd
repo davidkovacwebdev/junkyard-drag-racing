@@ -80,6 +80,16 @@ const GROUP := &"player"
 ## floaty and lazy, high snaps to the input the instant W/S is pressed.
 @export var tilt_response: float = 9.0
 
+## Hitting something harder than this (px/s of speed lost in one step) knocks.
+@export var bump_min_impact_speed: float = 150.0
+@export var engine_volume_db: float = -12.0
+@export var horn_volume_db: float = -6.0
+@export var tire_screech_volume_db: float = -12.0
+
+## The ignition only clicks the first time the car shows up this session.
+## Coming back out of a building, the engine was never switched off.
+static var _engine_started_this_session: bool = false
+
 var _facing_right: bool = true
 ## Current lean in radians; eased toward the target each frame so the car
 ## rocks into a climb/dive instead of snapping between angles.
@@ -112,6 +122,13 @@ var _puddles: PuddleField = null
 ## connector line back to wherever the last skid happened to end.
 var _skid_last_stamp: Array = []
 
+## Null when the car has no engine — then it rolls around in silence.
+var _engine_sound: EngineSound = null
+var _horn: SustainedSound
+var _tire_screech: SustainedSound
+var _bump_cooldown: float = 0.0
+var _sprint_pressed_last: bool = false
+
 func _ready() -> void:
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	add_to_group(GROUP)
@@ -121,6 +138,7 @@ func _ready() -> void:
 	var car := Inventory.get_selected_car()
 	if car != null:
 		_visual.build_from(car)
+	_setup_sounds(car)
 	# Coming back from a place (garage, drag strip race): reappear where we
 	# left the map instead of at the scene's default spawn.
 	if WorldState.has_player_position:
@@ -135,7 +153,7 @@ func _ready() -> void:
 # it's earmarked for braking (see player_car.gd's own history/notes), and
 # this list's whole job is releasing every drive-relevant key on focus
 # loss, brake included, the moment it starts doing something.
-const _DRIVE_KEYS := [KEY_W, KEY_A, KEY_S, KEY_D, KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT, KEY_SPACE, KEY_E, KEY_T]
+const _DRIVE_KEYS := [KEY_W, KEY_A, KEY_S, KEY_D, KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT, KEY_SPACE, KEY_E, KEY_T, KEY_H, KEY_SHIFT]
 
 func _notification(what: int) -> void:
 	# If the window loses OS focus while a key is held, no key-up event
@@ -229,6 +247,7 @@ func _physics_process(delta: float) -> void:
 		handling_multiplier *= puddle_slip_multiplier
 	var accel_rate := (acceleration if input_dir != Vector2.ZERO else friction) * handling_multiplier
 	velocity = velocity.move_toward(target_velocity, accel_rate * delta)
+	var velocity_before_move := velocity
 	move_and_slide()
 
 	# The map car has no physics at all, so its wheels are animated by hand
@@ -243,6 +262,7 @@ func _physics_process(delta: float) -> void:
 	_visual.animate_wheels(_roll_distance(delta, facing_sign), delta)
 
 	_update_skid_marks(skidding)
+	_update_sounds(delta, input_dir, skidding, (velocity_before_move - velocity).length())
 
 	# Keep the saved spot current so entering any place (or any other scene
 	# change) returns us to exactly here.
@@ -255,6 +275,51 @@ func _physics_process(delta: float) -> void:
 	_day_label.text = "Day %d" % DayNightCycle.day
 
 	_process_interaction(delta)
+
+## Engine, horn and tyres ride on the car, so they sit dead centre of the
+## camera. The engine voice comes from whatever engine is bolted on.
+func _setup_sounds(car: CarModelData) -> void:
+	var profile := EngineSoundProfile.for_engine(car.engine if car != null else null)
+	if profile != null:
+		_engine_sound = EngineSound.new()
+		_engine_sound.profile = profile
+		_engine_sound.volume_db = engine_volume_db
+		add_child(_engine_sound)
+		if not _engine_started_this_session:
+			Sfx.play(&"ignition_click", -6.0, 0.0)
+			_engine_sound.start_up(0.35)
+	_engine_started_this_session = true
+	_horn = _add_sustained_sound(&"horn_loop", horn_volume_db)
+	_horn.min_on_time = 0.18
+	_horn.restart_on_start = true
+	_tire_screech = _add_sustained_sound(&"tire_screech_loop", tire_screech_volume_db)
+
+func _add_sustained_sound(sound_name: StringName, volume_db: float) -> SustainedSound:
+	var sound := SustainedSound.new()
+	sound.sound_name = sound_name
+	sound.base_volume_db = volume_db
+	add_child(sound)
+	return sound
+
+## Speed maps onto rpm on a soft curve: normal top speed sits around three
+## quarters of the rev range and sprinting pushes it into the limiter. H honks.
+## Shift kicks the sprint in with a backfire.
+func _update_sounds(delta: float, input_dir: Vector2, skidding: bool, impact_speed: float) -> void:
+	if _engine_sound != null:
+		_engine_sound.rpm = 1.0 - exp(-velocity.length() / max_speed * 1.2)
+		_engine_sound.throttle = 1.0 if input_dir != Vector2.ZERO else 0.0
+	_horn.set_active(Input.is_physical_key_pressed(KEY_H))
+	_tire_screech.set_active(skidding)
+
+	_bump_cooldown -= delta
+	if impact_speed > bump_min_impact_speed and _bump_cooldown <= 0.0:
+		Sfx.play(&"bump", linear_to_db(clampf(impact_speed / max_speed, 0.3, 1.0)))
+		_bump_cooldown = 0.3
+
+	var sprint_pressed := Input.is_physical_key_pressed(KEY_SHIFT)
+	if sprint_pressed and not _sprint_pressed_last and input_dir != Vector2.ZERO and _engine_sound != null:
+		Sfx.play(&"backfire", -6.0)
+	_sprint_pressed_last = sprint_pressed
 
 ## Lean the whole car into its vertical movement: climbing (W/Up) tips the
 ## nose up, descending (S/Down) tips it down, easing back to level the moment
@@ -534,6 +599,7 @@ func _activate(target: Object) -> void:
 	print(target.display_name)
 	var interior = target.get("interior_scene")
 	if interior is PackedScene:
+		Sfx.play(&"door_close", -4.0)
 		get_tree().change_scene_to_packed(interior)
 
 ## T's counterpart to _activate(): only ever switches scene, since a
@@ -541,4 +607,5 @@ func _activate(target: Object) -> void:
 func _activate_test(target: Object) -> void:
 	var interior = target.get("test_interior_scene")
 	if interior is PackedScene:
+		Sfx.play(&"door_close", -4.0)
 		get_tree().change_scene_to_packed(interior)

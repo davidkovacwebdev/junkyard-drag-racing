@@ -45,6 +45,9 @@ func grant() -> void:
 	if part != null:
 		Inventory.add_part(part)
 
+func collect_sound() -> StringName:
+	return &"part_pickup"
+
 func label_text() -> String:
 	if part == null:
 		return ""

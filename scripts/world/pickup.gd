@@ -194,6 +194,8 @@ func collect(by: Node = null) -> void:
 	set_physics_process(false)
 	monitoring = false
 	grant()
+	if collect_sound() != &"":
+		Sfx.play(collect_sound(), -6.0, 0.12)
 	var text := label_text()
 	if not text.is_empty():
 		_spawn_float_text(text)
@@ -209,6 +211,10 @@ func collect(by: Node = null) -> void:
 ## The line that floats up when this is grabbed. Empty = no text at all.
 func label_text() -> String:
 	return ""
+
+## SoundLibrary name played when grabbed. Empty = silent.
+func collect_sound() -> StringName:
+	return &""
 
 ## Bank whatever this orb is worth. Subclasses override; the base is a no-op.
 func grant() -> void:

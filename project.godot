@@ -21,6 +21,8 @@ config/icon="res://icon.svg"
 
 [autoload]
 
+Sfx="*res://autoload/sfx.gd"
+ScrapCursor="*res://autoload/scrap_cursor.gd"
 PartDatabase="*res://autoload/part_database.gd"
 Inventory="*res://autoload/inventory.gd"
 WorldState="*res://autoload/world_state.gd"
@@ -40,6 +42,7 @@ enabled=PackedStringArray("res://addons/tree_creator/plugin.cfg")
 
 [gui]
 
+theme/custom="res://themes/scrap_theme.tres"
 theme/custom_font="res://assets/fonts/Poco.ttf"
 
 [rendering]

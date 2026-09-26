@@ -165,7 +165,7 @@ func _check_scrap_spawns() -> void:
 
 	# The buttons are wired by index into the amount list, so pressing one is the
 	# only way to be sure the binding lines up with the label.
-	(buttons[3] as Button).pressed.emit()
+	(buttons[3] as BaseButton).pressed.emit()
 	var paid := _live_pickups()[0] as ScrapPickup
 	var got := "nothing"
 	if paid != null:

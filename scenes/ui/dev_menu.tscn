@@ -1,18 +1,8 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/dev_menu.gd" id="1"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
-bg_color = Color(0.05, 0.06, 0.08, 0.97)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(1, 1, 1, 0.16)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_left = 12
-corner_radius_bottom_right = 12
+[ext_resource type="Script" path="res://scripts/ui/scrap_panel.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/ui/scrap_button.gd" id="3"]
 
 [node name="DevMenu" type="CanvasLayer"]
 layer = 10
@@ -24,9 +14,10 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 0.45)
+color = Color(0, 0, 0, 0.5)
 
-[node name="Panel" type="Panel" parent="Backdrop"]
+[node name="Panel" type="Control" parent="Backdrop"]
+layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -38,145 +29,159 @@ offset_right = 536.0
 offset_bottom = 294.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+script = ExtResource("2")
+body_color = Color(0.38, 0.41, 0.47, 1)
+shade_color = Color(0.33, 0.36, 0.41, 1)
+skirt_color = Color(0.3, 0.3, 0.32, 1)
+tilt_degrees = -0.4
+jitter_seed = 61
 
-[node name="TitleLabel" type="Label" parent="Backdrop/Panel"]
+[node name="TitlePlate" type="Control" parent="Backdrop/Panel"]
 layout_mode = 0
-offset_left = 24.0
-offset_top = 14.0
-offset_right = 424.0
-offset_bottom = 46.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
+offset_left = 22.0
+offset_top = -14.0
+offset_right = 222.0
+offset_bottom = 44.0
+mouse_filter = 2
+script = ExtResource("2")
+body_color = Color(0.95, 0.75, 0.1, 1)
+shade_color = Color(0.85, 0.66, 0.08, 1)
+skirt_color = Color(0.76, 0.58, 0.07, 1)
+tilt_degrees = -3.0
+jitter_seed = 62
+
+[node name="TitleLabel" type="Label" parent="Backdrop/Panel/TitlePlate"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -6.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.15, 0.14, 0.13, 1)
 theme_override_font_sizes/font_size = 26
 text = "DEV MENU"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="HintLabel" type="Label" parent="Backdrop/Panel"]
 layout_mode = 0
 offset_left = 344.0
 offset_top = 20.0
-offset_right = 1048.0
+offset_right = 1040.0
 offset_bottom = 44.0
-theme_override_colors/font_color = Color(0.7, 0.68, 0.65, 1)
+theme_override_colors/font_color = Color(0.8, 0.83, 0.88, 1)
 theme_override_font_sizes/font_size = 15
 text = "F1 closes. Click an entry to drop it on the ground."
 horizontal_alignment = 2
 
-[node name="BodyTab" type="Button" parent="Backdrop/Panel"]
+[node name="BodyTab" type="BaseButton" parent="Backdrop/Panel"]
 layout_mode = 0
 offset_left = 24.0
-offset_top = 56.0
-offset_right = 184.0
-offset_bottom = 90.0
-theme_override_colors/font_color = Color(1, 0.8, 0.2, 1)
-theme_override_colors/font_hover_color = Color(1, 0.8, 0.2, 1)
-theme_override_colors/font_pressed_color = Color(1, 0.8, 0.2, 1)
-theme_override_colors/font_focus_color = Color(0.85, 0.85, 0.85, 1)
-theme_override_font_sizes/font_size = 19
-flat = true
+offset_top = 70.0
+offset_right = 174.0
+offset_bottom = 112.0
+script = ExtResource("3")
 text = "Car Body"
+font_size = 19
+tilt_degrees = -2.0
+jitter_seed = 71
+selected = true
 
-[node name="EngineTab" type="Button" parent="Backdrop/Panel"]
+[node name="EngineTab" type="BaseButton" parent="Backdrop/Panel"]
 layout_mode = 0
-offset_left = 194.0
-offset_top = 56.0
-offset_right = 354.0
-offset_bottom = 90.0
-theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
-theme_override_colors/font_hover_color = Color(1, 0.8, 0.2, 1)
-theme_override_colors/font_pressed_color = Color(1, 0.8, 0.2, 1)
-theme_override_colors/font_focus_color = Color(0.85, 0.85, 0.85, 1)
-theme_override_font_sizes/font_size = 19
-flat = true
+offset_left = 186.0
+offset_top = 70.0
+offset_right = 336.0
+offset_bottom = 112.0
+script = ExtResource("3")
 text = "Engines"
+font_size = 19
+tilt_degrees = 1.5
+jitter_seed = 72
 
-[node name="WheelTab" type="Button" parent="Backdrop/Panel"]
+[node name="WheelTab" type="BaseButton" parent="Backdrop/Panel"]
 layout_mode = 0
-offset_left = 364.0
-offset_top = 56.0
-offset_right = 524.0
-offset_bottom = 90.0
-theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
-theme_override_colors/font_hover_color = Color(1, 0.8, 0.2, 1)
-theme_override_colors/font_pressed_color = Color(1, 0.8, 0.2, 1)
-theme_override_colors/font_focus_color = Color(0.85, 0.85, 0.85, 1)
-theme_override_font_sizes/font_size = 19
-flat = true
+offset_left = 348.0
+offset_top = 70.0
+offset_right = 498.0
+offset_bottom = 112.0
+script = ExtResource("3")
 text = "Wheels"
+font_size = 19
+tilt_degrees = -1.0
+jitter_seed = 73
 
-[node name="ScrapTab" type="Button" parent="Backdrop/Panel"]
+[node name="ScrapTab" type="BaseButton" parent="Backdrop/Panel"]
 layout_mode = 0
-offset_left = 534.0
-offset_top = 56.0
-offset_right = 694.0
-offset_bottom = 90.0
-theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
-theme_override_colors/font_hover_color = Color(1, 0.8, 0.2, 1)
-theme_override_colors/font_pressed_color = Color(1, 0.8, 0.2, 1)
-theme_override_colors/font_focus_color = Color(0.85, 0.85, 0.85, 1)
-theme_override_font_sizes/font_size = 19
-flat = true
+offset_left = 510.0
+offset_top = 70.0
+offset_right = 660.0
+offset_bottom = 112.0
+script = ExtResource("3")
 text = "Scrap"
+font_size = 19
+tilt_degrees = 2.0
+jitter_seed = 74
 
 [node name="PartsScroll" type="ScrollContainer" parent="Backdrop/Panel"]
 layout_mode = 0
-offset_left = 16.0
-offset_top = 100.0
-offset_right = 1056.0
-offset_bottom = 520.0
+offset_left = 20.0
+offset_top = 126.0
+offset_right = 1048.0
+offset_bottom = 516.0
 horizontal_scroll_mode = 0
 
 [node name="PartsList" type="GridContainer" parent="Backdrop/Panel/PartsScroll"]
 layout_mode = 2
-theme_override_constants/h_separation = 14
-theme_override_constants/v_separation = 14
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 16
 columns = 3
 
 [node name="ScrapBox" type="VBoxContainer" parent="Backdrop/Panel"]
 visible = false
 layout_mode = 0
 offset_left = 24.0
-offset_top = 104.0
+offset_top = 130.0
 offset_right = 1048.0
-offset_bottom = 520.0
+offset_bottom = 516.0
 theme_override_constants/separation = 22
 
 [node name="NoteLabel" type="Label" parent="Backdrop/Panel/ScrapBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.75, 0.73, 0.7, 1)
+theme_override_colors/font_color = Color(0.8, 0.83, 0.88, 1)
 theme_override_font_sizes/font_size = 17
 text = "Loose scrap on the ground, in the five orders of magnitude the economy spans."
 
 [node name="Buttons" type="HBoxContainer" parent="Backdrop/Panel/ScrapBox"]
 layout_mode = 2
-theme_override_constants/separation = 14
+theme_override_constants/separation = 16
 
 [node name="OwnedLabel" type="Label" parent="Backdrop/Panel/ScrapBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
 theme_override_font_sizes/font_size = 20
 text = "You are carrying 0 scrap."
 
 [node name="StatusLabel" type="Label" parent="Backdrop/Panel"]
 layout_mode = 0
 offset_left = 24.0
-offset_top = 530.0
-offset_right = 880.0
-offset_bottom = 560.0
-theme_override_colors/font_color = Color(0.8, 0.78, 0.72, 1)
+offset_top = 528.0
+offset_right = 860.0
+offset_bottom = 562.0
+theme_override_colors/font_color = Color(0.8, 0.83, 0.88, 1)
 theme_override_font_sizes/font_size = 15
 text = "Click a part to drop it on the ground next to the car."
 vertical_alignment = 1
 
-[node name="ClearButton" type="Button" parent="Backdrop/Panel"]
+[node name="ClearButton" type="BaseButton" parent="Backdrop/Panel"]
 layout_mode = 0
-offset_left = 880.0
-offset_top = 526.0
-offset_right = 1048.0
-offset_bottom = 562.0
-theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
-theme_override_colors/font_hover_color = Color(1, 0.8, 0.2, 1)
-theme_override_colors/font_pressed_color = Color(1, 0.8, 0.2, 1)
-theme_override_colors/font_focus_color = Color(0.85, 0.85, 0.85, 1)
-theme_override_font_sizes/font_size = 16
-flat = true
+offset_left = 856.0
+offset_top = 524.0
+offset_right = 1046.0
+offset_bottom = 566.0
+script = ExtResource("3")
 text = "Clear dropped (0)"
+font_size = 16
+tilt_degrees = 1.5
+jitter_seed = 75

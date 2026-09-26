@@ -109,6 +109,7 @@ func _finish_car(entry: Dictionary) -> void:
 	entry["finished"] = true
 	var car: CarAssembler.AssembledCar = entry["car"]
 	car.body.boost_force = finish_boost_force
+	RaceCarAudio.play(self, &"backfire", car.body.global_position, -2.0)
 	if _winner_name.is_empty():
 		_winner_name = entry["name"]
 		print(">>> WINNER: %s at t=%.2fs" % [_winner_name, _elapsed])

@@ -6,7 +6,7 @@ extends Control
 ## only enabled when one actually exists. Settings/Credits are real
 ## screens, just placeholder content for now.
 
-@onready var _continue_button: Button = $ContinueButton
+@onready var _continue_button: BaseButton = $Buttons/ContinueButton
 
 func _ready() -> void:
 	_continue_button.disabled = not SaveSystem.has_save()

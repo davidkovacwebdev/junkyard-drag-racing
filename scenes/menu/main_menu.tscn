@@ -1,93 +1,175 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/menu/main_menu.gd" id="1"]
-[ext_resource type="PackedScene" path="res://scenes/menu/swaying_background.tscn" id="2"]
+[ext_resource type="Script" path="res://scripts/menu/junk_pile_backdrop.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/menu/falling_parts.gd" id="3"]
+[ext_resource type="Script" path="res://scripts/ui/scrap_panel.gd" id="4"]
+[ext_resource type="Script" path="res://scripts/ui/scrap_button.gd" id="5"]
+[ext_resource type="Script" path="res://scripts/ui/hazard_stripe.gd" id="6"]
 
 [node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1")
 
-[node name="SwayingBackground" parent="." instance=ExtResource("2")]
+[node name="FarPiles" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("2")
+draw_sky = true
+pile_color = Color(0.72, 0.6, 0.43, 1)
+junk_color = Color(0.72, 0.6, 0.43, 1)
+pile_height = Vector2(0.3, 0.45)
+pile_seed = 7
 
-[node name="TitleLabel" type="Label" parent="."]
-offset_left = 276.0
-offset_top = 90.0
-offset_right = 876.0
-offset_bottom = 160.0
+[node name="FallingParts" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("3")
+
+[node name="NearPiles" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("2")
+pile_color = Color(0.58, 0.46, 0.32, 1)
+junk_color = Color(0.5, 0.39, 0.27, 1)
+pile_height = Vector2(0.1, 0.2)
+ground_color = Color(0.5, 0.39, 0.27, 1)
+ground_height = 24.0
+pile_seed = 3
+
+[node name="Post" type="Control" parent="."]
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -16.0
+offset_top = 216.0
+offset_right = 16.0
+offset_bottom = 12.0
+grow_horizontal = 2
+mouse_filter = 2
+script = ExtResource("4")
+body_color = Color(0.4, 0.38, 0.34, 1)
+shade_color = Color(0.34, 0.32, 0.29, 1)
+skirt_color = Color(0.34, 0.32, 0.29, 1)
+tilt_degrees = 1.0
+jitter_seed = 5
+nails = false
+
+[node name="TitleBoard" type="Control" parent="."]
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -310.0
+offset_top = 56.0
+offset_right = 310.0
+offset_bottom = 156.0
+grow_horizontal = 2
+mouse_filter = 2
+script = ExtResource("4")
+tilt_degrees = -1.5
+jitter_seed = 17
+
+[node name="TitleLabel" type="Label" parent="TitleBoard"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -6.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_colors/font_color = Color(0.25, 0.16, 0.08, 1)
-theme_override_colors/font_outline_color = Color(1, 0.95, 0.85, 0.6)
-theme_override_constants/outline_size = 6
 theme_override_font_sizes/font_size = 48
-horizontal_alignment = 1
 text = "JUNKYARD DRAG RACING"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="NewGameButton" type="Button" parent="."]
-offset_left = 426.0
-offset_top = 270.0
-offset_right = 726.0
-offset_bottom = 316.0
-theme_override_colors/font_color = Color(0.25, 0.16, 0.08, 1)
-theme_override_colors/font_hover_color = Color(0.6, 0.15, 0.15, 1)
-theme_override_colors/font_pressed_color = Color(0.6, 0.15, 0.15, 1)
-theme_override_colors/font_focus_color = Color(0.25, 0.16, 0.08, 1)
-theme_override_font_sizes/font_size = 26
-flat = true
+[node name="TitleStripe" type="Control" parent="."]
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -250.0
+offset_top = 170.0
+offset_right = 250.0
+offset_bottom = 186.0
+grow_horizontal = 2
+mouse_filter = 2
+script = ExtResource("6")
+
+[node name="Buttons" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -150.0
+offset_top = 236.0
+offset_right = 150.0
+offset_bottom = 580.0
+grow_horizontal = 2
+theme_override_constants/separation = 18
+
+[node name="NewGameButton" type="BaseButton" parent="Buttons"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+script = ExtResource("5")
 text = "New Game"
+tilt_degrees = -2.0
+jitter_seed = 11
 
-[node name="ContinueButton" type="Button" parent="."]
-offset_left = 426.0
-offset_top = 326.0
-offset_right = 726.0
-offset_bottom = 372.0
-theme_override_colors/font_color = Color(0.25, 0.16, 0.08, 1)
-theme_override_colors/font_disabled_color = Color(0.4, 0.36, 0.3, 0.6)
-theme_override_font_sizes/font_size = 26
-flat = true
+[node name="ContinueButton" type="BaseButton" parent="Buttons"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
 disabled = true
+script = ExtResource("5")
 text = "Continue"
+tilt_degrees = 1.5
+jitter_seed = 23
 
-[node name="SettingsButton" type="Button" parent="."]
-offset_left = 426.0
-offset_top = 382.0
-offset_right = 726.0
-offset_bottom = 428.0
-theme_override_colors/font_color = Color(0.25, 0.16, 0.08, 1)
-theme_override_colors/font_hover_color = Color(0.6, 0.15, 0.15, 1)
-theme_override_colors/font_pressed_color = Color(0.6, 0.15, 0.15, 1)
-theme_override_colors/font_focus_color = Color(0.25, 0.16, 0.08, 1)
-theme_override_font_sizes/font_size = 26
-flat = true
+[node name="SettingsButton" type="BaseButton" parent="Buttons"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+script = ExtResource("5")
 text = "Settings"
+tilt_degrees = -1.0
+jitter_seed = 37
 
-[node name="CreditsButton" type="Button" parent="."]
-offset_left = 426.0
-offset_top = 438.0
-offset_right = 726.0
-offset_bottom = 484.0
-theme_override_colors/font_color = Color(0.25, 0.16, 0.08, 1)
-theme_override_colors/font_hover_color = Color(0.6, 0.15, 0.15, 1)
-theme_override_colors/font_pressed_color = Color(0.6, 0.15, 0.15, 1)
-theme_override_colors/font_focus_color = Color(0.25, 0.16, 0.08, 1)
-theme_override_font_sizes/font_size = 26
-flat = true
+[node name="CreditsButton" type="BaseButton" parent="Buttons"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+script = ExtResource("5")
 text = "Credits"
+tilt_degrees = 2.0
+jitter_seed = 41
 
-[node name="QuitButton" type="Button" parent="."]
-offset_left = 426.0
-offset_top = 494.0
-offset_right = 726.0
-offset_bottom = 540.0
-theme_override_colors/font_color = Color(0.25, 0.16, 0.08, 1)
-theme_override_colors/font_hover_color = Color(0.6, 0.15, 0.15, 1)
-theme_override_colors/font_pressed_color = Color(0.6, 0.15, 0.15, 1)
-theme_override_colors/font_focus_color = Color(0.25, 0.16, 0.08, 1)
-theme_override_font_sizes/font_size = 26
-flat = true
+[node name="QuitButton" type="BaseButton" parent="Buttons"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+script = ExtResource("5")
 text = "Quit"
+tilt_degrees = -1.5
+jitter_seed = 53
 
-[connection signal="pressed" from="NewGameButton" to="." method="_on_new_game_pressed"]
-[connection signal="pressed" from="ContinueButton" to="." method="_on_continue_pressed"]
-[connection signal="pressed" from="SettingsButton" to="." method="_on_settings_pressed"]
-[connection signal="pressed" from="CreditsButton" to="." method="_on_credits_pressed"]
-[connection signal="pressed" from="QuitButton" to="." method="_on_quit_pressed"]
+[connection signal="pressed" from="Buttons/NewGameButton" to="." method="_on_new_game_pressed"]
+[connection signal="pressed" from="Buttons/ContinueButton" to="." method="_on_continue_pressed"]
+[connection signal="pressed" from="Buttons/SettingsButton" to="." method="_on_settings_pressed"]
+[connection signal="pressed" from="Buttons/CreditsButton" to="." method="_on_credits_pressed"]
+[connection signal="pressed" from="Buttons/QuitButton" to="." method="_on_quit_pressed"]

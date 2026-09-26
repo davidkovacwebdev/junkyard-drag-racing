@@ -214,6 +214,7 @@ func loot() -> int:
 		_spill_part(rng)
 
 	filled = false
+	Sfx.play_at(&"trash_rummage", global_position, -4.0)
 	if loot_id != "":
 		WorldState.mark_emptied(loot_id)
 	looted.emit(scrap)

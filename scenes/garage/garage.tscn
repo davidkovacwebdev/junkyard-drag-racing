@@ -1,32 +1,48 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/garage/garage.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/world/car_view.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/ui/back_button.tscn" id="3"]
 [ext_resource type="Script" path="res://scripts/garage/car_drop_zone.gd" id="5"]
-
-[sub_resource type="Gradient" id="Gradient_1"]
-offsets = PackedFloat32Array(0, 1)
-colors = PackedColorArray(0.05, 0.05, 0.08, 1, 0.16, 0.14, 0.2, 1)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_1"]
-gradient = SubResource("Gradient_1")
-fill_from = Vector2(0, 0)
-fill_to = Vector2(0, 1)
+[ext_resource type="Script" path="res://scripts/garage/workshop_backdrop.gd" id="6"]
+[ext_resource type="Script" path="res://scripts/ui/scrap_panel.gd" id="7"]
+[ext_resource type="Script" path="res://scripts/ui/scrap_button.gd" id="8"]
 
 [node name="Garage" type="Control"]
+layout_mode = 3
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1")
 
-[node name="Background" type="TextureRect" parent="."]
+[node name="Background" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-texture = SubResource("GradientTexture2D_1")
-expand_mode = 1
-stretch_mode = 0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("6")
+
+[node name="Lift" type="Control" parent="."]
+layout_mode = 0
+offset_left = 70.0
+offset_top = 352.0
+offset_right = 370.0
+offset_bottom = 380.0
+mouse_filter = 2
+script = ExtResource("7")
+body_color = Color(0.52, 0.56, 0.63, 1)
+shade_color = Color(0.38, 0.41, 0.47, 1)
+skirt_color = Color(0.38, 0.41, 0.47, 1)
+tilt_degrees = 0.5
+jitter_seed = 4
 
 [node name="CarDropZone" type="Control" parent="."]
+anchors_preset = 0
 offset_right = 440.0
 offset_bottom = 648.0
 script = ExtResource("5")
@@ -35,89 +51,133 @@ script = ExtResource("5")
 offset_left = 30.0
 offset_top = 20.0
 offset_right = 150.0
-offset_bottom = 50.0
+offset_bottom = 60.0
 
 [node name="CarPreview" parent="." instance=ExtResource("2")]
 position = Vector2(220, 260)
 scale = Vector2(1.5, 1.5)
 
-[node name="NameLabel" type="Label" parent="."]
-offset_left = 60.0
-offset_top = 440.0
-offset_right = 380.0
-offset_bottom = 472.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 20
+[node name="NamePlate" type="Control" parent="."]
+layout_mode = 0
+offset_left = 110.0
+offset_top = 430.0
+offset_right = 330.0
+offset_bottom = 480.0
+mouse_filter = 2
+script = ExtResource("7")
+tilt_degrees = -1.0
+jitter_seed = 12
+
+[node name="NameLabel" type="Label" parent="NamePlate"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_right = -12.0
+offset_bottom = -6.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.25, 0.16, 0.08, 1)
+theme_override_font_sizes/font_size = 18
 horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
 
-[node name="PrevButton" type="Button" parent="."]
-offset_left = 60.0
-offset_top = 480.0
-offset_right = 110.0
-offset_bottom = 520.0
+[node name="PrevButton" type="BaseButton" parent="."]
+layout_mode = 0
+offset_left = 46.0
+offset_top = 432.0
+offset_right = 96.0
+offset_bottom = 480.0
+script = ExtResource("8")
 text = "<"
+font_size = 24
+tilt_degrees = 2.0
+jitter_seed = 31
 
-[node name="NextButton" type="Button" parent="."]
-offset_left = 330.0
-offset_top = 480.0
-offset_right = 380.0
-offset_bottom = 520.0
+[node name="NextButton" type="BaseButton" parent="."]
+layout_mode = 0
+offset_left = 344.0
+offset_top = 432.0
+offset_right = 394.0
+offset_bottom = 480.0
+script = ExtResource("8")
 text = ">"
+font_size = 24
+tilt_degrees = -2.0
+jitter_seed = 32
 
-[node name="BodyFilterButton" type="Button" parent="."]
-offset_left = 460.0
-offset_top = 40.0
-offset_right = 610.0
+[node name="PartsBoard" type="Control" parent="."]
+layout_mode = 0
+offset_left = 450.0
+offset_top = 76.0
+offset_right = 1130.0
+offset_bottom = 610.0
+mouse_filter = 2
+script = ExtResource("7")
+tilt_degrees = -0.5
+jitter_seed = 27
+
+[node name="BodyFilterButton" type="BaseButton" parent="."]
+layout_mode = 0
+offset_left = 470.0
+offset_top = 28.0
+offset_right = 620.0
 offset_bottom = 72.0
-theme_override_colors/font_color = Color(1, 0.8, 0.2, 1)
-theme_override_colors/font_hover_color = Color(1, 0.8, 0.2, 1)
-theme_override_colors/font_pressed_color = Color(1, 0.8, 0.2, 1)
-theme_override_colors/font_focus_color = Color(0.85, 0.85, 0.85, 1)
-flat = true
+script = ExtResource("8")
 text = "Car Body"
+font_size = 20
+tilt_degrees = -2.0
+jitter_seed = 41
+selected = true
 
-[node name="EngineFilterButton" type="Button" parent="."]
-offset_left = 620.0
-offset_top = 40.0
-offset_right = 770.0
+[node name="EngineFilterButton" type="BaseButton" parent="."]
+layout_mode = 0
+offset_left = 632.0
+offset_top = 28.0
+offset_right = 782.0
 offset_bottom = 72.0
-theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
-theme_override_colors/font_hover_color = Color(1, 0.8, 0.2, 1)
-theme_override_colors/font_pressed_color = Color(1, 0.8, 0.2, 1)
-theme_override_colors/font_focus_color = Color(0.85, 0.85, 0.85, 1)
-flat = true
+script = ExtResource("8")
 text = "Engines"
+font_size = 20
+tilt_degrees = 1.5
+jitter_seed = 42
 
-[node name="WheelFilterButton" type="Button" parent="."]
-offset_left = 780.0
-offset_top = 40.0
-offset_right = 930.0
+[node name="WheelFilterButton" type="BaseButton" parent="."]
+layout_mode = 0
+offset_left = 794.0
+offset_top = 28.0
+offset_right = 944.0
 offset_bottom = 72.0
-theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
-theme_override_colors/font_hover_color = Color(1, 0.8, 0.2, 1)
-theme_override_colors/font_pressed_color = Color(1, 0.8, 0.2, 1)
-theme_override_colors/font_focus_color = Color(0.85, 0.85, 0.85, 1)
-flat = true
+script = ExtResource("8")
 text = "Wheels"
+font_size = 20
+tilt_degrees = -1.0
+jitter_seed = 43
 
 [node name="PartsScroll" type="ScrollContainer" parent="."]
-offset_left = 460.0
-offset_top = 90.0
-offset_right = 1140.0
-offset_bottom = 560.0
+layout_mode = 0
+offset_left = 470.0
+offset_top = 96.0
+offset_right = 1112.0
+offset_bottom = 588.0
+horizontal_scroll_mode = 0
 
 [node name="PartsList" type="GridContainer" parent="PartsScroll"]
+layout_mode = 2
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 16
 columns = 2
-theme_override_constants/h_separation = 14
-theme_override_constants/v_separation = 14
 
 [node name="PartsEmptyLabel" type="Label" parent="."]
-offset_left = 460.0
-offset_top = 90.0
-offset_right = 1140.0
-offset_bottom = 170.0
+layout_mode = 0
+offset_left = 470.0
+offset_top = 120.0
+offset_right = 1110.0
+offset_bottom = 200.0
 mouse_filter = 2
-theme_override_colors/font_color = Color(0.7, 0.68, 0.65, 1)
+theme_override_colors/font_color = Color(0.25, 0.16, 0.08, 1)
 theme_override_font_sizes/font_size = 18
 text = "No spare parts — everything you own is on a car."
 horizontal_alignment = 1

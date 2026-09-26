@@ -44,8 +44,6 @@ const _PART_PICKUP_SCENE := preload("res://scenes/world/part_pickup.tscn")
 const _SCRAP_PICKUP_SCENE := preload("res://scenes/world/scrap_pickup.tscn")
 const _PART_SLOT_SCENE := preload("res://scenes/garage/part_slot.tscn")
 
-const _ACTIVE_TAB_COLOR := Color(1, 0.8, 0.2, 1)
-const _INACTIVE_TAB_COLOR := Color(0.85, 0.85, 0.85, 1)
 
 @onready var _backdrop: ColorRect = $Backdrop
 @onready var _parts_scroll: ScrollContainer = $Backdrop/Panel/PartsScroll
@@ -54,11 +52,11 @@ const _INACTIVE_TAB_COLOR := Color(0.85, 0.85, 0.85, 1)
 @onready var _scrap_buttons: HBoxContainer = $Backdrop/Panel/ScrapBox/Buttons
 @onready var _owned_label: Label = $Backdrop/Panel/ScrapBox/OwnedLabel
 @onready var _status_label: Label = $Backdrop/Panel/StatusLabel
-@onready var _clear_button: Button = $Backdrop/Panel/ClearButton
-@onready var _body_tab: Button = $Backdrop/Panel/BodyTab
-@onready var _engine_tab: Button = $Backdrop/Panel/EngineTab
-@onready var _wheel_tab: Button = $Backdrop/Panel/WheelTab
-@onready var _scrap_tab: Button = $Backdrop/Panel/ScrapTab
+@onready var _clear_button: ScrapButton = $Backdrop/Panel/ClearButton
+@onready var _body_tab: ScrapButton = $Backdrop/Panel/BodyTab
+@onready var _engine_tab: ScrapButton = $Backdrop/Panel/EngineTab
+@onready var _wheel_tab: ScrapButton = $Backdrop/Panel/WheelTab
+@onready var _scrap_tab: ScrapButton = $Backdrop/Panel/ScrapTab
 
 ## Off unless this is a debug build (see `set_enabled`).
 var _enabled := false
@@ -146,7 +144,7 @@ func _on_backdrop_input(event: InputEvent) -> void:
 # --- The list ------------------------------------------------------------------
 
 ## Every signal is connected here rather than in the scene, partly so the binds
-## and the colours live in one place, and partly because two of these have to
+## live in one place, and partly because two of these have to
 ## pass an argument, which a scene connection cannot do readably.
 func _wire_buttons() -> void:
 	_body_tab.pressed.connect(_show_tab.bind(Tab.BODY))
@@ -160,16 +158,13 @@ func _wire_buttons() -> void:
 ## only place an amount is written down.
 func _build_scrap_buttons() -> void:
 	for amount in _SCRAP_AMOUNTS:
-		var button := Button.new()
+		var button := ScrapButton.new()
 		button.text = "x%d" % amount
 		button.focus_mode = Control.FOCUS_NONE
-		button.custom_minimum_size = Vector2(128, 46)
-		button.flat = true
-		button.add_theme_font_size_override("font_size", 20)
-		button.add_theme_color_override("font_color", _INACTIVE_TAB_COLOR)
-		button.add_theme_color_override("font_hover_color", _ACTIVE_TAB_COLOR)
-		button.add_theme_color_override("font_pressed_color", _ACTIVE_TAB_COLOR)
-		button.add_theme_color_override("font_focus_color", _INACTIVE_TAB_COLOR)
+		button.custom_minimum_size = Vector2(128, 50)
+		button.font_size = 20
+		button.jitter_seed = amount
+		button.tilt_degrees = 1.5 if _scrap_buttons.get_child_count() % 2 == 0 else -1.5
 		button.pressed.connect(_spawn_scrap.bind(amount))
 		_scrap_buttons.add_child(button)
 
@@ -188,14 +183,10 @@ func _show_tab(tab: int) -> void:
 	_set_status("Click a part to drop it on the ground next to the car.")
 
 func _refresh_tabs() -> void:
-	_body_tab.add_theme_color_override("font_color",
-			_ACTIVE_TAB_COLOR if _tab == Tab.BODY else _INACTIVE_TAB_COLOR)
-	_engine_tab.add_theme_color_override("font_color",
-			_ACTIVE_TAB_COLOR if _tab == Tab.ENGINE else _INACTIVE_TAB_COLOR)
-	_wheel_tab.add_theme_color_override("font_color",
-			_ACTIVE_TAB_COLOR if _tab == Tab.WHEEL else _INACTIVE_TAB_COLOR)
-	_scrap_tab.add_theme_color_override("font_color",
-			_ACTIVE_TAB_COLOR if _tab == Tab.SCRAP else _INACTIVE_TAB_COLOR)
+	_body_tab.selected = _tab == Tab.BODY
+	_engine_tab.selected = _tab == Tab.ENGINE
+	_wheel_tab.selected = _tab == Tab.WHEEL
+	_scrap_tab.selected = _tab == Tab.SCRAP
 
 ## The catalogue a tab shows, in the garage's own order (by name), so the dev
 ## menu and the parts list agree on where a part lives.

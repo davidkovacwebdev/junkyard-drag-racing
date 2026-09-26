@@ -22,41 +22,28 @@ var garage: Garage
 @onready var _speed_bar: StatBar = $Row/Info/SpeedRow/SpeedBar
 @onready var _mass_bar: StatBar = $Row/Info/MassRow/MassBar
 
-## The scene-authored panel style, captured once and never itself
-## mutated — every recolor reads its border/bg as the "neutral" baseline
-## to tween to/from, so a slot that cycles through parts (or back to no
-## part at all) never drifts from the original border width/corner
-## radius. `_style` is the single live instance actually applied as the
-## panel override; animating its bg_color in place (rather than swapping
-## in a fresh StyleBox each time) is what makes the hover tween possible.
-var _base_panel_style: StyleBoxFlat
-var _style: StyleBoxFlat
-var _hover_tween: Tween
+## Cardboard card behind the row (see the ui-style skill). The tier shows as a
+## strip of coloured tape across the top-right corner, not a border.
+var _board := ScrapBoard.new()
 var _hovering: bool = false
 
-## How far the background eases toward the tier color on hover. Hue
-## barely moves (a wash of color reads as gaudy against the neutral
-## panel) — opacity moves much further, so a hovered row reads as
-## brighter/lit-up rather than differently colored.
-const _HOVER_RGB_MIX := 0.18
-const _HOVER_ALPHA_MIX := 0.5
-const _HOVER_TRANSITION := 0.12
+const _TAPE_SIZE := Vector2(46.0, 12.0)
+const _TAPE_ANGLE := deg_to_rad(28.0)
+const _ICON_GAP_MARGIN := 4.0
 
 func _ready() -> void:
-	_base_panel_style = get_theme_stylebox("panel") as StyleBoxFlat
-	if _base_panel_style != null:
-		_style = _base_panel_style.duplicate() as StyleBoxFlat
-		add_theme_stylebox_override("panel", _style)
-	mouse_entered.connect(_on_mouse_entered)
-	mouse_exited.connect(_on_mouse_exited)
+	_board.jitter = 2.0
+	_board.nails = false
+	mouse_entered.connect(_set_hovering.bind(true))
+	mouse_exited.connect(_set_hovering.bind(false))
 
-func _on_mouse_entered() -> void:
-	_hovering = true
-	_animate_background()
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_RESIZED or what == NOTIFICATION_SORT_CHILDREN:
+		queue_redraw()
 
-func _on_mouse_exited() -> void:
-	_hovering = false
-	_animate_background()
+func _set_hovering(value: bool) -> void:
+	_hovering = value
+	queue_redraw()
 
 func set_part(new_part: PartData, count: int = 1) -> void:
 	part = new_part
@@ -65,9 +52,7 @@ func set_part(new_part: PartData, count: int = 1) -> void:
 	_durability_bar.set_rating(_rating(part.durability, PartData.DURABILITY_RANGE) if part != null else 0)
 	_speed_bar.set_rating(_rating(part.speed, PartData.SPEED_RANGE) if part != null else 0)
 	_mass_bar.set_rating(_rating(part.mass, PartData.MASS_RANGE) if part != null else 0)
-	if _style != null:
-		_style.border_color = PartData.tier_color(part.tier) if part != null else _base_panel_style.border_color
-	_animate_background()
+	queue_redraw()
 
 ## "Standard Wheel x2" — how many copies of this part the player owns, fitted
 ## or loose. Fitting MOVES a copy rather than cloning one, so the count is what
@@ -84,27 +69,24 @@ static func _rating(value: float, stat_range: Vector2) -> int:
 	var t := clampf((value - stat_range.x) / (stat_range.y - stat_range.x), 0.0, 1.0)
 	return clampi(int(round(t * 4.0)) + 1, 1, 5)
 
-## Eases the background toward (or back from) a faint tint of the part's
-## tier color. Always tweens from wherever bg_color currently sits, so a
-## hover that lands mid-transition (or a part swap while already
-## hovered) redirects smoothly instead of snapping.
-func _animate_background() -> void:
-	if _style == null or _base_panel_style == null:
-		return
-	var base := _base_panel_style.bg_color
-	var target := base
-	if _hovering and part != null:
-		var tint := PartData.tier_color(part.tier)
-		target = Color(
-			lerpf(base.r, tint.r, _HOVER_RGB_MIX),
-			lerpf(base.g, tint.g, _HOVER_RGB_MIX),
-			lerpf(base.b, tint.b, _HOVER_RGB_MIX),
-			lerpf(base.a, tint.a, _HOVER_ALPHA_MIX))
-	if _hover_tween != null and _hover_tween.is_valid():
-		_hover_tween.kill()
-	_hover_tween = create_tween()
-	_hover_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	_hover_tween.tween_property(_style, "bg_color", target, _HOVER_TRANSITION)
+func _draw() -> void:
+	var seed := hash(part.id) if part != null else 0
+	_board.jitter_seed = seed
+	_board.tilt_degrees = float(posmod(seed, 17) - 8) / 10.0
+	_board.body_color = UiPalette.CARDBOARD_LIGHT if _hovering and part != null else UiPalette.CARDBOARD_BASE
+	_board.shade_color = UiPalette.CARDBOARD_SHADE
+	_board.skirt_color = UiPalette.CARDBOARD_DARK
+	_board.draw(self, Rect2(Vector2.ZERO, size))
+
+	var icon_rect := Rect2(_icon.global_position - global_position, _icon.size)
+	draw_rect(icon_rect.grow(_ICON_GAP_MARGIN), UiPalette.SURFACE_DARK)
+
+	if part != null:
+		var tape_centre := Vector2(size.x - _TAPE_SIZE.x * 0.45, _TAPE_SIZE.y * 0.6)
+		var tape := PackedVector2Array()
+		for corner in [Vector2(-1, -1), Vector2(1, -1), Vector2(1, 1), Vector2(-1, 1)]:
+			tape.append(tape_centre + (corner * _TAPE_SIZE * 0.5).rotated(_TAPE_ANGLE))
+		draw_colored_polygon(tape, PartData.tier_color(part.tier))
 
 func _get_drag_data(_at_position: Vector2) -> Variant:
 	if part == null:

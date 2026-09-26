@@ -158,6 +158,7 @@ func dig() -> void:
 	# Check the wallet before the claw moves, not after: finding out you can't
 	# afford a dig is worth a line of text, not a whole dive into the heap.
 	if not Inventory.can_afford(grab_cost):
+		Sfx.play(&"denied", -6.0, 0.0)
 		denied.emit()
 		return
 	_digging = true
@@ -166,6 +167,7 @@ func dig() -> void:
 	# Nothing is charged yet — we don't know what's in the basket.
 	var caught := await _sink(heap)
 	if caught.is_empty():
+		Sfx.play_at(&"crane_miss", jaw_mouth_global(), -4.0)
 		await _haul_up()
 		_digging = false
 		missed.emit()
@@ -174,6 +176,7 @@ func dig() -> void:
 
 	# Shut on the haul, lift it, and pay for it on the way up. The pieces ride
 	# with the jaws — carried out of the heap, not left to fade where they lay.
+	Sfx.play_at(&"crane_clang", jaw_mouth_global(), -2.0)
 	await _snap_jaws(0.0)
 	await _carry_up(caught)
 	Inventory.spend_money(grab_cost)

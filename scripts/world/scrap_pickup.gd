@@ -16,6 +16,9 @@ const METAL_COLOR := Color(0.6, 0.62, 0.58, 1.0)
 func grant() -> void:
 	Inventory.add_scrap(amount)
 
+func collect_sound() -> StringName:
+	return &"scrap_pickup"
+
 func label_text() -> String:
 	if noun.is_empty():
 		return "+%d scrap" % amount
