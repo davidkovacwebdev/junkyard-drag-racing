@@ -82,6 +82,11 @@ const GROUP := &"player"
 
 ## Hitting something harder than this (px/s of speed lost in one step) knocks.
 @export var bump_min_impact_speed: float = 150.0
+## Extra deceleration (px/s^2, on top of normal friction) applied while
+## touching an obstacle but below bump_min_impact_speed — a glancing slide
+## along its edge rather than a square hit. See the collision handling in
+## _physics_process for why this exists alongside the hard-hit zeroing.
+@export var collision_contact_friction: float = 2400.0
 @export var engine_volume_db: float = -12.0
 @export var horn_volume_db: float = -6.0
 @export var tire_screech_volume_db: float = -12.0
@@ -250,6 +255,30 @@ func _physics_process(delta: float) -> void:
 	var velocity_before_move := velocity
 	move_and_slide()
 
+	# move_and_slide() only strips the component of velocity that's directly
+	# into whatever it hit — a glancing or diagonal hit leaves a tangential
+	# "slide" component alive, and move_toward keeps re-feeding that while
+	# input is held, so it can discharge as a sudden shove once we clear the
+	# obstacle's edge. A hard enough hit (same threshold the bump sound uses)
+	# kills velocity outright instead, so a real collision actually stops the
+	# car rather than storing up momentum for later.
+	var impact_speed := (velocity_before_move - velocity).length()
+	if impact_speed > bump_min_impact_speed:
+		velocity = Vector2.ZERO
+	elif get_slide_collision_count() > 0 and input_dir != Vector2.ZERO:
+		# A softer, glancing touch never crosses the hard-stop threshold above
+		# in any single frame, but it's still in contact — sliding along an
+		# obstacle's edge builds the same leftover tangential velocity a hard
+		# hit would, just gradually. Only bleed off the part of velocity NOT
+		# pointing where the player's currently steering (the actual leftover
+		# from the collision) — damping the whole vector here would fight the
+		# player's own forward speed the instant they so much as brush a
+		# corner, which is what made every touch feel like hitting molasses.
+		var desired_dir := input_dir.normalized()
+		var forward_component := velocity.dot(desired_dir) * desired_dir
+		var residual := (velocity - forward_component).move_toward(Vector2.ZERO, collision_contact_friction * delta)
+		velocity = forward_component + residual
+
 	# The map car has no physics at all, so its wheels are animated by hand
 	# from the ground it just covered. Each wheel decides what that means — a
 	# plain one rolls, a paddle swings (see CarWheel.animate_visual).
@@ -262,7 +291,7 @@ func _physics_process(delta: float) -> void:
 	_visual.animate_wheels(_roll_distance(delta, facing_sign), delta)
 
 	_update_skid_marks(skidding)
-	_update_sounds(delta, input_dir, skidding, (velocity_before_move - velocity).length())
+	_update_sounds(delta, input_dir, skidding, impact_speed)
 
 	# Keep the saved spot current so entering any place (or any other scene
 	# change) returns us to exactly here.

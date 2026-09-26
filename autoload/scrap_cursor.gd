@@ -27,14 +27,18 @@ func _ready() -> void:
 		Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
 
 func _notification(what: int) -> void:
-	# Leaving the window shows the OS pointer on its own; don't leave a frozen
-	# scrap arrow stuck at the edge where the mouse left.
+	# Leaving the window: hide our drawn arrow and actually give the OS
+	# pointer back (mouse_mode was forced HIDDEN in _ready, so without this
+	# the real cursor never reappears outside the window either — nothing at
+	# all would be visible to click a window control with).
 	if _pointer == null:
 		return
 	if what == NOTIFICATION_WM_MOUSE_EXIT:
 		_pointer.visible = false
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	elif what == NOTIFICATION_WM_MOUSE_ENTER:
 		_pointer.visible = true
+		Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
 
 func _process(delta: float) -> void:
 	var viewport := get_viewport()
