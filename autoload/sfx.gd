@@ -47,9 +47,12 @@ func stream(sound_name: StringName) -> AudioStreamWAV:
 
 ## Non-positional one-shot (UI, pickups, anything "in your ears"). A little
 ## random pitch keeps repeats — a stream of scrap orbs — from sounding robotic.
-func play(sound_name: StringName, volume_db: float = 0.0, pitch_variation: float = 0.05) -> AudioStreamPlayer:
+## `bus` overrides the sound's usual bus (the settings screen previews each
+## slider's level through it).
+func play(sound_name: StringName, volume_db: float = 0.0, pitch_variation: float = 0.05, bus: StringName = &"") -> AudioStreamPlayer:
 	var player := _free_player()
 	player.stream = stream(sound_name)
+	player.bus = bus if bus != &"" else SoundLibrary.bus_for(sound_name)
 	player.volume_db = volume_db
 	player.pitch_scale = 1.0 + randf_range(-pitch_variation, pitch_variation)
 	player.play()
@@ -65,6 +68,7 @@ func play_at(sound_name: StringName, global_position: Vector2, volume_db: float 
 		return
 	var player := AudioStreamPlayer2D.new()
 	player.stream = stream(sound_name)
+	player.bus = SoundLibrary.bus_for(sound_name)
 	player.volume_db = volume_db
 	player.pitch_scale = 1.0 + randf_range(-pitch_variation, pitch_variation)
 	player.max_distance = 2500.0

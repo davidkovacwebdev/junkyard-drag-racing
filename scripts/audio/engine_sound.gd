@@ -50,6 +50,7 @@ var _gust_y: float = 0.0
 var _gust_gain: float = 0.0
 
 func _ready() -> void:
+	bus = AudioSettings.CARS
 	if profile == null:
 		return
 	var generator := AudioStreamGenerator.new()

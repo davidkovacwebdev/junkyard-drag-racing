@@ -36,6 +36,35 @@ const LOOPING: Array[StringName] = [
 	&"rain_loop",
 ]
 
+const CAR_SOUNDS: Array[StringName] = [
+	&"ignition_click",
+	&"engine_stall",
+	&"backfire",
+	&"horn_loop",
+	&"tire_screech_loop",
+	&"bump",
+	&"collision",
+]
+
+const UI_SOUNDS: Array[StringName] = [
+	&"ui_click",
+	&"ui_hover",
+]
+
+const AMBIENT_SOUNDS: Array[StringName] = [
+	&"rain_loop",
+]
+
+## The AudioSettings bus a sound plays on, so each volume slider covers it.
+static func bus_for(sound_name: StringName) -> StringName:
+	if CAR_SOUNDS.has(sound_name):
+		return AudioSettings.CARS
+	if UI_SOUNDS.has(sound_name):
+		return AudioSettings.UI
+	if AMBIENT_SOUNDS.has(sound_name):
+		return AudioSettings.AMBIENCE
+	return AudioSettings.SFX
+
 static func build_stream(sound_name: StringName) -> AudioStreamWAV:
 	return Synth.to_stream(render(sound_name), LOOPING.has(sound_name))
 
@@ -112,14 +141,31 @@ static func _horn_loop() -> PackedFloat32Array:
 		fade = 0.0,
 	})
 
+## Pitched rubber squeal with a wandering pitch, a second tyre chirping above
+## it, stick-slip chatter and a little scrub noise underneath. Every wobble is a
+## whole number of Hz over the 1 s loop so the pitch lines up at the seam.
 static func _tire_screech_loop(rng: RandomNumberGenerator) -> PackedFloat32Array:
-	return Synth.noise_sweep(1.0, {
-		freq = [[0.0, 2200.0], [0.3, 2600.0], [0.7, 2300.0], [1.0, 2200.0]],
-		q = [[0.0, 10.0]],
-		highpass = 600.0,
+	var duration := 1.0
+	var scrub := Synth.noise_sweep(duration, {
+		freq = [[0.0, 1800.0]],
+		q = [[0.0, 1.5]],
+		highpass = 300.0,
 		amp = [[0.0, 1.0]],
 		fade = 0.0,
 	}, rng)
+	var out := Synth.silence(duration)
+	var squeal_phase := 0.0
+	var chirp_phase := 0.0
+	for i in out.size():
+		var t := float(i) / Synth.SAMPLE_RATE
+		var wobble := 70.0 * sin(TAU * 2.0 * t) + 45.0 * sin(TAU * 6.0 * t) + 25.0 * sin(TAU * 17.0 * t)
+		squeal_phase += (1150.0 + wobble) / Synth.SAMPLE_RATE
+		chirp_phase += (1730.0 - wobble * 1.4) / Synth.SAMPLE_RATE
+		var squeal := sin(TAU * squeal_phase) + 0.4 * sin(2.0 * TAU * squeal_phase) + 0.2 * sin(3.0 * TAU * squeal_phase)
+		var chirp := sin(TAU * chirp_phase) * (0.5 + 0.5 * sin(TAU * 3.0 * t))
+		var chatter := 0.7 + 0.3 * sin(TAU * 23.0 * t)
+		out[i] = Synth.softclip((0.7 * squeal + 0.3 * chirp) * chatter, 1.5) + 0.35 * scrub[i]
+	return Synth.finish(out, 0.85, 0.0)
 
 # --- Impacts ------------------------------------------------------------------
 

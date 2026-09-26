@@ -15,12 +15,14 @@
 [ext_resource type="Script" uid="uid://bvsm27bp5u8y8" path="res://scripts/world/water.gd" id="13"]
 [ext_resource type="Script" uid="uid://br7vlahippyej" path="res://scripts/world/terrain.gd" id="14"]
 [ext_resource type="Script" uid="uid://ds8hajmui5tbe" path="res://scripts/world/biome_marker.gd" id="15"]
-[ext_resource type="PackedScene" path="res://scenes/world/obstacle.tscn" id="16"]
+[ext_resource type="PackedScene" path="res://scenes/world/ramp_event.tscn" id="16"]
 [ext_resource type="PackedScene" path="res://scenes/race/race_ramp.tscn" id="17"]
 [ext_resource type="PackedScene" path="res://scenes/world/composed_tree.tscn" id="17_bolr6"]
 [ext_resource type="Resource" uid="uid://cm4qhmwwrhvy0" path="res://trees/spruce.tres" id="18_hbyw3"]
 [ext_resource type="Script" uid="uid://bo1kwx12twsg5" path="res://scripts/world/puddle_field.gd" id="19_puddle"]
 [ext_resource type="Script" uid="uid://dkr4ur3uxyxfe" path="res://scripts/world/rain_layer.gd" id="20_rain"]
+
+[ext_resource type="Script" path="res://scripts/world/minimap_marker.gd" id="21_marker"]
 
 [sub_resource type="Curve2D" id="Curve2D_688af"]
 _data = {
@@ -183,10 +185,7 @@ script = ExtResource("9")
 position = Vector2(-1200, 994)
 
 [node name="Ramp" parent="Sortables" unique_id=1499947680 instance=ExtResource("16")]
-position = Vector2(400, 300)
-size = Vector2(220, 160)
-rect_color = Color(0.95, 0.55, 0.1, 1)
-display_name = "Ramp"
+position = Vector2(460, 300)
 interior_scene = ExtResource("17")
 
 [node name="ComposedTree" parent="Sortables" unique_id=1582399453 instance=ExtResource("17_bolr6")]
@@ -218,3 +217,18 @@ tree_data = ExtResource("18_hbyw3")
 [node name="Rain" type="Node2D" parent="." unique_id=597439047]
 z_index = 900
 script = ExtResource("20_rain")
+
+[node name="MinimapMarker" type="Node2D" parent="Sortables/House"]
+script = ExtResource("21_marker")
+
+[node name="MinimapMarker" type="Node2D" parent="DragStrip"]
+script = ExtResource("21_marker")
+kind = 1
+
+[node name="MinimapMarker" type="Node2D" parent="Sortables/Junkyard"]
+script = ExtResource("21_marker")
+kind = 2
+
+[node name="MinimapMarker" type="Node2D" parent="Sortables/Ramp"]
+script = ExtResource("21_marker")
+kind = 3
