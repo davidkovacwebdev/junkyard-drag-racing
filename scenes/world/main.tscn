@@ -21,8 +21,7 @@
 [ext_resource type="Resource" uid="uid://cm4qhmwwrhvy0" path="res://trees/spruce.tres" id="18_hbyw3"]
 [ext_resource type="Script" uid="uid://bo1kwx12twsg5" path="res://scripts/world/puddle_field.gd" id="19_puddle"]
 [ext_resource type="Script" uid="uid://dkr4ur3uxyxfe" path="res://scripts/world/rain_layer.gd" id="20_rain"]
-
-[ext_resource type="Script" path="res://scripts/world/minimap_marker.gd" id="21_marker"]
+[ext_resource type="Script" uid="uid://b1lrvw48vx2h2" path="res://scripts/world/minimap_marker.gd" id="21_marker"]
 
 [sub_resource type="Curve2D" id="Curve2D_688af"]
 _data = {
@@ -157,6 +156,10 @@ script = ExtResource("19_puddle")
 [node name="DragStrip" parent="." unique_id=903706534 instance=ExtResource("5")]
 position = Vector2(3200, 0)
 
+[node name="MinimapMarker" type="Node2D" parent="DragStrip" unique_id=238757149]
+script = ExtResource("21_marker")
+kind = 1
+
 [node name="Sortables" type="Node2D" parent="." unique_id=58475017]
 y_sort_enabled = true
 
@@ -167,6 +170,9 @@ position = Vector2(260, -260)
 building_data = ExtResource("10")
 display_name = "Garage"
 interior_scene = ExtResource("3")
+
+[node name="MinimapMarker" type="Node2D" parent="Sortables/House" unique_id=488309621]
+script = ExtResource("21_marker")
 
 [node name="HouseShed" parent="Sortables" unique_id=31371306 instance=ExtResource("2")]
 position = Vector2(515, -228.5)
@@ -184,9 +190,17 @@ script = ExtResource("9")
 [node name="Junkyard" parent="Sortables" unique_id=446594018 instance=ExtResource("8")]
 position = Vector2(-1200, 994)
 
+[node name="MinimapMarker" type="Node2D" parent="Sortables/Junkyard" unique_id=591956851]
+script = ExtResource("21_marker")
+kind = 2
+
 [node name="Ramp" parent="Sortables" unique_id=1499947680 instance=ExtResource("16")]
 position = Vector2(460, 300)
 interior_scene = ExtResource("17")
+
+[node name="MinimapMarker" type="Node2D" parent="Sortables/Ramp" unique_id=963194865]
+script = ExtResource("21_marker")
+kind = 3
 
 [node name="ComposedTree" parent="Sortables" unique_id=1582399453 instance=ExtResource("17_bolr6")]
 position = Vector2(-308, 33)
@@ -217,18 +231,3 @@ tree_data = ExtResource("18_hbyw3")
 [node name="Rain" type="Node2D" parent="." unique_id=597439047]
 z_index = 900
 script = ExtResource("20_rain")
-
-[node name="MinimapMarker" type="Node2D" parent="Sortables/House"]
-script = ExtResource("21_marker")
-
-[node name="MinimapMarker" type="Node2D" parent="DragStrip"]
-script = ExtResource("21_marker")
-kind = 1
-
-[node name="MinimapMarker" type="Node2D" parent="Sortables/Junkyard"]
-script = ExtResource("21_marker")
-kind = 2
-
-[node name="MinimapMarker" type="Node2D" parent="Sortables/Ramp"]
-script = ExtResource("21_marker")
-kind = 3

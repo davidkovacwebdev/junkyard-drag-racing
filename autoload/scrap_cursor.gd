@@ -13,9 +13,17 @@ const SQUASH_TIME := 0.06
 const SPRING_TIME := 0.4
 const HOVER_TILT := deg_to_rad(-14.0)
 const TILT_RESPONSE := 18.0
+## Driving is keyboard-only, so a mouse left sitting mid-screen is just
+## clutter once the player's clearly not about to click anything. Only
+## kicks in while the player's car exists (PlayerCar.GROUP) — menus and
+## the garage still want the pointer up regardless of how still it sits.
+const IDLE_HIDE_DELAY := 2.0
 
 var _pointer: Node2D
 var _squash_tween: Tween
+var _mouse_in_window: bool = true
+var _idle_time: float = 0.0
+var _last_mouse_pos: Vector2 = Vector2.INF
 
 func _ready() -> void:
 	layer = 128
@@ -34,15 +42,29 @@ func _notification(what: int) -> void:
 	if _pointer == null:
 		return
 	if what == NOTIFICATION_WM_MOUSE_EXIT:
+		_mouse_in_window = false
 		_pointer.visible = false
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	elif what == NOTIFICATION_WM_MOUSE_ENTER:
+		_mouse_in_window = true
+		_idle_time = 0.0
 		_pointer.visible = true
 		Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
 
 func _process(delta: float) -> void:
 	var viewport := get_viewport()
-	_pointer.position = viewport.get_mouse_position()
+	var mouse_pos := viewport.get_mouse_position()
+	if mouse_pos != _last_mouse_pos:
+		_last_mouse_pos = mouse_pos
+		_idle_time = 0.0
+	else:
+		_idle_time += delta
+	_pointer.position = mouse_pos
+
+	var driving := get_tree().get_first_node_in_group(PlayerCar.GROUP) != null
+	var idle_hidden := driving and _idle_time >= IDLE_HIDE_DELAY
+	_pointer.visible = _mouse_in_window and not idle_hidden
+
 	var hovered := viewport.gui_get_hovered_control()
 	var over_clickable := hovered is BaseButton and not (hovered as BaseButton).disabled
 	var target_tilt := HOVER_TILT if over_clickable else 0.0

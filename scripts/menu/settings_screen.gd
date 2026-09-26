@@ -20,8 +20,15 @@ const PREVIEW_SOUNDS := {
 }
 
 @onready var _rows: VBoxContainer = $Board/Rows
+@onready var _back_button: BackButton = $BackButton
 
 func _ready() -> void:
+	# Settings is reached two ways — straight from the main menu, or from
+	# the pause menu mid-game — and "back" means something different each
+	# time. WorldState only ever has a remembered position once the player
+	# has actually been on the map this session, so it doubles as "is there
+	# a game in progress to return to" here.
+	_back_button.target_scene = "res://scenes/world/main.tscn" if WorldState.has_player_position else "res://scenes/menu/main_menu.tscn"
 	for i in ROWS.size():
 		_add_row(ROWS[i][0], ROWS[i][1], i)
 

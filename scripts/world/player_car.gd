@@ -71,6 +71,12 @@ const GROUP := &"player"
 ## PuddleField.is_on_puddle().
 @export var puddles_path: NodePath = ^"../Puddles"
 
+## Off for a PlayerCar that lives in its own local space (the junkyard
+## yard, say) rather than on the open map — WorldState.player_position is
+## a single shared spot on the main map, so a car that isn't on that map
+## must neither spawn from it nor overwrite it with its own coordinates.
+@export var remember_position: bool = true
+
 ## How far the car leans at full vertical speed, in radians. Climbing W
 ## tips the nose up, descending S tips it down; it eases back to level the
 ## moment the vertical input stops. Deliberately small — it's a hint of a
@@ -146,7 +152,7 @@ func _ready() -> void:
 	_setup_sounds(car)
 	# Coming back from a place (garage, drag strip race): reappear where we
 	# left the map instead of at the scene's default spawn.
-	if WorldState.has_player_position:
+	if remember_position and WorldState.has_player_position:
 		global_position = WorldState.player_position
 	# If E was still held when the previous scene ended, don't let it count
 	# as a fresh press here — that would instantly re-enter the place we
@@ -298,7 +304,8 @@ func _physics_process(delta: float) -> void:
 
 	# Keep the saved spot current so entering any place (or any other scene
 	# change) returns us to exactly here.
-	WorldState.remember_player(global_position)
+	if remember_position:
+		WorldState.remember_player(global_position)
 
 	# The only thing looting actually tracks right now — a plain running
 	# total, no distinct item types yet — so this is the whole HUD for now.
