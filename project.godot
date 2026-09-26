@@ -15,12 +15,14 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="Junkyard drag racing"
-run/main_scene="res://scenes/menu/main_menu.tscn"
+run/main_scene="res://scenes/menu/loading_screen.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
 
 [autoload]
 
+AudioSettings="*res://autoload/audio_settings.gd"
+Music="*res://autoload/music.gd"
 Sfx="*res://autoload/sfx.gd"
 ScrapCursor="*res://autoload/scrap_cursor.gd"
 PartDatabase="*res://autoload/part_database.gd"

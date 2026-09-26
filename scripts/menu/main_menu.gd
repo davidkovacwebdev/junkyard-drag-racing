@@ -1,6 +1,6 @@
 class_name MainMenu
 extends Control
-## The game's entry point (see project.godot's run/main_scene). New Game
+## The main menu, shown once LoadingScreen has finished rendering the music. New Game
 ## resets Inventory/WorldState to a fresh start and drops the player
 ## into the open world; Continue loads SaveSystem's save instead and is
 ## only enabled when one actually exists. Settings/Credits are real

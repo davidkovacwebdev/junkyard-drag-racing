@@ -29,6 +29,11 @@ Every sound is synthesized from code — do not add .wav/.ogg files. The toolkit
 | `scripts/audio/sustained_sound.gd` | `SustainedSound` — a looping library sound driven by `set_level()` / `set_active()` with fades |
 | `scripts/audio/engine_sound.gd` | `EngineSound` — live engine synth (AudioStreamGenerator) driven by `rpm` and `throttle` |
 | `scripts/audio/engine_sound_profile.gd` | `EngineSoundProfile` — per-engine voice settings |
+| `scripts/audio/music_synth.gd` | `MusicSynth` — music sequencer (text patterns, chord-following bass/strum/arpeggio) + instruments: slap bass, clav, kazoo, banjo, tuba, toy piano, slide whistle, junk drums (incl. ghost snare, clap, chicken scratch, trash lid, boing) |
+| `scripts/audio/song_library.gd` | `SongLibrary` — the songs, composed in code |
+| `autoload/music.gd` | `Music` autoload — renders songs on a background thread, picks one per scene folder (menu / race / everything else), crossfades |
+| `autoload/audio_settings.gd` | `AudioSettings` autoload — per-bus volume + mute, saved to `user://settings.cfg` |
+| `default_bus_layout.tres` | buses: Master, Music, SFX, Cars, Ambience, UI |
 | `sounds/engines/<engine id>.tres` | one profile per engine part, looked up by id |
 | `scripts/car/car_engine_audio.gd` | race car engine: rpm from wheel spin |
 | `scripts/car/race_car_audio.gd` | `RaceCarAudio` — the mix rule for every race-car sound |
@@ -57,6 +62,14 @@ Loops must use `fade = 0` and start/end at the same level. Tones loop cleanly wh
 Engine starts are an `ignition_click` one-shot followed by `EngineSound.start_up()`. The catch and rev blip come from the live engine voice, so the start always matches the fitted engine. Never bake a motor into a start one-shot.
 
 Tone: junkyard, cheap, a little broken. Rattly, clunky, lo-fi, never glossy or orchestral. It should match the cut-out polygon look (see the `ui-style` skill).
+
+## Buses
+
+Every sound must land on a bus so the settings sliders cover it. `SoundLibrary.bus_for()` decides: names in `CAR_SOUNDS` → Cars, `UI_SOUNDS` → UI, `AMBIENT_SOUNDS` → Ambience, everything else → SFX. `Sfx`, `SustainedSound` and `EngineSound` apply it automatically, so a new sound only needs adding to the right list. Any new player created outside those must set `bus` itself.
+
+## Music
+
+Songs are silly junkyard funk: 16th-note syncopation, slap bass, clav stabs, ghost notes, chromatic runs and semitone chord slides, odd meters, stop-time breaks, cheesy key changes, wonky detune and tape wobble. User feedback on a tame folk version was "like a children youtube video" — keep it weird, never polite or epic. Add one in `SongLibrary` and map it in `Music._song_for_scene()`. Each renders in ~4–5 s on a background thread; keep songs under ~80 s. `MusicSynth` warns when a `|`-separated bar has the wrong step count.
 
 ## Adding an engine part
 
@@ -93,4 +106,4 @@ Keep rms at full rpm around 0.25–0.5 so engines are balanced. Measure by calli
 
 ## Current coverage (keep this updated)
 
-Overworld car: engine (ignition click + live start once per session, live rpm), H horn, skid screech, wall bump, Shift backfire, door when entering a place. Race: live engines, impacts, part-break crash, body-break stall, finish-line backfire. Pickups: scrap blip, part arpeggio (also the crane haul). Trash looting rummage. Scrap dealer: cash register / denied. Crane: clang on grab, miss, denied. Garage: wrench clunk on fitting a part. All buttons click; ScrapButtons tick on hover. Rain ambience.
+Overworld car: engine (ignition click + live start once per session, live rpm), H horn, skid screech, wall bump, Shift backfire, door when entering a place. Race: live engines, impacts, part-break crash, body-break stall, finish-line backfire. Pickups: scrap blip, part arpeggio (also the crane haul). Trash looting rummage. Scrap dealer: cash register / denied. Crane: clang on grab, miss, denied. Garage: wrench clunk on fitting a part. All buttons click; ScrapButtons tick on hover. Rain ambience. Settings: each volume change previews through its bus. Music: menu (Junkyard Strut), overworld (Drunk Crane Shuffle, 7/8), races (Scrapheap Stampede).

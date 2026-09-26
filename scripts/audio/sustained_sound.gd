@@ -22,6 +22,7 @@ var _on_time: float = 0.0
 
 func _ready() -> void:
 	stream = Sfx.stream(sound_name)
+	bus = SoundLibrary.bus_for(sound_name)
 	volume_db = -80.0
 
 func set_level(level: float) -> void:

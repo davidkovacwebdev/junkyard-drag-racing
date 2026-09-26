@@ -309,7 +309,7 @@ func _update_sounds(delta: float, input_dir: Vector2, skidding: bool, impact_spe
 		_engine_sound.rpm = 1.0 - exp(-velocity.length() / max_speed * 1.2)
 		_engine_sound.throttle = 1.0 if input_dir != Vector2.ZERO else 0.0
 	_horn.set_active(Input.is_physical_key_pressed(KEY_H))
-	_tire_screech.set_active(skidding)
+	_tire_screech.set_level(clampf(velocity.length() / max_speed, 0.4, 1.0) if skidding else 0.0)
 
 	_bump_cooldown -= delta
 	if impact_speed > bump_min_impact_speed and _bump_cooldown <= 0.0:
