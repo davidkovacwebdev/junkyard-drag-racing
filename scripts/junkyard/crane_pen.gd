@@ -98,6 +98,7 @@ func _on_dig_finished(caught: int) -> void:
 	_set_line(summary)
 	if caught > 0:
 		_popup(summary, POPUP_AT)
+		Sfx.play(&"part_pickup" if not _haul.is_empty() else &"scrap_pickup", -4.0, 0.0)
 	_refresh()
 	_haul.clear()
 	_haul_scrap = 0

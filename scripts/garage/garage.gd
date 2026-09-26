@@ -8,20 +8,18 @@ extends Control
 ## you drive in the world.
 
 @onready var _car_view: CarView = $CarPreview
-@onready var _name_label: Label = $NameLabel
+@onready var _name_label: Label = $NamePlate/NameLabel
 @onready var _parts_list: GridContainer = $PartsScroll/PartsList
 @onready var _parts_empty_label: Label = $PartsEmptyLabel
-@onready var _body_filter_button: Button = $BodyFilterButton
-@onready var _engine_filter_button: Button = $EngineFilterButton
-@onready var _wheel_filter_button: Button = $WheelFilterButton
+@onready var _body_filter_button: ScrapButton = $BodyFilterButton
+@onready var _engine_filter_button: ScrapButton = $EngineFilterButton
+@onready var _wheel_filter_button: ScrapButton = $WheelFilterButton
 @onready var _car_drop_zone: CarDropZone = $CarDropZone
 
 var _index: int = 0
 var _wheel_mount_zones: Array[WheelMountZone] = []
 var _current_category: PartData.Category = PartData.Category.BODY
 
-const _INACTIVE_FILTER_COLOR := Color(0.85, 0.85, 0.85, 1)
-const _ACTIVE_FILTER_COLOR := Color(1, 0.8, 0.2, 1)
 const _PART_SLOT_SCENE := preload("res://scenes/garage/part_slot.tscn")
 const _WHEEL_MOUNT_ZONE_SCENE := preload("res://scenes/garage/wheel_mount_zone.tscn")
 
@@ -109,6 +107,7 @@ func equip_part(category: PartData.Category, part: PartData, wheel_index: int = 
 		return
 	# A wheel swap is a minute's work; a body or an engine is most of a day.
 	DayNightCycle.advance_hours(1.0 if category == PartData.Category.WHEEL else 4.0)
+	Sfx.play(&"wrench_clunk", -4.0)
 	_refresh()
 	# Ownership changed — a copy moved out of the stash onto the car, or
 	# between two cars — so the list has to be rebuilt with fresh counts
@@ -207,6 +206,6 @@ func _show_category(category: PartData.Category) -> void:
 		slot.garage = self
 		slot.set_part(row["part"], row["count"])
 
-	_body_filter_button.add_theme_color_override("font_color", _ACTIVE_FILTER_COLOR if category == PartData.Category.BODY else _INACTIVE_FILTER_COLOR)
-	_engine_filter_button.add_theme_color_override("font_color", _ACTIVE_FILTER_COLOR if category == PartData.Category.ENGINE else _INACTIVE_FILTER_COLOR)
-	_wheel_filter_button.add_theme_color_override("font_color", _ACTIVE_FILTER_COLOR if category == PartData.Category.WHEEL else _INACTIVE_FILTER_COLOR)
+	_body_filter_button.selected = category == PartData.Category.BODY
+	_engine_filter_button.selected = category == PartData.Category.ENGINE
+	_wheel_filter_button.selected = category == PartData.Category.WHEEL

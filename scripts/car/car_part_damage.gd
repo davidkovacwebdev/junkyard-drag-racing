@@ -17,11 +17,15 @@ signal broken
 
 const IMPACT_VELOCITY_THRESHOLD := 200.0
 const DAMAGE_PER_MOMENTUM := 0.006
+## A hit this hard (Δv) or harder knocks at full volume.
+const LOUDEST_IMPACT_VELOCITY := 900.0
+const IMPACT_SOUND_COOLDOWN := 0.15
 
 var current_durability: float = 100.0
 var is_broken: bool = false
 
 var _prev_velocity := Vector2.ZERO
+var _impact_sound_cooldown := 0.0
 
 func _ready() -> void:
 	if part_data != null:
@@ -36,7 +40,8 @@ func resync() -> void:
 	if is_instance_valid(target):
 		_prev_velocity = target.linear_velocity
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
+	_impact_sound_cooldown -= delta
 	# is_instance_valid, not a plain null check: target is a dangling
 	# reference (not nulled out) once queue_free()'d, which a `== null`
 	# check doesn't catch — surfaced by chaotic multi-car pileups where
@@ -52,4 +57,9 @@ func _physics_process(_delta: float) -> void:
 	current_durability -= momentum * DAMAGE_PER_MOMENTUM
 	if current_durability <= 0.0:
 		is_broken = true
+		RaceCarAudio.play(self, &"collision", target.global_position, -2.0)
 		broken.emit()
+	elif _impact_sound_cooldown <= 0.0:
+		_impact_sound_cooldown = IMPACT_SOUND_COOLDOWN
+		var loudness := clampf(delta_v / LOUDEST_IMPACT_VELOCITY, 0.25, 1.0)
+		RaceCarAudio.play(self, &"bump", target.global_position, linear_to_db(loudness))

@@ -33,6 +33,9 @@ func _ensure_fit() -> void:
 	if _fit == null:
 		_fit = Node2D.new()
 		_fit.name = "Fit"
+		# The drop highlights are this node's own drawing; keep them on top of
+		# the car art instead of hidden behind it.
+		_fit.show_behind_parent = true
 		add_child(_fit)
 
 func _process(_delta: float) -> void:
@@ -161,20 +164,26 @@ func _draw() -> void:
 			if _has_engine_mount:
 				_draw_ring(_engine_mount_local)
 		PartData.Category.BODY:
-			_draw_body_outline()
+			_draw_body_glow()
+
+## Drop-target highlights are flat, pulsing yellow shapes (no outlines, per the
+## ui-style skill): an octagon over each mount, a wash over the body.
+func _highlight_color(base_alpha: float) -> Color:
+	var pulse := 0.5 + 0.5 * sin(Time.get_ticks_msec() / 250.0)
+	var color := UiPalette.ACCENT_YELLOW
+	color.a = base_alpha + 0.15 * pulse
+	return color
 
 func _draw_ring(center: Vector2) -> void:
-	var pulse := 0.5 + 0.5 * sin(Time.get_ticks_msec() / 250.0)
-	var fill := Color(1.0, 0.85, 0.2, 0.12 + 0.12 * pulse)
-	var outline := Color(1.0, 0.85, 0.2, 0.6 + 0.35 * pulse)
-	draw_circle(center, _HIGHLIGHT_RADIUS, fill)
-	draw_arc(center, _HIGHLIGHT_RADIUS, 0.0, TAU, 40, outline, 3.0, true)
+	var octagon := PackedVector2Array()
+	for k in 8:
+		octagon.append(center + Vector2.from_angle(TAU * k / 8.0 + PI / 8.0) * _HIGHLIGHT_RADIUS)
+	draw_colored_polygon(octagon, _highlight_color(0.25))
 
-func _draw_body_outline() -> void:
+func _draw_body_glow() -> void:
 	if _body == null:
 		return
-	var pulse := 0.5 + 0.5 * sin(Time.get_ticks_msec() / 250.0)
-	var outline := Color(1.0, 0.85, 0.2, 0.5 + 0.35 * pulse)
+	var color := _highlight_color(0.2)
 	for child in _body.get_children():
 		if child is Polygon2D:
 			var poly: Polygon2D = child
@@ -182,5 +191,4 @@ func _draw_body_outline() -> void:
 			for p in poly.polygon:
 				pts.append(_fit.position + (poly.position + p) * _fit.scale)
 			if pts.size() > 2:
-				pts.append(pts[0])
-				draw_polyline(pts, outline, 3.0, true)
+				draw_colored_polygon(pts, color)

@@ -1,7 +1,6 @@
 class_name BackButton
-extends Button
-## Plain-text "leave here" control — flat, no background, just a
-## font-color change on hover. Defaults to the open world (what every
+extends ScrapButton
+## "Leave here" slab (a ScrapButton). Defaults to the open world (what every
 ## building interior wants — the player lands back at the exact spot
 ## they entered from because PlayerCar/WorldState handle that, not this
 ## button), but menu screens override target_scene to go back to the

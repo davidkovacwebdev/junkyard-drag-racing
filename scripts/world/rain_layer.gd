@@ -42,6 +42,7 @@ const FALLBACK_RECT := Rect2(-1400.0, -900.0, 2800.0, 1800.0)
 ## x, y (local position) and z (this drop's fall speed).
 var _drops: Array[Vector3] = []
 var _rng := RandomNumberGenerator.new()
+var _rain_sound: SustainedSound
 
 func _ready() -> void:
 	_rng.seed = 1337
@@ -53,9 +54,16 @@ func _ready() -> void:
 			_rng.randf_range(FALLBACK_RECT.position.y, FALLBACK_RECT.end.y),
 			_rng.randf_range(fall_speed_min, fall_speed_max)))
 	visible = false
+	_rain_sound = SustainedSound.new()
+	_rain_sound.sound_name = &"rain_loop"
+	_rain_sound.base_volume_db = -8.0
+	_rain_sound.fade_in_time = 1.5
+	_rain_sound.fade_out_time = 2.0
+	add_child(_rain_sound)
 
 func _process(delta: float) -> void:
 	var intensity := Weather.get_rain_intensity()
+	_rain_sound.set_level(intensity)
 	visible = intensity > 0.02
 	if not visible:
 		return

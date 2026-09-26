@@ -170,11 +170,13 @@ func _set_line(text: String) -> void:
 ## Turn the player's whole scrap pile into cash. Returns the money earned.
 func sell() -> int:
 	if Inventory.scrap <= 0:
+		Sfx.play(&"denied", -6.0, 0.0)
 		_show_popup(empty_line)
 		_set_line(empty_line)
 		return 0
 	var sold := Inventory.scrap
 	var earned := Inventory.sell_scrap(money_per_scrap)
+	Sfx.play(&"cash_register", -4.0, 0.0)
 	_show_popup(sold_line % [sold, earned])
 	_set_line(sold_line % [sold, earned])
 	return earned
