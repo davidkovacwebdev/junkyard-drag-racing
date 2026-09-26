@@ -19,8 +19,8 @@
 [ext_resource type="PackedScene" path="res://scenes/race/race_ramp.tscn" id="17"]
 [ext_resource type="PackedScene" path="res://scenes/world/composed_tree.tscn" id="17_bolr6"]
 [ext_resource type="Resource" uid="uid://cm4qhmwwrhvy0" path="res://trees/spruce.tres" id="18_hbyw3"]
-[ext_resource type="Script" path="res://scripts/world/puddle_field.gd" id="19_puddle"]
-[ext_resource type="Script" path="res://scripts/world/rain_layer.gd" id="20_rain"]
+[ext_resource type="Script" uid="uid://bo1kwx12twsg5" path="res://scripts/world/puddle_field.gd" id="19_puddle"]
+[ext_resource type="Script" uid="uid://dkr4ur3uxyxfe" path="res://scripts/world/rain_layer.gd" id="20_rain"]
 
 [sub_resource type="Curve2D" id="Curve2D_688af"]
 _data = {
@@ -149,7 +149,7 @@ curve = SubResource("Curve2D_5bu78")
 [node name="SkidMarks" type="Node2D" parent="." unique_id=344039305]
 script = ExtResource("12")
 
-[node name="Puddles" type="Node2D" parent="."]
+[node name="Puddles" type="Node2D" parent="." unique_id=316629190]
 script = ExtResource("19_puddle")
 
 [node name="DragStrip" parent="." unique_id=903706534 instance=ExtResource("5")]
@@ -215,6 +215,6 @@ tree_data = ExtResource("18_hbyw3")
 
 [node name="PauseMenu" parent="." unique_id=1833115279 instance=ExtResource("6")]
 
-[node name="Rain" type="Node2D" parent="."]
+[node name="Rain" type="Node2D" parent="." unique_id=597439047]
 z_index = 900
 script = ExtResource("20_rain")

@@ -77,6 +77,28 @@ const MAX_ANGULAR_VELOCITY := 45.0
 ## much heavier, a snappier ramp is what keeps the wheel actually pulling
 ## that extra weight along instead of just slipping under it.
 const MOTOR_ACCEL := 45.0
+## Extra wheel target speed (rad/s) per radian the chassis is currently
+## tilted nose-down. The car settles to roughly the local slope's own
+## angle as it rolls along it (rolling contact naturally matches the
+## chassis's pitch to the ground under it), so reading body.rotation is
+## a direct, physical stand-in for "how steep is the ground right here"
+## — no need to hand-author a slope-vs-x lookup, and it stays correct
+## automatically however the curve's shape changes. Only counts while
+## climbing (see the progress < 1.0 guard at the call site) and only
+## the nose-down direction (negative/uphill tilt contributes nothing).
+##
+## The combined (distance climb + this) target is clamped to
+## MAX_ANGULAR_VELOCITY at the call site, not left to add up freely —
+## tried that first and even a single steep stretch of the curve (~30°,
+## already well into the distance climb's own high end) pushed the
+## total target past 60, which is untested territory this whole rig was
+## never tuned for: speeds spiralled into the thousands, wheels
+## snapped, and the car eventually tunnelled clean through the end of
+## the track into the void. The clamp keeps this a "reach the same
+## proven-safe top speed sooner on steep ground" boost, not a way past
+## it.
+const DOWNHILL_BOOST_PER_RADIAN := 8.0
+
 ## World x range the wheel target climbs across — the Start segment (car
 ## needs to already be moving before it even reaches the slope) through
 ## the end of the Downhill (node position.x 500 + its local run of 7500).
@@ -108,6 +130,7 @@ const MASS_MULTIPLIER := 3.0
 
 var _player_car: CarAssembler.AssembledCar
 var _damage_rearmed := false
+var _gravity_reduced := false
 
 func _ready() -> void:
 	# Debug aid while tuning this track's geometry: draws every collision
@@ -200,12 +223,25 @@ func _physics_process(delta: float) -> void:
 		return
 	var progress := inverse_lerp(CLIMB_START_X, CLIMB_END_X, _player_car.body.global_position.x)
 	var target := lerpf(START_ANGULAR_VELOCITY, MAX_ANGULAR_VELOCITY, clampf(progress, 0.0, 1.0))
+	if progress < 1.0:
+		target = clampf(target + _downhill_boost(_player_car.body.rotation), START_ANGULAR_VELOCITY, MAX_ANGULAR_VELOCITY)
 	for wheel in _player_car.wheels:
 		if is_instance_valid(wheel):
 			wheel.target_angular_velocity = target
 	if not _damage_rearmed and _player_car.body.global_position.x >= DAMAGE_REARM_X:
 		_damage_rearmed = true
 		_rearm_damage()
+	if not _gravity_reduced and _player_car.body.global_position.x >= CLIMB_END_X:
+		_gravity_reduced = true
+		_reduce_gravity_on_ramp(_player_car)
+
+## Positive rotation is nose-down in this scene (confirmed empirically —
+## the car reads ~20-40° through the steepest part of the Downhill curve),
+## so only positive tilt counts as "downhill" here; a nose-up moment
+## (settling, a bounce) contributes no boost rather than working against
+## the car.
+func _downhill_boost(body_rotation: float) -> float:
+	return maxf(0.0, body_rotation) * DOWNHILL_BOOST_PER_RADIAN
 
 ## CarAssembler bolts a CarAutosteer onto every car body — a real vertical
 ## force (fast noise, hundreds of newtons) that makes cars wander up/down
@@ -267,6 +303,23 @@ func _double_gravity(car: CarAssembler.AssembledCar) -> void:
 	for wheel in car.wheels:
 		if is_instance_valid(wheel):
 			wheel.gravity_scale = GRAVITY_SCALE
+
+## Applied once at CLIMB_END_X (see _physics_process) — the same point
+## the Ramp itself begins, so this fires right as the car reaches it.
+## Below normal (1.0), not just back down to it: the doubled
+## GRAVITY_SCALE is what gives the downhill its fast, weighty feel, but
+## carried through the jump it yanks the car back down almost as soon as
+## it leaves the ramp. Wheels get the same reduction as the body, same
+## reasoning as _double_gravity — keeps the PinJoint2D from being asked
+## to hold two differently-falling bodies together.
+const RAMP_GRAVITY_SCALE := 0.75
+
+func _reduce_gravity_on_ramp(car: CarAssembler.AssembledCar) -> void:
+	if is_instance_valid(car.body):
+		car.body.gravity_scale = RAMP_GRAVITY_SCALE
+	for wheel in car.wheels:
+		if is_instance_valid(wheel):
+			wheel.gravity_scale = RAMP_GRAVITY_SCALE
 
 ## CarPartDamage tracks impact momentum (mass * |Δv| per physics step) and
 ## breaks a part once enough of it accumulates — meant for real collisions
