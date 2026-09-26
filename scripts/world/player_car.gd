@@ -149,6 +149,9 @@ func _ready() -> void:
 	_interact_pressed_last = Input.is_physical_key_pressed(KEY_E)
 	_test_pressed_last = Input.is_physical_key_pressed(KEY_T)
 
+func get_road_network() -> RoadNetwork:
+	return _road_network
+
 # KEY_SPACE stays in here even though nothing reads it for movement yet —
 # it's earmarked for braking (see player_car.gd's own history/notes), and
 # this list's whole job is releasing every drive-relevant key on focus
