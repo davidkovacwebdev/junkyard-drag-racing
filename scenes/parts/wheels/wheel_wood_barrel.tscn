@@ -1,0 +1,32 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_wheel.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/wheel_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_wood_barrel"]
+script = ExtResource("2")
+id = &"wheel_wood_barrel"
+display_name = "Wooden Barrel"
+mass = 12.0
+durability = 100.0
+speed = 4.0
+material_type = 1
+
+[node name="WheelWoodBarrel" type="RigidBody2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_wood_barrel")
+
+[node name="Body" type="Polygon2D" parent="."]
+color = Color(0.5, 0.34, 0.18, 1)
+polygon = PackedVector2Array(34, 0, 29.44, 17, 17, 29.44, 0, 34, -17, 29.44, -29.44, 17, -34, 0, -29.44, -17, -17, -29.44, 0, -34, 17, -29.44, 29.44, -17)
+
+[node name="Hoop1" type="Polygon2D" parent="."]
+color = Color(0.32, 0.31, 0.29, 1)
+polygon = PackedVector2Array(-34, -16, 34, -16, 34, -10, -34, -10)
+
+[node name="Hoop2" type="Polygon2D" parent="."]
+color = Color(0.32, 0.31, 0.29, 1)
+polygon = PackedVector2Array(-34, 10, 34, 10, 34, 16, -34, 16)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(34, 0, 29.44, 17, 17, 29.44, 0, 34, -17, 29.44, -29.44, 17, -34, 0, -29.44, -17, -17, -29.44, 0, -34, 17, -29.44, 29.44, -17)

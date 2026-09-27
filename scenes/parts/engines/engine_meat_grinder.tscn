@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_engine.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/engine_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_meat_grinder"]
+script = ExtResource("2")
+id = &"engine_meat_grinder"
+display_name = "Meat Grinder"
+mass = 6.0
+durability = 50.0
+speed = 1.8
+material_type = 0
+power = 1.8
+
+[node name="EngineMeatGrinder" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_meat_grinder")
+
+[node name="Base" type="Polygon2D" parent="."]
+color = Color(0.25, 0.25, 0.26, 1)
+polygon = PackedVector2Array(-12, -8, 16, -8, 16, 0, -12, 0)
+
+[node name="Body" type="Polygon2D" parent="."]
+color = Color(0.68, 0.7, 0.72, 1)
+polygon = PackedVector2Array(-12, -30, 16, -30, 16, -8, -12, -8)
+
+[node name="Hopper" type="Polygon2D" parent="."]
+color = Color(0.6, 0.62, 0.64, 1)
+polygon = PackedVector2Array(-8, -44, 14, -44, 8, -30, -2, -30)

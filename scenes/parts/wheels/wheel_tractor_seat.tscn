@@ -1,0 +1,32 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_wheel.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/wheel_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_tractor_seat"]
+script = ExtResource("2")
+id = &"wheel_tractor_seat"
+display_name = "Tractor Seat"
+mass = 7.0
+durability = 85.0
+speed = 3.5
+material_type = 0
+
+[node name="WheelTractorSeat" type="RigidBody2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_tractor_seat")
+
+[node name="Pan" type="Polygon2D" parent="."]
+color = Color(0.75, 0.35, 0.15, 1)
+polygon = PackedVector2Array(36, 0, 31.18, 18, 18, 31.18, 0, 36, -18, 31.18, -31.18, 18, -36, 0, -31.18, -18, -18, -31.18, 0, -36, 18, -31.18, 31.18, -18)
+
+[node name="Shade" type="Polygon2D" parent="."]
+color = Color(0.65, 0.28, 0.12, 1)
+polygon = PackedVector2Array(0, 36, -18, 31.18, -31.18, 18, -36, 0, -31.18, -18, -14, -18, -9, 0, -14, 18)
+
+[node name="Bolt" type="Polygon2D" parent="."]
+color = Color(0.25, 0.25, 0.25, 1)
+polygon = PackedVector2Array(5, 0, 4.33, 2.5, 2.5, 4.33, 0, 5, -2.5, 4.33, -4.33, 2.5, -5, 0, -4.33, -2.5, -2.5, -4.33, 0, -5, 2.5, -4.33, 4.33, -2.5)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(36, 0, 31.18, 18, 18, 31.18, 0, 36, -18, 31.18, -31.18, 18, -36, 0, -31.18, -18, -18, -31.18, 0, -36, 18, -31.18, 31.18, -18)

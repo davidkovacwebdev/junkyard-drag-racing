@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_engine.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/engine_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_fire_extinguisher"]
+script = ExtResource("2")
+id = &"engine_fire_extinguisher"
+display_name = "Fire Extinguisher (Nozzle Backward)"
+mass = 3.0
+durability = 25.0
+speed = 3.5
+material_type = 0
+power = 3.5
+
+[node name="EngineFireExtinguisher" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_fire_extinguisher")
+
+[node name="Cylinder" type="Polygon2D" parent="."]
+color = Color(0.65, 0.15, 0.12, 1)
+polygon = PackedVector2Array(-12, -2, 12, -2, 12, -44, -12, -44)
+
+[node name="Cap" type="Polygon2D" parent="."]
+color = Color(0.25, 0.25, 0.26, 1)
+polygon = PackedVector2Array(-8, -50, 8, -50, 8, -44, -8, -44)
+
+[node name="Nozzle" type="Polygon2D" parent="."]
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-12, -14, -30, -16, -30, -12, -12, -10)

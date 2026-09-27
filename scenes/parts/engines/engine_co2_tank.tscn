@@ -1,0 +1,26 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_engine.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/engine_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_co2_tank"]
+script = ExtResource("2")
+id = &"engine_co2_tank"
+display_name = "CO2 Tank"
+mass = 6.0
+durability = 60.0
+speed = 3.8
+material_type = 0
+power = 3.8
+
+[node name="EngineCo2Tank" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_co2_tank")
+
+[node name="Cylinder" type="Polygon2D" parent="."]
+color = Color(0.42, 0.48, 0.44, 1)
+polygon = PackedVector2Array(-11, -2, 11, -2, 11, -48, -11, -48)
+
+[node name="Valve" type="Polygon2D" parent="."]
+color = Color(0.15, 0.15, 0.16, 1)
+polygon = PackedVector2Array(-6, -54, 6, -54, 6, -48, -6, -48)

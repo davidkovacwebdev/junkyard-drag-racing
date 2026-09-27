@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_engine.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/engine_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_soda_bottle"]
+script = ExtResource("2")
+id = &"engine_soda_bottle"
+display_name = "Soda Bottle Under Pressure"
+mass = 2.0
+durability = 18.0
+speed = 4.0
+material_type = 2
+power = 4.0
+
+[node name="EngineSodaBottle" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_soda_bottle")
+
+[node name="Bottle" type="Polygon2D" parent="."]
+color = Color(0.35, 0.5, 0.32, 0.85)
+polygon = PackedVector2Array(-14, -2, 14, -2, 14, -40, 9, -46, 9, -58, -9, -58, -9, -46, -14, -40)
+
+[node name="Label" type="Polygon2D" parent="."]
+color = Color(0.85, 0.8, 0.7, 0.9)
+polygon = PackedVector2Array(-13, -30, 13, -30, 13, -18, -13, -18)
+
+[node name="Cap" type="Polygon2D" parent="."]
+color = Color(0.65, 0.55, 0.15, 1)
+polygon = PackedVector2Array(-6, -64, 6, -64, 6, -58, -6, -58)

@@ -1,0 +1,28 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_wheel.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/wheel_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_pizza_tray"]
+script = ExtResource("2")
+id = &"wheel_pizza_tray"
+display_name = "Pizza Tray"
+mass = 2.5
+durability = 22.0
+speed = 6.5
+material_type = 0
+
+[node name="WheelPizzaTray" type="RigidBody2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_pizza_tray")
+
+[node name="Tray" type="Polygon2D" parent="."]
+color = Color(0.7, 0.71, 0.72, 1)
+polygon = PackedVector2Array(42, 0, 36.37, 21, 21, 36.37, 0, 42, -21, 36.37, -36.37, 21, -42, 0, -36.37, -21, -21, -36.37, 0, -42, 21, -36.37, 36.37, -21)
+
+[node name="Rim" type="Polygon2D" parent="."]
+color = Color(0.6, 0.61, 0.62, 1)
+polygon = PackedVector2Array(37, 0, 32.04, 18.5, 18.5, 32.04, 0, 37, -18.5, 32.04, -32.04, 18.5, -37, 0, -32.04, -18.5, -18.5, -32.04, 0, -37, 18.5, -32.04, 32.04, -18.5)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(42, 0, 36.37, 21, 21, 36.37, 0, 42, -21, 36.37, -36.37, 21, -42, 0, -36.37, -21, -21, -36.37, 0, -42, 21, -36.37, 36.37, -21)

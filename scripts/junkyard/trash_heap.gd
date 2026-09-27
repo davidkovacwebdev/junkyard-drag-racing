@@ -193,9 +193,7 @@ func _spawn_part(rng: RandomNumberGenerator, index: int) -> void:
 ## one.
 ##
 ## Rolls again rather than giving up when a pick turns out to be unusable, so
-## `part_count` is what actually lands in the heap. Two picks need rejecting: a
-## paddle wheel, which swings its own blade every physics tick (car_paddle.gd)
-## and would lie in the pile spinning like a machine digging itself out; and a
+## `part_count` is what actually lands in the heap. One pick needs rejecting: a
 ## part whose art measures to nothing, which has no shape to collide with.
 func _build_part(rng: RandomNumberGenerator) -> RigidBody2D:
 	for attempt in 8:
@@ -203,9 +201,6 @@ func _build_part(rng: RandomNumberGenerator) -> RigidBody2D:
 		if node == null:
 			continue
 		PartScale.apply_to(node)
-		if node is CarPaddle:
-			node.free()
-			continue
 		var body := node as RigidBody2D
 		if body == null:
 			body = _wrap(node)

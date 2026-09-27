@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_engine.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/engine_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_vacuum_cleaner"]
+script = ExtResource("2")
+id = &"engine_vacuum_cleaner"
+display_name = "Vacuum Cleaner"
+mass = 6.0
+durability = 40.0
+speed = 2.0
+material_type = 2
+power = 2.0
+
+[node name="EngineVacuumCleaner" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_vacuum_cleaner")
+
+[node name="Canister" type="Polygon2D" parent="."]
+color = Color(0.6, 0.2, 0.2, 1)
+polygon = PackedVector2Array(-22, -40, 22, -40, 22, -8, -22, -8)
+
+[node name="Base" type="Polygon2D" parent="."]
+color = Color(0.2, 0.2, 0.21, 1)
+polygon = PackedVector2Array(-22, -8, 22, -8, 22, -2, -22, -2)
+
+[node name="Hose" type="Polygon2D" parent="."]
+color = Color(0.35, 0.35, 0.37, 1)
+polygon = PackedVector2Array(22, -30, 38, -26, 40, -20, 34, -16, 22, -20)

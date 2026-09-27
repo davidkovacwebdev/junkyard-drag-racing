@@ -1,28 +1,30 @@
 class_name DigitalClock
 extends Control
-## Small retro LCD clock, housed in the same brushed-steel style as the
-## minimap's rim (see Minimap._draw) so the two read as one instrument
-## mounted on the same dash rather than two unrelated HUD widgets. Meant
-## to sit flush above the minimap in the scene, sharing its width.
+## Small digital clock, built the same way every other panel in the game
+## is: a ScrapBoard (the same salvaged-wood board the garage and menus
+## use) with a dark recessed "void" cut into it for the display, and
+## flat seven-segment digits lit in the UI's accent yellow — the same
+## yellow the road's dashed centre line uses, so the readout ties back
+## into the game's own world instead of reading as an unrelated gadget.
 ##
-## Digits are hand-drawn seven-segment strokes (no font involved) reading
-## the in-game hour off DayNightCycle, HH:MM 24-hour.
+## Digits are hand-drawn strokes (no font involved), reading the in-game
+## hour off DayNightCycle, HH:MM 24-hour.
 
-const DIGIT_SIZE := Vector2(12.0, 20.0)
-const DIGIT_GAP := 3.0
-const SEGMENT_THICKNESS := 3.0
-const COLON_GAP := 6.0
-## Empty space between the digits and the LCD screen's own edge.
-const SCREEN_PADDING := 8.0
+const DIGIT_SIZE := Vector2(10.0, 17.0)
+const DIGIT_GAP := 2.5
+const SEGMENT_THICKNESS := 2.5
+const COLON_GAP := 5.0
+## Empty space between the digits and the recessed screen's own edge, and
+## between the screen and the board's outer edge.
+const SCREEN_PADDING := 5.0
+const BOARD_MARGIN := 4.0
 
-## Steel housing around the LCD screen, matching Minimap's rim palette.
-const BEZEL_MARGIN := 5.0
-const RIVET_INSET := 4.0
-const RIVET_SIZE := 1.3
+const VOID_COLOR := UiPalette.VOID
+const LIT_COLOR := UiPalette.ACCENT_YELLOW
+const UNLIT_COLOR := Color(UiPalette.ACCENT_YELLOW, 0.15)
 
-const LCD_COLOR := Color(0.05, 0.04, 0.04, 1)
-const LIT_COLOR := Color(1.0, 0.15, 0.08, 1)
-const UNLIT_COLOR := Color(1.0, 0.15, 0.08, 0.12)
+const BOARD_TILT_DEGREES := -1.5
+const BOARD_JITTER_SEED := 7733
 
 ## Standard seven-segment layout, keyed a (top) round to g (middle).
 const DIGIT_SEGMENTS := {
@@ -41,16 +43,23 @@ const DIGIT_SEGMENTS := {
 ## Real-world seconds, not in-game ones — a blink tied to DayNightCycle's
 ## sped-up minutes would flicker many times a second.
 var _blink_time: float = 0.0
+var _board := ScrapBoard.new()
+
+func _ready() -> void:
+	_board.tilt_degrees = BOARD_TILT_DEGREES
+	_board.jitter_seed = BOARD_JITTER_SEED
+	_board.jitter = 2.0
+	_board.skirt_height = 4.0
 
 func _process(delta: float) -> void:
 	_blink_time = fmod(_blink_time + delta, 1.0)
 	queue_redraw()
 
 func _draw() -> void:
-	_draw_bezel()
+	_board.draw(self, Rect2(Vector2.ZERO, size))
 
-	var screen := Rect2(Vector2.ONE * BEZEL_MARGIN, size - Vector2.ONE * BEZEL_MARGIN * 2.0)
-	draw_rect(screen, LCD_COLOR)
+	var screen := Rect2(Vector2.ONE * BOARD_MARGIN, size - Vector2.ONE * BOARD_MARGIN * 2.0)
+	draw_rect(screen, VOID_COLOR)
 
 	var content_size := Vector2(4.0 * DIGIT_SIZE.x + 2.0 * DIGIT_GAP + COLON_GAP, DIGIT_SIZE.y)
 	var origin := screen.position + (screen.size - content_size) / 2.0
@@ -64,20 +73,6 @@ func _draw() -> void:
 	cursor = _draw_colon(cursor)
 	cursor = _draw_digit(cursor, minute / 10)
 	_draw_digit(cursor, minute % 10)
-
-## Brushed-steel housing: a flat plate with a corner rivet each side, the
-## same shorthand Minimap uses for its rim rather than a full match of its
-## round bevel (this panel's rectangular, so that geometry doesn't carry
-## over) — enough to read as the same dashboard hardware.
-func _draw_bezel() -> void:
-	draw_rect(Rect2(Vector2.ZERO, size), UiPalette.STEEL_SHADE)
-	draw_rect(Rect2(Vector2.ZERO, size), UiPalette.STEEL_DARK, false, 2.0)
-	for corner in [Vector2(RIVET_INSET, RIVET_INSET), Vector2(size.x - RIVET_INSET, RIVET_INSET),
-			Vector2(RIVET_INSET, size.y - RIVET_INSET), Vector2(size.x - RIVET_INSET, size.y - RIVET_INSET)]:
-		draw_colored_polygon(PackedVector2Array([
-			corner + Vector2(-RIVET_SIZE, -RIVET_SIZE), corner + Vector2(RIVET_SIZE, -RIVET_SIZE),
-			corner + Vector2(RIVET_SIZE, RIVET_SIZE), corner + Vector2(-RIVET_SIZE, RIVET_SIZE),
-		]), UiPalette.STEEL_DARK)
 
 func _draw_digit(origin: Vector2, digit: int) -> Vector2:
 	var lit: Array = DIGIT_SEGMENTS.get(digit, [])
@@ -108,8 +103,8 @@ func _draw_colon(origin: Vector2) -> Vector2:
 ## One segment's rect within a digit box anchored at `origin`. Horizontal
 ## bars (a/g/d) run the digit's full width; vertical ones (b/c/e/f) sit
 ## flush to whichever side and span a bit over a third of the digit's
-## height each — tall strokes, not the near-square blocks a smaller digit
-## used to draw, which at a glance read as a second colon rather than "1".
+## height each — tall strokes, not near-square blocks that would read as
+## a second colon rather than a stroke.
 func _segment_rect(origin: Vector2, seg_id: String) -> Rect2:
 	var w := DIGIT_SIZE.x
 	var h := DIGIT_SIZE.y

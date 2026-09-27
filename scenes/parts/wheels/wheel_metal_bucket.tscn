@@ -1,0 +1,32 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_wheel.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/wheel_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_metal_bucket"]
+script = ExtResource("2")
+id = &"wheel_metal_bucket"
+display_name = "Metal Bucket"
+mass = 4.5
+durability = 60.0
+speed = 2.2
+material_type = 0
+
+[node name="WheelMetalBucket" type="RigidBody2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_metal_bucket")
+
+[node name="HandleBar" type="Polygon2D" parent="."]
+color = Color(0.4, 0.41, 0.43, 1)
+polygon = PackedVector2Array(-20, -40, -14, -46, 14, -46, 20, -40, 14, -38, -14, -38)
+
+[node name="Bucket" type="Polygon2D" parent="."]
+color = Color(0.62, 0.64, 0.66, 1)
+polygon = PackedVector2Array(-24, -34, 24, -34, 30, 34, -30, 34)
+
+[node name="Shade" type="Polygon2D" parent="."]
+color = Color(0.5, 0.52, 0.54, 1)
+polygon = PackedVector2Array(8, -34, 24, -34, 30, 34, 12, 34)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(-24, -34, 24, -34, 30, 34, -30, 34)

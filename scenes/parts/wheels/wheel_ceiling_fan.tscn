@@ -1,0 +1,40 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_wheel.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/wheel_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_ceiling_fan"]
+script = ExtResource("2")
+id = &"wheel_ceiling_fan"
+display_name = "Ceiling Fan"
+mass = 3.0
+durability = 28.0
+speed = 1.0
+material_type = 1
+
+[node name="WheelCeilingFan" type="RigidBody2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_ceiling_fan")
+
+[node name="BladeRight" type="Polygon2D" parent="."]
+color = Color(0.55, 0.38, 0.22, 1)
+polygon = PackedVector2Array(6, -3, 44, -9, 50, 0, 44, 9, 6, 3)
+
+[node name="BladeDown" type="Polygon2D" parent="."]
+color = Color(0.55, 0.38, 0.22, 1)
+polygon = PackedVector2Array(3, 6, 9, 44, 0, 50, -9, 44, -3, 6)
+
+[node name="BladeLeft" type="Polygon2D" parent="."]
+color = Color(0.55, 0.38, 0.22, 1)
+polygon = PackedVector2Array(-6, 3, -44, 9, -50, 0, -44, -9, -6, -3)
+
+[node name="BladeUp" type="Polygon2D" parent="."]
+color = Color(0.55, 0.38, 0.22, 1)
+polygon = PackedVector2Array(-3, -6, -9, -44, 0, -50, 9, -44, 3, -6)
+
+[node name="Hub" type="Polygon2D" parent="."]
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(8, 0, 6.93, 4, 4, 6.93, 0, 8, -4, 6.93, -6.93, 4, -8, 0, -6.93, -4, -4, -6.93, 0, -8, 4, -6.93, 6.93, -4)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(8, 0, 6.93, 4, 4, 6.93, 0, 8, -4, 6.93, -6.93, 4, -8, 0, -6.93, -4, -4, -6.93, 0, -8, 4, -6.93, 6.93, -4)

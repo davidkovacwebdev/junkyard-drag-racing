@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_engine.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/engine_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_blender"]
+script = ExtResource("2")
+id = &"engine_blender"
+display_name = "Blender"
+mass = 2.5
+durability = 25.0
+speed = 3.0
+material_type = 5
+power = 3.0
+
+[node name="EngineBlender" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_blender")
+
+[node name="Base" type="Polygon2D" parent="."]
+color = Color(0.2, 0.2, 0.22, 1)
+polygon = PackedVector2Array(-16, -14, 16, -14, 16, 0, -16, 0)
+
+[node name="Jar" type="Polygon2D" parent="."]
+color = Color(0.55, 0.65, 0.68, 0.75)
+polygon = PackedVector2Array(-14, -52, 14, -52, 11, -14, -11, -14)
+
+[node name="Blade" type="Polygon2D" parent="."]
+color = Color(0.15, 0.15, 0.16, 1)
+polygon = PackedVector2Array(-6, -16, 6, -16, 6, -14, -6, -14)

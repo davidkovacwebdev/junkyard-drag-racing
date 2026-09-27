@@ -1,0 +1,32 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_wheel.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/wheel_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_office_chair"]
+script = ExtResource("2")
+id = &"wheel_office_chair"
+display_name = "Office Chair"
+mass = 5.0
+durability = 50.0
+speed = 4.5
+material_type = 6
+
+[node name="WheelOfficeChair" type="RigidBody2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_office_chair")
+
+[node name="Cushion" type="Polygon2D" parent="."]
+color = Color(0.32, 0.35, 0.4, 1)
+polygon = PackedVector2Array(38, 0, 32.91, 19, 19, 32.91, 0, 38, -19, 32.91, -32.91, 19, -38, 0, -32.91, -19, -19, -32.91, 0, -38, 19, -32.91, 32.91, -19)
+
+[node name="Shade" type="Polygon2D" parent="."]
+color = Color(0.26, 0.29, 0.34, 1)
+polygon = PackedVector2Array(0, 38, -19, 32.91, -32.91, 19, -38, 0, -32.91, -19, -19, -19, -9, 0, -19, 19)
+
+[node name="Hub" type="Polygon2D" parent="."]
+color = Color(0.4, 0.41, 0.43, 1)
+polygon = PackedVector2Array(10, 0, 8.66, 5, 5, 8.66, 0, 10, -5, 8.66, -8.66, 5, -10, 0, -8.66, -5, -5, -8.66, 0, -10, 5, -8.66, 8.66, -5)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(38, 0, 32.91, 19, 19, 32.91, 0, 38, -19, 32.91, -32.91, 19, -38, 0, -32.91, -19, -19, -32.91, 0, -38, 19, -32.91, 32.91, -19)

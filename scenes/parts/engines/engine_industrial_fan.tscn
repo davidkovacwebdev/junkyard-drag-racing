@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_engine.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/engine_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_industrial_fan"]
+script = ExtResource("2")
+id = &"engine_industrial_fan"
+display_name = "Industrial Fan"
+mass = 8.0
+durability = 60.0
+speed = 2.0
+material_type = 0
+power = 2.0
+
+[node name="EngineIndustrialFan" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_industrial_fan")
+
+[node name="Base" type="Polygon2D" parent="."]
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-10, -4, 10, -4, 10, 0, -10, 0)
+
+[node name="Housing" type="Polygon2D" parent="."]
+color = Color(0.5, 0.52, 0.54, 1)
+polygon = PackedVector2Array(-32, -64, 32, -64, 32, -4, -32, -4)
+
+[node name="Hub" type="Polygon2D" parent="."]
+color = Color(0.25, 0.25, 0.26, 1)
+polygon = PackedVector2Array(8, -34, 6.93, -30, 4, -27.07, 0, -26, -4, -27.07, -6.93, -30, -8, -34, -6.93, -38, -4, -40.93, 0, -42, 4, -40.93, 6.93, -38)

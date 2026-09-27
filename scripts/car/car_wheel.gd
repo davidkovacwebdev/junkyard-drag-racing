@@ -21,10 +21,11 @@ extends RigidBody2D
 
 @export var part_data: WheelPartData
 
-## The rigid body this wheel is jointed to, set by CarAssembler. Plain
-## rolling wheels never need it — they push the car purely through
-## ground friction — but a subclass like CarPaddle uses it to shove the
-## chassis directly. Optional so a wheel scene still works standalone.
+## The rigid body this wheel is jointed to, set by CarAssembler. Every
+## current wheel pushes the car purely through ground friction and never
+## reads this, but it's there for a subclass that wants to shove the
+## chassis directly instead. Optional so a wheel scene still works
+## standalone.
 var chassis: RigidBody2D
 
 ## Rotation speed (rad/s) this wheel's motor targets. Positive spins the
@@ -64,9 +65,8 @@ func _integrate_forces(state: PhysicsDirectBodyState2D) -> void:
 ## animate themselves the way a race wheel does from inside
 ## _integrate_forces. CarView calls animate_visual() by hand every frame
 ## instead, and that one method is all a wheel scene needs to implement to
-## come to life out there: a plain wheel rolls, a paddle swings (CarPaddle
-## overrides it). CarView looks the method up by name, so a part is free to
-## not be a CarWheel at all.
+## come to life out there. CarView looks the method up by name, so a part
+## is free to not be a CarWheel at all.
 
 ## Animate this wheel over `distance` world pixels of travel along the car's
 ## facing (signed — the caller has already corrected for facing). `delta` is

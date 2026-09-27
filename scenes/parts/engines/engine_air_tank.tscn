@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_engine.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/engine_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_air_tank"]
+script = ExtResource("2")
+id = &"engine_air_tank"
+display_name = "Compressed-Air Tank"
+mass = 7.0
+durability = 65.0
+speed = 3.6
+material_type = 0
+power = 3.6
+
+[node name="EngineAirTank" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_air_tank")
+
+[node name="Legs" type="Polygon2D" parent="."]
+color = Color(0.25, 0.25, 0.26, 1)
+polygon = PackedVector2Array(-30, -2, 20, -2, 20, 0, -30, 0)
+
+[node name="Cylinder" type="Polygon2D" parent="."]
+color = Color(0.4, 0.46, 0.52, 1)
+polygon = PackedVector2Array(-30, -16, 20, -16, 20, -2, -30, -2)
+
+[node name="Valve" type="Polygon2D" parent="."]
+color = Color(0.2, 0.2, 0.21, 1)
+polygon = PackedVector2Array(20, -12, 30, -11, 30, -7, 20, -8)

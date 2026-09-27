@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_engine.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/engine_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_rc_car_motor"]
+script = ExtResource("2")
+id = &"engine_rc_car_motor"
+display_name = "RC Car Motor"
+mass = 1.0
+durability = 20.0
+speed = 4.5
+material_type = 0
+power = 4.5
+
+[node name="EngineRcCarMotor" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_rc_car_motor")
+
+[node name="Can" type="Polygon2D" parent="."]
+color = Color(0.55, 0.6, 0.68, 1)
+polygon = PackedVector2Array(-9, -24, 9, -24, 9, -4, -9, -4)
+
+[node name="Copper" type="Polygon2D" parent="."]
+color = Color(0.7, 0.4, 0.15, 1)
+polygon = PackedVector2Array(-9, -18, 9, -18, 9, -14, -9, -14)
+
+[node name="Shaft" type="Polygon2D" parent="."]
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-2, -30, 2, -30, 2, -24, -2, -24)

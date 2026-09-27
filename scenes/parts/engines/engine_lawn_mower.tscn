@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_engine.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/engine_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_lawn_mower"]
+script = ExtResource("2")
+id = &"engine_lawn_mower"
+display_name = "Lawn Mower Engine"
+mass = 9.0
+durability = 55.0
+speed = 2.5
+material_type = 0
+power = 2.5
+
+[node name="EngineLawnMower" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_lawn_mower")
+
+[node name="Deck" type="Polygon2D" parent="."]
+color = Color(0.35, 0.5, 0.25, 1)
+polygon = PackedVector2Array(-30, -8, 30, -8, 30, -2, -30, -2)
+
+[node name="Block" type="Polygon2D" parent="."]
+color = Color(0.4, 0.4, 0.42, 1)
+polygon = PackedVector2Array(-16, -40, 16, -40, 16, -8, -16, -8)
+
+[node name="Cylinder" type="Polygon2D" parent="."]
+color = Color(0.18, 0.17, 0.16, 1)
+polygon = PackedVector2Array(-6, -52, 6, -52, 6, -40, -6, -40)

@@ -1,0 +1,36 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_wheel.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/wheel_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_metal_barrel"]
+script = ExtResource("2")
+id = &"wheel_metal_barrel"
+display_name = "Metal Barrel"
+mass = 14.0
+durability = 120.0
+speed = 3.6
+material_type = 0
+
+[node name="WheelMetalBarrel" type="RigidBody2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_metal_barrel")
+
+[node name="Body" type="Polygon2D" parent="."]
+color = Color(0.2, 0.34, 0.3, 1)
+polygon = PackedVector2Array(36, 0, 31.18, 18, 18, 31.18, 0, 36, -18, 31.18, -31.18, 18, -36, 0, -31.18, -18, -18, -31.18, 0, -36, 18, -31.18, 31.18, -18)
+
+[node name="Rib1" type="Polygon2D" parent="."]
+color = Color(0.28, 0.42, 0.38, 1)
+polygon = PackedVector2Array(-36, -14, 36, -14, 36, -8, -36, -8)
+
+[node name="Rib2" type="Polygon2D" parent="."]
+color = Color(0.28, 0.42, 0.38, 1)
+polygon = PackedVector2Array(-36, 8, 36, 8, 36, 14, -36, 14)
+
+[node name="Rust" type="Polygon2D" parent="."]
+color = Color(0.45, 0.28, 0.14, 0.6)
+polygon = PackedVector2Array(10, 18, 22, 20, 20, 30, 8, 28)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(36, 0, 31.18, 18, 18, 31.18, 0, 36, -18, 31.18, -31.18, 18, -36, 0, -31.18, -18, -18, -31.18, 0, -36, 18, -31.18, 31.18, -18)

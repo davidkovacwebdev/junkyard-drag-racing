@@ -1,0 +1,32 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_wheel.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/wheel_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_stop_sign"]
+script = ExtResource("2")
+id = &"wheel_stop_sign"
+display_name = "Stop Road Sign"
+mass = 4.0
+durability = 65.0
+speed = 5.5
+material_type = 0
+
+[node name="WheelStopSign" type="RigidBody2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_stop_sign")
+
+[node name="Trim" type="Polygon2D" parent="."]
+color = Color(0.88, 0.86, 0.8, 1)
+polygon = PackedVector2Array(36, 0, 25.46, 25.46, 0, 36, -25.46, 25.46, -36, 0, -25.46, -25.46, 0, -36, 25.46, -25.46)
+
+[node name="Face" type="Polygon2D" parent="."]
+color = Color(0.62, 0.15, 0.12, 1)
+polygon = PackedVector2Array(30, 0, 21.21, 21.21, 0, 30, -21.21, 21.21, -30, 0, -21.21, -21.21, 0, -30, 21.21, -21.21)
+
+[node name="Bolt" type="Polygon2D" parent="."]
+color = Color(0.4, 0.38, 0.34, 1)
+polygon = PackedVector2Array(4, 0, 3.46, 2, 2, 3.46, 0, 4, -2, 3.46, -3.46, 2, -4, 0, -3.46, -2, -2, -3.46, 0, -4, 2, -3.46, 3.46, -2)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(36, 0, 25.46, 25.46, 0, 36, -25.46, 25.46, -36, 0, -25.46, -25.46, 0, -36, 25.46, -25.46)

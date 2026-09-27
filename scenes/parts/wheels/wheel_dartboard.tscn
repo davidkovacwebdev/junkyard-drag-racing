@@ -1,0 +1,36 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_wheel.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/wheel_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_dartboard"]
+script = ExtResource("2")
+id = &"wheel_dartboard"
+display_name = "Dartboard"
+mass = 2.5
+durability = 24.0
+speed = 5.0
+material_type = 1
+
+[node name="WheelDartboard" type="RigidBody2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_dartboard")
+
+[node name="RingOuter" type="Polygon2D" parent="."]
+color = Color(0.62, 0.5, 0.32, 1)
+polygon = PackedVector2Array(38, 0, 32.91, 19, 19, 32.91, 0, 38, -19, 32.91, -32.91, 19, -38, 0, -32.91, -19, -19, -32.91, 0, -38, 19, -32.91, 32.91, -19)
+
+[node name="RingRed" type="Polygon2D" parent="."]
+color = Color(0.55, 0.15, 0.13, 1)
+polygon = PackedVector2Array(30, 0, 25.98, 15, 15, 25.98, 0, 30, -15, 25.98, -25.98, 15, -30, 0, -25.98, -15, -15, -25.98, 0, -30, 15, -25.98, 25.98, -15)
+
+[node name="RingBlack" type="Polygon2D" parent="."]
+color = Color(0.16, 0.15, 0.14, 1)
+polygon = PackedVector2Array(20, 0, 17.32, 10, 10, 17.32, 0, 20, -10, 17.32, -17.32, 10, -20, 0, -17.32, -10, -10, -17.32, 0, -20, 10, -17.32, 17.32, -10)
+
+[node name="Bullseye" type="Polygon2D" parent="."]
+color = Color(0.55, 0.15, 0.13, 1)
+polygon = PackedVector2Array(6, 0, 5.2, 3, 3, 5.2, 0, 6, -3, 5.2, -5.2, 3, -6, 0, -5.2, -3, -3, -5.2, 0, -6, 3, -5.2, 5.2, -3)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(38, 0, 32.91, 19, 19, 32.91, 0, 38, -19, 32.91, -32.91, 19, -38, 0, -32.91, -19, -19, -32.91, 0, -38, 19, -32.91, 32.91, -19)

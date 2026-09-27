@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="EngineSoundProfile" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/audio/engine_sound_profile.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+idle_frequency = 100.0
+max_frequency = 220.0
+jitter = 0.006
+knock = 0.12
+knock_rate = 8.0
+buzz_level = 0.1
+harmonics = 4
+rolloff = 1.45
+drive = 0.03
+noise_level = 0.1
+noise_cutoff = 1400.0
+cutoff_idle = 600.0
+cutoff_max = 1400.0
+whine_level = 0.15
+whine_ratio = 3.0
+idle_volume = 0.3
+max_volume = 0.6

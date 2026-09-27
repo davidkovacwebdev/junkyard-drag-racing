@@ -1,0 +1,34 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_engine.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/engine_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_sewing_machine"]
+script = ExtResource("2")
+id = &"engine_sewing_machine"
+display_name = "Sewing Machine Motor"
+mass = 4.0
+durability = 60.0
+speed = 1.5
+material_type = 0
+power = 1.5
+
+[node name="EngineSewingMachine" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_sewing_machine")
+
+[node name="Base" type="Polygon2D" parent="."]
+color = Color(0.15, 0.14, 0.13, 1)
+polygon = PackedVector2Array(-24, -10, 24, -10, 24, -2, -24, -2)
+
+[node name="Body" type="Polygon2D" parent="."]
+color = Color(0.18, 0.17, 0.16, 1)
+polygon = PackedVector2Array(-20, -30, 20, -30, 20, -10, -20, -10)
+
+[node name="Trim" type="Polygon2D" parent="."]
+color = Color(0.75, 0.6, 0.15, 1)
+polygon = PackedVector2Array(-20, -26, 14, -26, 14, -23, -20, -23)
+
+[node name="Needle" type="Polygon2D" parent="."]
+color = Color(0.5, 0.5, 0.52, 1)
+polygon = PackedVector2Array(10, -30, 13, -30, 13, -10, 10, -10)
