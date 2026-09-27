@@ -135,10 +135,11 @@ class Plot:
 @export_group("Keep-out")
 ## Plots houses must stay out of, on top of the road network's own
 ## `clear_areas`. Defaults to the drag strip (asphalt starts at world x
-## 1800, same box TrashSpawner uses) and the junkyard entrance.
+## 1800, same box TrashSpawner uses), the junkyard entrance and the farm.
 @export var keep_out_areas: Array[Rect2] = [
 	Rect2(1720.0, -560.0, 3300.0, 1120.0),
 	Rect2(-780.0, 180.0, 560.0, 340.0),
+	Rect2(-1100.0, -1120.0, 1000.0, 600.0),
 ]
 
 ## Every house placed, in placement order. Read by TrashSpawner to put a bin

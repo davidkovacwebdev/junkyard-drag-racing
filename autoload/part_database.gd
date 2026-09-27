@@ -7,6 +7,8 @@ extends Node
 var bodies: Array[BodyPartData] = []
 var wheels: Array[WheelPartData] = []
 var engines: Array[EnginePartData] = []
+## The engines that turn up as loot in bins and junk heaps.
+var junk_engines: Array[EnginePartData] = []
 
 const _BODY_SCENES := [
 	"res://scenes/parts/bodies/body_classic.tscn",
@@ -95,6 +97,7 @@ const _ENGINE_SCENES := [
 	"res://scenes/parts/engines/engine_co2_tank.tscn",
 	"res://scenes/parts/engines/engine_air_tank.tscn",
 	"res://scenes/parts/engines/engine_firework_rocket.tscn",
+	"res://scenes/parts/engines/engine_horse.tscn",
 ]
 
 func _ready() -> void:
@@ -107,6 +110,7 @@ func _ready() -> void:
 	_assign_tiers(bodies)
 	_assign_tiers(wheels)
 	_assign_tiers(engines)
+	junk_engines.assign(engines.filter(func(engine: EnginePartData) -> bool: return engine.found_in_junk))
 
 ## Ranks a category's parts by performance_score() and splits them into
 ## PartData.TIER_COUNT roughly-even groups — a tier is a quartile within

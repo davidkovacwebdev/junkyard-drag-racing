@@ -69,7 +69,7 @@ extends Node2D
 @export_group("Keep-out")
 ## Plots props must stay out of, on top of the road network's own `clear_areas`.
 ## Defaults to the drag strip, whose asphalt starts at world x 1800.
-@export var keep_out_areas: Array[Rect2] = [Rect2(1720.0, -560.0, 3300.0, 1120.0)]
+@export var keep_out_areas: Array[Rect2] = [Rect2(1720.0, -560.0, 3300.0, 1120.0), Rect2(-1100.0, -1120.0, 1000.0, 600.0)]
 
 func _ready() -> void:
 	# Deferred so it runs once the whole scene has come up: the road node is

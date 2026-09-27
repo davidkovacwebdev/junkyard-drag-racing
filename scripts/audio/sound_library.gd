@@ -41,6 +41,7 @@ const NAMES: Array[StringName] = [
 	&"crane_clang",
 	&"crane_miss",
 	&"rooster_crow",
+	&"horse_neigh",
 	&"rain_loop",
 ]
 
@@ -133,6 +134,7 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"crane_clang": return _crane_clang(rng)
 		&"crane_miss": return _crane_miss(rng)
 		&"rooster_crow": return _rooster_crow()
+		&"horse_neigh": return _horse_neigh(rng)
 		&"rain_loop": return _rain_loop(rng)
 	push_error("SoundLibrary: unknown sound '%s'" % sound_name)
 	return Synth.silence(0.05)
@@ -525,6 +527,38 @@ static func _rooster_crow() -> PackedFloat32Array:
 		squawk.call(0.12, 680.0, 900.0, 860.0),
 		squawk.call(0.55, 820.0, 1040.0, 560.0),
 	])
+
+## A whinny: a nasal cry that climbs, shakes and falls away, then a snort out
+## of the nose.
+static func _horse_neigh(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var duration := 1.0
+	var shape := [[0.0, 620.0], [0.12, 1050.0], [0.35, 980.0], [0.75, 560.0], [duration, 420.0]]
+	var vibrato_rate := 13.0
+	var pitch: Array = []
+	var steps := int(duration * vibrato_rate * 4.0)
+	for step in steps + 1:
+		var t := duration * step / steps
+		var depth := 0.04 + 0.1 * t
+		pitch.append([t, Synth.curve(shape, t) * (1.0 + depth * sin(TAU * vibrato_rate * t))])
+	var overtone: Array = []
+	for point in pitch:
+		overtone.append([point[0], point[1] * 2.02])
+	var cry := Synth.tones(duration, [pitch, overtone], {
+		square = 0.35,
+		amp = [[0.0, 0.0], [0.05, 1.0], [0.6, 0.8], [duration, 0.0]],
+		peak = 0.6,
+	})
+	var breath := Synth.noise_sweep(duration, {
+		freq = [[0.0, 1400.0], [duration, 900.0]], q = [[0.0, 2.0]],
+		amp = [[0.0, 0.0], [0.1, 0.4], [duration, 0.0]], peak = 0.25,
+	}, rng)
+	var snort := Synth.noise_sweep(0.22, {
+		freq = [[0.0, 500.0], [0.22, 300.0]], q = [[0.0, 1.5]],
+		amp = [[0.0, 0.0], [0.02, 1.0], [0.22, 0.0]], peak = 0.5,
+	}, rng)
+	var out := Synth.mix_into(cry, breath, 0.0, 0.6)
+	out = Synth.concat([out, Synth.silence(0.08), snort])
+	return Synth.finish(out, 0.75)
 
 # --- Junk handling ------------------------------------------------------------
 

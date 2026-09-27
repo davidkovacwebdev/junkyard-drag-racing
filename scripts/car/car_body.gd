@@ -55,10 +55,12 @@ func get_engine_mount() -> Marker2D:
 ## the body's origin. Engines are authored with their origin at their
 ## mounting base (+y down, body extending up), so no extra offset is
 ## needed. Falls back to leaving the engine at its own position when the
-## body has no mount.
+## body has no mount. An engine that has to fit itself around the body (the
+## horse walks out in front of it) gets `attach_to_body()` called afterwards.
 func place_engine(engine: Node2D) -> void:
 	var mount := get_engine_mount()
-	if mount == null:
-		return
-	engine.position = mount.position
-	engine.rotation = mount.rotation
+	if mount != null:
+		engine.position = mount.position
+		engine.rotation = mount.rotation
+	if engine.has_method("attach_to_body"):
+		engine.call("attach_to_body", self)

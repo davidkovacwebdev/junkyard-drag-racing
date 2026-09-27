@@ -1,0 +1,90 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/farm.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/world/farm_prop.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/world/farm_barn.gd" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/parts/engines/engine_horse.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/world/horse_farmer.tscn" id="5"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_barn"]
+resource_local_to_scene = true
+size = Vector2(240, 200)
+
+[node name="Farm" type="Node2D"]
+y_sort_enabled = true
+script = ExtResource("1")
+
+[node name="Yard" type="StaticBody2D" parent="."]
+position = Vector2(-480, -170)
+script = ExtResource("2")
+kind = 5
+yard_size = Vector2(960, 420)
+
+[node name="Windmill" type="StaticBody2D" parent="."]
+position = Vector2(-420, -90)
+script = ExtResource("2")
+kind = 2
+
+[node name="Barn" type="StaticBody2D" parent="."]
+position = Vector2(-210, -30)
+script = ExtResource("3")
+size = Vector2(240, 200)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Barn"]
+shape = SubResource("RectangleShape2D_barn")
+
+[node name="HayBale" type="StaticBody2D" parent="."]
+position = Vector2(-62, 62)
+script = ExtResource("2")
+kind = 1
+
+[node name="HayBale2" type="StaticBody2D" parent="."]
+position = Vector2(-26, 70)
+script = ExtResource("2")
+kind = 1
+
+[node name="HayBale3" type="StaticBody2D" parent="."]
+position = Vector2(24, 176)
+script = ExtResource("2")
+kind = 1
+
+[node name="FenceBack" type="StaticBody2D" parent="."]
+position = Vector2(60, -110)
+script = ExtResource("2")
+length = 340.0
+
+[node name="FenceLeft" type="StaticBody2D" parent="."]
+position = Vector2(60, -110)
+script = ExtResource("2")
+length = 290.0
+vertical = true
+
+[node name="FenceRight" type="StaticBody2D" parent="."]
+position = Vector2(400, -110)
+script = ExtResource("2")
+length = 290.0
+vertical = true
+
+[node name="FenceFront" type="StaticBody2D" parent="."]
+position = Vector2(60, 180)
+script = ExtResource("2")
+length = 340.0
+
+[node name="Trough" type="StaticBody2D" parent="."]
+position = Vector2(340, 150)
+script = ExtResource("2")
+kind = 3
+
+[node name="PaddockHorse" parent="." instance=ExtResource("4")]
+position = Vector2(220, 40)
+scale = Vector2(0.5, 0.5)
+
+[node name="HorseFarmer" parent="." instance=ExtResource("5")]
+position = Vector2(-20, 150)
+
+[node name="Sign" type="StaticBody2D" parent="."]
+position = Vector2(-300, 210)
+script = ExtResource("2")
+kind = 4
+sign_title = "FARM"
+sign_subtitle = "HORSES FOR SALE"

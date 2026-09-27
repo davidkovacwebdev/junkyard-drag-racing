@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="EngineSoundProfile" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/audio/engine_sound_profile.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+idle_frequency = 1.0
+max_frequency = 7.0
+jitter = 0.25
+jitter_rate = 3.0
+knock = 0.0
+buzz_level = 0.0
+sub_level = 0.0
+drive = 0.0
+noise_level = 1.0
+noise_cutoff = 1400.0
+cutoff_idle = 700.0
+cutoff_max = 1500.0
+resonance_frequency = 520.0
+resonance_q = 3.0
+resonance_gain = 1.2
+chuff_level = 0.97
+chuff_ratio = 2.0
+chuff_sharpness = 14
+idle_volume = 0.2
+max_volume = 1.8
+throttle_boost = 0.15

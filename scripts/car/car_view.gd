@@ -162,7 +162,7 @@ func _apply_fit(raw_mounts: Array[Vector2]) -> void:
 	_fit.position = Vector2.ZERO
 	# PartScale.measure_bounds measures a part the same way the wheels measure
 	# their own rolling radius, so there's one answer to "how big is this art".
-	var bounds := PartScale.measure_bounds(_fit)
+	var bounds := PartScale.measure_bounds(_fit, auto_fit_width > 0.0)
 	var scale := 1.0
 	if auto_fit_width > 0.0 and bounds.size.x > 0.0:
 		scale = auto_fit_width / bounds.size.x

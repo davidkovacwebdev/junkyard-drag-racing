@@ -72,7 +72,7 @@ offset_right = 1040.0
 offset_bottom = 44.0
 theme_override_colors/font_color = Color(0.8, 0.83, 0.88, 1)
 theme_override_font_sizes/font_size = 15
-text = "F1 closes. Click an entry to drop it on the ground."
+text = "F1 closes. M adds $1000. Click an entry to drop it on the ground."
 horizontal_alignment = 2
 
 [node name="BodyTab" type="BaseButton" parent="Backdrop/Panel"]

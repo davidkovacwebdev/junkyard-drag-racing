@@ -287,7 +287,7 @@ func _random_part(rng: RandomNumberGenerator) -> PartData:
 	var pool: Array[PartData] = []
 	pool.append_array(PartDatabase.bodies)
 	pool.append_array(PartDatabase.wheels)
-	pool.append_array(PartDatabase.engines)
+	pool.append_array(PartDatabase.junk_engines)
 	if pool.is_empty():
 		return null
 	return pool[rng.randi() % pool.size()]

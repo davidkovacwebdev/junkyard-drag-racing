@@ -10,6 +10,7 @@ enum Kind {
 	DRAG_STRIP,
 	JUNKYARD,
 	RAMP,
+	FARM,
 }
 
 @export var kind: Kind = Kind.HOME
