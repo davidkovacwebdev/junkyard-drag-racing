@@ -1,14 +1,14 @@
-[gd_scene load_steps=8 format=3 uid="uid://cbqu276qnvmmb"]
+[gd_scene load_steps=8 format=3]
 
-[ext_resource type="Script" uid="uid://dvpc6plismwj3" path="res://scripts/race/random_race_setup.gd" id="1"]
-[ext_resource type="PackedScene" path="res://scenes/race/track_multi.tscn" id="2"]
+[ext_resource type="Script" path="res://scripts/race/single_lane_race_setup.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/race/track_multi_test.tscn" id="2"]
 [ext_resource type="Script" uid="uid://4c501krrbwml" path="res://scripts/race/race_controller.gd" id="3"]
 [ext_resource type="Script" uid="uid://daxmnxgvm6578" path="res://scripts/race/camera_follow.gd" id="4"]
 [ext_resource type="Script" path="res://scripts/race/race_timer_hud.gd" id="5"]
 [ext_resource type="PackedScene" path="res://scenes/race/results_screen.tscn" id="6"]
 [ext_resource type="Script" path="res://scripts/ui/scrap_button.gd" id="7"]
 
-[node name="RaceRandomTest" type="Node2D"]
+[node name="RaceDragStrip" type="Node2D"]
 script = ExtResource("1")
 race_controller_path = NodePath("RaceController")
 camera_path = NodePath("MainCamera")
@@ -21,13 +21,14 @@ finish_x = 5400.0
 max_duration = 60.0
 camera_path = NodePath("../MainCamera")
 exit_scene_path = "res://scenes/world/main.tscn"
+camera_focus_y = 400.0
 timer_hud_path = NodePath("../UI/RaceTimerHud")
 results_screen_path = NodePath("../UI/ResultsScreen")
 surrender_button_path = NodePath("../UI/SurrenderButton")
 end_delay = 4.0
 
 [node name="MainCamera" type="Camera2D" parent="."]
-position = Vector2(400, 575)
+position = Vector2(400, 400)
 zoom = Vector2(0.5, 0.5)
 script = ExtResource("4")
 

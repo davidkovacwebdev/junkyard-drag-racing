@@ -31,6 +31,9 @@ const GROUP := &"player"
 ## Top speed multiplier while Shift is held, stacking on top of the
 ## on/off-road multiplier above.
 @export var sprint_speed_multiplier: float = 3.0
+## Deceleration (px/s^2) while Space is held. Overrides any movement input
+## and still scales with road/puddle handling, so braking on wet ground slides.
+@export var brake_deceleration: float = 4200.0
 ## Same convention as TrashSpawner.roads_path: the exported path first,
 ## falling back to searching the scene for any RoadNetwork if it doesn't
 ## resolve (e.g. this scene got reparented).
@@ -164,10 +167,6 @@ func _ready() -> void:
 func get_road_network() -> RoadNetwork:
 	return _road_network
 
-# KEY_SPACE stays in here even though nothing reads it for movement yet —
-# it's earmarked for braking (see player_car.gd's own history/notes), and
-# this list's whole job is releasing every drive-relevant key on focus
-# loss, brake included, the moment it starts doing something.
 const _DRIVE_KEYS := [KEY_W, KEY_A, KEY_S, KEY_D, KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT, KEY_SPACE, KEY_E, KEY_T, KEY_H, KEY_SHIFT]
 
 func _notification(what: int) -> void:
@@ -247,10 +246,11 @@ func _physics_process(delta: float) -> void:
 	# Compared against velocity as it stood BEFORE this frame's move_toward
 	# touches it — "the car was already heading this way" — against the
 	# input direction just read above, "now the player wants that way".
-	var skidding := _is_skidding(input_dir, on_puddle)
+	var braking := Input.is_physical_key_pressed(KEY_SPACE)
+	var skidding := _is_skidding(input_dir, on_puddle) or (braking and velocity.length() > skid_min_speed)
 
 	var target_velocity := Vector2.ZERO
-	if input_dir != Vector2.ZERO:
+	if input_dir != Vector2.ZERO and not braking:
 		var speed_multiplier := on_road_speed_multiplier if on_road else off_road_speed_multiplier
 		if Input.is_physical_key_pressed(KEY_SHIFT):
 			speed_multiplier *= sprint_speed_multiplier
@@ -260,7 +260,12 @@ func _physics_process(delta: float) -> void:
 		# Grip, not speed: the car can still carry its momentum, it just
 		# can't change what it's doing anything like as quickly.
 		handling_multiplier *= puddle_slip_multiplier
-	var accel_rate := (acceleration if input_dir != Vector2.ZERO else friction) * handling_multiplier
+	var base_rate := friction
+	if braking:
+		base_rate = brake_deceleration
+	elif input_dir != Vector2.ZERO:
+		base_rate = acceleration
+	var accel_rate := base_rate * handling_multiplier
 	velocity = velocity.move_toward(target_velocity, accel_rate * delta)
 	var velocity_before_move := velocity
 	move_and_slide()
@@ -301,7 +306,7 @@ func _physics_process(delta: float) -> void:
 	_visual.animate_wheels(_roll_distance(delta, facing_sign), delta)
 
 	_update_skid_marks(skidding)
-	_update_sounds(delta, input_dir, skidding, impact_speed)
+	_update_sounds(delta, Vector2.ZERO if braking else input_dir, skidding, impact_speed)
 
 	# Keep the saved spot current so entering any place (or any other scene
 	# change) returns us to exactly here.

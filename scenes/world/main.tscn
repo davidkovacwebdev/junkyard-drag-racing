@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" path="res://scenes/garage/garage.tscn" id="3"]
 [ext_resource type="Script" uid="uid://cu6o77berdu32" path="res://scripts/world/road.gd" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/world/drag_strip.tscn" id="5"]
-[ext_resource type="PackedScene" uid="uid://bgff7e404jhvq" path="res://scenes/world/pause_menu.tscn" id="6"]
+[ext_resource type="PackedScene" path="res://scenes/world/pause_menu.tscn" id="6"]
 [ext_resource type="Script" uid="uid://cxavmo7w253pf" path="res://scripts/world/trash_spawner.gd" id="7"]
 [ext_resource type="PackedScene" path="res://scenes/world/junkyard.tscn" id="8"]
 [ext_resource type="Script" uid="uid://ndh2o15pw6to" path="res://scripts/world/house_spawner.gd" id="9"]
@@ -64,6 +64,60 @@ _data = {
 "points": PackedVector2Array(0, 0, 0, 0, 2710, 1252, 0, 0, 0, 0, 4054, 873, 0, 0, 0, 0, 5245, 1122, 0, 0, 0, 0, 5451, 1718, 0, 0, 0, 0, 4920, 3755, 0, 0, 0, 0, 3804, 4762, 0, 0, 0, 0, -1053, 7176, 0, 0, 0, 0, -2115, 7439, 0, 0, 0, 0, -3045.9907, 7281.2827, 0, 0, 0, 0, -3439.2905, 6835.5425, 0, 0, 0, 0, -3688, 5157, 0, 0, 0, 0, -3787.044, 3304.521, 0, 0, 0, 0, -3668, 2934, 0, 0, 0, 0, -3168, 2422, 0, 0, 0, 0, -3228, 1862, 0, 0, 0, 0, -3694.0066, 1100.1338, 53.820023, 134.55005, -53.820023, -134.55005, -3935, 665, 0, 0, 0, 0, -4765, 34)
 }
 point_count = 18
+
+[sub_resource type="Curve2D" id="Curve2D_road_ring"]
+_data = {
+"points": PackedVector2Array(-700, 166.7, 700, -166.7, -6600, -4500, -1350, 0, 1350, 0, -3000, -4000, -1500, 166.7, 1500, -166.7, 1500, -4500, -1416.7, 116.7, 1416.7, -116.7, 6000, -5000, -1166.7, -133.3, 1166.7, 133.3, 10000, -5200, -966.7, -483.3, 966.7, 483.3, 13000, -4200, -600, -450, 600, 450, 15800, -2300, 300, -200, -300, 200, 16600, -1500, 966.7, -16.7, -966.7, 16.7, 14000, -1100, 850, -100, -850, 100, 10800, -1400, 383.3, -433.3, -383.3, 433.3, 8900, -500, 66.7, -700, -66.7, 700, 8500, 1200, 283.3, -416.7, -283.3, 416.7, 8500, 3700, 650, -216.7, -650, 216.7, 6800, 3700, 316.7, -683.3, -316.7, 683.3, 4600, 5000, 100, -716.7, -100, 716.7, 4900, 7800, 566.7, -250, -566.7, 250, 4000, 9300, 950, -33.3, -950, 33.3, 1500, 9300, 483.3, 150, -483.3, -150, -1700, 9500, 183.3, 266.7, -183.3, -266.7, -1400, 8400, 466.7, 133.3, -466.7, -133.3, -2800, 7900, 333.3, 400, -333.3, -400, -4200, 7600, 50, 683.3, -50, -683.3, -4800, 5500, 0, 666.7, 0, -666.7, -4500, 3500, 250, 666.7, -250, -666.7, -4800, 1500, 516.7, 216.7, -516.7, -216.7, -6000, -500, 283.3, 166.7, -283.3, -166.7, -7900, 200, -116.7, 533.3, 116.7, -533.3, -7700, -1500, -183.3, 500, 183.3, -500, -7200, -3000, -700, 166.7, 700, -166.7, -6600, -4500)
+}
+point_count = 30
+
+[sub_resource type="Curve2D" id="Curve2D_road_snowroad"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 408, -1592, -182, 484.7, 182, -484.7, 1000, -2800, 0, 0, 0, 0, 1500, -4500)
+}
+point_count = 3
+
+[sub_resource type="Curve2D" id="Curve2D_road_mountainroad"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 6592, 743, -650, -100, 650, 100, 6200, -300, 0, 0, 0, 0, 8465, 811)
+}
+point_count = 3
+
+[sub_resource type="Curve2D" id="Curve2D_road_northmountainroad"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 6200, -300, 33.3, 783.3, -33.3, -783.3, 6300, -2600, 0, 0, 0, 0, 6000, -5000)
+}
+point_count = 3
+
+[sub_resource type="Curve2D" id="Curve2D_road_peninsulaloop"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 4000, 9300, 50, -750, -50, 750, 3000, 11200, -416.7, -716.7, 416.7, 716.7, 3700, 13800, -650, -400, 650, 400, 5500, 15500, -516.7, 116.7, 516.7, -116.7, 7600, 16200, 0, 550, 0, -550, 8600, 14800, 500, 250, -500, -250, 7600, 12900, 650, -150, -650, 150, 5600, 13300, 0, 0, 0, 0, 3700, 13800)
+}
+point_count = 9
+
+[sub_resource type="Curve2D" id="Curve2D_road_southspur"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, -1700, 9500, 266.7, -316.7, -266.7, 316.7, -2400, 10500, 0, 0, 0, 0, -3300, 11400)
+}
+point_count = 3
+
+[sub_resource type="Curve2D" id="Curve2D_road_southwestarm"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, -4800, 5500, 166.7, -283.3, -166.7, 283.3, -5400, 6400, 0, 0, 0, 0, -5800, 7200)
+}
+point_count = 3
+
+[sub_resource type="Curve2D" id="Curve2D_road_forestlink"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, -1509, -677, -81, -88, 81, 88, -1300, -420, 0, 0, 0, 0, -1023, -149)
+}
+point_count = 3
+
+[sub_resource type="Curve2D" id="Curve2D_road_dragstriplink"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 2710, 1252, 201.7, 158.7, -201.7, -158.7, 1950, 850, 107.2, 179.3, -107.2, -179.3, 1500, 300, 0, 0, 0, 0, 1307, -226)
+}
+point_count = 4
 
 [node name="Main" type="Node2D" unique_id=1332585834]
 
@@ -146,6 +200,33 @@ curve = SubResource("Curve2D_i5mec")
 
 [node name="Path2D3" type="Path2D" parent="Roads" unique_id=1908181160]
 curve = SubResource("Curve2D_5bu78")
+
+[node name="Ring" type="Path2D" parent="Roads" unique_id=1952099019]
+curve = SubResource("Curve2D_road_ring")
+
+[node name="SnowRoad" type="Path2D" parent="Roads" unique_id=992695476]
+curve = SubResource("Curve2D_road_snowroad")
+
+[node name="MountainRoad" type="Path2D" parent="Roads" unique_id=382947329]
+curve = SubResource("Curve2D_road_mountainroad")
+
+[node name="NorthMountainRoad" type="Path2D" parent="Roads" unique_id=161098808]
+curve = SubResource("Curve2D_road_northmountainroad")
+
+[node name="PeninsulaLoop" type="Path2D" parent="Roads" unique_id=1424107815]
+curve = SubResource("Curve2D_road_peninsulaloop")
+
+[node name="SouthSpur" type="Path2D" parent="Roads" unique_id=938085127]
+curve = SubResource("Curve2D_road_southspur")
+
+[node name="SouthwestArm" type="Path2D" parent="Roads" unique_id=913788856]
+curve = SubResource("Curve2D_road_southwestarm")
+
+[node name="ForestLink" type="Path2D" parent="Roads" unique_id=789317830]
+curve = SubResource("Curve2D_road_forestlink")
+
+[node name="DragStripLink" type="Path2D" parent="Roads" unique_id=690803523]
+curve = SubResource("Curve2D_road_dragstriplink")
 
 [node name="SkidMarks" type="Node2D" parent="." unique_id=344039305]
 script = ExtResource("12")

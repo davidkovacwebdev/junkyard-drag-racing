@@ -1,7 +1,7 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://ba2orb2qwib1i"]
 
-[ext_resource type="Script" path="res://scripts/car/car_wheel.gd" id="1"]
-[ext_resource type="Script" path="res://scripts/parts/wheel_part_data.gd" id="2"]
+[ext_resource type="Script" uid="uid://dfvus2kf03pt7" path="res://scripts/car/car_wheel.gd" id="1"]
+[ext_resource type="Script" uid="uid://8u3si1g8lrmm" path="res://scripts/parts/wheel_part_data.gd" id="2"]
 
 [sub_resource type="Resource" id="Resource_frying_pan"]
 script = ExtResource("2")
@@ -9,24 +9,23 @@ id = &"wheel_frying_pan"
 display_name = "Frying Pan"
 mass = 8.0
 durability = 95.0
-speed = 3.2
-material_type = 0
+speed = 4.7
 
-[node name="WheelFryingPan" type="RigidBody2D"]
+[node name="WheelFryingPan" type="RigidBody2D" unique_id=379807691]
 script = ExtResource("1")
 part_data = SubResource("Resource_frying_pan")
 
-[node name="Handle" type="Polygon2D" parent="."]
+[node name="Handle" type="Polygon2D" parent="." unique_id=218263838]
 color = Color(0.15, 0.14, 0.13, 1)
 polygon = PackedVector2Array(30, -6, 70, -7, 78, -4, 78, 4, 70, 7, 30, 6)
 
-[node name="Bowl" type="Polygon2D" parent="."]
+[node name="Bowl" type="Polygon2D" parent="." unique_id=1347397787]
 color = Color(0.25, 0.25, 0.26, 1)
 polygon = PackedVector2Array(34, 0, 29.44, 15.64, 17, 27.09, 0, 31.28, -17, 27.09, -29.44, 15.64, -34, 0, -29.44, -15.64, -17, -27.09, 0, -31.28, 17, -27.09, 29.44, -15.64)
 
-[node name="Inner" type="Polygon2D" parent="."]
+[node name="Inner" type="Polygon2D" parent="." unique_id=981501465]
 color = Color(0.16, 0.16, 0.17, 1)
 polygon = PackedVector2Array(24, 0, 20.78, 11.04, 12, 19.12, 0, 22.08, -12, 19.12, -20.78, 11.04, -24, 0, -20.78, -11.04, -12, -19.12, 0, -22.08, 12, -19.12, 20.78, -11.04)
 
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="." unique_id=1512160508]
 polygon = PackedVector2Array(34, 0, 29.44, 15.64, 17, 27.09, 0, 31.28, -17, 27.09, -29.44, 15.64, -34, 0, -29.44, -15.64, -17, -27.09, 0, -31.28, 17, -27.09, 29.44, -15.64)

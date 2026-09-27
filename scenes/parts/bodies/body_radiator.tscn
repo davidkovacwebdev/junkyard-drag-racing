@@ -9,7 +9,7 @@ id = &"body_radiator"
 display_name = "Cast Iron Radiator"
 mass = 32.0
 durability = 160.0
-speed = 1.0
+speed = 2.8
 material_type = 0
 impact_sound = &"radiator_clang"
 

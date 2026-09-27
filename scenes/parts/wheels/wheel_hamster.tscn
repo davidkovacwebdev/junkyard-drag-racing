@@ -9,7 +9,7 @@ id = &"wheel_hamster"
 display_name = "Hamster Wheel"
 mass = 2.0
 durability = 35.0
-speed = 3.0
+speed = 5.6
 material_type = 0
 impact_sound = &"hamster_squeak"
 

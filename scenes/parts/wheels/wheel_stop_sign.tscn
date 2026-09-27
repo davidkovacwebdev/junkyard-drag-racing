@@ -9,7 +9,7 @@ id = &"wheel_stop_sign"
 display_name = "Stop Road Sign"
 mass = 4.0
 durability = 65.0
-speed = 5.5
+speed = 4.3
 material_type = 0
 
 [node name="WheelStopSign" type="RigidBody2D"]

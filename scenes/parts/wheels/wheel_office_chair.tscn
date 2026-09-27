@@ -9,7 +9,7 @@ id = &"wheel_office_chair"
 display_name = "Office Chair"
 mass = 5.0
 durability = 50.0
-speed = 4.5
+speed = 5.4
 material_type = 6
 
 [node name="WheelOfficeChair" type="RigidBody2D"]

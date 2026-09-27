@@ -9,7 +9,7 @@ id = &"wheel_ceiling_fan"
 display_name = "Ceiling Fan"
 mass = 3.0
 durability = 28.0
-speed = 1.0
+speed = 1.1
 material_type = 1
 
 [node name="WheelCeilingFan" type="RigidBody2D"]

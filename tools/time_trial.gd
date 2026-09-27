@@ -1,0 +1,95 @@
+class_name TimeTrial
+extends Node2D
+## Races car specs ({"body", "engine", "wheels"} scene paths) one car per flat
+## floor, CARS_PER_BATCH at a time, over the drag strip's distance. Each spec
+## gets "time" (RaceProgression.DID_NOT_FINISH if it never got there), "distance"
+## (how far it got) and "wrecked" (whether its body broke). Used by the roster
+## builder and the part benchmark.
+
+signal finished(results: Array[Dictionary])
+
+const CARS_PER_BATCH := 16
+const SPAWN_X := 150.0
+## Same run as the drag strip: start to finish line on race_drag_strip.tscn.
+const FINISH_X := 5400.0
+const TIME_LIMIT := 90.0
+const FLOOR_SPACING := 1500.0
+
+var _pending: Array[Dictionary] = []
+var _results: Array[Dictionary] = []
+var _total := 0
+var _batch_specs: Array[Dictionary] = []
+var _batch_cars: Array[CarAssembler.AssembledCar] = []
+var _batch_root: Node2D = null
+var _batch_elapsed := 0.0
+
+func run(specs: Array[Dictionary]) -> void:
+	_pending = specs.duplicate()
+	_results.clear()
+	_total = specs.size()
+	_start_batch.call_deferred()
+
+func _physics_process(delta: float) -> void:
+	if _batch_root == null:
+		return
+	_batch_elapsed += delta
+	var all_done := true
+	for i in _batch_cars.size():
+		var spec := _batch_specs[i]
+		if spec.has("time"):
+			continue
+		var car := _batch_cars[i]
+		if not is_instance_valid(car.body):
+			spec["time"] = RaceProgression.DID_NOT_FINISH
+			spec["wrecked"] = true
+		elif car.body.global_position.x >= FINISH_X:
+			spec["time"] = snappedf(_batch_elapsed, 0.01)
+			spec["distance"] = FINISH_X - SPAWN_X
+		else:
+			spec["distance"] = snappedf(car.body.global_position.x - SPAWN_X, 1.0)
+			all_done = false
+	if all_done or _batch_elapsed >= TIME_LIMIT:
+		_finish_batch()
+
+func _start_batch() -> void:
+	_batch_root = Node2D.new()
+	add_child(_batch_root)
+	_batch_elapsed = 0.0
+	_batch_specs.clear()
+	_batch_cars.clear()
+	for i in mini(CARS_PER_BATCH, _pending.size()):
+		var spec: Dictionary = _pending.pop_front()
+		spec["wrecked"] = false
+		spec["distance"] = 0.0
+		var floor_y := i * FLOOR_SPACING
+		_add_floor(floor_y)
+		var wheel_scenes: Array[PackedScene] = []
+		for wheel_path in spec["wheels"]:
+			wheel_scenes.append(load(wheel_path))
+		var car := CarAssembler.assemble(load(spec["body"]), wheel_scenes, load(spec["engine"]),
+				_batch_root, Vector2(SPAWN_X, floor_y - 15.0))
+		_batch_specs.append(spec)
+		_batch_cars.append(car)
+
+func _finish_batch() -> void:
+	for spec in _batch_specs:
+		if not spec.has("time"):
+			spec["time"] = RaceProgression.DID_NOT_FINISH
+		_results.append(spec)
+	_batch_root.queue_free()
+	_batch_root = null
+	print("time trial: %d / %d" % [_results.size(), _total])
+	if _pending.is_empty():
+		finished.emit(_results)
+	else:
+		_start_batch.call_deferred()
+
+func _add_floor(floor_y: float) -> void:
+	var rectangle := RectangleShape2D.new()
+	rectangle.size = Vector2(8000.0, 60.0)
+	var shape := CollisionShape2D.new()
+	shape.shape = rectangle
+	var floor_body := StaticBody2D.new()
+	floor_body.position = Vector2(3400.0, floor_y + 30.0)
+	floor_body.add_child(shape)
+	_batch_root.add_child(floor_body)

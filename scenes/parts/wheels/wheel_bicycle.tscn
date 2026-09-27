@@ -9,7 +9,7 @@ id = &"wheel_bicycle"
 display_name = "Bicycle Wheel"
 mass = 3.0
 durability = 40.0
-speed = 6.5
+speed = 6.4
 material_type = 4
 impact_sound = &"bicycle_rattle"
 

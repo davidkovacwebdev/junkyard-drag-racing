@@ -11,6 +11,9 @@ extends Node2D
 ## centered on this node's origin.
 
 @export var auto_fit_width: float = 0.0
+## > 0: a car wider than this (before this node's own scale) is shrunk to fit,
+## so long bodies aren't cropped. Smaller cars keep their size.
+@export var max_width: float = 0.0
 ## Which part category to highlight while dragging: -1 = none, or a
 ## PartData.Category value. Drawn by _draw() in this node's local space.
 var highlight: int = -1
@@ -101,6 +104,13 @@ func jiggle(amount: float = 120.0) -> void:
 func get_wheel_mounts() -> Array[Vector2]:
 	return _mounts_local.duplicate()
 
+## The current body's lamps. Their global transforms already include the fit
+## scale, the facing mirror and the tilt, so a beam can be aimed straight off them.
+func get_headlights() -> Array[HeadlightMount]:
+	if _body == null:
+		return []
+	return _body.get_headlight_mounts()
+
 ## Animates every wheel over `distance` world pixels of travel along the car's
 ## facing: positive moves the car toward its facing (+x) side, negative
 ## reverses. No physics happens in the map car, so this is what sells the
@@ -156,6 +166,8 @@ func _apply_fit(raw_mounts: Array[Vector2]) -> void:
 	var scale := 1.0
 	if auto_fit_width > 0.0 and bounds.size.x > 0.0:
 		scale = auto_fit_width / bounds.size.x
+	elif max_width > 0.0 and bounds.size.x > max_width:
+		scale = max_width / bounds.size.x
 	_fit.scale = Vector2(scale, scale)
 	_fit.position = -bounds.get_center() * scale
 

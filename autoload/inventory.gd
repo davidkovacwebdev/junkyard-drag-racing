@@ -167,9 +167,8 @@ func sell_scrap(rate: int = 1) -> int:
 func _ready() -> void:
 	reset()
 
-## Wipe everything back to a fresh start: one car built from the worst
-## (most basic) body/engine/wheel in the whole catalog, nothing else —
-## no spare parts, no scrap, no cash. Called on boot and again by
+## Wipe everything back to a fresh start: one junker (see STARTER_*),
+## nothing else — no spare parts, no scrap, no cash. Called on boot and again by
 ## MainMenu's New Game, since SaveSystem's Continue only overwrites these
 ## fields rather than re-running _ready().
 func reset() -> void:
@@ -185,31 +184,31 @@ func get_selected_car() -> CarModelData:
 		return null
 	return owned_cars[clampi(selected_index, 0, owned_cars.size() - 1)]
 
-## You start in a junkyard, so you start in a heap — the worst body,
-## engine and wheel in the whole catalog, not a random one.
+## The car a new game starts with. Junk on purpose — tier-1 body, engine and
+## wheels — but picked so it actually finishes a drag race (~68s against a
+## ~20s best), winning roughly half its races at zero wins. RaceProgression's
+## STARTING_PAR_TIME is tuned against this car, so retune both together.
+const STARTER_BODY := "res://scenes/parts/bodies/body_wrecked_car.tscn"
+const STARTER_ENGINE := "res://scenes/parts/engines/engine_lawn_mower.tscn"
+const STARTER_WHEEL := "res://scenes/parts/wheels/wheel_tv.tscn"
+
 func _build_starter_car() -> CarModelData:
-	var body := _worst(PartDatabase.bodies) as BodyPartData
-	var engine := _worst(PartDatabase.engines) as EnginePartData
-	var wheel := _worst(PartDatabase.wheels) as WheelPartData
 	var car := CarModelData.new()
-	car.body = body.duplicate() as BodyPartData
-	car.engine = engine.duplicate() as EnginePartData
-	var mount_count := PartDatabase.wheel_mount_count(car.body)
+	car.body = _catalog_copy(PartDatabase.bodies, STARTER_BODY) as BodyPartData
+	car.engine = _catalog_copy(PartDatabase.engines, STARTER_ENGINE) as EnginePartData
+	var wheel := _catalog_copy(PartDatabase.wheels, STARTER_WHEEL) as WheelPartData
 	car.wheels = []
-	for i in mount_count:
+	for i in PartDatabase.wheel_mount_count(car.body):
 		car.wheels.append(wheel.duplicate())
 	return car
 
-## "Worst" = tier 1 — the bottom quartile PartDatabase ranked this
-## category into (see PartDatabase._assign_tiers()), which always
-## includes at least the single lowest-scoring part for any non-empty
-## category. Falls back to the first part on an empty/untiered array so
-## this never returns null while the catalog has anything in it at all.
-static func _worst(parts: Array) -> PartData:
+## A fresh copy of the catalog part living in `scene_path`.
+static func _catalog_copy(parts: Array, scene_path: String) -> PartData:
 	for part in parts:
-		if part.tier == 1:
-			return part
-	return parts[0] if not parts.is_empty() else null
+		if part.scene_path == scene_path:
+			return part.duplicate()
+	push_error("Inventory: starter part %s is not in the PartDatabase catalog" % scene_path)
+	return null
 
 # --- Fitting (the ownership rules) ---------------------------------------------
 

@@ -9,7 +9,7 @@ id = &"wheel_metal_barrel"
 display_name = "Metal Barrel"
 mass = 14.0
 durability = 120.0
-speed = 3.6
+speed = 5.4
 material_type = 0
 
 [node name="WheelMetalBarrel" type="RigidBody2D"]

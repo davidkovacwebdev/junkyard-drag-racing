@@ -9,7 +9,7 @@ id = &"wheel_tv"
 display_name = "CRT TV Wheel"
 mass = 10.0
 durability = 20.0
-speed = 0.8
+speed = 5.0
 material_type = 5
 impact_sound = &"tv_thunk"
 

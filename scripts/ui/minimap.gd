@@ -121,7 +121,7 @@ func _draw_roads() -> void:
 		return
 	roads.ensure_built()
 	var width := road_width_pixels / world_to_map_scale
-	for polyline in roads.get_road_polylines():
+	for polyline in roads.get_draw_polylines():
 		if polyline.size() >= 2:
 			_road_layer.draw_polyline(roads.global_transform * polyline, ROAD_COLOR, width)
 

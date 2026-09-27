@@ -20,6 +20,8 @@ const NIGHT_END := 8.0 * SECONDS_PER_HOUR    ## 8 AM, the following morning.
 ## cycle takes 30 seconds instead of 12 minutes.
 const DEBUG_FAST_FORWARD_KEY := KEY_K
 const DEBUG_FAST_FORWARD_SCALE := 24.0
+## Testing aid: Ctrl+K skips straight to the next morning (START_TIME).
+const DEBUG_SKIP_TO_MORNING_KEY := KEY_K
 
 ## Every new day starts at 8 AM (right as night ends) rather than midnight.
 const START_TIME := NIGHT_END
@@ -33,12 +35,29 @@ var day: int = 1
 var time_of_day: float = START_TIME ## Seconds into the current day, [0, DAY_LENGTH).
 
 func _process(delta: float) -> void:
-	var scale := DEBUG_FAST_FORWARD_SCALE if Input.is_physical_key_pressed(DEBUG_FAST_FORWARD_KEY) else 1.0
+	var fast_forwarding := Input.is_physical_key_pressed(DEBUG_FAST_FORWARD_KEY) and not Input.is_physical_key_pressed(KEY_CTRL)
+	var scale := DEBUG_FAST_FORWARD_SCALE if fast_forwarding else 1.0
 	time_of_day += delta * scale
 	if time_of_day >= DAY_LENGTH:
 		time_of_day -= DAY_LENGTH
 		day += 1
 		day_changed.emit(day)
+
+func _unhandled_input(event: InputEvent) -> void:
+	var key_event := event as InputEventKey
+	if key_event != null and key_event.pressed and not key_event.echo and key_event.ctrl_pressed \
+			and key_event.physical_keycode == DEBUG_SKIP_TO_MORNING_KEY:
+		skip_to_next_morning()
+		get_viewport().set_input_as_handled()
+
+## Jumps to the next START_TIME. Before it (the small hours) that's later
+## today, since the calendar already rolled at midnight; otherwise tomorrow.
+func skip_to_next_morning() -> void:
+	var seconds_until_morning := START_TIME - time_of_day
+	if seconds_until_morning <= 0.0:
+		seconds_until_morning += DAY_LENGTH
+	advance_seconds(seconds_until_morning)
+	Sfx.play(&"rooster_crow", -6.0)
 
 ## Called on New Game — Continue restores day/time_of_day from SaveSystem
 ## instead, never through here.
