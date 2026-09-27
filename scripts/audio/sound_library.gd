@@ -27,6 +27,7 @@ const NAMES: Array[StringName] = [
 	&"tractor_thud",
 	&"hamster_squeak",
 	&"tv_thunk",
+	&"paddle_splash",
 	&"door_close",
 	&"scrap_pickup",
 	&"part_pickup",
@@ -62,6 +63,7 @@ const CAR_SOUNDS: Array[StringName] = [
 	&"tractor_thud",
 	&"hamster_squeak",
 	&"tv_thunk",
+	&"paddle_splash",
 ]
 
 const UI_SOUNDS: Array[StringName] = [
@@ -110,6 +112,7 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"tractor_thud": return _tractor_thud(rng)
 		&"hamster_squeak": return _hamster_squeak(rng)
 		&"tv_thunk": return _tv_thunk(rng)
+		&"paddle_splash": return _paddle_splash(rng)
 		&"door_close": return _door_close(rng)
 		&"scrap_pickup": return _scrap_pickup()
 		&"part_pickup": return _part_pickup()
@@ -280,6 +283,26 @@ static func _prosthetic_clunk(rng: RandomNumberGenerator) -> PackedFloat32Array:
 		tremolo = [45.0, 0.6],
 	})
 	Synth.mix_into(out, squeak, 0.03, 0.12)
+	return Synth.finish(out)
+
+## A wooden paddle blade slapping down: a low hollow shaft-thock, a broad
+## noisy splash as the blade digs in, and a few bright droplet flecks
+## trailing off the top of the stroke.
+static func _paddle_splash(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.thump(0.14, 200.0, 0.002, 0.06, rng)
+	var splash := Synth.noise_sweep(0.24, {
+		freq = [[0.0, 1600.0], [0.24, 450.0]],
+		q = [[0.0, 1.0]],
+		amp = [[0.0, 0.0], [0.02, 1.0], [0.24, 0.0]],
+	}, rng)
+	Synth.mix_into(out, splash, 0.0, 0.5)
+	var droplets := Synth.noise_sweep(0.18, {
+		freq = [[0.0, 4000.0], [0.18, 2800.0]],
+		q = [[0.0, 3.0]],
+		amp = [[0.0, 0.0], [0.04, 1.0], [0.18, 0.0]],
+		highpass = 2400.0,
+	}, rng)
+	Synth.mix_into(out, droplets, 0.04, 0.22)
 	return Synth.finish(out)
 
 ## A cast-iron radiator whacking something: a deep dull clang through all its

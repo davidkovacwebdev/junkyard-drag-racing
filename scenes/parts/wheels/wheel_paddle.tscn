@@ -1,6 +1,6 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
-[ext_resource type="Script" path="res://scripts/car/car_wheel.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/car/car_paddle.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/parts/wheel_part_data.gd" id="2"]
 
 [sub_resource type="Resource" id="Resource_paddle"]
@@ -9,10 +9,15 @@ id = &"wheel_paddle"
 display_name = "Boat Paddle"
 mass = 4.0
 durability = 45.0
-speed = 1.0
+speed = 2.5
 material_type = 1
+impact_sound = &"paddle_splash"
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_wood"]
+friction = 0.6
 
 [node name="WheelPaddle" type="RigidBody2D"]
+physics_material_override = SubResource("PhysicsMaterial_wood")
 script = ExtResource("1")
 part_data = SubResource("Resource_paddle")
 
