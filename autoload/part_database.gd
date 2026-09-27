@@ -113,8 +113,7 @@ func _ready() -> void:
 ## its OWN category (comparing a wheel's mass to an engine's would be
 ## meaningless), so "how good is this part" always means "compared to the
 ## other parts you could put in the same slot". The lowest-scoring part
-## in any non-empty category always lands in tier 1, which is what makes
-## Inventory._worst() below safe to just look for tier == 1.
+## in any non-empty category always lands in tier 1.
 static func _assign_tiers(parts: Array) -> void:
 	if parts.is_empty():
 		return

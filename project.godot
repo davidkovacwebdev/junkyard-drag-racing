@@ -31,6 +31,7 @@ WorldState="*res://autoload/world_state.gd"
 SaveSystem="*res://autoload/save_system.gd"
 DayNightCycle="*res://autoload/day_night_cycle.gd"
 Weather="*res://autoload/weather.gd"
+RaceProgression="*res://autoload/race_progression.gd"
 DevMenu="*res://scenes/ui/dev_menu.tscn"
 
 [display]

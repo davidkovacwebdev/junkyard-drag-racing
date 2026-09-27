@@ -21,6 +21,7 @@ const DAMAGE_PER_MOMENTUM := 0.006
 const LOUDEST_IMPACT_VELOCITY := 900.0
 const IMPACT_SOUND_COOLDOWN := 0.15
 
+var max_durability: float = 100.0
 var current_durability: float = 100.0
 var is_broken: bool = false
 
@@ -29,7 +30,15 @@ var _impact_sound_cooldown := 0.0
 
 func _ready() -> void:
 	if part_data != null:
-		current_durability = part_data.durability
+		max_durability = part_data.durability
+	current_durability = max_durability
+
+## The tracker on `part`, or null if it has none.
+static func of(part: Node) -> CarPartDamage:
+	for child in part.get_children():
+		if child is CarPartDamage:
+			return child
+	return null
 
 ## For a caller that pauses this tracker (set_physics_process(false)) for a
 ## stretch and later re-arms it: without this, the first step back would
@@ -54,13 +63,18 @@ func _physics_process(delta: float) -> void:
 	if delta_v < IMPACT_VELOCITY_THRESHOLD:
 		return
 	var momentum := target.mass * delta_v
-	current_durability -= momentum * DAMAGE_PER_MOMENTUM
-	if current_durability <= 0.0:
-		is_broken = true
-		RaceCarAudio.play(self, &"collision", target.global_position, -2.0)
-		broken.emit()
-	elif _impact_sound_cooldown <= 0.0:
+	apply_damage(momentum * DAMAGE_PER_MOMENTUM)
+	if not is_broken and _impact_sound_cooldown <= 0.0:
 		_impact_sound_cooldown = IMPACT_SOUND_COOLDOWN
 		var loudness := clampf(delta_v / LOUDEST_IMPACT_VELOCITY, 0.25, 1.0)
 		var impact_sound := part_data.impact_sound if part_data != null else &"bump"
 		RaceCarAudio.play(self, impact_sound, target.global_position, linear_to_db(loudness))
+
+func apply_damage(amount: float) -> void:
+	if is_broken or not is_instance_valid(target):
+		return
+	current_durability -= amount
+	if current_durability <= 0.0:
+		is_broken = true
+		RaceCarAudio.play(self, &"collision", target.global_position, -2.0)
+		broken.emit()

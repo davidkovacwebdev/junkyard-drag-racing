@@ -20,5 +20,6 @@ extends Resource
 ## back. See WorldState.get_looted_snapshot(); older saves store a plain set of
 ## looted ids here and are upgraded on load.
 @export var looted: Dictionary = {}
+@export var races_won: int = 0
 @export var day: int = 1
 @export var time_of_day: float = 0.0

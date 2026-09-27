@@ -11,6 +11,10 @@ extends Node2D
 ## of just falling off the end of the track. The race only wraps up once
 ## every car has crossed (or been destroyed), or max_duration runs out.
 
+## Fired once when the race wraps up, before leaving the scene. `winner_name`
+## is the first car across the line, or empty when nobody made it.
+signal race_ended(winner_name: String)
+
 @export var finish_x: float = 2000.0
 @export var max_duration: float = 20.0
 @export var camera_path: NodePath
@@ -139,6 +143,7 @@ func _end_race(reason: String) -> void:
 			print("    %s DESTROYED" % entry["name"])
 			continue
 		print("    %s final x=%.1f%s" % [entry["name"], car.body.global_position.x, " [finished]" if entry["finished"] else ""])
+	race_ended.emit(_winner_name)
 	if end_delay > 0.0:
 		get_tree().create_timer(end_delay).timeout.connect(exit_race)
 	else:

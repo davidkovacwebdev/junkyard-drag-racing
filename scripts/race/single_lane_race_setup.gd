@@ -1,10 +1,9 @@
 extends Node2D
-## Drag strip test harness: randomly assembles CAR_COUNT cars (random body,
-## independent random front/back wheels, random engine) and registers them
-## with the sibling RaceController — same CarAssembler wheel-physics rig as
-## random_race_setup.gd (real gravity, rolling wheels, CarPartDamage/
-## PartShatter breakage). The difference is the track and what it's for: this one
-## runs on track_multi_test.tscn, where each lane's road is drawn as its own
+## The drag strip race: the player's selected garage car in the top lane,
+## RaceProgression's rivals in the rest, all registered with the sibling
+## RaceController (real gravity, rolling wheels, CarPartDamage/PartShatter
+## breakage). When the race ends, a player win is recorded so the next field is
+## quicker. It runs on track_multi_test.tscn, where each lane's road is drawn as its own
 ## bendable strip, and that strip — along with the artwork of everything lying on
 ## it — is displaced so the cars wander across lane boundaries and look like
 ## they're trading paint.
@@ -94,9 +93,12 @@ extends Node2D
 ##
 ## --- What's real and what's faked ---------------------------------------------
 ##
-## Real: the driving, the bouncing, the shattering. Faked: the up/down wander
-## and the "collisions" it causes — approximated from proximity and answered
-## with sparks only, no contact and no impulse. Every lane sits on its own
+## Real: the driving, the bouncing, the shattering, and the rocks. Faked: the
+## up/down wander and the "collisions" it causes — approximated from proximity,
+## with no contact, and answered by hand: sparks, both cars lose speed (the one
+## behind more) and a random part of each takes damage. Puddles (only when it's
+## raining) just cost a car some speed as it splashes in. Hazards are drawn
+## where they physically sit, not with the drift. Every lane sits on its own
 ## collision bit (authored on Slabs/SlabN) so two cars can genuinely overlap on
 ## screen while the physics never sees more than one lane's worth of ground.
 ##
@@ -130,13 +132,11 @@ extends Node2D
 @export var cosmetic_drift_enabled := true
 
 const CAR_COUNT := 5
-## Where the cars drop from, staggered along x by SPAWN_STAGGER_X so all five
-## don't come down through the same column at once (wider than the widest body,
-## ~280px) and SPAWN_HEIGHT_ABOVE_LANE above their lane's road surface, so they
-## still fall onto it under real gravity.
+## Where the cars drop from: all lined up on the same x, SPAWN_HEIGHT_ABOVE_LANE
+## above their lane's road surface, so they still fall onto it under real
+## gravity. Lanes only collide with their own slab, so sharing a column is safe.
 const SPAWN_X := 150.0
 const SPAWN_HEIGHT_ABOVE_LANE := 15.0
-const SPAWN_STAGGER_X := 300.0
 
 ## --- Cosmetic up/down drift ---------------------------------------------------
 
@@ -184,42 +184,23 @@ const TOUCH_Y_DISTANCE := 140.0
 ## happens to stay close.
 const TOUCH_COOLDOWN := 0.8
 
+## Share of its forward speed a car keeps after a touch. The car behind ran into
+## the one ahead, so it pays more.
+const REAR_CAR_SPEED_KEPT := 0.55
+const FRONT_CAR_SPEED_KEPT := 0.85
+## Share of a part's full durability that one touch knocks off a random part
+## of each car.
+const TOUCH_DAMAGE_FRACTION := 0.2
+
+## --- Puddles ------------------------------------------------------------------
+
+## Share of its forward speed a car keeps after splashing into a puddle.
+const PUDDLE_SPEED_KEPT := 0.8
+const SPLASH_COLOR := Color(0.7, 0.85, 0.95, 1.0)
+
 ## Sparks are drawn above every lane, whatever depth the two cars were at.
 const SPARK_Z := 100
 const SPARK_COLOR := Color(1.0, 0.8, 0.25, 1.0)
-
-var body_scenes: Array[PackedScene] = [
-	preload("res://scenes/parts/bodies/body_plank.tscn"),
-	preload("res://scenes/parts/bodies/body_wrecked_car.tscn"),
-	preload("res://scenes/parts/bodies/body_fridge.tscn"),
-	preload("res://scenes/parts/bodies/body_sofa.tscn"),
-	preload("res://scenes/parts/bodies/body_boat.tscn"),
-	preload("res://scenes/parts/bodies/body_mattress.tscn"),
-	preload("res://scenes/parts/bodies/body_limo.tscn"),
-	preload("res://scenes/parts/bodies/body_radiator.tscn"),
-	preload("res://scenes/parts/bodies/body_bicycle.tscn"),
-]
-
-var wheel_scenes: Array[PackedScene] = [
-	# wheel_bicycle.tscn removed on purpose — it's the one round/easy wheel,
-	# and the point right now is maximum chaos from the wild shapes.
-	preload("res://scenes/parts/wheels/wheel_square.tscn"),
-	preload("res://scenes/parts/wheels/wheel_triangle.tscn"),
-	preload("res://scenes/parts/wheels/wheel_toilet.tscn"),
-	preload("res://scenes/parts/wheels/wheel_tv.tscn"),
-	preload("res://scenes/parts/wheels/wheel_pogo.tscn"),
-	preload("res://scenes/parts/wheels/wheel_prosthetic_leg.tscn"),
-	preload("res://scenes/parts/wheels/wheel_tractor.tscn"),
-	preload("res://scenes/parts/wheels/wheel_hamster.tscn"),
-]
-
-var engine_scenes: Array[PackedScene] = [
-	preload("res://scenes/parts/engines/engine_v6.tscn"),
-	preload("res://scenes/parts/engines/engine_boiler.tscn"),
-	preload("res://scenes/parts/engines/engine_propeller.tscn"),
-	preload("res://scenes/parts/engines/engine_sail.tscn"),
-	preload("res://scenes/parts/engines/engine_jet.tscn"),
-]
 
 ## Everything one lane needs to drift: the road strip that gets bent, the car
 ## riding on it, the wrappers its artwork hangs off, and the two numbers that
@@ -251,6 +232,8 @@ class LaneState:
 	var target := 0.0
 	var hold := 0.0
 	var cooldown := 0.0
+	var puddles: Array[TrackHazards.Puddle] = []
+	var in_puddle := false
 	## World x the bump is centred on: wherever the piece being followed is, eased.
 	var centre := 0.0
 
@@ -281,14 +264,25 @@ var _slabs: Array[StaticBody2D] = []
 var _surface_y: Array[float] = []
 var _wall: CollisionObject2D = null
 var _states: Array[LaneState] = []
+var _player_car_name := ""
+var _rocky_race := false
+var _rainy_race := false
+var _hazards: Node2D = null
 
 func _ready() -> void:
 	var race_controller := get_node_or_null(race_controller_path) as RaceController
 	var camera := get_node_or_null(camera_path) as CameraFollow
 	_collect_lanes()
 	if _lanes.size() < CAR_COUNT or _slabs.size() < CAR_COUNT:
-		push_error("RaceTestLane wants %d lanes under the track's 'Lanes' and 'Slabs' nodes (see track_multi_test.tscn) but found %d/%d." % [CAR_COUNT, _lanes.size(), _slabs.size()])
+		push_error("RaceDragStrip wants %d lanes under the track's 'Lanes' and 'Slabs' nodes (see track_multi_test.tscn) but found %d/%d." % [CAR_COUNT, _lanes.size(), _slabs.size()])
 		return
+
+	_rocky_race = randf() < TrackHazards.ROCKY_RACE_CHANCE
+	_rainy_race = Weather.is_raining()
+	# Added before the cars so a lane's hazards draw under that lane's car.
+	_hazards = Node2D.new()
+	_hazards.name = "Hazards"
+	add_child(_hazards)
 
 	# Cars live in a plain static container: nothing that moves gets to be an
 	# ancestor of a rigid body (see this file's header for what that costs).
@@ -302,31 +296,35 @@ func _ready() -> void:
 	# assembled in the garage is what they drive here too.
 	var lane := 0
 	var player_car := Inventory.get_selected_car()
-	if player_car != null and player_car.body != null and not player_car.body.scene_path.is_empty():
-		var car := _assemble_player_car(player_car, lane, cars)
-		_register_car("Player_%s" % player_car.display_name, lane, car, race_controller, camera_targets)
+	var player_assembled := CarAssembler.assemble_from_car_data(player_car, cars, _spawn_position(lane))
+	if player_assembled != null:
+		_player_car_name = "Player_%s" % player_car.display_name
+		_register_car(_player_car_name, lane, player_assembled, race_controller, camera_targets)
+		if race_controller != null:
+			race_controller.race_ended.connect(_on_race_ended)
 		lane += 1
 
-	for i in range(lane, CAR_COUNT):
-		var body_scene: PackedScene = body_scenes[randi() % body_scenes.size()]
-		var wheel_front: PackedScene = wheel_scenes[randi() % wheel_scenes.size()]
-		var wheel_back: PackedScene = wheel_scenes[randi() % wheel_scenes.size()]
-		var engine_scene: PackedScene = engine_scenes[randi() % engine_scenes.size()]
-
-		var car := CarAssembler.assemble(body_scene, [wheel_front, wheel_back], engine_scene, cars, _spawn_position(i))
-		var car_name := "Car%d_%s_%s+%s_%s" % [
-			i,
-			body_scene.resource_path.get_file().trim_suffix(".tscn"),
-			wheel_front.resource_path.get_file().trim_suffix(".tscn"),
-			wheel_back.resource_path.get_file().trim_suffix(".tscn"),
-			engine_scene.resource_path.get_file().trim_suffix(".tscn"),
+	for rival in RaceProgression.pick_rivals(CAR_COUNT - lane):
+		var wheel_scenes: Array[PackedScene] = []
+		for wheel_path in rival["wheels"]:
+			wheel_scenes.append(load(wheel_path))
+		var car := CarAssembler.assemble(load(rival["body"]), wheel_scenes, load(rival["engine"]),
+				cars, _spawn_position(lane))
+		var car_name := "Car%d_%s_%s_%s" % [
+			lane,
+			String(rival["body"]).get_file().get_basename(),
+			String(rival["wheels"][0]).get_file().get_basename(),
+			String(rival["engine"]).get_file().get_basename(),
 		]
-		_register_car(car_name, i, car, race_controller, camera_targets)
+		_register_car(car_name, lane, car, race_controller, camera_targets)
+		lane += 1
 
 	if camera != null:
 		camera.targets = camera_targets
 
 func _physics_process(delta: float) -> void:
+	for state in _states:
+		_check_puddles(state)
 	if not cosmetic_drift_enabled:
 		return
 	for state in _states:
@@ -373,6 +371,7 @@ func _register_car(car_name: String, lane: int, car: CarAssembler.AssembledCar, 
 	state.centre = _spawn_position(lane).x
 	_setup_road_strip(state)
 	_setup_drift_art(state)
+	_add_hazards(state)
 	_states.append(state)
 	camera_targets.append(car.body)
 
@@ -633,15 +632,68 @@ func _would_touch(a: LaneState, b: LaneState) -> bool:
 		return false
 	return absf(pos_a.y - pos_b.y) <= TOUCH_Y_DISTANCE
 
-## Sparks, and nothing else: the faked contact deliberately has no say in
-## either car's velocity, so a rubbing pair carries on driving exactly as its
-## own physics says it should.
 func _touch(a: LaneState, b: LaneState) -> void:
 	a.cooldown = TOUCH_COOLDOWN
 	b.cooldown = TOUCH_COOLDOWN
-	_spawn_sparks((a.visual_position() + b.visual_position()) * 0.5)
+	var contact := (a.visual_position() + b.visual_position()) * 0.5
+	_spawn_sparks(contact, SPARK_COLOR)
+	RaceCarAudio.play(self, &"metal_scrape", contact)
+	var a_is_behind := a.car.body.global_position.x < b.car.body.global_position.x
+	_slow_down(a.car, REAR_CAR_SPEED_KEPT if a_is_behind else FRONT_CAR_SPEED_KEPT)
+	_slow_down(b.car, FRONT_CAR_SPEED_KEPT if a_is_behind else REAR_CAR_SPEED_KEPT)
+	_damage_random_part(a.car)
+	_damage_random_part(b.car)
 
-func _spawn_sparks(at: Vector2) -> void:
+## Cuts the whole car's forward speed: body, wheels and their motors together, or
+## the joints would fight it.
+func _slow_down(car: CarAssembler.AssembledCar, speed_kept: float) -> void:
+	for part in _car_parts(car):
+		part.linear_velocity.x *= speed_kept
+		if part is CarWheel:
+			(part as CarWheel).lose_spin(speed_kept)
+		# The speed cut is not an impact; without this the tracker would read
+		# it as one and deal damage on top.
+		var tracker := CarPartDamage.of(part)
+		if tracker != null:
+			tracker.resync()
+
+func _damage_random_part(car: CarAssembler.AssembledCar) -> void:
+	var tracker := CarPartDamage.of(_car_parts(car).pick_random())
+	if tracker != null:
+		tracker.apply_damage(tracker.max_durability * TOUCH_DAMAGE_FRACTION)
+
+func _car_parts(car: CarAssembler.AssembledCar) -> Array[RigidBody2D]:
+	var parts: Array[RigidBody2D] = [car.body]
+	for wheel in car.wheels:
+		if is_instance_valid(wheel):
+			parts.append(wheel)
+	return parts
+
+## Rocks on rocky races, puddles on rainy ones, drawn under that lane's car.
+func _add_hazards(state: LaneState) -> void:
+	var surface_y := _surface_y[state.lane]
+	var z_index_of_lane := state.lane_art.z_index
+	if _rocky_race:
+		for rock in TrackHazards.add_rocks(_hazards, surface_y, _slabs[state.lane].collision_layer):
+			rock.z_index = z_index_of_lane
+	if _rainy_race:
+		state.puddles = TrackHazards.add_puddles(_hazards, surface_y)
+		for puddle in state.puddles:
+			puddle.node.z_index = z_index_of_lane
+
+## Splashing into a puddle costs the car some speed, once per puddle.
+func _check_puddles(state: LaneState) -> void:
+	if state.puddles.is_empty() or not _is_racing(state):
+		return
+	var x := state.car.body.global_position.x
+	var in_puddle := state.puddles.any(func(puddle: TrackHazards.Puddle) -> bool: return puddle.covers(x))
+	if in_puddle and not state.in_puddle:
+		_slow_down(state.car, PUDDLE_SPEED_KEPT)
+		_spawn_sparks(state.car.body.global_position, SPLASH_COLOR)
+		RaceCarAudio.play(self, &"paddle_splash", state.car.body.global_position)
+	state.in_puddle = in_puddle
+
+func _spawn_sparks(at: Vector2, color: Color) -> void:
 	var particles := CPUParticles2D.new()
 	particles.name = "Sparks"
 	particles.z_index = SPARK_Z
@@ -656,7 +708,7 @@ func _spawn_sparks(at: Vector2) -> void:
 	particles.gravity = Vector2(0.0, 500.0)
 	particles.scale_amount_min = 2.0
 	particles.scale_amount_max = 4.0
-	particles.color = SPARK_COLOR
+	particles.color = color
 	add_child(particles)
 	particles.global_position = at
 	particles.emitting = true
@@ -667,18 +719,8 @@ func _spawn_sparks(at: Vector2) -> void:
 ## drops onto it under real gravity. World space, not lane-local: the cars are
 ## not parented to the lanes.
 func _spawn_position(lane: int) -> Vector2:
-	return Vector2(SPAWN_X + lane * SPAWN_STAGGER_X, _surface_y[lane] - SPAWN_HEIGHT_ABOVE_LANE)
+	return Vector2(SPAWN_X, _surface_y[lane] - SPAWN_HEIGHT_ABOVE_LANE)
 
-## Builds the player's selected garage car into the race. Reuses the exact
-## part scene paths stored on the CarModelData, so the racing rig is the
-## same body/wheels/engine the garage preview (and world player) show.
-func _assemble_player_car(car_data: CarModelData, lane: int, parent: Node) -> CarAssembler.AssembledCar:
-	var body_scene: PackedScene = load(car_data.body.scene_path)
-	var wheel_scenes: Array[PackedScene] = []
-	for wheel in car_data.wheels:
-		if wheel != null and not wheel.scene_path.is_empty():
-			wheel_scenes.append(load(wheel.scene_path))
-	var engine_scene: PackedScene = null
-	if car_data.engine != null and not car_data.engine.scene_path.is_empty():
-		engine_scene = load(car_data.engine.scene_path)
-	return CarAssembler.assemble(body_scene, wheel_scenes, engine_scene, parent, _spawn_position(lane))
+func _on_race_ended(winner_name: String) -> void:
+	RaceProgression.record_race(winner_name == _player_car_name)
+	SaveSystem.save_game()

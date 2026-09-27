@@ -64,6 +64,11 @@ func _integrate_forces(state: PhysicsDirectBodyState2D) -> void:
 	state.transform = Transform2D(new_rotation, state.transform.get_origin())
 	state.angular_velocity = _drive_speed
 
+## Knocks the motor's current spin down to `fraction_kept` of itself; it ramps
+## back up at motor_accel like a standing start.
+func lose_spin(fraction_kept: float) -> void:
+	_drive_speed *= fraction_kept
+
 ## The spin speed the motor is heading for right now. A wheel with a mind of
 ## its own (the hamster wheel) overrides this; 0 lets the wheel roll freely.
 func _current_target_speed() -> float:

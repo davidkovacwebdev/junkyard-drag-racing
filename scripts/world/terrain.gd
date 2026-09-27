@@ -2,8 +2,8 @@
 class_name TerrainNetwork
 extends Node2D
 ## Islands for the world map. Everything that isn't listed here is water (see
-## `water.gd`), so this node *is* the land, and the car can drive off the edge
-## of it into open sea.
+## `water.gd`), so this node *is* the land. In the running game every shoreline
+## is also a static collision outline, so the car can't drive out to sea.
 ##
 ## Same two ways of working as the road network:
 ##
@@ -213,6 +213,8 @@ var _settle: float = 0.0
 
 func _ready() -> void:
 	_rebuild()
+	if not Engine.is_editor_hint():
+		_build_shore_collision()
 	if Engine.is_editor_hint():
 		# Dragging a Path2D's curve or a biome marker doesn't notify us, so poll
 		# a cheap snapshot of the inputs and rebuild when it changes. That's what
@@ -278,6 +280,18 @@ func _rebuild() -> void:
 	_collect_markers()
 	_build_cells()
 	queue_redraw()
+
+## Built once: an outline of segments per coastline, so the physics server does
+## the water check instead of a per-frame point-in-polygon test.
+func _build_shore_collision() -> void:
+	var shore_body := StaticBody2D.new()
+	shore_body.name = "ShoreCollision"
+	for coastline in _coastlines:
+		var outline := CollisionPolygon2D.new()
+		outline.build_mode = CollisionPolygon2D.BUILD_SEGMENTS
+		outline.polygon = coastline
+		shore_body.add_child(outline)
+	add_child(shore_body)
 
 func _add_island(coastline: PackedVector2Array) -> void:
 	_coastlines.append(coastline)

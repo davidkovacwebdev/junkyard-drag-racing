@@ -28,6 +28,8 @@ const NAMES: Array[StringName] = [
 	&"hamster_squeak",
 	&"tv_thunk",
 	&"paddle_splash",
+	&"rock_clack",
+	&"metal_scrape",
 	&"door_close",
 	&"scrap_pickup",
 	&"part_pickup",
@@ -64,6 +66,8 @@ const CAR_SOUNDS: Array[StringName] = [
 	&"hamster_squeak",
 	&"tv_thunk",
 	&"paddle_splash",
+	&"rock_clack",
+	&"metal_scrape",
 ]
 
 const UI_SOUNDS: Array[StringName] = [
@@ -113,6 +117,8 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"hamster_squeak": return _hamster_squeak(rng)
 		&"tv_thunk": return _tv_thunk(rng)
 		&"paddle_splash": return _paddle_splash(rng)
+		&"rock_clack": return _rock_clack(rng)
+		&"metal_scrape": return _metal_scrape(rng)
 		&"door_close": return _door_close(rng)
 		&"scrap_pickup": return _scrap_pickup()
 		&"part_pickup": return _part_pickup()
@@ -303,6 +309,33 @@ static func _paddle_splash(rng: RandomNumberGenerator) -> PackedFloat32Array:
 		highpass = 2400.0,
 	}, rng)
 	Synth.mix_into(out, droplets, 0.04, 0.22)
+	return Synth.finish(out)
+
+## A wheel rolling onto a rock: a dry stony knock with a gritty skitter of
+## gravel kicked off it.
+static func _rock_clack(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.thump(0.12, 1400.0, 0.001, 0.03, rng)
+	Synth.mix_into(out, Synth.thump(0.1, 2600.0, 0.001, 0.02, rng), 0.035, 0.6)
+	var gravel := Synth.noise_sweep(0.2, {
+		freq = [[0.0, 3200.0], [0.2, 2000.0]],
+		q = [[0.0, 2.0]],
+		amp = [[0.0, 0.0], [0.01, 1.0], [0.2, 0.0]],
+		highpass = 1500.0,
+	}, rng)
+	Synth.mix_into(out, gravel, 0.02, 0.3)
+	return Synth.finish(out)
+
+## Two race cars trading paint: a bodywork thunk, then a grinding screech of
+## metal on metal that trails off as they bounce apart.
+static func _metal_scrape(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.thump(0.2, 300.0, 0.002, 0.09, rng)
+	var grind := Synth.noise_sweep(0.45, {
+		freq = [[0.0, 2400.0], [0.15, 3400.0], [0.45, 1800.0]],
+		q = [[0.0, 9.0]],
+		amp = [[0.0, 0.0], [0.02, 1.0], [0.25, 0.6], [0.45, 0.0]],
+	}, rng)
+	Synth.mix_into(out, grind, 0.01, 0.55)
+	Synth.mix_into(out, _metal_ring(0.4, 1150.0, 14.0, 0.2, rng), 0.0, 0.3)
 	return Synth.finish(out)
 
 ## A cast-iron radiator whacking something: a deep dull clang through all its

@@ -5,8 +5,8 @@ extends Node2D
 ## terrain (see `terrain.gd`) is water, so this node paints the deep fill plus
 ## a slow drift of lighter ripple strokes across it. Flat shapes, a couple of
 ## values, barely-there motion — the same stepped, cell-shaded look the
-## building parts are drawn in. **Purely cosmetic**: the car drives over it
-## like any other ground, and if it drives off the island it just keeps going.
+## building parts are drawn in. Purely visual: the shoreline collision that
+## keeps the car out of it lives in `terrain.gd`.
 ##
 ## **Draw order.** Water goes behind the terrain, which goes behind everything
 ## else: park it as the first child of the map and give it a very negative
