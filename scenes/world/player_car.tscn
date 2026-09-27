@@ -5,7 +5,7 @@
 [ext_resource type="Script" path="res://scripts/world/world_camera.gd" id="3"]
 [ext_resource type="Script" path="res://scripts/world/night_overlay.gd" id="4"]
 [ext_resource type="Shader" path="res://shaders/night_overlay.gdshader" id="5"]
-[ext_resource type="Script" path="res://scripts/world/analog_clock.gd" id="6"]
+[ext_resource type="Script" path="res://scripts/world/digital_clock.gd" id="6"]
 [ext_resource type="Script" path="res://scripts/ui/minimap.gd" id="7"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
@@ -45,11 +45,18 @@ mouse_filter = 2
 color = Color(1, 1, 1, 1)
 script = ExtResource("4")
 
-[node name="AnalogClock" type="Control" parent="UI"]
-offset_left = 16.0
-offset_top = 16.0
-offset_right = 72.0
-offset_bottom = 72.0
+[node name="DigitalClock" type="Control" parent="UI"]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -159.0
+offset_top = -262.0
+offset_right = -73.0
+offset_bottom = -216.0
+grow_horizontal = 0
+grow_vertical = 0
 mouse_filter = 2
 script = ExtResource("6")
 
