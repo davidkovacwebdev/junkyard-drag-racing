@@ -31,7 +31,7 @@ Every sound is synthesized from code — do not add .wav/.ogg files. The toolkit
 | `scripts/audio/engine_sound_profile.gd` | `EngineSoundProfile` — per-engine voice settings |
 | `scripts/audio/music_synth.gd` | `MusicSynth` — music sequencer (text patterns, chord-following bass/strum/arpeggio) + instruments: slap bass, clav, kazoo, banjo, tuba, toy piano, slide whistle, junk drums (incl. ghost snare, clap, chicken scratch, trash lid, boing) |
 | `scripts/audio/song_library.gd` | `SongLibrary` — the songs, composed in code |
-| `autoload/music.gd` | `Music` autoload — renders songs on a background thread, picks one per scene folder (menu / race / everything else), crossfades |
+| `autoload/music.gd` | `Music` autoload — loads the baked songs, picks one per scene folder (menu / race / everything else), crossfades |
 | `autoload/audio_settings.gd` | `AudioSettings` autoload — per-bus volume + mute, saved to `user://settings.cfg` |
 | `default_bus_layout.tres` | buses: Master, Music, SFX, Cars, Ambience, UI |
 | `sounds/engines/<engine id>.tres` | one profile per engine part, looked up by id |
@@ -69,7 +69,7 @@ Every sound must land on a bus so the settings sliders cover it. `SoundLibrary.b
 
 ## Music
 
-Songs are silly junkyard funk: 16th-note syncopation, slap bass, clav stabs, ghost notes, chromatic runs and semitone chord slides, odd meters, stop-time breaks, cheesy key changes, wonky detune and tape wobble. User feedback on a tame folk version was "like a children youtube video" — keep it weird, never polite or epic. Add one in `SongLibrary` and map it in `Music._song_for_scene()`. Each renders in ~4–5 s on a background thread; keep songs under ~80 s. `MusicSynth` warns when a `|`-separated bar has the wrong step count.
+Songs are silly junkyard funk: 16th-note syncopation, slap bass, clav stabs, ghost notes, chromatic runs and semitone chord slides, odd meters, stop-time breaks, cheesy key changes, wonky detune and tape wobble. User feedback on a tame folk version was "like a children youtube video" — keep it weird, never polite or epic. Add one in `SongLibrary` and map it in `Music._song_for_scene()`. Songs are baked to `sounds/music/*.wav` by `godot --headless --script res://tools/render_music.gd` (then `godot --headless --import`); rerun after changing any song. Keep songs under ~80 s. `MusicSynth` warns when a `|`-separated bar has the wrong step count.
 
 ## Adding an engine part
 
@@ -106,4 +106,4 @@ Keep rms at full rpm around 0.25–0.5 so engines are balanced. Measure by calli
 
 ## Current coverage (keep this updated)
 
-Overworld car: engine (ignition click + live start once per session, live rpm), H horn, skid screech, wall bump, Shift backfire, door when entering a place. Race: live engines, impacts, part-break crash, body-break stall, finish-line backfire. Pickups: scrap blip, part arpeggio (also the crane haul). Trash looting rummage. Scrap dealer: cash register / denied. Crane: clang on grab, miss, denied. Garage: wrench clunk on fitting a part. All buttons click; ScrapButtons tick on hover. Rain ambience. Settings: each volume change previews through its bus. Music: menu (Junkyard Strut), overworld (Drunk Crane Shuffle, 7/8), races (Scrapheap Stampede).
+Overworld car: engine (ignition click + live start once per session, live rpm), H horn, skid screech, wall bump, Shift backfire, door when entering a place. Race: live engines, impacts (soft parts like the mattress use their own `impact_sound`, e.g. `mattress_squish`, `sign_wobble` for the warning-sign wheel, also on the overworld wall bump), pogo stick `pogo_boing` on every takeoff (louder the deeper the squash), prosthetic leg `prosthetic_clunk` on every footstep (also its bump sound), radiator body `radiator_clang` and bicycle body `bicycle_rattle` as their bump sounds (the limo uses the plain car `bump`), tractor tire `tractor_thud` bumps, hamster wheel `hamster_squeak` on bumps and when the hamster panics, CRT TV wheel `tv_thunk` bumps (sofa reuses `mattress_squish`, bicycle wheel reuses `bicycle_rattle`), part-break crash, body-break stall, finish-line backfire. Pickups: scrap blip, part arpeggio (also the crane haul). Trash looting rummage. Scrap dealer: cash register / denied. Crane: clang on grab, miss, denied. Garage: wrench clunk on fitting a part. All buttons click; ScrapButtons tick on hover. Rain ambience. Settings: each volume change previews through its bus. Music: menu (Junkyard Strut), overworld (Drunk Crane Shuffle, 7/8), races (Scrapheap Stampede).

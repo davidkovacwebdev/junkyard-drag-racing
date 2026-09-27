@@ -17,6 +17,10 @@ const _BODY_SCENES := [
 	"res://scenes/parts/bodies/body_sofa.tscn",
 	"res://scenes/parts/bodies/body_pipes.tscn",
 	"res://scenes/parts/bodies/body_bathtub.tscn",
+	"res://scenes/parts/bodies/body_mattress.tscn",
+	"res://scenes/parts/bodies/body_limo.tscn",
+	"res://scenes/parts/bodies/body_radiator.tscn",
+	"res://scenes/parts/bodies/body_bicycle.tscn",
 ]
 const _WHEEL_SCENES := [
 	"res://scenes/parts/wheels/wheel_standard.tscn",
@@ -44,6 +48,10 @@ const _WHEEL_SCENES := [
 	"res://scenes/parts/wheels/wheel_wood_barrel.tscn",
 	"res://scenes/parts/wheels/wheel_metal_barrel.tscn",
 	"res://scenes/parts/wheels/wheel_dartboard.tscn",
+	"res://scenes/parts/wheels/wheel_pogo.tscn",
+	"res://scenes/parts/wheels/wheel_prosthetic_leg.tscn",
+	"res://scenes/parts/wheels/wheel_tractor.tscn",
+	"res://scenes/parts/wheels/wheel_hamster.tscn",
 ]
 const _ENGINE_SCENES := [
 	"res://scenes/parts/engines/engine_v6.tscn",

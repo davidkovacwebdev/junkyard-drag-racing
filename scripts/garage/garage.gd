@@ -109,6 +109,7 @@ func equip_part(category: PartData.Category, part: PartData, wheel_index: int = 
 	DayNightCycle.advance_hours(1.0 if category == PartData.Category.WHEEL else 4.0)
 	Sfx.play(&"wrench_clunk", -4.0)
 	_refresh()
+	_car_view.jiggle()
 	# Ownership changed — a copy moved out of the stash onto the car, or
 	# between two cars — so the list has to be rebuilt with fresh counts
 	# rather than left showing whatever was true a moment ago.

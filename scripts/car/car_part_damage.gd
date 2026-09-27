@@ -62,4 +62,5 @@ func _physics_process(delta: float) -> void:
 	elif _impact_sound_cooldown <= 0.0:
 		_impact_sound_cooldown = IMPACT_SOUND_COOLDOWN
 		var loudness := clampf(delta_v / LOUDEST_IMPACT_VELOCITY, 0.25, 1.0)
-		RaceCarAudio.play(self, &"bump", target.global_position, linear_to_db(loudness))
+		var impact_sound := part_data.impact_sound if part_data != null else &"bump"
+		RaceCarAudio.play(self, impact_sound, target.global_position, linear_to_db(loudness))

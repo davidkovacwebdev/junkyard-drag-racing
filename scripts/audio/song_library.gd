@@ -3,13 +3,18 @@ extends RefCounted
 ## The game's music, composed in code for MusicSynth (see there for the pattern
 ## language). Junkyard funk: syncopated slap bass, clav stabs, ghost notes,
 ## chromatic runs that go somewhere they shouldn't, a kazoo that won't behave.
-## Silly, never epic. Each song loops.
+## Silly, never epic. Each song loops. Songs are baked to WAV files by
+## tools/render_music.gd; rerun it after changing a song.
 
 const MENU := &"junkyard_strut"
 const OVERWORLD := &"drunk_crane_shuffle"
 const RACE := &"scrapheap_stampede"
 
 const NAMES: Array[StringName] = [MENU, OVERWORLD, RACE]
+const MUSIC_DIRECTORY := "res://sounds/music"
+
+static func baked_path(song_name: StringName) -> String:
+	return "%s/%s.wav" % [MUSIC_DIRECTORY, song_name]
 
 static func render(song_name: StringName) -> AudioStreamWAV:
 	match song_name:
