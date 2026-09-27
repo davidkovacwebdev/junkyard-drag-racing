@@ -14,6 +14,8 @@ const NAMES: Array[StringName] = [
 	&"ignition_click",
 	&"engine_stall",
 	&"backfire",
+	&"race_stalled",
+	&"results_fanfare",
 	&"horn_loop",
 	&"tire_screech_loop",
 	&"bump",
@@ -99,6 +101,8 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"ignition_click": return _ignition_click(rng)
 		&"engine_stall": return _engine_stall(rng)
 		&"backfire": return _backfire(rng)
+		&"race_stalled": return _race_stalled()
+		&"results_fanfare": return _results_fanfare()
 		&"horn_loop": return _horn_loop()
 		&"tire_screech_loop": return _tire_screech_loop(rng)
 		&"bump": return _bump(rng)
@@ -452,6 +456,29 @@ static func _cash_register(rng: RandomNumberGenerator) -> PackedFloat32Array:
 	})
 	var out := Synth.mix_into(Synth.finish(drawer), bell, 0.07, 0.8)
 	return Synth.finish(out)
+
+## Two detuned tones sliding down together and cutting out — a junkyard
+## sad-trombone for "nobody's going anywhere," played when the race gives
+## up on itself instead of grinding out the rest of max_duration.
+static func _race_stalled() -> PackedFloat32Array:
+	return Synth.tones(0.7, [[[0.0, 220.0], [0.7, 80.0]], [[0.0, 165.0], [0.7, 60.0]]], {
+		square = 0.45,
+		amp = [[0.0, 0.0], [0.04, 0.8], [0.5, 0.55], [0.7, 0.0]],
+		peak = 0.55,
+	})
+
+## Three-note ascending pluck (junkyard kazoo, not a brass fanfare) for the
+## results screen showing a real podium — skipped on a STALLED ending,
+## which gets `race_stalled` instead since there's nothing to celebrate.
+static func _results_fanfare() -> PackedFloat32Array:
+	return Synth.tones(0.6, [[[0.0, 392.0], [0.18, 392.0], [0.2, 523.0], [0.36, 523.0],
+			[0.38, 659.0]]], {
+		square = 0.35,
+		amp = [[0.0, 0.0], [0.02, 0.85], [0.16, 0.7], [0.2, 0.0],
+				[0.22, 0.85], [0.34, 0.7], [0.38, 0.0],
+				[0.4, 0.9], [0.55, 0.6], [0.6, 0.0]],
+		peak = 0.6,
+	})
 
 ## Low double buzz for "can't do that" (no money, nothing to sell).
 static func _denied() -> PackedFloat32Array:
