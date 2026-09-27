@@ -31,7 +31,7 @@ Every sound is synthesized from code — do not add .wav/.ogg files. The toolkit
 | `scripts/audio/engine_sound_profile.gd` | `EngineSoundProfile` — per-engine voice settings |
 | `scripts/audio/music_synth.gd` | `MusicSynth` — music sequencer (text patterns, chord-following bass/strum/arpeggio) + instruments: slap bass, clav, kazoo, banjo, tuba, toy piano, slide whistle, junk drums (incl. ghost snare, clap, chicken scratch, trash lid, boing) |
 | `scripts/audio/song_library.gd` | `SongLibrary` — the songs, composed in code |
-| `autoload/music.gd` | `Music` autoload — renders songs on a background thread, picks one per scene folder (menu / race / everything else), crossfades |
+| `autoload/music.gd` | `Music` autoload — loads the baked songs, picks one per scene folder (menu / race / everything else), crossfades |
 | `autoload/audio_settings.gd` | `AudioSettings` autoload — per-bus volume + mute, saved to `user://settings.cfg` |
 | `default_bus_layout.tres` | buses: Master, Music, SFX, Cars, Ambience, UI |
 | `sounds/engines/<engine id>.tres` | one profile per engine part, looked up by id |
@@ -69,7 +69,7 @@ Every sound must land on a bus so the settings sliders cover it. `SoundLibrary.b
 
 ## Music
 
-Songs are silly junkyard funk: 16th-note syncopation, slap bass, clav stabs, ghost notes, chromatic runs and semitone chord slides, odd meters, stop-time breaks, cheesy key changes, wonky detune and tape wobble. User feedback on a tame folk version was "like a children youtube video" — keep it weird, never polite or epic. Add one in `SongLibrary` and map it in `Music._song_for_scene()`. Each renders in ~4–5 s on a background thread; keep songs under ~80 s. `MusicSynth` warns when a `|`-separated bar has the wrong step count.
+Songs are silly junkyard funk: 16th-note syncopation, slap bass, clav stabs, ghost notes, chromatic runs and semitone chord slides, odd meters, stop-time breaks, cheesy key changes, wonky detune and tape wobble. User feedback on a tame folk version was "like a children youtube video" — keep it weird, never polite or epic. Add one in `SongLibrary` and map it in `Music._song_for_scene()`. Songs are baked to `sounds/music/*.wav` by `godot --headless --script res://tools/render_music.gd` (then `godot --headless --import`); rerun after changing any song. Keep songs under ~80 s. `MusicSynth` warns when a `|`-separated bar has the wrong step count.
 
 ## Adding an engine part
 
