@@ -9,7 +9,7 @@ id = &"wheel_paddle"
 display_name = "Boat Paddle"
 mass = 4.0
 durability = 45.0
-speed = 2.5
+speed = 5.1
 material_type = 1
 impact_sound = &"paddle_splash"
 

@@ -7,8 +7,9 @@ extends CarWheel
 ## (the track, a crate, a rival's roof) within `rest_length`, the spring pushes
 ## the chassis back up along the stick, like a raycast suspension. The engine
 ## pumps extra push into every extension, so each bounce ends higher than it
-## started, until gravity and the car's weight balance it out. Heavy cars hop
-## low, light ones launch.
+## started, until gravity and the car's weight balance it out. Spring and pump
+## scale with the chassis's mass, so every body hops about the same height:
+## unscaled, light bodies launched high enough to wreck themselves on landing.
 ##
 ## The stick leans forward, so every push has a forward part to it: that is
 ## the drive. The lean fades out near top speed. It only partly follows the chassis's tilt (`self_righting`), so
@@ -19,8 +20,11 @@ extends CarWheel
 @export var rest_length: float = 46.0
 ## How far the foot can sink before the stick bottoms out on its hard foot.
 @export var spring_travel: float = 22.0
-@export var stiffness: float = 2400.0
-@export var spring_damping: float = 60.0
+## Spring, damping and pump are tuned for a chassis this heavy and scaled to
+## the real one.
+@export var reference_chassis_mass: float = 20.0
+@export var stiffness: float = 5000.0
+@export var spring_damping: float = 150.0
 ## Extra push, in force units, while the spring extends, scaled by engine
 ## power raised to `power_exponent`.
 @export var pump_force: float = 40000.0
@@ -29,7 +33,7 @@ extends CarWheel
 ## the car nears its top speed and leans back past it, so the hops brake.
 @export var lean: float = deg_to_rad(16.0)
 ## Top speed in px/s per unit of engine power.
-@export var top_speed_per_power: float = 45.0
+@export var top_speed_per_power: float = 30.0
 ## 0 = the stick tilts fully with the chassis, 1 = it always points straight down.
 @export var self_righting: float = 0.35
 ## A hop this deep (px of compression) or deeper boings at full volume.
@@ -77,6 +81,7 @@ func _integrate_forces(state: PhysicsDirectBodyState2D) -> void:
 		var push := stiffness * _compression + spring_damping * compression_speed
 		if compression_speed < 0.0:
 			push += pump_force * pow(absf(target_angular_velocity), power_exponent)
+		push *= chassis.mass / reference_chassis_mass
 		chassis.apply_force(-down * maxf(push, 0.0), mount - chassis.global_position)
 	elif previous_compression > 0.0:
 		_boing()

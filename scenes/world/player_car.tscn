@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/player_car.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/world/car_view.tscn" id="2"]
@@ -7,6 +7,7 @@
 [ext_resource type="Shader" path="res://shaders/night_overlay.gdshader" id="5"]
 [ext_resource type="Script" path="res://scripts/world/digital_clock.gd" id="6"]
 [ext_resource type="Script" path="res://scripts/ui/minimap.gd" id="7"]
+[ext_resource type="Script" path="res://scripts/world/headlights.gd" id="8"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
 size = Vector2(90, 32)
@@ -26,6 +27,9 @@ auto_fit_width = 130.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_1")
+
+[node name="Headlights" type="Node2D" parent="."]
+script = ExtResource("8")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 script = ExtResource("3")

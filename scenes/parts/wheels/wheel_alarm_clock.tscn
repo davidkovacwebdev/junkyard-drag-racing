@@ -9,7 +9,7 @@ id = &"wheel_alarm_clock"
 display_name = "Giant Alarm Clock"
 mass = 9.0
 durability = 55.0
-speed = 3.0
+speed = 5.1
 material_type = 0
 
 [node name="WheelAlarmClock" type="RigidBody2D"]
@@ -38,3 +38,9 @@ polygon = PackedVector2Array(-2, 0, 2, 0, 2, -18, -2, -18)
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
 polygon = PackedVector2Array(40, 0, 34.64, 20, 20, 34.64, 0, 40, -20, 34.64, -34.64, 20, -40, 0, -34.64, -20, -20, -34.64, 0, -40, 20, -34.64, 34.64, -20)
+
+[node name="CollisionBellLeft" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(-18, -34, -19.34, -29, -23, -25.34, -28, -24, -33, -25.34, -36.66, -29, -38, -34, -36.66, -39, -33, -42.66, -28, -44, -23, -42.66, -19.34, -39)
+
+[node name="CollisionBellRight" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(38, -34, 36.66, -29, 33, -25.34, 28, -24, 23, -25.34, 19.34, -29, 18, -34, 19.34, -39, 23, -42.66, 28, -44, 33, -42.66, 36.66, -39)

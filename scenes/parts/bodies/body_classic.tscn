@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://blaa280k1rqwg" path="res://scripts/car/car_body.gd" id="1"]
 [ext_resource type="Script" uid="uid://baxc83cuw3lof" path="res://scripts/parts/body_part_data.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/car/headlight_mount.gd" id="headlight_mount"]
 
 [sub_resource type="Resource" id="Resource_classic"]
 script = ExtResource("2")
@@ -9,7 +10,7 @@ color = Color(0.78, 0.18, 0.2, 1)
 id = &"body_classic"
 display_name = "Classic Car"
 mass = 18.0
-speed = 4.0
+speed = 3.0
 
 [node name="BodyClassic" type="RigidBody2D" unique_id=1723387921]
 script = ExtResource("1")
@@ -39,3 +40,7 @@ position = Vector2(95, 16)
 
 [node name="EngineMount" type="Marker2D" parent="." unique_id=915073870]
 position = Vector2(-92, -10)
+
+[node name="HeadlightMount" type="Marker2D" parent="."]
+position = Vector2(130, -4)
+script = ExtResource("headlight_mount")

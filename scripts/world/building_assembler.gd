@@ -11,7 +11,7 @@ extends RefCounted
 
 const DEFAULT_FOOTPRINT := Vector2(200.0, 200.0)
 
-## Draw order for each slot. Later slots draw on top of earlier ones; a
+## Draw order for each slot. Higher layers draw on top of lower ones; a
 ## part's own z_offset nudges it from there (a decoration can, say, sit
 ## behind the wall instead of in front of it).
 static func base_z(slot: BuildingPartData.Slot) -> int:
@@ -40,6 +40,10 @@ static func assemble(data: BuildingData, parent: Node, spawn_position: Vector2) 
 	if data == null:
 		return root
 
+	# Layered by child order, not z_index: a raised z_index lifts the part out
+	# of the world's y-sort, so a door or roof would draw over a car parked in
+	# front of the building.
+	var layered: Array[Dictionary] = []
 	for slot in BuildingPartData.Slot.values():
 		var scene := data.get_part(slot)
 		if scene == null:
@@ -51,9 +55,13 @@ static func assemble(data: BuildingData, parent: Node, spawn_position: Vector2) 
 			continue
 		var part := instance as Node2D
 		var part_data := part.get("part_data") as BuildingPartData
-		part.z_index = base_z(slot) + (part_data.z_offset if part_data != null else 0)
 		part.name = "%sPart" % BuildingPartData.slot_name(slot)
-		root.add_child(part)
+		var layer := base_z(slot) + (part_data.z_offset if part_data != null else 0)
+		layered.append({part = part, layer = layer, slot = slot})
+	layered.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return a.layer < b.layer or (a.layer == b.layer and a.slot < b.slot))
+	for entry in layered:
+		root.add_child(entry.part)
 
 	return root
 

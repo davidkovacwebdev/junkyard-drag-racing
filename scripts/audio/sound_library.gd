@@ -12,6 +12,7 @@ const NAMES: Array[StringName] = [
 	&"ui_click",
 	&"ui_hover",
 	&"ignition_click",
+	&"headlight_click",
 	&"engine_stall",
 	&"backfire",
 	&"horn_loop",
@@ -39,6 +40,7 @@ const NAMES: Array[StringName] = [
 	&"wrench_clunk",
 	&"crane_clang",
 	&"crane_miss",
+	&"rooster_crow",
 	&"rain_loop",
 ]
 
@@ -50,6 +52,7 @@ const LOOPING: Array[StringName] = [
 
 const CAR_SOUNDS: Array[StringName] = [
 	&"ignition_click",
+	&"headlight_click",
 	&"engine_stall",
 	&"backfire",
 	&"horn_loop",
@@ -101,6 +104,7 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"ui_click": return _ui_click(rng)
 		&"ui_hover": return _ui_hover()
 		&"ignition_click": return _ignition_click(rng)
+		&"headlight_click": return _headlight_click(rng)
 		&"engine_stall": return _engine_stall(rng)
 		&"backfire": return _backfire(rng)
 		&"horn_loop": return _horn_loop()
@@ -128,6 +132,7 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"wrench_clunk": return _wrench_clunk(rng)
 		&"crane_clang": return _crane_clang(rng)
 		&"crane_miss": return _crane_miss(rng)
+		&"rooster_crow": return _rooster_crow()
 		&"rain_loop": return _rain_loop(rng)
 	push_error("SoundLibrary: unknown sound '%s'" % sound_name)
 	return Synth.silence(0.05)
@@ -142,6 +147,14 @@ static func _ignition_click(rng: RandomNumberGenerator) -> PackedFloat32Array:
 	var solenoid := Synth.mix_into(Synth.thump(0.08, 900.0, 0.002, 0.04, rng),
 			_metal_ring(0.08, 1600.0, 10.0, 0.015, rng), 0.0, 0.6)
 	return Synth.finish(Synth.mix_into(key, solenoid, 0.12, 1.0), 0.7)
+
+## Dashboard light switch: a plasticky tick, then the relay under the hood
+## clacking in a beat later.
+static func _headlight_click(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var switch := _metal_ring(0.03, 2600.0, 9.0, 0.006, rng)
+	var relay := Synth.mix_into(Synth.thump(0.05, 1400.0, 0.002, 0.025, rng),
+			_metal_ring(0.05, 2100.0, 12.0, 0.01, rng), 0.0, 0.5)
+	return Synth.finish(Synth.mix_into(switch, relay, 0.06, 0.6), 0.6)
 
 static func _engine_stall(rng: RandomNumberGenerator) -> PackedFloat32Array:
 	return Synth.engine(1.6, {
@@ -494,6 +507,24 @@ static func _denied() -> PackedFloat32Array:
 				[0.16, 0.0], [0.17, 1.0], [0.28, 1.0], [0.3, 0.0]],
 		peak = 0.55,
 	})
+
+## Kazoo-ish "cock-a-doodle-doo" for skipping to morning: three short squawks
+## then a long wobbly one that droops at the end.
+static func _rooster_crow() -> PackedFloat32Array:
+	var squawk := func(duration: float, start: float, peak: float, end: float) -> PackedFloat32Array:
+		return Synth.tones(duration, [[[0.0, start], [duration * 0.3, peak], [duration, end]],
+				[[0.0, start * 2.01], [duration * 0.3, peak * 2.01], [duration, end * 2.01]]], {
+			square = 0.5,
+			amp = [[0.0, 0.0], [0.015, 1.0], [duration * 0.8, 0.8], [duration, 0.0]],
+			tremolo = [22.0, 0.25],
+			peak = 0.6,
+		})
+	return Synth.concat([
+		squawk.call(0.11, 520.0, 700.0, 640.0),
+		squawk.call(0.1, 600.0, 760.0, 700.0),
+		squawk.call(0.12, 680.0, 900.0, 860.0),
+		squawk.call(0.55, 820.0, 1040.0, 560.0),
+	])
 
 # --- Junk handling ------------------------------------------------------------
 

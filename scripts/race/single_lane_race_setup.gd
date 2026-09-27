@@ -93,12 +93,17 @@ extends Node2D
 ##
 ## --- What's real and what's faked ---------------------------------------------
 ##
-## Real: the driving, the bouncing, the shattering, and the rocks. Faked: the
-## up/down wander and the "collisions" it causes — approximated from proximity,
-## with no contact, and answered by hand: sparks, both cars lose speed (the one
-## behind more) and a random part of each takes damage. Puddles (only when it's
-## raining) just cost a car some speed as it splashes in. Hazards are drawn
-## where they physically sit, not with the drift. Every lane sits on its own
+## Real: the driving, the bouncing, the shattering. Faked: the up/down wander
+## and the "collisions" it causes — approximated from proximity, with no
+## contact, and answered by hand: sparks, both cars lose speed (the one behind
+## more) and a random part of each takes damage.
+##
+## Hazards (TrackHazards) are drawn on a static layer across the whole track,
+## under every car, and hit by where a car is *drawn*, so steering can miss them.
+## A puddle costs a car speed when its drawn road line splashes through it. A rock
+## has an invisible copy on every lane's real road that only turns solid for a
+## lane whose car is drawn over the rock just before its front wheel gets there;
+## from then on the bump over it is real physics. Every lane sits on its own
 ## collision bit (authored on Slabs/SlabN) so two cars can genuinely overlap on
 ## screen while the physics never sees more than one lane's worth of ground.
 ##
@@ -149,9 +154,9 @@ const SPAWN_HEIGHT_ABOVE_LANE := 15.0
 const DRIFT_AMPLITUDE := 140.0
 ## How fast the bump's height eases toward its next target; slower than the
 ## targets change, so it reads as wandering rather than snapping.
-const DRIFT_STEER_SPEED := 50.0
-const DRIFT_HOLD_MIN := 0.8
-const DRIFT_HOLD_MAX := 2.0
+const DRIFT_STEER_SPEED := 30.0
+const DRIFT_HOLD_MIN := 1.2
+const DRIFT_HOLD_MAX := 3.0
 ## Forward speed (px/s) a piece has to be doing before it can be followed, and so
 ## before its lane gets a bump at all. Drifting is part of driving, so a car that
 ## is stopped — wrecked, flipped, jammed against the wall, still dropping in at the
@@ -194,9 +199,24 @@ const TOUCH_DAMAGE_FRACTION := 0.2
 
 ## --- Puddles ------------------------------------------------------------------
 
+## --- Hazards ------------------------------------------------------------------
+
 ## Share of its forward speed a car keeps after splashing into a puddle.
 const PUDDLE_SPEED_KEPT := 0.8
 const SPLASH_COLOR := Color(0.7, 0.85, 0.95, 1.0)
+## How far a car's drawn road line can be from a drawn rock's base and still run
+## over it.
+const ROCK_HIT_TOLERANCE := 30.0
+## How close the car's front wheel gets to a rock before its hit is decided. Close,
+## so the drift can't carry the car far between the decision and the bump.
+const ROCK_DECISION_DISTANCE := 30.0
+## Rough reach of a wheel's rim ahead of its axle.
+const WHEEL_REACH := 40.0
+## Hazards are scattered this far past the top and bottom lanes' road lines,
+## covering the painted track.
+const HAZARD_BAND_MARGIN := 100.0
+## Under every car and above the painted track.
+const HAZARD_Z := -1
 
 ## Sparks are drawn above every lane, whatever depth the two cars were at.
 const SPARK_Z := 100
@@ -232,7 +252,6 @@ class LaneState:
 	var target := 0.0
 	var hold := 0.0
 	var cooldown := 0.0
-	var puddles: Array[TrackHazards.Puddle] = []
 	var in_puddle := false
 	## World x the bump is centred on: wherever the piece being followed is, eased.
 	var centre := 0.0
@@ -265,9 +284,8 @@ var _surface_y: Array[float] = []
 var _wall: CollisionObject2D = null
 var _states: Array[LaneState] = []
 var _player_car_name := ""
-var _rocky_race := false
-var _rainy_race := false
-var _hazards: Node2D = null
+var _rocks: Array[TrackHazards.Rock] = []
+var _puddles: Array[TrackHazards.Puddle] = []
 
 func _ready() -> void:
 	var race_controller := get_node_or_null(race_controller_path) as RaceController
@@ -277,12 +295,7 @@ func _ready() -> void:
 		push_error("RaceDragStrip wants %d lanes under the track's 'Lanes' and 'Slabs' nodes (see track_multi_test.tscn) but found %d/%d." % [CAR_COUNT, _lanes.size(), _slabs.size()])
 		return
 
-	_rocky_race = randf() < TrackHazards.ROCKY_RACE_CHANCE
-	_rainy_race = Weather.is_raining()
-	# Added before the cars so a lane's hazards draw under that lane's car.
-	_hazards = Node2D.new()
-	_hazards.name = "Hazards"
-	add_child(_hazards)
+	_add_hazards()
 
 	# Cars live in a plain static container: nothing that moves gets to be an
 	# ancestor of a rigid body (see this file's header for what that costs).
@@ -325,6 +338,7 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	for state in _states:
 		_check_puddles(state)
+		_check_rocks(state)
 	if not cosmetic_drift_enabled:
 		return
 	for state in _states:
@@ -371,7 +385,6 @@ func _register_car(car_name: String, lane: int, car: CarAssembler.AssembledCar, 
 	state.centre = _spawn_position(lane).x
 	_setup_road_strip(state)
 	_setup_drift_art(state)
-	_add_hazards(state)
 	_states.append(state)
 	camera_targets.append(car.body)
 
@@ -669,29 +682,56 @@ func _car_parts(car: CarAssembler.AssembledCar) -> Array[RigidBody2D]:
 			parts.append(wheel)
 	return parts
 
-## Rocks on rocky races, puddles on rainy ones, drawn under that lane's car.
-func _add_hazards(state: LaneState) -> void:
-	var surface_y := _surface_y[state.lane]
-	var z_index_of_lane := state.lane_art.z_index
-	if _rocky_race:
-		for rock in TrackHazards.add_rocks(_hazards, surface_y, _slabs[state.lane].collision_layer):
-			rock.z_index = z_index_of_lane
-	if _rainy_race:
-		state.puddles = TrackHazards.add_puddles(_hazards, surface_y)
-		for puddle in state.puddles:
-			puddle.node.z_index = z_index_of_lane
+## Rocks on some races, puddles when it's raining, on a static layer under every
+## car. A plain static container like Cars: the rock colliders are physics.
+func _add_hazards() -> void:
+	var hazards := Node2D.new()
+	hazards.name = "Hazards"
+	hazards.z_index = HAZARD_Z
+	add_child(hazards)
+	var band := Vector2(_surface_y[0] - HAZARD_BAND_MARGIN, _surface_y[CAR_COUNT - 1] + HAZARD_BAND_MARGIN)
+	if Weather.is_raining():
+		_puddles = TrackHazards.add_puddles(hazards, band)
+	if randf() < TrackHazards.ROCKY_RACE_CHANCE:
+		var lane_layers: Array[int] = []
+		for slab in _slabs:
+			lane_layers.append(slab.collision_layer)
+		_rocks = TrackHazards.add_rocks(hazards, band, _surface_y.slice(0, CAR_COUNT), lane_layers.slice(0, CAR_COUNT))
+
+## Where this car's road line is drawn at x: what it runs over, as far as the
+## player can see.
+func _drawn_road_point(state: LaneState, x: float) -> Vector2:
+	return Vector2(x, _surface_y[state.lane] + state.offset_at(x))
 
 ## Splashing into a puddle costs the car some speed, once per puddle.
 func _check_puddles(state: LaneState) -> void:
-	if state.puddles.is_empty() or not _is_racing(state):
+	if _puddles.is_empty() or not _is_racing(state):
 		return
-	var x := state.car.body.global_position.x
-	var in_puddle := state.puddles.any(func(puddle: TrackHazards.Puddle) -> bool: return puddle.covers(x))
+	var road_point := _drawn_road_point(state, state.car.body.global_position.x)
+	var in_puddle := _puddles.any(func(puddle: TrackHazards.Puddle) -> bool: return puddle.covers(road_point))
 	if in_puddle and not state.in_puddle:
 		_slow_down(state.car, PUDDLE_SPEED_KEPT)
-		_spawn_sparks(state.car.body.global_position, SPLASH_COLOR)
-		RaceCarAudio.play(self, &"paddle_splash", state.car.body.global_position)
+		_spawn_sparks(road_point, SPLASH_COLOR)
+		RaceCarAudio.play(self, &"paddle_splash", road_point)
 	state.in_puddle = in_puddle
+
+## Decides, once per rock, whether this car runs it over: just before its front
+## wheel arrives, from where the car is drawn at that moment.
+func _check_rocks(state: LaneState) -> void:
+	if _rocks.is_empty() or not _is_racing(state):
+		return
+	var front_x := _front_x(state.car)
+	for rock in _rocks:
+		if rock.decided[state.lane] or front_x < rock.left_x() - ROCK_DECISION_DISTANCE:
+			continue
+		var road_y := _drawn_road_point(state, rock.position.x).y
+		rock.decide(state.lane, absf(road_y - rock.position.y) <= ROCK_HIT_TOLERANCE)
+
+func _front_x(car: CarAssembler.AssembledCar) -> float:
+	var front_x := car.body.global_position.x
+	for part in _car_parts(car):
+		front_x = maxf(front_x, part.global_position.x + WHEEL_REACH)
+	return front_x
 
 func _spawn_sparks(at: Vector2, color: Color) -> void:
 	var particles := CPUParticles2D.new()

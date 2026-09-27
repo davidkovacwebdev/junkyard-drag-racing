@@ -9,7 +9,7 @@ id = &"wheel_satellite_dish"
 display_name = "Satellite Dish"
 mass = 3.0
 durability = 25.0
-speed = 5.0
+speed = 0.5
 material_type = 0
 
 [node name="WheelSatelliteDish" type="RigidBody2D"]
@@ -30,3 +30,6 @@ polygon = PackedVector2Array(30, -4, 52, -8, 56, -4, 56, 4, 52, 8, 30, 4)
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
 polygon = PackedVector2Array(34, 0, 29.44, 17, 17, 29.44, 0, 34, -17, 29.44, -29.44, 17, -34, 0, -29.44, -17, -17, -29.44, 0, -34, 17, -29.44, 29.44, -17)
+
+[node name="CollisionArm" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(30, -4, 52, -8, 56, -4, 56, 4, 52, 8, 30, 4)

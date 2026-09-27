@@ -25,6 +25,13 @@ uniform vec4 shadow_tint : source_color = vec4(0.03, 0.05, 0.14, 1.0);
 uniform float light_threshold : hint_range(0.0, 1.0) = 0.6;
 uniform float light_preserve : hint_range(0.0, 1.0) = 0.85;
 
+// --- Headlights ---
+// Beams are drawn in the world (see headlight_beam.gdshader) and leave their
+// light in the framebuffer alpha: 1 - alpha is how lit a pixel is.
+uniform vec4 headlight_color : source_color = vec4(1.0, 0.93, 0.78, 1.0);
+// Warm haze added inside the beam, so it reads as light and not just a hole.
+uniform float headlight_haze : hint_range(0.0, 1.0) = 0.1;
+
 // --- Vignette ---
 uniform float vignette_strength : hint_range(0.0, 1.0) = 1;
 uniform float vignette_inner : hint_range(0.0, 1.0) = 0.1;   // was 0.25
@@ -40,7 +47,8 @@ float ign(vec2 p) {
 }
 
 void fragment() {
-	vec3 src = textureLod(screen_tex, SCREEN_UV, 0.0).rgb;
+	vec4 screen = textureLod(screen_tex, SCREEN_UV, 0.0);
+	vec3 src = screen.rgb;
 
 	// Eased strength so dusk/dawn don't feel linear.
 	float t = smoothstep(0.0, 1.0, pow(night_factor, fade_curve));
@@ -58,6 +66,11 @@ void fragment() {
 	// 3) Bright pixels resist the night, so light sources still pop.
 	float glow = smoothstep(light_threshold, 1.0, lum);
 	grade = mix(grade, src, glow * light_preserve);
+
+	// 3b) Headlight beams cut the night back to the day image, warmed up.
+	float light = clamp(1.0 - screen.a, 0.0, 1.0);
+	vec3 lit = src * mix(vec3(1.0), headlight_color.rgb, 0.35) + headlight_color.rgb * headlight_haze * light;
+	grade = mix(grade, lit, light);
 
 	// 4) Vignette (aspect-corrected so it's round, not oval).
 	vec2 uv = SCREEN_UV - 0.5;

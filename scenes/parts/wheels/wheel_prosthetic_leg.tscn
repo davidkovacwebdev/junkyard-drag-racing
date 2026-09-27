@@ -9,7 +9,7 @@ id = &"wheel_prosthetic_leg"
 display_name = "Prosthetic Leg"
 mass = 3.0
 durability = 80.0
-speed = 2.0
+speed = 3.6
 material_type = 1
 impact_sound = &"prosthetic_clunk"
 

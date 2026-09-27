@@ -9,7 +9,7 @@ id = &"wheel_traffic_cone"
 display_name = "Traffic Cone"
 mass = 2.0
 durability = 30.0
-speed = 1.8
+speed = 0.5
 material_type = 2
 
 [node name="WheelTrafficCone" type="RigidBody2D"]

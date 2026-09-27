@@ -9,7 +9,7 @@ id = &"wheel_triangle"
 display_name = "Warning Sign Wheel"
 mass = 6.0
 durability = 70.0
-speed = 2.0
+speed = 3.0
 material_type = 0
 impact_sound = &"sign_wobble"
 

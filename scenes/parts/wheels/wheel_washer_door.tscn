@@ -9,7 +9,7 @@ id = &"wheel_washer_door"
 display_name = "Washing Machine Door"
 mass = 6.0
 durability = 35.0
-speed = 4.5
+speed = 5.2
 material_type = 5
 
 [node name="WheelWasherDoor" type="RigidBody2D"]

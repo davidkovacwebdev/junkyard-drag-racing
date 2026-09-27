@@ -33,6 +33,14 @@ func get_wheel_mounts() -> Array[Marker2D]:
 			mounts.append(child)
 	return mounts
 
+## The body's lamps, in child order. Empty for bodies without any.
+func get_headlight_mounts() -> Array[HeadlightMount]:
+	var mounts: Array[HeadlightMount] = []
+	for child in get_children():
+		if child is HeadlightMount:
+			mounts.append(child)
+	return mounts
+
 ## Returns this body's "EngineMount" marker — the spot on this body's art
 ## where an installed engine belongs (a car's hood, a fridge's top, a
 ## boat's stern, ...). Null if the body declares none.

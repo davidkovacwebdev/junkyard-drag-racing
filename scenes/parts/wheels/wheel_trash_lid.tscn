@@ -9,7 +9,7 @@ id = &"wheel_trash_lid"
 display_name = "Garbage Can Lid"
 mass = 5.0
 durability = 70.0
-speed = 4.0
+speed = 5.7
 material_type = 0
 
 [node name="WheelTrashLid" type="RigidBody2D"]

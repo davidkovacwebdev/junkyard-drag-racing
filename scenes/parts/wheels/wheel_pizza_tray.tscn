@@ -9,7 +9,7 @@ id = &"wheel_pizza_tray"
 display_name = "Pizza Tray"
 mass = 2.5
 durability = 22.0
-speed = 6.5
+speed = 5.5
 material_type = 0
 
 [node name="WheelPizzaTray" type="RigidBody2D"]

@@ -19,7 +19,7 @@ const DID_NOT_FINISH := 999.0
 
 ## Tuned so Inventory's starter car wins ~45% of its first races, ~25% after one
 ## win, and then needs better parts to keep up.
-const STARTING_PAR_TIME := 69.0
+const STARTING_PAR_TIME := 68.5
 const PAR_TIME_PER_WIN := 0.93
 ## Roughly the quickest thing in the roster; par never asks for more.
 const FASTEST_PAR_TIME := 23.0

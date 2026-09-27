@@ -9,7 +9,7 @@ id = &"wheel_bbq_grill"
 display_name = "Barbecue Grill"
 mass = 11.0
 durability = 75.0
-speed = 3.8
+speed = 4.1
 material_type = 0
 
 [node name="WheelBbqGrill" type="RigidBody2D"]
@@ -38,3 +38,9 @@ polygon = PackedVector2Array(-4, -16, 4, -16, 4, -8, -4, -8)
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
 polygon = PackedVector2Array(38, 0, 32.91, 19, 19, 32.91, 0, 38, -19, 32.91, -32.91, 19, -38, 0, -32.91, -19, -19, -32.91, 0, -38, 19, -32.91, 32.91, -19)
+
+[node name="CollisionLegLeft" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(-14, 34, -8, 34, -10, 50, -16, 50)
+
+[node name="CollisionLegRight" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(8, 34, 14, 34, 16, 50, 10, 50)

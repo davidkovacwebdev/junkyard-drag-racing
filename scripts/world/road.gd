@@ -142,6 +142,12 @@ var _query_segment_to: PackedVector2Array = []
 ## nothing but that one curve. Caching it means adding or editing one road
 ## doesn't redo the work for every other road in the scene.
 var _authored_cache: Dictionary = {}
+## Chunk cell -> DrawChunk.
+var _draw_chunks: Dictionary = {}
+## One container per `ChunkLayer`, holding that layer's chunk canvases.
+var _layer_containers: Array[Node2D] = []
+## Per layer: chunk cell -> the Node2D that draws it.
+var _chunk_canvases: Array[Dictionary] = []
 ## Centres of the generated roundabouts, so their islands can be drawn.
 var _roundabouts: Array[Vector2] = []
 ## Editor-only: snapshot of the inputs, polled so edits get noticed.
@@ -163,6 +169,25 @@ const SIMPLIFY_TOLERANCE := 0.5
 ## and more cells to check; 128 keeps the common (no-extra) query down to a 2x2
 ## walk while a wide footprint's reach only widens it to a handful of cells.
 const QUERY_CELL_SIZE := 128.0
+
+## Side of one drawing chunk, in pixels. The network is drawn as a grid of
+## these rather than as one canvas item spanning the whole island, so Godot
+## culls every chunk the camera can't see. One big item meant redrawing every
+## road on the map each frame.
+const DRAW_CHUNK_SIZE := 2048.0
+
+## Draw order across all chunks: every shoulder, then every bit of asphalt, then
+## markings, so junctions merge into one surface even across a chunk seam.
+enum ChunkLayer { SHOULDERS, ASPHALT, MARKINGS }
+
+## One chunk's share of the drawing geometry.
+class DrawChunk:
+	var ribbons: Array[PackedVector2Array] = []
+	var discs := PackedVector2Array()
+	var islands := PackedVector2Array()
+	## Pairs of points, for `draw_multiline`.
+	var edge_segments := PackedVector2Array()
+	var dash_segments := PackedVector2Array()
 
 ## What one authored curve contributes to the network.
 class AuthoredRoad:
@@ -287,7 +312,8 @@ func _rebuild() -> void:
 	_rebuild_blocking_grid()
 	_rebuild_query_grid()
 	_build_markings()
-	queue_redraw()
+	_build_draw_chunks()
+	_sync_chunk_canvases()
 
 ## Sample the Path2D children, reusing whatever is still cached for any curve
 ## that hasn't been touched since the last rebuild.
@@ -457,6 +483,10 @@ func ensure_built() -> void:
 ## modify the result — it's the network's own working data.
 func get_road_polylines() -> Array[PackedVector2Array]:
 	return _roads
+
+## Decimated copies of the roads, for anything that only needs to draw them.
+func get_draw_polylines() -> Array[PackedVector2Array]:
+	return _draw_roads
 
 ## Distance from a road's centreline out to the far edge of its shoulder. Add a
 ## gutter to this to sit a prop just off the tarmac.
@@ -771,46 +801,118 @@ func _normalized_bounds() -> Rect2:
 
 # --- Drawing -------------------------------------------------------------------
 
-func _draw() -> void:
-	if _roads.is_empty() or _corner_points.size() != _draw_roads.size():
-		return
-	# 1. Shoulders under the whole network...
-	for i in _draw_roads.size():
-		_draw_ribbon(_draw_roads[i], _corner_points[i],
-				road_width + shoulder_width * 2.0, shoulder_color)
-	# 2. ...then the asphalt, so junctions read as one surface.
-	for i in _draw_roads.size():
-		_draw_ribbon(_draw_roads[i], _corner_points[i], road_width, asphalt_color)
-	# 3. Roundabout islands sit on top of the asphalt.
-	for center in _roundabouts:
-		_draw_island(center)
-	# 4. Markings last, stopping short of any road they meet. Every one of these
-	# polylines was already offset, densified and junction-clipped by
-	# `_build_markings()`, so a redraw only has to replay them.
-	for run in _edge_runs:
-		draw_polyline(run, edge_color, edge_width, true)
-	for run in _dash_runs:
-		draw_polyline(run, line_color, line_width, true)
+## Draw every chunk's share of the network: the chunk data is rebuilt with
+## the markings, then each layer container's chunk canvases are reused where
+## their cell survived, freed where it didn't, and redrawn.
+func _sync_chunk_canvases() -> void:
+	if _layer_containers.is_empty():
+		for layer in ChunkLayer.values():
+			var container := Node2D.new()
+			container.name = "Draw%s" % ChunkLayer.find_key(layer).capitalize()
+			add_child(container, false, Node.INTERNAL_MODE_FRONT)
+			_layer_containers.append(container)
+			_chunk_canvases.append({})
+	for layer in ChunkLayer.values():
+		var canvases: Dictionary = _chunk_canvases[layer]
+		for cell in canvases.keys():
+			if not _draw_chunks.has(cell):
+				canvases[cell].queue_free()
+				canvases.erase(cell)
+		for cell in _draw_chunks:
+			if not canvases.has(cell):
+				var canvas := Node2D.new()
+				canvas.draw.connect(_draw_chunk_layer.bind(canvas, cell, layer))
+				_layer_containers[layer].add_child(canvas)
+				canvases[cell] = canvas
+			canvases[cell].queue_redraw()
 
-## A road surface: a thick line with a disc at every *corner* (`corners`, worked
-## out once in `_corners_of`), so bends come out round instead of notched.
-## Collinear samples don't get a disc — the polyline itself already covers them.
-func _draw_ribbon(points: PackedVector2Array, corners: PackedVector2Array,
-		width: float, color: Color) -> void:
-	if points.size() < 2:
+func _draw_chunk_layer(canvas: Node2D, cell: Vector2i, layer: ChunkLayer) -> void:
+	var chunk: DrawChunk = _draw_chunks.get(cell)
+	if chunk == null:
 		return
-	draw_polyline(points, color, width, true)
+	match layer:
+		ChunkLayer.SHOULDERS:
+			_draw_ribbons(canvas, chunk, road_width + shoulder_width * 2.0, shoulder_color)
+		ChunkLayer.ASPHALT:
+			_draw_ribbons(canvas, chunk, road_width, asphalt_color)
+		ChunkLayer.MARKINGS:
+			for center in chunk.islands:
+				_draw_island(canvas, center)
+			# Markings are thin enough that loose segments show no seam at the
+			# bends, and one multiline per chunk is one draw call instead of one
+			# per dash.
+			if not chunk.edge_segments.is_empty():
+				canvas.draw_multiline(chunk.edge_segments, edge_color, edge_width, true)
+			if not chunk.dash_segments.is_empty():
+				canvas.draw_multiline(chunk.dash_segments, line_color, line_width, true)
+
+## A road surface: thick lines with a disc at every corner, end and chunk seam,
+## so bends and the joins between chunks come out round instead of notched.
+func _draw_ribbons(canvas: Node2D, chunk: DrawChunk, width: float, color: Color) -> void:
+	for ribbon in chunk.ribbons:
+		canvas.draw_polyline(ribbon, color, width, true)
 	var radius := width * 0.5
-	draw_circle(points[0], radius, color)
-	draw_circle(points[points.size() - 1], radius, color)
-	for corner in corners:
-		draw_circle(corner, radius, color)
+	for disc in chunk.discs:
+		canvas.draw_circle(disc, radius, color)
 
-func _draw_island(center: Vector2) -> void:
+func _draw_island(canvas: Node2D, center: Vector2) -> void:
 	var radius := maxf(roundabout_radius - road_width * 0.5 + 2.0, 8.0)
-	draw_circle(center, radius, island_color)
-	draw_arc(center, radius - edge_width * 0.5, 0.0, TAU, 48, island_rim_color, edge_width, true)
-	draw_circle(center, radius * 0.16, island_rim_color)
+	canvas.draw_circle(center, radius, island_color)
+	canvas.draw_arc(center, radius - edge_width * 0.5, 0.0, TAU, 48, island_rim_color, edge_width, true)
+	canvas.draw_circle(center, radius * 0.16, island_rim_color)
+
+## Sort the finished drawing geometry into chunks. Ribbons are cut wherever
+## they cross into another chunk; marking runs go in as loose segments.
+func _build_draw_chunks() -> void:
+	_draw_chunks.clear()
+	for i in _draw_roads.size():
+		var points := _draw_roads[i]
+		if points.size() < 2:
+			continue
+		_add_ribbon_pieces(points)
+		_chunk_at(points[0]).discs.append(points[0])
+		_chunk_at(points[points.size() - 1]).discs.append(points[points.size() - 1])
+		for corner in _corner_points[i]:
+			_chunk_at(corner).discs.append(corner)
+	for center in _roundabouts:
+		_chunk_at(center).islands.append(center)
+	for run in _edge_runs:
+		for s in range(1, run.size()):
+			var chunk := _chunk_at((run[s - 1] + run[s]) * 0.5)
+			chunk.edge_segments.append(run[s - 1])
+			chunk.edge_segments.append(run[s])
+	for run in _dash_runs:
+		for s in range(1, run.size()):
+			var chunk := _chunk_at((run[s - 1] + run[s]) * 0.5)
+			chunk.dash_segments.append(run[s - 1])
+			chunk.dash_segments.append(run[s])
+
+func _add_ribbon_pieces(points: PackedVector2Array) -> void:
+	var cell := _chunk_cell((points[0] + points[1]) * 0.5)
+	var piece := PackedVector2Array([points[0]])
+	for s in range(1, points.size()):
+		var segment_cell := _chunk_cell((points[s - 1] + points[s]) * 0.5)
+		if segment_cell != cell:
+			var chunk := _chunk_for_cell(cell)
+			chunk.ribbons.append(piece)
+			chunk.discs.append(points[s - 1])
+			piece = PackedVector2Array([points[s - 1]])
+			cell = segment_cell
+		piece.append(points[s])
+	_chunk_for_cell(cell).ribbons.append(piece)
+
+func _chunk_cell(point: Vector2) -> Vector2i:
+	return Vector2i((point / DRAW_CHUNK_SIZE).floor())
+
+func _chunk_at(point: Vector2) -> DrawChunk:
+	return _chunk_for_cell(_chunk_cell(point))
+
+func _chunk_for_cell(cell: Vector2i) -> DrawChunk:
+	var chunk: DrawChunk = _draw_chunks.get(cell)
+	if chunk == null:
+		chunk = DrawChunk.new()
+		_draw_chunks[cell] = chunk
+	return chunk
 
 # --- Geometry ------------------------------------------------------------------
 

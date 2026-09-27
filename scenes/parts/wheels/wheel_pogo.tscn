@@ -9,7 +9,8 @@ id = &"wheel_pogo"
 display_name = "Pogo Stick"
 mass = 3.0
 durability = 90.0
-speed = 3.0
+absorption = 0.8
+speed = 4.8
 material_type = 0
 impact_sound = &"sign_wobble"
 

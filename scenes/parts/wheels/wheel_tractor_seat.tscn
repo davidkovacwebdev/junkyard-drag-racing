@@ -9,7 +9,7 @@ id = &"wheel_tractor_seat"
 display_name = "Tractor Seat"
 mass = 7.0
 durability = 85.0
-speed = 3.5
+speed = 5.3
 material_type = 0
 
 [node name="WheelTractorSeat" type="RigidBody2D"]

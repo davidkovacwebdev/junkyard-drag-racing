@@ -5,6 +5,10 @@ extends RefCounted
 ## Phase 1 test rigs and the later garage/customize UI will use, so the
 ## garage never needs its own bespoke assembly logic.
 
+## Damping on wheels left rolling after the body breaks. Round ones would
+## otherwise roll forever: the physics has no rolling resistance.
+const LOOSE_WHEEL_DAMP := 1.5
+
 class AssembledCar:
 	var root: Node2D
 	var body: CarBody
@@ -41,6 +45,12 @@ static func assemble(body_scene: PackedScene, wheel_scenes: Array[PackedScene], 
 		joint.node_a = joint.get_path_to(body_instance)
 		joint.node_b = joint.get_path_to(wheel_instance)
 		joints.append(joint)
+
+	# Neighbouring wheels on a short body can overlap; left colliding they
+	# grind against each other and jam the car.
+	for i in wheels.size():
+		for j in range(i + 1, wheels.size()):
+			wheels[i].add_collision_exception_with(wheels[j])
 
 	var engine_instance: Node2D = null
 	var engine_power := 0.0
@@ -85,6 +95,7 @@ static func assemble(body_scene: PackedScene, wheel_scenes: Array[PackedScene], 
 		var wheel_damage := CarPartDamage.new()
 		wheel_damage.target = wheel
 		wheel_damage.part_data = wheel.part_data
+		wheel_damage.absorption = wheel.part_data.absorption if wheel.part_data != null else 0.0
 		wheel.add_child(wheel_damage)
 		wheel_damage.broken.connect(func() -> void:
 			if not is_instance_valid(wheel):
@@ -99,6 +110,7 @@ static func assemble(body_scene: PackedScene, wheel_scenes: Array[PackedScene], 
 	var body_damage := CarPartDamage.new()
 	body_damage.target = body_instance
 	body_damage.part_data = body_instance.part_data
+	body_damage.absorption = _average_absorption(wheels)
 	body_instance.add_child(body_damage)
 	body_damage.broken.connect(func() -> void:
 		if not is_instance_valid(body_instance):
@@ -109,6 +121,12 @@ static func assemble(body_scene: PackedScene, wheel_scenes: Array[PackedScene], 
 		for joint in joints:
 			if is_instance_valid(joint):
 				joint.queue_free()
+		# No engine left to drive them: loose wheels roll on and wind down.
+		for wheel in wheels:
+			if is_instance_valid(wheel):
+				wheel.target_angular_velocity = 0.0
+				wheel.angular_damp = LOOSE_WHEEL_DAMP
+				wheel.linear_damp = LOOSE_WHEEL_DAMP
 		PartShatter.shatter(body_instance, _get_part_color(body_instance), root)
 	)
 
@@ -148,3 +166,10 @@ static func _get_part_color(node: Node) -> Color:
 		if child is Polygon2D:
 			return (child as Polygon2D).color
 	return Color(0.5, 0.5, 0.5, 1.0)
+
+static func _average_absorption(wheels: Array[CarWheel]) -> float:
+	var total := 0.0
+	for wheel in wheels:
+		if wheel.part_data != null:
+			total += wheel.part_data.absorption
+	return total / maxf(wheels.size(), 1.0)

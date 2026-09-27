@@ -21,6 +21,9 @@ const DAMAGE_PER_MOMENTUM := 0.006
 const LOUDEST_IMPACT_VELOCITY := 900.0
 const IMPACT_SOUND_COOLDOWN := 0.15
 
+## 0..1 share of impact damage soaked up before it counts. Only bumps and
+## landings: apply_damage() from anything else is taken in full.
+var absorption: float = 0.0
 var max_durability: float = 100.0
 var current_durability: float = 100.0
 var is_broken: bool = false
@@ -63,7 +66,7 @@ func _physics_process(delta: float) -> void:
 	if delta_v < IMPACT_VELOCITY_THRESHOLD:
 		return
 	var momentum := target.mass * delta_v
-	apply_damage(momentum * DAMAGE_PER_MOMENTUM)
+	apply_damage(momentum * DAMAGE_PER_MOMENTUM * (1.0 - absorption))
 	if not is_broken and _impact_sound_cooldown <= 0.0:
 		_impact_sound_cooldown = IMPACT_SOUND_COOLDOWN
 		var loudness := clampf(delta_v / LOUDEST_IMPACT_VELOCITY, 0.25, 1.0)

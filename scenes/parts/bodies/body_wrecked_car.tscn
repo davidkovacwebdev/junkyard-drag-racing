@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://blaa280k1rqwg" path="res://scripts/car/car_body.gd" id="1"]
 [ext_resource type="Script" uid="uid://baxc83cuw3lof" path="res://scripts/parts/body_part_data.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/car/headlight_mount.gd" id="headlight_mount"]
 
 [sub_resource type="Resource" id="Resource_wrecked_car"]
 script = ExtResource("2")
@@ -33,3 +34,17 @@ position = Vector2(95, 16)
 
 [node name="EngineMount" type="Marker2D" parent="." unique_id=1898314335]
 position = Vector2(-98, -10)
+
+[node name="Headlight" type="Polygon2D" parent="."]
+color = Color(1, 0.9, 0.55, 1)
+polygon = PackedVector2Array(120, -8, 130, -7, 130, 0, 121, 0)
+
+[node name="HeadlightCrack" type="Polygon2D" parent="."]
+color = Color(0.35, 0.3, 0.2, 1)
+polygon = PackedVector2Array(122, -7, 126, -4, 124, -1, 125, -4)
+
+[node name="HeadlightMount" type="Marker2D" parent="."]
+position = Vector2(130, -4)
+script = ExtResource("headlight_mount")
+power = 0.7
+flicker = 0.6

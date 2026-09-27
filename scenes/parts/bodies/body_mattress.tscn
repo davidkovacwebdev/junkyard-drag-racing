@@ -10,7 +10,7 @@ id = &"body_mattress"
 display_name = "Soggy Mattress"
 mass = 5.0
 durability = 22.0
-speed = 2.0
+speed = 3.3
 material_type = 6
 impact_sound = &"mattress_squish"
 
