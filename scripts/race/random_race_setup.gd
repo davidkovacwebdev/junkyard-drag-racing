@@ -19,6 +19,10 @@ var body_scenes: Array[PackedScene] = [
 	preload("res://scenes/parts/bodies/body_fridge.tscn"),
 	preload("res://scenes/parts/bodies/body_sofa.tscn"),
 	preload("res://scenes/parts/bodies/body_boat.tscn"),
+	preload("res://scenes/parts/bodies/body_mattress.tscn"),
+	preload("res://scenes/parts/bodies/body_limo.tscn"),
+	preload("res://scenes/parts/bodies/body_radiator.tscn"),
+	preload("res://scenes/parts/bodies/body_bicycle.tscn"),
 ]
 
 var wheel_scenes: Array[PackedScene] = [
@@ -28,6 +32,10 @@ var wheel_scenes: Array[PackedScene] = [
 	preload("res://scenes/parts/wheels/wheel_triangle.tscn"),
 	preload("res://scenes/parts/wheels/wheel_toilet.tscn"),
 	preload("res://scenes/parts/wheels/wheel_tv.tscn"),
+	preload("res://scenes/parts/wheels/wheel_pogo.tscn"),
+	preload("res://scenes/parts/wheels/wheel_prosthetic_leg.tscn"),
+	preload("res://scenes/parts/wheels/wheel_tractor.tscn"),
+	preload("res://scenes/parts/wheels/wheel_hamster.tscn"),
 ]
 
 var engine_scenes: Array[PackedScene] = [

@@ -1,0 +1,109 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_prosthetic_leg.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/wheel_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_prosthetic_leg"]
+script = ExtResource("2")
+id = &"wheel_prosthetic_leg"
+display_name = "Prosthetic Leg"
+mass = 3.0
+durability = 80.0
+speed = 2.0
+material_type = 1
+impact_sound = &"prosthetic_clunk"
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_knee"]
+radius = 7.0
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_sneaker"]
+friction = 0.9
+
+[node name="WheelProstheticLeg" type="RigidBody2D"]
+physics_material_override = SubResource("PhysicsMaterial_sneaker")
+script = ExtResource("1")
+part_data = SubResource("Resource_prosthetic_leg")
+
+[node name="Thigh" type="Node2D" parent="."]
+
+[node name="Socket" type="Polygon2D" parent="Thigh"]
+color = Color(0.85, 0.68, 0.55, 1)
+polygon = PackedVector2Array(-11, -4, 11, -4, 9, 12, 6, 25, -6, 25, -9, 12)
+
+[node name="SocketShade" type="Polygon2D" parent="Thigh"]
+color = Color(0.72, 0.55, 0.43, 1)
+polygon = PackedVector2Array(4, -4, 11, -4, 9, 12, 6, 25, 2, 25, 5, 12)
+
+[node name="SocketRim" type="Polygon2D" parent="Thigh"]
+color = Color(0.62, 0.47, 0.36, 1)
+polygon = PackedVector2Array(-12, -6, 12, -6, 11.5, -2, -11.5, -2)
+
+[node name="Strap" type="Polygon2D" parent="Thigh"]
+color = Color(0.35, 0.22, 0.13, 1)
+polygon = PackedVector2Array(-10, 5, 10, 5, 9.6, 9.5, -9.6, 9.5)
+
+[node name="Buckle" type="Polygon2D" parent="Thigh"]
+color = Color(0.7, 0.66, 0.5, 1)
+polygon = PackedVector2Array(-3, 4, 2, 4, 2, 10.5, -3, 10.5)
+
+[node name="BuckleHole" type="Polygon2D" parent="Thigh"]
+color = Color(0.35, 0.22, 0.13, 1)
+polygon = PackedVector2Array(-1.8, 5.5, 0.8, 5.5, 0.8, 9, -1.8, 9)
+
+[node name="DuctTape" type="Polygon2D" parent="Thigh"]
+color = Color(0.64, 0.66, 0.68, 1)
+polygon = PackedVector2Array(-8, 14, 1, 12.5, 2, 17, -7.5, 18.5)
+
+[node name="Shin" type="Node2D" parent="."]
+position = Vector2(0, 26)
+
+[node name="Pylon" type="Polygon2D" parent="Shin"]
+color = Color(0.62, 0.63, 0.66, 1)
+polygon = PackedVector2Array(-2.5, 0, 2.5, 0, 2.5, 26, -2.5, 26)
+
+[node name="PylonHighlight" type="Polygon2D" parent="Shin"]
+color = Color(0.82, 0.83, 0.85, 1)
+polygon = PackedVector2Array(-1.8, 2, -0.6, 2, -0.6, 24, -1.8, 24)
+
+[node name="Adapter" type="Polygon2D" parent="Shin"]
+color = Color(0.4, 0.4, 0.43, 1)
+polygon = PackedVector2Array(-4, 17, 4, 17, 4, 20.5, -4, 20.5)
+
+[node name="KneeHinge" type="Polygon2D" parent="Shin"]
+color = Color(0.45, 0.45, 0.48, 1)
+polygon = PackedVector2Array(-2.8, -6.5, 2.8, -6.5, 6.5, -2.8, 6.5, 2.8, 2.8, 6.5, -2.8, 6.5, -6.5, 2.8, -6.5, -2.8)
+
+[node name="KneeBolt" type="Polygon2D" parent="Shin"]
+color = Color(0.75, 0.75, 0.78, 1)
+polygon = PackedVector2Array(-1, -2.4, 1, -2.4, 2.4, -1, 2.4, 1, 1, 2.4, -1, 2.4, -2.4, 1, -2.4, -1)
+
+[node name="KneeRust" type="Polygon2D" parent="Shin"]
+color = Color(0.5, 0.3, 0.15, 1)
+polygon = PackedVector2Array(3, 2, 6, 1.5, 5.5, 4.5, 3, 5)
+
+[node name="Foot" type="Node2D" parent="."]
+position = Vector2(0, 54)
+
+[node name="Sneaker" type="Polygon2D" parent="Foot"]
+color = Color(0.36, 0.45, 0.6, 1)
+polygon = PackedVector2Array(-7, -9, 3, -10, 6, -6, 13, -4.5, 16.5, -1.5, 16.5, 0, -7.5, 0, -8, -5)
+
+[node name="Sole" type="Polygon2D" parent="Foot"]
+color = Color(0.9, 0.88, 0.82, 1)
+polygon = PackedVector2Array(-8, -2.5, 16.5, -2.5, 16.5, 0, -7.5, 0)
+
+[node name="Laces" type="Polygon2D" parent="Foot"]
+color = Color(0.92, 0.9, 0.84, 1)
+polygon = PackedVector2Array(3, -8.5, 5, -8.5, 10, -5, 8, -4.5)
+
+[node name="ToeHole" type="Polygon2D" parent="Foot"]
+color = Color(0.85, 0.68, 0.55, 1)
+polygon = PackedVector2Array(11, -4.2, 14.5, -3, 14, -2.5, 10.5, -2.5)
+
+[node name="SoleFlap" type="Polygon2D" parent="Foot"]
+color = Color(0.78, 0.76, 0.7, 1)
+polygon = PackedVector2Array(9, 0, 16.5, 0, 15, 2.5, 10, 1.5)
+
+[node name="KneeBumper" type="CollisionShape2D" parent="."]
+position = Vector2(0, 28)
+shape = SubResource("CircleShape2D_knee")

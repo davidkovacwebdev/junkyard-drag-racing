@@ -51,13 +51,22 @@ func _integrate_forces(state: PhysicsDirectBodyState2D) -> void:
 	# the world map's car (it has no physics at all) and moves their art by
 	# hand with animate_visual() instead. Driving them here as well would just
 	# fight that.
-	if freeze or target_angular_velocity == 0.0:
+	if freeze:
+		return
+	var target := _current_target_speed()
+	if target == 0.0:
+		_drive_speed = state.angular_velocity
 		return
 	var step := state.get_step()
-	_drive_speed = move_toward(_drive_speed, target_angular_velocity, motor_accel * step)
+	_drive_speed = move_toward(_drive_speed, target, motor_accel * step)
 	var new_rotation := state.transform.get_rotation() + _drive_speed * step
 	state.transform = Transform2D(new_rotation, state.transform.get_origin())
 	state.angular_velocity = _drive_speed
+
+## The spin speed the motor is heading for right now. A wheel with a mind of
+## its own (the hamster wheel) overrides this; 0 lets the wheel roll freely.
+func _current_target_speed() -> float:
+	return target_angular_velocity
 
 ## ---- Physics-free preview --------------------------------------------
 ## The world map's car is pure decoration (see CarView), so its wheels can't

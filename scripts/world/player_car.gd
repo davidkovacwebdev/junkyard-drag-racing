@@ -138,6 +138,7 @@ var _engine_sound: EngineSound = null
 var _horn: SustainedSound
 var _tire_screech: SustainedSound
 var _bump_cooldown: float = 0.0
+var _bump_sound: StringName = &"bump"
 var _sprint_pressed_last: bool = false
 
 func _ready() -> void:
@@ -318,6 +319,8 @@ func _physics_process(delta: float) -> void:
 ## Engine, horn and tyres ride on the car, so they sit dead centre of the
 ## camera. The engine voice comes from whatever engine is bolted on.
 func _setup_sounds(car: CarModelData) -> void:
+	if car != null and car.body != null:
+		_bump_sound = car.body.impact_sound
 	var profile := EngineSoundProfile.for_engine(car.engine if car != null else null)
 	if profile != null:
 		_engine_sound = EngineSound.new()
@@ -352,7 +355,7 @@ func _update_sounds(delta: float, input_dir: Vector2, skidding: bool, impact_spe
 
 	_bump_cooldown -= delta
 	if impact_speed > bump_min_impact_speed and _bump_cooldown <= 0.0:
-		Sfx.play(&"bump", linear_to_db(clampf(impact_speed / max_speed, 0.3, 1.0)))
+		Sfx.play(_bump_sound, linear_to_db(clampf(impact_speed / max_speed, 0.3, 1.0)))
 		_bump_cooldown = 0.3
 
 	var sprint_pressed := Input.is_physical_key_pressed(KEY_SHIFT)

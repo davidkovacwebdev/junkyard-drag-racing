@@ -194,6 +194,10 @@ var body_scenes: Array[PackedScene] = [
 	preload("res://scenes/parts/bodies/body_fridge.tscn"),
 	preload("res://scenes/parts/bodies/body_sofa.tscn"),
 	preload("res://scenes/parts/bodies/body_boat.tscn"),
+	preload("res://scenes/parts/bodies/body_mattress.tscn"),
+	preload("res://scenes/parts/bodies/body_limo.tscn"),
+	preload("res://scenes/parts/bodies/body_radiator.tscn"),
+	preload("res://scenes/parts/bodies/body_bicycle.tscn"),
 ]
 
 var wheel_scenes: Array[PackedScene] = [
@@ -203,6 +207,10 @@ var wheel_scenes: Array[PackedScene] = [
 	preload("res://scenes/parts/wheels/wheel_triangle.tscn"),
 	preload("res://scenes/parts/wheels/wheel_toilet.tscn"),
 	preload("res://scenes/parts/wheels/wheel_tv.tscn"),
+	preload("res://scenes/parts/wheels/wheel_pogo.tscn"),
+	preload("res://scenes/parts/wheels/wheel_prosthetic_leg.tscn"),
+	preload("res://scenes/parts/wheels/wheel_tractor.tscn"),
+	preload("res://scenes/parts/wheels/wheel_hamster.tscn"),
 ]
 
 var engine_scenes: Array[PackedScene] = [
@@ -509,8 +517,10 @@ func _sync_art(state: LaneState) -> void:
 			_offset_art(state, wrapper)
 			state.art.append(wrapper)
 
-## Wraps `part`'s Polygon2D children (and `extra`, if given) in a new child node
-## the drift can move. `reparent(wrapper, false)` keeps each child's local
+## Wraps `part`'s art children in a new child node: its Polygon2Ds plus any
+## plain Node2D group of art (an engine, a hamster, a leg's bones), and
+## `extra` if given, so the drift can move them. Collision, markers and audio
+## stay put. `reparent(wrapper, false)` keeps each child's local
 ## transform and the wrapper starts at its parent's origin, so nothing moves on
 ## the frame this runs.
 func _wrap_art(part: Node2D, extra: Node2D = null) -> Node2D:
@@ -518,7 +528,9 @@ func _wrap_art(part: Node2D, extra: Node2D = null) -> Node2D:
 	wrapper.name = "DriftArt"
 	part.add_child(wrapper)
 	for child in part.get_children():
-		if child is Polygon2D or (extra != null and child == extra):
+		if child == wrapper:
+			continue
+		if child is Polygon2D or child.get_class() == "Node2D" or (extra != null and child == extra):
 			child.reparent(wrapper, false)
 	return wrapper
 

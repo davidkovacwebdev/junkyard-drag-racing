@@ -1,0 +1,140 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_body.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/body_part_data.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/car/soft_body_wobble.gd" id="3"]
+
+[sub_resource type="Resource" id="Resource_mattress"]
+script = ExtResource("2")
+id = &"body_mattress"
+display_name = "Soggy Mattress"
+mass = 5.0
+durability = 22.0
+speed = 2.0
+material_type = 6
+impact_sound = &"mattress_squish"
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_springy"]
+friction = 0.8
+bounce = 0.45
+
+[node name="BodyMattress" type="RigidBody2D"]
+physics_material_override = SubResource("PhysicsMaterial_springy")
+script = ExtResource("1")
+part_data = SubResource("Resource_mattress")
+
+[node name="Ticking" type="Polygon2D" parent="."]
+color = Color(0.86, 0.82, 0.7, 1)
+polygon = PackedVector2Array(-91, -20, -87, -25, -79, -27, 0, -29, 79, -27, 87, -25, 91, -20, 92, 6, 88, 11, 80, 13, -80, 13, -88, 11, -92, 6)
+
+[node name="SideBand" type="Polygon2D" parent="."]
+color = Color(0.7, 0.66, 0.55, 1)
+polygon = PackedVector2Array(-92, 2, 0, 3, 92, 2, 92, 6, 88, 11, 80, 13, -80, 13, -88, 11, -92, 6)
+
+[node name="TopPiping" type="Polygon2D" parent="."]
+color = Color(0.94, 0.91, 0.82, 1)
+polygon = PackedVector2Array(-79, -27, 0, -29, 79, -27, 86, -23, 0, -25, -86, -23)
+
+[node name="Stripe1" type="Polygon2D" parent="."]
+color = Color(0.5, 0.6, 0.7, 1)
+polygon = PackedVector2Array(-68, -22, -65, -22, -64, 1, -67, 1)
+
+[node name="Stripe2" type="Polygon2D" parent="."]
+color = Color(0.5, 0.6, 0.7, 1)
+polygon = PackedVector2Array(-45, -23, -42, -23, -42, 2, -45, 2)
+
+[node name="Stripe3" type="Polygon2D" parent="."]
+color = Color(0.5, 0.6, 0.7, 1)
+polygon = PackedVector2Array(-23, -23, -20, -23, -21, 2, -24, 2)
+
+[node name="Stripe4" type="Polygon2D" parent="."]
+color = Color(0.5, 0.6, 0.7, 1)
+polygon = PackedVector2Array(-1, -24, 2, -24, 2, 2, -1, 2)
+
+[node name="Stripe5" type="Polygon2D" parent="."]
+color = Color(0.5, 0.6, 0.7, 1)
+polygon = PackedVector2Array(21, -23, 24, -23, 25, 2, 22, 2)
+
+[node name="Stripe6" type="Polygon2D" parent="."]
+color = Color(0.5, 0.6, 0.7, 1)
+polygon = PackedVector2Array(43, -23, 46, -23, 46, 2, 43, 2)
+
+[node name="Stripe7" type="Polygon2D" parent="."]
+color = Color(0.5, 0.6, 0.7, 1)
+polygon = PackedVector2Array(65, -22, 68, -22, 67, 1, 64, 1)
+
+[node name="PeeStain" type="Polygon2D" parent="."]
+color = Color(0.78, 0.66, 0.35, 0.7)
+polygon = PackedVector2Array(4, -18, 16, -21, 30, -17, 34, -8, 26, -1, 12, 0, 2, -6)
+
+[node name="PeeStainCore" type="Polygon2D" parent="."]
+color = Color(0.68, 0.54, 0.26, 0.6)
+polygon = PackedVector2Array(12, -14, 22, -15, 26, -9, 20, -5, 12, -7)
+
+[node name="MudStain" type="Polygon2D" parent="."]
+color = Color(0.45, 0.36, 0.26, 0.55)
+polygon = PackedVector2Array(-84, -6, -74, -10, -62, -6, -58, 4, -70, 9, -84, 7)
+
+[node name="Tuft1" type="Polygon2D" parent="."]
+color = Color(0.62, 0.58, 0.48, 1)
+polygon = PackedVector2Array(-55, -15, -52, -12, -55, -9, -58, -12)
+
+[node name="Tuft2" type="Polygon2D" parent="."]
+color = Color(0.62, 0.58, 0.48, 1)
+polygon = PackedVector2Array(-33, -15, -30, -12, -33, -9, -36, -12)
+
+[node name="Tuft3" type="Polygon2D" parent="."]
+color = Color(0.62, 0.58, 0.48, 1)
+polygon = PackedVector2Array(-11, -15, -8, -12, -11, -9, -14, -12)
+
+[node name="Tuft4" type="Polygon2D" parent="."]
+color = Color(0.62, 0.58, 0.48, 1)
+polygon = PackedVector2Array(55, -15, 58, -12, 55, -9, 52, -12)
+
+[node name="Tear" type="Polygon2D" parent="."]
+color = Color(0.3, 0.26, 0.2, 1)
+polygon = PackedVector2Array(26, -28, 36, -29, 46, -28, 44, -24, 36, -22, 28, -24)
+
+[node name="Stuffing" type="Polygon2D" parent="."]
+color = Color(0.97, 0.95, 0.9, 1)
+polygon = PackedVector2Array(27, -27, 29, -33, 34, -36, 40, -34, 45, -35, 47, -30, 44, -26, 36, -25)
+
+[node name="StuffingShade" type="Polygon2D" parent="."]
+color = Color(0.84, 0.82, 0.78, 1)
+polygon = PackedVector2Array(31, -28, 36, -31, 42, -30, 44, -27, 36, -26)
+
+[node name="SpringLeg1" type="Polygon2D" parent="."]
+color = Color(0.55, 0.55, 0.58, 1)
+polygon = PackedVector2Array(59.9, -24.3, 68.6, -30.5, 67.1, -32.7, 58.4, -26.5)
+
+[node name="SpringLeg2" type="Polygon2D" parent="."]
+color = Color(0.45, 0.45, 0.48, 1)
+polygon = PackedVector2Array(68.4, -31.8, 56.5, -36.6, 55.6, -34.2, 67.5, -29.4)
+
+[node name="SpringLeg3" type="Polygon2D" parent="."]
+color = Color(0.55, 0.55, 0.58, 1)
+polygon = PackedVector2Array(56.5, -33.4, 68.4, -38.2, 67.5, -40.6, 55.6, -35.8)
+
+[node name="SpringLeg4" type="Polygon2D" parent="."]
+color = Color(0.45, 0.45, 0.48, 1)
+polygon = PackedVector2Array(68.4, -39.8, 56.5, -44.6, 55.6, -42.2, 67.5, -37.4)
+
+[node name="SpringLeg5" type="Polygon2D" parent="."]
+color = Color(0.6, 0.38, 0.22, 1)
+polygon = PackedVector2Array(56.7, -41.4, 65.5, -46.4, 64.3, -48.6, 55.5, -43.6)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(-91, -20, -87, -25, -79, -27, 79, -27, 87, -25, 91, -20, 92, 6, 88, 11, 80, 13, -80, 13, -88, 11, -92, 6)
+
+[node name="WheelMount0" type="Marker2D" parent="."]
+position = Vector2(-62, 16)
+
+[node name="WheelMount1" type="Marker2D" parent="."]
+position = Vector2(62, 16)
+
+[node name="EngineMount" type="Marker2D" parent="."]
+position = Vector2(-40, -28)
+
+[node name="SoftBodyWobble" type="Node" parent="."]
+script = ExtResource("3")
+pivot = Vector2(0, 13)

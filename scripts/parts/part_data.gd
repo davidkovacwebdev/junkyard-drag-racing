@@ -19,6 +19,8 @@ enum MaterialType { METAL, WOOD, PLASTIC, CERAMIC, RUBBER, GLASS, FABRIC }
 ## those actually factor into open-world driving.
 @export var speed: float = 3.0
 @export var material_type: MaterialType = MaterialType.METAL
+## SoundLibrary sound this part makes when it knocks into something.
+@export var impact_sound: StringName = &"bump"
 ## Scene this part's actual visual/physics rig lives in — set by whatever
 ## loads the part (PartDatabase), not authored on the resource itself.
 @export var scene_path: String = ""

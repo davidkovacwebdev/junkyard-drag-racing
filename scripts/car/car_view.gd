@@ -87,6 +87,15 @@ func build_from(car: CarModelData) -> void:
 	_apply_fit(raw_positions)
 	queue_redraw()
 
+## Gives a soft body (the mattress) a squish, for when the car is changed in
+## the garage and nothing actually moves to set it wobbling.
+func jiggle(amount: float = 120.0) -> void:
+	if _body == null:
+		return
+	for child in _body.get_children():
+		if child is SoftBodyWobble:
+			child.poke(amount)
+
 ## Wheel mount positions in this node's local space (already fit-adjusted),
 ## so the garage can drop wheel zones right on top of them.
 func get_wheel_mounts() -> Array[Vector2]:

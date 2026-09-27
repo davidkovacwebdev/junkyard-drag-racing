@@ -1,4 +1,4 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/car/car_body.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/parts/body_part_data.gd" id="2"]
@@ -6,29 +6,230 @@
 [sub_resource type="Resource" id="Resource_sofa"]
 script = ExtResource("2")
 id = &"body_sofa"
-display_name = "Sofa Chair"
+display_name = "Grandma's Sofa"
 mass = 10.0
 durability = 40.0
 speed = 3.0
 material_type = 6
 max_wheels = 2
+impact_sound = &"mattress_squish"
 
 [node name="BodySofa" type="RigidBody2D"]
 script = ExtResource("1")
 part_data = SubResource("Resource_sofa")
 
-[node name="Polygon2D" type="Polygon2D" parent="."]
+[node name="FootLeft" type="Polygon2D" parent="."]
+color = Color(0.45, 0.3, 0.18, 1)
+polygon = PackedVector2Array(-100, 8, -90, 8, -91, 16, -99, 16)
+
+[node name="FootRight" type="Polygon2D" parent="."]
+color = Color(0.45, 0.3, 0.18, 1)
+polygon = PackedVector2Array(90, 8, 100, 8, 99, 16, 91, 16)
+
+[node name="Backrest" type="Polygon2D" parent="."]
 color = Color(0.5, 0.25, 0.55, 1)
-polygon = PackedVector2Array(-100, 16, -100, -50, -70, -50, -70, -10, 100, -10, 100, 16)
+polygon = PackedVector2Array(-92, -16, -92, -44, -86, -52, 86, -52, 92, -44, 92, -16)
+
+[node name="BackrestTopShine" type="Polygon2D" parent="."]
+color = Color(0.6, 0.34, 0.64, 1)
+polygon = PackedVector2Array(-86, -52, 86, -52, 89, -48, -89, -48)
+
+[node name="TuftButton0" type="Polygon2D" parent="."]
+color = Color(0.38, 0.18, 0.43, 1)
+polygon = PackedVector2Array(-57.8, -36, -58.44, -34.44, -60, -33.8, -61.56, -34.44, -62.2, -36, -61.56, -37.56, -60, -38.2, -58.44, -37.56)
+
+[node name="TuftButton1" type="Polygon2D" parent="."]
+color = Color(0.38, 0.18, 0.43, 1)
+polygon = PackedVector2Array(-27.8, -36, -28.44, -34.44, -30, -33.8, -31.56, -34.44, -32.2, -36, -31.56, -37.56, -30, -38.2, -28.44, -37.56)
+
+[node name="TuftButton2" type="Polygon2D" parent="."]
+color = Color(0.38, 0.18, 0.43, 1)
+polygon = PackedVector2Array(2.2, -36, 1.56, -34.44, 0, -33.8, -1.56, -34.44, -2.2, -36, -1.56, -37.56, -0, -38.2, 1.56, -37.56)
+
+[node name="TuftButton3" type="Polygon2D" parent="."]
+color = Color(0.38, 0.18, 0.43, 1)
+polygon = PackedVector2Array(32.2, -36, 31.56, -34.44, 30, -33.8, 28.44, -34.44, 27.8, -36, 28.44, -37.56, 30, -38.2, 31.56, -37.56)
+
+[node name="TuftButton4" type="Polygon2D" parent="."]
+color = Color(0.38, 0.18, 0.43, 1)
+polygon = PackedVector2Array(62.2, -36, 61.56, -34.44, 60, -33.8, 58.44, -34.44, 57.8, -36, 58.44, -37.56, 60, -38.2, 61.56, -37.56)
+
+[node name="Skirt" type="Polygon2D" parent="."]
+color = Color(0.38, 0.18, 0.43, 1)
+polygon = PackedVector2Array(-100, -4, 100, -4, 100, 10, -100, 10)
+
+[node name="Fringe0" type="Polygon2D" parent="."]
+color = Color(0.72, 0.6, 0.3, 1)
+polygon = PackedVector2Array(-99, 10, -93, 10, -96, 13)
+
+[node name="Fringe1" type="Polygon2D" parent="."]
+color = Color(0.72, 0.6, 0.3, 1)
+polygon = PackedVector2Array(-87, 10, -81, 10, -84, 13)
+
+[node name="Fringe2" type="Polygon2D" parent="."]
+color = Color(0.72, 0.6, 0.3, 1)
+polygon = PackedVector2Array(-75, 10, -69, 10, -72, 13)
+
+[node name="Fringe3" type="Polygon2D" parent="."]
+color = Color(0.72, 0.6, 0.3, 1)
+polygon = PackedVector2Array(-63, 10, -57, 10, -60, 13)
+
+[node name="Fringe4" type="Polygon2D" parent="."]
+color = Color(0.72, 0.6, 0.3, 1)
+polygon = PackedVector2Array(-51, 10, -45, 10, -48, 13)
+
+[node name="Fringe5" type="Polygon2D" parent="."]
+color = Color(0.72, 0.6, 0.3, 1)
+polygon = PackedVector2Array(-39, 10, -33, 10, -36, 13)
+
+[node name="Fringe6" type="Polygon2D" parent="."]
+color = Color(0.72, 0.6, 0.3, 1)
+polygon = PackedVector2Array(-27, 10, -21, 10, -24, 13)
+
+[node name="Fringe7" type="Polygon2D" parent="."]
+color = Color(0.72, 0.6, 0.3, 1)
+polygon = PackedVector2Array(-15, 10, -9, 10, -12, 13)
+
+[node name="Fringe8" type="Polygon2D" parent="."]
+color = Color(0.72, 0.6, 0.3, 1)
+polygon = PackedVector2Array(-3, 10, 3, 10, 0, 13)
+
+[node name="Fringe9" type="Polygon2D" parent="."]
+color = Color(0.72, 0.6, 0.3, 1)
+polygon = PackedVector2Array(9, 10, 15, 10, 12, 13)
+
+[node name="Fringe10" type="Polygon2D" parent="."]
+color = Color(0.72, 0.6, 0.3, 1)
+polygon = PackedVector2Array(21, 10, 27, 10, 24, 13)
+
+[node name="Fringe11" type="Polygon2D" parent="."]
+color = Color(0.72, 0.6, 0.3, 1)
+polygon = PackedVector2Array(33, 10, 39, 10, 36, 13)
+
+[node name="Fringe12" type="Polygon2D" parent="."]
+color = Color(0.72, 0.6, 0.3, 1)
+polygon = PackedVector2Array(45, 10, 51, 10, 48, 13)
+
+[node name="Fringe13" type="Polygon2D" parent="."]
+color = Color(0.72, 0.6, 0.3, 1)
+polygon = PackedVector2Array(57, 10, 63, 10, 60, 13)
+
+[node name="Fringe14" type="Polygon2D" parent="."]
+color = Color(0.72, 0.6, 0.3, 1)
+polygon = PackedVector2Array(69, 10, 75, 10, 72, 13)
+
+[node name="Fringe15" type="Polygon2D" parent="."]
+color = Color(0.72, 0.6, 0.3, 1)
+polygon = PackedVector2Array(81, 10, 87, 10, 84, 13)
+
+[node name="Fringe16" type="Polygon2D" parent="."]
+color = Color(0.72, 0.6, 0.3, 1)
+polygon = PackedVector2Array(93, 10, 99, 10, 96, 13)
+
+[node name="Cushion0" type="Polygon2D" parent="."]
+color = Color(0.5, 0.25, 0.55, 1)
+polygon = PackedVector2Array(-82, -2, -82, -16, -78, -19, -55, -21, -32, -19, -28, -16, -28, -2)
+
+[node name="CushionShade0" type="Polygon2D" parent="."]
+color = Color(0.38, 0.18, 0.43, 1)
+polygon = PackedVector2Array(-82, -6, -28, -6, -28, -2, -82, -2)
+
+[node name="CushionPiping0" type="Polygon2D" parent="."]
+color = Color(0.6, 0.34, 0.64, 1)
+polygon = PackedVector2Array(-78, -19, -55, -21, -32, -19, -55, -19)
+
+[node name="Cushion1" type="Polygon2D" parent="."]
+color = Color(0.5, 0.25, 0.55, 1)
+polygon = PackedVector2Array(-27, -2, -27, -16, -23, -19, 0, -21, 23, -19, 27, -16, 27, -2)
+
+[node name="CushionShade1" type="Polygon2D" parent="."]
+color = Color(0.38, 0.18, 0.43, 1)
+polygon = PackedVector2Array(-27, -6, 27, -6, 27, -2, -27, -2)
+
+[node name="CushionPiping1" type="Polygon2D" parent="."]
+color = Color(0.6, 0.34, 0.64, 1)
+polygon = PackedVector2Array(-23, -19, 0, -21, 23, -19, 0, -19)
+
+[node name="Cushion2" type="Polygon2D" parent="."]
+color = Color(0.5, 0.25, 0.55, 1)
+polygon = PackedVector2Array(28, -2, 28, -16, 32, -19, 55, -21, 78, -19, 82, -16, 82, -2)
+
+[node name="CushionShade2" type="Polygon2D" parent="."]
+color = Color(0.38, 0.18, 0.43, 1)
+polygon = PackedVector2Array(28, -6, 82, -6, 82, -2, 28, -2)
+
+[node name="CushionPiping2" type="Polygon2D" parent="."]
+color = Color(0.6, 0.34, 0.64, 1)
+polygon = PackedVector2Array(32, -19, 55, -21, 78, -19, 55, -19)
+
+[node name="CoffeeStain" type="Polygon2D" parent="."]
+color = Color(0.35, 0.2, 0.2, 0.6)
+polygon = PackedVector2Array(-70, -15, -60, -17, -52, -12, -58, -7, -68, -8)
+
+[node name="Tear" type="Polygon2D" parent="."]
+color = Color(0.2, 0.08, 0.2, 1)
+polygon = PackedVector2Array(-8, -18, 4, -19, 10, -16, 0, -13, -6, -14)
+
+[node name="Stuffing" type="Polygon2D" parent="."]
+color = Color(0.96, 0.94, 0.88, 1)
+polygon = PackedVector2Array(-6, -18, -3, -24, 3, -25, 8, -21, 6, -17)
+
+[node name="Remote" type="Polygon2D" parent="."]
+color = Color(0.12, 0.12, 0.13, 1)
+polygon = PackedVector2Array(24, -30, 30, -31, 31, -14, 25, -14)
+
+[node name="RemoteButtonRed" type="Polygon2D" parent="."]
+color = Color(0.85, 0.2, 0.15, 1)
+polygon = PackedVector2Array(28.7, -27, 28.1, -25.96, 26.9, -25.96, 26.3, -27, 26.9, -28.04, 28.1, -28.04)
+
+[node name="RemoteButtons" type="Polygon2D" parent="."]
+color = Color(0.6, 0.6, 0.62, 1)
+polygon = PackedVector2Array(26, -24, 29, -24, 29, -21, 26, -21)
+
+[node name="ArmLeft" type="Polygon2D" parent="."]
+color = Color(0.5, 0.25, 0.55, 1)
+polygon = PackedVector2Array(-106, 10, -106, -26, -102, -32, -86, -32, -82, -26, -82, 10)
+
+[node name="ArmRollLeft" type="Polygon2D" parent="."]
+color = Color(0.6, 0.34, 0.64, 1)
+polygon = PackedVector2Array(-104, -28, -101, -31, -87, -31, -84, -28)
+
+[node name="ArmShadeLeft" type="Polygon2D" parent="."]
+color = Color(0.38, 0.18, 0.43, 1)
+polygon = PackedVector2Array(-106, 2, -82, 2, -82, 10, -106, 10)
+
+[node name="ArmRight" type="Polygon2D" parent="."]
+color = Color(0.5, 0.25, 0.55, 1)
+polygon = PackedVector2Array(106, 10, 106, -26, 102, -32, 86, -32, 82, -26, 82, 10)
+
+[node name="ArmRollRight" type="Polygon2D" parent="."]
+color = Color(0.6, 0.34, 0.64, 1)
+polygon = PackedVector2Array(104, -28, 101, -31, 87, -31, 84, -28)
+
+[node name="ArmShadeRight" type="Polygon2D" parent="."]
+color = Color(0.38, 0.18, 0.43, 1)
+polygon = PackedVector2Array(106, 2, 82, 2, 82, 10, 106, 10)
+
+[node name="ArmTape1" type="Polygon2D" parent="."]
+color = Color(0.66, 0.67, 0.68, 1)
+polygon = PackedVector2Array(82.75, -22.44, 102.75, -6.44, 105.25, -9.56, 85.25, -25.56)
+
+[node name="ArmTape2" type="Polygon2D" parent="."]
+color = Color(0.6, 0.61, 0.62, 1)
+polygon = PackedVector2Array(85.25, -6.44, 105.25, -22.44, 102.75, -25.56, 82.75, -9.56)
+
+[node name="ArmWornPatch" type="Polygon2D" parent="."]
+color = Color(0.66, 0.46, 0.6, 1)
+polygon = PackedVector2Array(-102, -18, -90, -20, -88, -10, -100, -8)
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
-polygon = PackedVector2Array(-100, 16, -100, -50, -70, -50, -70, -10, 100, -10, 100, 16)
+polygon = PackedVector2Array(-106, 12, -106, -26, -100, -33, -92, -44, -86, -52, 86, -52, 92, -44, 100, -33, 106, -26, 106, 12)
 
 [node name="WheelMount0" type="Marker2D" parent="."]
-position = Vector2(-60, 16)
+position = Vector2(-62, 16)
 
 [node name="WheelMount1" type="Marker2D" parent="."]
-position = Vector2(70, 16)
+position = Vector2(62, 16)
 
 [node name="EngineMount" type="Marker2D" parent="."]
-position = Vector2(0, -10)
+position = Vector2(0, -19)
