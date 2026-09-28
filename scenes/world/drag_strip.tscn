@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/world/drag_strip.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/world/registration_booth.tscn" id="2"]
-[ext_resource type="PackedScene" path="res://scenes/race/race_drag_strip.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/race/drag_strip_menu.tscn" id="3"]
 
 [node name="DragStrip" type="Node2D"]
 

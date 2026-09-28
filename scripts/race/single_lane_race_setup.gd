@@ -286,6 +286,15 @@ var _states: Array[LaneState] = []
 var _player_car_name := ""
 var _rocks: Array[TrackHazards.Rock] = []
 var _puddles: Array[TrackHazards.Puddle] = []
+## Copied out of RaceProgression.pending_entry_fee at _ready() (see that
+## field): captured once so a later reset of the pending field can't change
+## what a win pays out.
+var _entry_fee := 0
+## True only for DragStripMenu's spectator-only bet races, where lane 0
+## isn't the player. Left false for every other entrance into this scene
+## (direct T-key test, the old menu-less path) so nothing about them changes.
+var _bet_only := false
+var _field_car_names: Array[String] = []
 
 func _ready() -> void:
 	var race_controller := get_node_or_null(race_controller_path) as RaceController
@@ -305,19 +314,46 @@ func _ready() -> void:
 
 	var camera_targets: Array[Node2D] = []
 
-	# The player's own garage car races in the top lane, so whatever they
-	# assembled in the garage is what they drive here too.
-	var lane := 0
-	var player_car := Inventory.get_selected_car()
-	var player_assembled := CarAssembler.assemble_from_car_data(player_car, cars, _spawn_position(lane))
-	if player_assembled != null:
-		_player_car_name = "Player_%s" % player_car.display_name
-		_register_car(_player_car_name, lane, player_assembled, race_controller, camera_targets)
-		if race_controller != null:
-			race_controller.race_ended.connect(_on_race_ended)
-		lane += 1
+	# DragStripMenu writes these just before switching into this scene; a
+	# fresh scene has no other way to receive parameters. Read and clear them
+	# immediately so anything that reaches this scene directly (the old
+	# T-key test entrance) falls back to the untouched defaults below.
+	var tier := RaceProgression.pending_tier
+	var car_index := RaceProgression.pending_car_index
+	var include_player := RaceProgression.pending_include_player
+	var bet_field := RaceProgression.pending_bet_field
+	_entry_fee = RaceProgression.pending_entry_fee
+	_bet_only = not include_player
+	RaceProgression.pending_tier = -1
+	RaceProgression.pending_car_index = -1
+	RaceProgression.pending_include_player = true
+	RaceProgression.pending_entry_fee = 0
+	RaceProgression.pending_bet_field = []
 
-	for rival in RaceProgression.pick_rivals(CAR_COUNT - lane):
+	# The player's own garage car races in the top lane, so whatever they
+	# assembled in the garage is what they drive here too — unless
+	# DragStripMenu sent us here to spectate a bet, in which case no player
+	# car is registered at all.
+	var lane := 0
+	if include_player:
+		var player_car := Inventory.get_selected_car()
+		if car_index >= 0 and car_index < Inventory.owned_cars.size():
+			player_car = Inventory.owned_cars[car_index]
+		var player_assembled := CarAssembler.assemble_from_car_data(player_car, cars, _spawn_position(lane))
+		if player_assembled != null:
+			_player_car_name = "Player_%s" % player_car.display_name
+			_register_car(_player_car_name, lane, player_assembled, race_controller, camera_targets)
+			if race_controller != null:
+				race_controller.race_ended.connect(_on_race_ended)
+			lane += 1
+
+	# A bet race reuses the exact field DragStripMenu already showed the
+	# player and took a bet against, rather than rolling a fresh one, so the
+	# car bet on is the actual car that races.
+	var rivals := bet_field if not bet_field.is_empty() \
+			else (RaceProgression.pick_rivals_for_tier(CAR_COUNT - lane, tier) if tier > 0 \
+			else RaceProgression.pick_rivals(CAR_COUNT - lane))
+	for rival in rivals:
 		var wheel_scenes: Array[PackedScene] = []
 		for wheel_path in rival["wheels"]:
 			wheel_scenes.append(load(wheel_path))
@@ -330,10 +366,20 @@ func _ready() -> void:
 			String(rival["engine"]).get_file().get_basename(),
 		]
 		_register_car(car_name, lane, car, race_controller, camera_targets)
+		_field_car_names.append(car_name)
 		lane += 1
 
 	if camera != null:
 		camera.targets = camera_targets
+
+	if _bet_only and race_controller != null:
+		race_controller.race_ended.connect(_on_bet_race_ended)
+
+	# Came in through DragStripMenu (tier > 0 covers both the paid-entry and
+	# the spectator bet path) — send the player back to it instead of the
+	# open world once the race ends, so betting/tier-picking is a loop.
+	if tier > 0 and race_controller != null:
+		race_controller.exit_scene_path = "res://scenes/race/drag_strip_menu.tscn"
 
 func _physics_process(delta: float) -> void:
 	for state in _states:
@@ -762,5 +808,16 @@ func _spawn_position(lane: int) -> Vector2:
 	return Vector2(SPAWN_X, _surface_y[lane] - SPAWN_HEIGHT_ABOVE_LANE)
 
 func _on_race_ended(winner_name: String) -> void:
-	RaceProgression.record_race(winner_name == _player_car_name)
+	var player_won := winner_name == _player_car_name
+	RaceProgression.record_race(player_won)
+	if player_won and _entry_fee > 0:
+		Inventory.money += _entry_fee * RaceProgression.ENTRY_WIN_MULTIPLIER
+		Sfx.play(&"cash_register", -4.0)
 	SaveSystem.save_game()
+
+## Spectator-only bet race: no player car, so RaceProgression's win-tracking
+## and money don't apply here — DragStripMenu resolves the bet itself once it
+## reads these back after the scene returns to it.
+func _on_bet_race_ended(winner_name: String) -> void:
+	RaceProgression.last_ai_race_winner = winner_name
+	RaceProgression.last_ai_race_field_names = _field_car_names
