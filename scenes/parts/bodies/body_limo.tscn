@@ -19,91 +19,19 @@ part_data = SubResource("Resource_body_limo")
 
 [node name="Paint" type="Polygon2D" parent="."]
 color = Color(0.13, 0.13, 0.15, 1)
-polygon = PackedVector2Array(-175, 16, -175, -6, -160, -14, -118, -18, -100, -42, 95, -42, 112, -18, 160, -14, 175, -6, 175, 16)
+polygon = PackedVector2Array(-175, -10, -160, -14, -116, -16, -104, -40, 100, -40, 110, -18, 160, -16, 175, -10, 175, 16, -175, 16)
 
-[node name="RoofShine" type="Polygon2D" parent="."]
-color = Color(0.32, 0.32, 0.36, 1)
-polygon = PackedVector2Array(-96, -42, 92, -42, 90, -39, -94, -39)
-
-[node name="HoodShine" type="Polygon2D" parent="."]
-color = Color(0.28, 0.28, 0.32, 1)
-polygon = PackedVector2Array(114, -17, 158, -13, 156, -11, 113, -15)
-
-[node name="PrimerDoor" type="Polygon2D" parent="."]
-color = Color(0.52, 0.51, 0.48, 1)
-polygon = PackedVector2Array(-44, -18, -4, -18, -4, 13, -44, 13)
-
-[node name="RearWindow" type="Polygon2D" parent="."]
+[node name="Windows" type="Polygon2D" parent="."]
 color = Color(0.2, 0.24, 0.3, 1)
-polygon = PackedVector2Array(-97, -38, -92, -38, -92, -20, -112, -20)
-
-[node name="Window1" type="Polygon2D" parent="."]
-color = Color(0.2, 0.24, 0.3, 1)
-polygon = PackedVector2Array(-88, -38, -50, -38, -50, -20, -88, -20)
-
-[node name="Window2" type="Polygon2D" parent="."]
-color = Color(0.2, 0.24, 0.3, 1)
-polygon = PackedVector2Array(-42, -38, -6, -38, -6, -20, -42, -20)
-
-[node name="Window3" type="Polygon2D" parent="."]
-color = Color(0.2, 0.24, 0.3, 1)
-polygon = PackedVector2Array(2, -38, 40, -38, 40, -20, 2, -20)
-
-[node name="Window4" type="Polygon2D" parent="."]
-color = Color(0.2, 0.24, 0.3, 1)
-polygon = PackedVector2Array(48, -38, 78, -38, 78, -20, 48, -20)
-
-[node name="Windshield" type="Polygon2D" parent="."]
-color = Color(0.2, 0.24, 0.3, 1)
-polygon = PackedVector2Array(84, -38, 93, -38, 107, -20, 84, -20)
-
-[node name="WindowGlint" type="Polygon2D" parent="."]
-color = Color(0.45, 0.5, 0.58, 1)
-polygon = PackedVector2Array(-80, -37, -74, -37, -84, -21, -88, -21)
-
-[node name="TapeStrip1" type="Polygon2D" parent="."]
-color = Color(0.66, 0.67, 0.68, 1)
-polygon = PackedVector2Array(3.2, -34.2, 37.2, -20.2, 38.8, -23.8, 4.8, -37.8)
-
-[node name="TapeStrip2" type="Polygon2D" parent="."]
-color = Color(0.6, 0.61, 0.62, 1)
-polygon = PackedVector2Array(4.8, -20.2, 38.8, -34.2, 37.2, -37.8, 3.2, -23.8)
-
-[node name="ChromeStrip" type="Polygon2D" parent="."]
-color = Color(0.76, 0.77, 0.8, 1)
-polygon = PackedVector2Array(-172, -3, 172, -3, 172, 0, -172, 0)
-
-[node name="RustPatch" type="Polygon2D" parent="."]
-color = Color(0.5, 0.28, 0.14, 1)
-polygon = PackedVector2Array(60, 2, 74, 0, 84, 5, 80, 12, 64, 13)
-
-[node name="RustSpeck" type="Polygon2D" parent="."]
-color = Color(0.42, 0.24, 0.12, 1)
-polygon = PackedVector2Array(-150, -8, -144, -9, -142, -5, -149, -4)
-
-[node name="RoofDent" type="Polygon2D" parent="."]
-color = Color(0.08, 0.08, 0.1, 1)
-polygon = PackedVector2Array(-20, -42, -8, -42, -11, -40, -17, -40)
-
-[node name="ArchRear" type="Polygon2D" parent="."]
-color = Color(0.05, 0.05, 0.06, 1)
-polygon = PackedVector2Array(-157, 16, -154.9, 7.6, -149.1, 0.4, -140.3, -4.3, -130, -6, -119.7, -4.3, -110.9, 0.4, -105.1, 7.6, -103, 16)
-
-[node name="ArchFront" type="Polygon2D" parent="."]
-color = Color(0.05, 0.05, 0.06, 1)
-polygon = PackedVector2Array(103, 16, 105.1, 7.6, 110.9, 0.4, 119.7, -4.3, 130, -6, 140.3, -4.3, 149.1, 0.4, 154.9, 7.6, 157, 16)
+polygon = PackedVector2Array(-100, -36, 96, -36, 104, -20, -108, -20)
 
 [node name="Headlight" type="Polygon2D" parent="."]
 color = Color(1, 0.9, 0.55, 1)
-polygon = PackedVector2Array(165, -9, 175, -6, 175, 0, 165, 0)
+polygon = PackedVector2Array(165, -10, 175, -10, 175, 0, 165, 0)
 
 [node name="Taillight" type="Polygon2D" parent="."]
 color = Color(0.75, 0.12, 0.1, 1)
-polygon = PackedVector2Array(-175, -6, -167, -9, -167, 0, -175, 0)
-
-[node name="HoodOrnament" type="Polygon2D" parent="."]
-color = Color(0.8, 0.8, 0.84, 1)
-polygon = PackedVector2Array(138, -16, 144, -16, 140, -23)
+polygon = PackedVector2Array(-175, -10, -167, -10, -167, 0, -175, 0)
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
 polygon = PackedVector2Array(-175, 16, -175, -6, -160, -14, -118, -18, -100, -42, 95, -42, 112, -18, 160, -14, 175, -6, 175, 16)

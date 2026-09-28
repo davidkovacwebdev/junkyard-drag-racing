@@ -37,49 +37,17 @@ polygon = PackedVector2Array(120, -48, 148, -48, 148, -16, 120, -16)
 color = Color(0.45, 0.5, 0.48, 1)
 polygon = PackedVector2Array(148, -48, 184, -48, 184, -26, 148, -26)
 
+[node name="MainShade" type="Polygon2D" parent="."]
+color = Color(0.37, 0.42, 0.39, 1)
+polygon = PackedVector2Array(-180, 6, 180, 6, 180, 16, -180, 16)
+
 [node name="FlangeMainLeft" type="Polygon2D" parent="."]
 color = Color(0.3, 0.33, 0.32, 1)
-polygon = PackedVector2Array(-186, -20, -180, -20, -180, 20, -186, 20)
+polygon = PackedVector2Array(-188, -20, -180, -20, -180, 20, -188, 20)
 
 [node name="FlangeMainRight" type="Polygon2D" parent="."]
 color = Color(0.3, 0.33, 0.32, 1)
-polygon = PackedVector2Array(180, -20, 186, -20, 186, 20, 180, 20)
-
-[node name="JointLeft" type="Polygon2D" parent="."]
-color = Color(0.3, 0.33, 0.32, 1)
-polygon = PackedVector2Array(-168, -22, -132, -22, -132, -16, -168, -16)
-
-[node name="JointRight" type="Polygon2D" parent="."]
-color = Color(0.3, 0.33, 0.32, 1)
-polygon = PackedVector2Array(116, -22, 152, -22, 152, -16, 116, -16)
-
-[node name="FlangeTopLeft" type="Polygon2D" parent="."]
-color = Color(0.3, 0.33, 0.32, 1)
-polygon = PackedVector2Array(-188, -88, -182, -88, -182, -52, -188, -52)
-
-[node name="FlangeTopRight" type="Polygon2D" parent="."]
-color = Color(0.3, 0.33, 0.32, 1)
-polygon = PackedVector2Array(-118, -88, -112, -88, -112, -52, -118, -52)
-
-[node name="FlangeArm" type="Polygon2D" parent="."]
-color = Color(0.3, 0.33, 0.32, 1)
-polygon = PackedVector2Array(184, -52, 190, -52, 190, -22, 184, -22)
-
-[node name="ShineMain" type="Polygon2D" parent="."]
-color = Color(0.62, 0.67, 0.64, 1)
-polygon = PackedVector2Array(-180, -10, 180, -10, 180, -6, -180, -6)
-
-[node name="ShineLeft" type="Polygon2D" parent="."]
-color = Color(0.62, 0.67, 0.64, 1)
-polygon = PackedVector2Array(-158, -56, -154, -56, -154, -16, -158, -16)
-
-[node name="ShineLeftTop" type="Polygon2D" parent="."]
-color = Color(0.62, 0.67, 0.64, 1)
-polygon = PackedVector2Array(-182, -78, -118, -78, -118, -74, -182, -74)
-
-[node name="ShineRight" type="Polygon2D" parent="."]
-color = Color(0.62, 0.67, 0.64, 1)
-polygon = PackedVector2Array(126, -44, 130, -44, 130, -16, 126, -16)
+polygon = PackedVector2Array(180, -20, 188, -20, 188, 20, 180, 20)
 
 [node name="CollisionMain" type="CollisionPolygon2D" parent="."]
 polygon = PackedVector2Array(-180, -16, 180, -16, 180, 16, -180, 16)

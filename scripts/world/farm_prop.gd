@@ -41,7 +41,6 @@ const WOOD_DARK := Color(0.4, 0.28, 0.17)
 const STRAW := Color(0.86, 0.72, 0.36)
 const STRAW_SHADE := Color(0.76, 0.62, 0.3)
 const STRAW_LIGHT := Color(0.92, 0.8, 0.46)
-const TWINE := Color(0.55, 0.35, 0.2)
 const WATER := Color(0.35, 0.5, 0.55)
 const DIRT := Color(0.62, 0.5, 0.34)
 const DIRT_DARK := Color(0.56, 0.44, 0.3)
@@ -51,7 +50,7 @@ const FENCE_POST_SPACING := 40.0
 const FENCE_DEPTH_POST_SPACING := 30.0
 const FENCE_HEIGHT := 34.0
 const WINDMILL_HEIGHT := 170.0
-const WINDMILL_BLADES := 8
+const WINDMILL_BLADES := 4
 const WINDMILL_BLADE_LENGTH := 44.0
 const WINDMILL_SPIN := 1.4
 
@@ -112,10 +111,6 @@ func _jitter(index: int, amount: float) -> float:
 func _draw_post(base: Vector2, index: int) -> void:
 	var height := FENCE_HEIGHT + _jitter(index, 3.0)
 	draw_rect(Rect2(base.x - 3.0, base.y - height, 6.0, height), WOOD)
-	draw_rect(Rect2(base.x + 1.0, base.y - height, 2.0, height), WOOD_DARK)
-	draw_colored_polygon(PackedVector2Array([
-		Vector2(base.x - 3.0, base.y - height), Vector2(base.x, base.y - height - 3.0), Vector2(base.x + 3.0, base.y - height),
-	]), WOOD_LIGHT)
 
 func _draw_fence() -> void:
 	draw_rect(Rect2(0.0, -2.0, length, 4.0), UiPalette.SHADOW)
@@ -124,7 +119,6 @@ func _draw_fence() -> void:
 			Vector2(0.0, rail_y), Vector2(length, rail_y + _jitter(int(rail_y), 1.5)),
 			Vector2(length, rail_y + 5.0 + _jitter(int(rail_y), 1.5)), Vector2(0.0, rail_y + 5.0),
 		]), WOOD_LIGHT)
-		draw_rect(Rect2(0.0, rail_y + 3.5, length, 1.5), WOOD_DARK)
 	var posts := maxi(1, roundi(length / FENCE_POST_SPACING))
 	for i in posts + 1:
 		_draw_post(Vector2(length * i / posts, 0.0), i)
@@ -133,71 +127,42 @@ func _draw_depth_fence() -> void:
 	var posts := maxi(1, roundi(length / FENCE_DEPTH_POST_SPACING))
 	for rail_y: float in [-28.0, -16.0]:
 		draw_rect(Rect2(-2.0, rail_y, 4.0, length), WOOD_LIGHT)
-		draw_rect(Rect2(1.0, rail_y, 1.0, length), WOOD_DARK)
 	for i in posts + 1:
 		_draw_post(Vector2(0.0, length * i / posts), i)
 
 func _draw_hay_bale() -> void:
 	draw_colored_polygon(FlatProps.octagon(Vector2(4.0, 0.0), 28.0, 5.0), UiPalette.SHADOW)
 	draw_rect(Rect2(-22.0, -26.0, 44.0, 26.0), STRAW)
-	draw_rect(Rect2(14.0, -26.0, 8.0, 26.0), STRAW_SHADE)
 	draw_colored_polygon(PackedVector2Array([
 		Vector2(-22.0, -26.0), Vector2(-16.0, -32.0), Vector2(28.0, -32.0), Vector2(22.0, -26.0),
 	]), STRAW_LIGHT)
 	draw_colored_polygon(PackedVector2Array([
 		Vector2(22.0, -26.0), Vector2(28.0, -32.0), Vector2(28.0, -6.0), Vector2(22.0, 0.0),
-	]), STRAW_SHADE.darkened(0.08))
-	for x: float in [-10.0, 6.0]:
-		draw_rect(Rect2(x, -26.0, 2.5, 26.0), TWINE)
-		draw_colored_polygon(FlatProps.sliver(Vector2(x + 1.25, -26.0), Vector2(x + 7.25, -32.0), 2.5), TWINE)
-	draw_colored_polygon(PackedVector2Array([
-		Vector2(-18.0, -26.0), Vector2(-22.0, -34.0), Vector2(-14.0, -27.0),
-	]), STRAW_LIGHT)
+	]), STRAW_SHADE)
 
 func _draw_trough() -> void:
 	draw_colored_polygon(FlatProps.octagon(Vector2(3.0, 0.0), 36.0, 5.0), UiPalette.SHADOW)
 	draw_colored_polygon(PackedVector2Array([
 		Vector2(-32.0, -20.0), Vector2(32.0, -20.0), Vector2(28.0, 0.0), Vector2(-28.0, 0.0),
 	]), WOOD)
-	draw_colored_polygon(PackedVector2Array([
-		Vector2(22.0, -20.0), Vector2(32.0, -20.0), Vector2(28.0, 0.0), Vector2(20.0, 0.0),
-	]), WOOD_DARK)
-	draw_rect(Rect2(-30.0, -20.0, 60.0, 4.0), WATER)
-	draw_rect(Rect2(-24.0, -19.0, 10.0, 1.5), WATER.lightened(0.25))
-	draw_rect(Rect2(-28.0, -11.0, 50.0, 2.0), WOOD_DARK)
+	draw_rect(Rect2(-30.0, -20.0, 60.0, 5.0), WATER)
 
 func _draw_windmill() -> void:
 	var top := Vector2(0.0, -WINDMILL_HEIGHT)
 	draw_colored_polygon(FlatProps.octagon(Vector2(6.0, 0.0), 40.0, 7.0), UiPalette.SHADOW)
 	for side: float in [-1.0, 1.0]:
-		draw_colored_polygon(FlatProps.sliver(Vector2(24.0 * side, 0.0), top + Vector2(5.0 * side, 10.0), 4.0),
-				UiPalette.STEEL_SHADE if side > 0.0 else UiPalette.STEEL_BASE)
-	var braces := 5
-	for i in braces:
-		var t0 := float(i) / braces
-		var t1 := float(i + 1) / braces
-		var left0 := Vector2(-24.0, 0.0).lerp(top + Vector2(-5.0, 10.0), t0)
-		var right0 := Vector2(24.0, 0.0).lerp(top + Vector2(5.0, 10.0), t0)
-		var left1 := Vector2(-24.0, 0.0).lerp(top + Vector2(-5.0, 10.0), t1)
-		var right1 := Vector2(24.0, 0.0).lerp(top + Vector2(5.0, 10.0), t1)
-		draw_colored_polygon(FlatProps.sliver(left0, right1, 2.0), UiPalette.STEEL_DARK)
-		draw_colored_polygon(FlatProps.sliver(right0, left1, 2.0), UiPalette.STEEL_DARK)
-	draw_rect(Rect2(-10.0, top.y + 4.0, 20.0, 6.0), UiPalette.METAL_GREY)
-	draw_colored_polygon(FlatProps.sliver(top, top + Vector2(40.0, -2.0), 3.0), UiPalette.METAL_GREY)
+		draw_colored_polygon(FlatProps.sliver(Vector2(24.0 * side, 0.0), top + Vector2(5.0 * side, 10.0), 6.0), UiPalette.STEEL_BASE)
+	draw_rect(Rect2(-16.0, -64.0, 32.0, 6.0), UiPalette.STEEL_BASE)
+	draw_colored_polygon(FlatProps.sliver(top, top + Vector2(40.0, -2.0), 4.0), UiPalette.METAL_GREY)
 	draw_colored_polygon(PackedVector2Array([
 		top + Vector2(34.0, -14.0), top + Vector2(52.0, -20.0), top + Vector2(52.0, 8.0), top + Vector2(34.0, 6.0),
 	]), VANE_RED)
 	for i in WINDMILL_BLADES:
-		var angle := _blade_angle + TAU * i / WINDMILL_BLADES
-		var direction := Vector2.from_angle(angle)
-		var side := direction.orthogonal() * 5.0
-		var root := top + direction * 8.0
+		var direction := Vector2.from_angle(_blade_angle + TAU * i / WINDMILL_BLADES)
+		var side := direction.orthogonal() * 7.0
 		var tip := top + direction * WINDMILL_BLADE_LENGTH
-		draw_colored_polygon(PackedVector2Array([
-			root - side * 0.5, tip - side, tip + side, root + side * 0.5,
-		]), UiPalette.TRIM_OFF_WHITE if i % 2 == 0 else UiPalette.STEEL_LIGHT)
+		draw_colored_polygon(PackedVector2Array([top - side * 0.5, tip - side, tip + side, top + side * 0.5]), UiPalette.TRIM_OFF_WHITE)
 	draw_colored_polygon(FlatProps.octagon(top, 7.0, 7.0), UiPalette.METAL_GREY)
-	draw_colored_polygon(FlatProps.octagon(top + Vector2(-1.5, -1.5), 2.5, 2.5), UiPalette.STEEL_BASE)
 
 func _draw_sign() -> void:
 	var board := Rect2(-70.0, -92.0, 140.0, 56.0)
@@ -208,8 +173,6 @@ func _draw_sign() -> void:
 	draw_rect(Rect2(local.position + Vector2(4.0, 5.0), local.size), UiPalette.SHADOW)
 	draw_rect(local, WOOD_LIGHT)
 	draw_rect(Rect2(local.end.x - 8.0, local.position.y, 8.0, local.size.y), WOOD)
-	draw_rect(Rect2(local.position.x, local.end.y - 5.0, local.size.x, 5.0), WOOD_DARK)
-	draw_rect(Rect2(local.position.x, local.position.y + 26.0, local.size.x - 8.0, 2.0), WOOD)
 	var font := ThemeDB.fallback_font
 	draw_string(font, local.position + Vector2(0.0, 23.0), sign_title,
 			HORIZONTAL_ALIGNMENT_CENTER, local.size.x - 8.0, 22, UiPalette.TEXT_BROWN)

@@ -23,39 +23,24 @@ func _draw() -> void:
 ## A hex nut with a bent strip of sheet metal wedged behind it.
 func _draw_scrap() -> void:
 	_poly([Vector2(0.52, 0.08), Vector2(0.96, 0.22), Vector2(0.90, 0.40), Vector2(0.50, 0.28)], UiPalette.RUST)
-	_poly(_hexagon(Vector2(0.60, 0.66), 0.36), UiPalette.SHADOW)
 	var nut := _hexagon(Vector2(0.52, 0.58), 0.36)
-	_poly(nut, UiPalette.STEEL_DARK)
-	_poly(_hexagon(Vector2(0.52, 0.55), 0.33), UiPalette.STEEL_BASE)
-	_poly([nut[0], nut[1], Vector2(0.52, 0.58)], UiPalette.STEEL_SHADE)
-	_poly(_hexagon(Vector2(0.52, 0.56), 0.13), UiPalette.VOID)
-	_poly([Vector2(0.30, 0.34), Vector2(0.44, 0.28), Vector2(0.40, 0.36)], UiPalette.STEEL_LIGHT)
+	_poly(nut, UiPalette.STEEL_BASE)
+	_poly([nut[0], nut[1], nut[2], Vector2(0.52, 0.58)], UiPalette.STEEL_SHADE)
+	_poly(_hexagon(Vector2(0.52, 0.58), 0.13), UiPalette.VOID)
 
 ## Two stacked octagonal coins.
 func _draw_money() -> void:
-	_poly(_octagon(Vector2(0.58, 0.64), 0.36), UiPalette.SHADOW)
-	_poly(_octagon(Vector2(0.62, 0.40), 0.30), COIN_DARK)
-	_poly(_octagon(Vector2(0.62, 0.37), 0.28), COIN_SHADE)
-	_poly(_octagon(Vector2(0.46, 0.62), 0.36), COIN_DARK)
-	_poly(_octagon(Vector2(0.46, 0.58), 0.34), COIN_BASE)
-	_poly(_octagon(Vector2(0.46, 0.58), 0.22), COIN_SHADE)
-	_poly([Vector2(0.43, 0.44), Vector2(0.50, 0.44), Vector2(0.50, 0.72), Vector2(0.43, 0.72)], COIN_BASE)
-	_poly([Vector2(0.22, 0.46), Vector2(0.32, 0.34), Vector2(0.30, 0.44)], UiPalette.CARDBOARD_LIGHT)
+	_poly(_octagon(Vector2(0.62, 0.38), 0.30), COIN_SHADE)
+	_poly(_octagon(Vector2(0.46, 0.60), 0.36), COIN_BASE)
+	_poly(_octagon(Vector2(0.46, 0.60), 0.18), COIN_DARK)
 
 ## Cardboard tear-off page with a red header and two ring binders.
 func _draw_calendar() -> void:
-	_poly([Vector2(0.14, 0.18), Vector2(0.98, 0.20), Vector2(0.96, 1.0), Vector2(0.16, 0.98)], UiPalette.SHADOW)
-	_poly([Vector2(0.06, 0.14), Vector2(0.90, 0.12), Vector2(0.92, 0.92), Vector2(0.08, 0.94)], UiPalette.CARDBOARD_DARK)
-	_poly([Vector2(0.06, 0.14), Vector2(0.90, 0.12), Vector2(0.91, 0.86), Vector2(0.07, 0.88)], UiPalette.CARDBOARD_BASE)
-	_poly([Vector2(0.78, 0.12), Vector2(0.90, 0.12), Vector2(0.91, 0.86), Vector2(0.79, 0.87)], UiPalette.CARDBOARD_SHADE)
-	_poly([Vector2(0.06, 0.14), Vector2(0.90, 0.12), Vector2(0.90, 0.36), Vector2(0.06, 0.38)], UiPalette.DANGER_RED)
-	for ring_x in [0.28, 0.66]:
-		_poly([Vector2(ring_x, 0.04), Vector2(ring_x + 0.08, 0.04), Vector2(ring_x + 0.08, 0.24), Vector2(ring_x, 0.24)], UiPalette.METAL_GREY)
-	for row in 2:
-		for column in 3:
-			var cell_origin := Vector2(0.18 + column * 0.22, 0.48 + row * 0.18)
-			_poly([cell_origin, cell_origin + Vector2(0.12, 0.0), cell_origin + Vector2(0.12, 0.10), cell_origin + Vector2(0.0, 0.10)], UiPalette.CARDBOARD_DARK)
-	_poly([Vector2(0.10, 0.18), Vector2(0.22, 0.17), Vector2(0.12, 0.24)], UiPalette.CARDBOARD_LIGHT)
+	_poly([Vector2(0.06, 0.14), Vector2(0.90, 0.12), Vector2(0.92, 0.92), Vector2(0.08, 0.94)], UiPalette.CARDBOARD_BASE)
+	_poly([Vector2(0.76, 0.12), Vector2(0.90, 0.12), Vector2(0.92, 0.92), Vector2(0.77, 0.93)], UiPalette.CARDBOARD_SHADE)
+	_poly([Vector2(0.06, 0.14), Vector2(0.90, 0.12), Vector2(0.90, 0.38), Vector2(0.06, 0.40)], UiPalette.DANGER_RED)
+	for ring_x in [0.22, 0.60]:
+		_poly([Vector2(ring_x, 0.02), Vector2(ring_x + 0.15, 0.02), Vector2(ring_x + 0.15, 0.24), Vector2(ring_x, 0.24)], UiPalette.METAL_GREY)
 
 func _poly(unit_points: Array, color: Color) -> void:
 	var points := PackedVector2Array()

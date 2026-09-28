@@ -2,7 +2,7 @@ class_name DragTrackArt
 extends Node2D
 ## The straight drag strip a race is run on: the asphalt, a white line down every
 ## lane boundary, the start line, and the checkered finish band. Plus a bit of
-## character: repair patches, burnout marks, cracks and oil puddles.
+## character: a few repair patches, burnout marks, chunky cracks and oil puddles.
 ##
 ## Nothing here ever moves. This is the track the player sees, and it stays put —
 ## the harness that fakes cars weaving across lanes (single_lane_race_setup.gd)
@@ -68,17 +68,18 @@ extends Node2D
 @export_group("Wear")
 ## Change this to reroll where everything lands. Same seed, same track.
 @export var wear_seed := 7
-@export var crack_count := 60
-@export var puddle_count := 14
-@export var patch_count := 10
-@export var crack_color := Color(0.08, 0.10, 0.16, 0.75)
-@export var crack_width := 3.0
-@export var oil_color := Color(0.03, 0.04, 0.08, 0.9)
-## Rainbow sheen on the oil: a purple layer and a teal layer over the black.
-@export var oil_sheen_a := Color(0.55, 0.35, 0.85, 0.35)
-@export var oil_sheen_b := Color(0.25, 0.75, 0.75, 0.30)
-## Burnout streaks off the start line, fading out down the track.
-@export var rubber_color := Color(0.04, 0.05, 0.09, 0.4)
+@export var crack_count := 8
+@export var puddle_count := 6
+@export var patch_count := 8
+## Cracks are a flat tone step darker than the road, chunky enough to read at
+## race zoom. No hairlines.
+@export var crack_color := Color(0.18, 0.22, 0.31, 1.0)
+@export var crack_width := 7.0
+@export var oil_color := Color(0.07, 0.07, 0.12, 1.0)
+## One lighter step inside each oil puddle so it reads as wet.
+@export var oil_shine := Color(0.17, 0.16, 0.27, 1.0)
+## Burnout tracks off the start line.
+@export var rubber_color := Color(0.04, 0.05, 0.09, 0.3)
 
 ## Asphalt and markings are a fixed shape, so this only has to run once — but it's
 ## re-run whenever the scene is reloaded in the editor with different exports, which
@@ -143,96 +144,63 @@ func _clear_of_lines(x: float, margin: float) -> bool:
 func _draw_patches(top: float, bottom: float) -> void:
 	var rng := _rng(1)
 	for n in patch_count:
-		var size := Vector2(rng.randf_range(120.0, 320.0), rng.randf_range(40.0, 110.0))
+		var size := Vector2(rng.randf_range(160.0, 320.0), rng.randf_range(60.0, 110.0))
 		var pos := Vector2(rng.randf_range(left + 100.0, right - 100.0),
 				rng.randf_range(top + 10.0, bottom - size.y - 10.0))
 		var tone := rng.randf()
 		if not _clear_of_lines(pos.x + size.x * 0.5, size.x * 0.5 + 10.0):
 			continue
-		var fill := asphalt_color.lightened(0.10) if tone < 0.5 else asphalt_color.darkened(0.18)
-		draw_rect(Rect2(pos, size), fill)
-		draw_rect(Rect2(pos, size), crack_color, false, 2.0)
+		draw_rect(Rect2(pos, size), asphalt_color.lightened(0.08) if tone < 0.5 else asphalt_color.darkened(0.12))
 
-## Two wheel tracks per lane, darkest at the start line and fading away.
+## Two flat wheel tracks per lane running off the start line.
 func _draw_rubber() -> void:
 	var rng := _rng(2)
-	var pieces := 12
 	for lane in lane_count:
 		var cy := top_lane_y + lane_height * float(lane)
-		for s in 2:
-			var side := -1.0 if s == 0 else 1.0
+		for side: float in [-1.0, 1.0]:
 			var length := rng.randf_range(350.0, 800.0)
 			var y := cy + side * 42.0 + rng.randf_range(-4.0, 4.0)
-			for p in pieces:
-				var alpha := rubber_color.a * (1.0 - float(p) / float(pieces))
-				var x0 := start_x + 30.0 + length * float(p) / float(pieces)
-				draw_line(Vector2(x0, y), Vector2(x0 + length / float(pieces) + 1.0, y),
-						Color(rubber_color, alpha), 14.0)
+			draw_rect(Rect2(start_x + 30.0, y - 7.0, length, 14.0), rubber_color)
 
+## A crack is a short zigzag of three chunky flat bars.
 func _draw_cracks(top: float, bottom: float) -> void:
 	var rng := _rng(3)
 	for n in crack_count:
 		var pos := Vector2(rng.randf_range(left + 100.0, right - 100.0),
-				rng.randf_range(top + 10.0, bottom - 10.0))
+				rng.randf_range(top + 40.0, bottom - 40.0))
 		var heading := rng.randf_range(0.0, TAU)
-		_draw_crack(rng, pos, heading, rng.randi_range(6, 14), crack_width, true, top, bottom)
+		for s in 3:
+			var to := pos + Vector2.from_angle(heading) * rng.randf_range(40.0, 70.0)
+			if to.y < top or to.y > bottom or not _clear_of_lines(to.x, 20.0):
+				break
+			draw_colored_polygon(FlatProps.sliver(pos, to, crack_width), crack_color)
+			heading += 1.1 if s % 2 == 0 else -1.1
+			pos = to
 
-## A crack is a jittery walk that thins out as it goes, and can fork once.
-func _draw_crack(rng: RandomNumberGenerator, pos: Vector2, heading: float, steps: int,
-		width: float, can_branch: bool, top: float, bottom: float) -> void:
-	for s in steps:
-		var to := pos + Vector2.from_angle(heading) * rng.randf_range(25.0, 60.0)
-		heading += rng.randf_range(-0.7, 0.7)
-		if to.y < top or to.y > bottom or not _clear_of_lines(to.x, 20.0):
-			return
-		var taper := 1.0 - float(s) / float(steps)
-		draw_line(pos, to, crack_color, maxf(1.0, width * taper), true)
-		if can_branch and rng.randf() < 0.22:
-			_draw_crack(rng, to, heading + rng.randf_range(-1.2, 1.2),
-					maxi(2, int(float(steps - s) * 0.5)), width * 0.6, false, top, bottom)
-		pos = to
-
-## Oil: a black blob with two smaller, offset sheen layers on top, a little
-## highlight, and a few splatter drops around it.
+## Oil: a dark eight-sided blob with one lighter, smaller blob inside it.
 func _draw_puddles(top: float, bottom: float) -> void:
 	var rng := _rng(4)
 	for n in puddle_count:
-		var radius := rng.randf_range(35.0, 100.0)
-		var squish := rng.randf_range(0.4, 0.65)
+		var radius := rng.randf_range(45.0, 100.0)
+		var squish := rng.randf_range(0.45, 0.65)
 		var center := Vector2(rng.randf_range(left + 200.0, right - 200.0),
 				rng.randf_range(top + radius * 0.8, bottom - radius * 0.8))
-		var drops := rng.randi_range(3, 6)
 		if not _clear_of_lines(center.x, radius * 1.3 + 15.0):
 			continue
-
 		var blob := _blob(rng, center, radius, squish)
 		draw_colored_polygon(blob, oil_color)
-		draw_colored_polygon(_shrunk(blob, center, 0.70, Vector2(-radius * 0.10, -radius * 0.04)), oil_sheen_a)
-		draw_colored_polygon(_shrunk(blob, center, 0.42, Vector2(radius * 0.10, radius * 0.03)), oil_sheen_b)
-		draw_circle(center + Vector2(-radius * 0.35, -radius * squish * 0.30), radius * 0.06,
-				Color(1, 1, 1, 0.3))
+		draw_colored_polygon(_shrunk(blob, center, 0.55, Vector2(-radius * 0.12, -radius * 0.05)), oil_shine)
 
-		for d in drops:
-			var a := rng.randf_range(0.0, TAU)
-			var dist := radius * rng.randf_range(1.1, 1.6)
-			var drop_pos := center + Vector2(cos(a) * dist, sin(a) * dist * squish)
-			draw_circle(drop_pos, rng.randf_range(3.0, 8.0), oil_color)
-
-## An irregular, squashed ellipse: a few lobes plus a little jitter, so it reads as
-## a spill rather than a perfect oval.
+## An irregular, squashed octagon, so it reads as a spill rather than a sign.
 func _blob(rng: RandomNumberGenerator, center: Vector2, radius: float, squish: float) -> PackedVector2Array:
 	var points := PackedVector2Array()
-	var count := 28
-	var phase_a := rng.randf_range(0.0, TAU)
-	var phase_b := rng.randf_range(0.0, TAU)
-	for i in count:
-		var a := TAU * float(i) / float(count)
-		var r := radius * (1.0 + 0.12 * sin(a * 3.0 + phase_a) + 0.07 * sin(a * 5.0 + phase_b)
-				+ rng.randf_range(-0.03, 0.03))
+	for i in 8:
+		var a := TAU * (float(i) + 0.5) / 8.0
+		var r := radius * rng.randf_range(0.85, 1.15)
 		points.append(center + Vector2(cos(a) * r, sin(a) * r * squish))
 	return points
 
-## The same outline scaled toward its centre and nudged, for the sheen layers.
+## The same outline scaled toward its centre and nudged, for the shine.
 func _shrunk(poly: PackedVector2Array, center: Vector2, factor: float, offset: Vector2) -> PackedVector2Array:
 	var out := PackedVector2Array()
 	for p in poly:

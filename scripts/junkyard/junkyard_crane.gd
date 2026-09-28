@@ -57,12 +57,11 @@ extends Node2D
 @export var rust_color: Color = Color(0.55, 0.3, 0.16, 1)
 @export var dark_color: Color = Color(0.2, 0.2, 0.22, 1)
 @export var cable_color: Color = Color(0.13, 0.13, 0.14, 1)
-@export var trim_color: Color = Color(0.87, 0.84, 0.72, 1)
 
 const TURRET_H := 74.0
-const RAIL := 8.0
-const LATTICE_STEP := 62.0
-const BRACE_W := 4.0
+const RAIL := 14.0
+const LATTICE_STEP := 124.0
+const BRACE_W := 10.0
 const PYLON_H := 120.0
 ## How far below the claw block the jaws reach.
 const JAW_DROP := 52.0
@@ -165,16 +164,9 @@ func _draw() -> void:
 func _draw_tracks() -> void:
 	var half := track_width * 0.5
 	draw_rect(Rect2(-half, -track_height, track_width, track_height), dark_color)
-	var plates := int(track_width / 26.0)
-	for i in plates + 1:
-		var x := -half + 6.0 + float(i) * 26.0
-		if x > half - 4.0:
-			break
-		draw_line(Vector2(x, -track_height + 7.0), Vector2(x, -7.0),
-				Color(1, 1, 1, 0.06), 3.0)
 	var wheel_r := track_height * 0.28
-	draw_circle(Vector2(-half + wheel_r + 6.0, -track_height * 0.5), wheel_r, rust_color)
-	draw_circle(Vector2(half - wheel_r - 6.0, -track_height * 0.5), wheel_r, rust_color)
+	for x: float in [-half + wheel_r + 6.0, half - wheel_r - 6.0]:
+		draw_colored_polygon(FlatProps.octagon(Vector2(x, -track_height * 0.5), wheel_r, wheel_r), rust_color)
 
 func _draw_turret() -> void:
 	var half := track_width * 0.34
@@ -183,7 +175,6 @@ func _draw_turret() -> void:
 	draw_rect(Rect2(-half, top, half * 2.0, bottom - top), steel_color)
 	# cab window on the side that faces down the yard
 	draw_rect(Rect2(-half + 12.0, top + 14.0, half * 0.9, TURRET_H - 30.0), dark_color)
-	draw_rect(Rect2(-half + 12.0, top + 14.0, half * 0.9, TURRET_H - 30.0), trim_color, false, 3.0)
 	# exhaust stack
 	draw_rect(Rect2(half - 26.0, top - 34.0, 12.0, 34.0), rust_color)
 
@@ -197,11 +188,9 @@ func _draw_mast() -> void:
 	var flip := false
 	while y - LATTICE_STEP > top:
 		if flip:
-			draw_line(Vector2(-half, y), Vector2(half, y - LATTICE_STEP),
-					steel_color.darkened(0.3), BRACE_W)
+			draw_colored_polygon(FlatProps.sliver(Vector2(-half, y), Vector2(half, y - LATTICE_STEP), BRACE_W), steel_color.darkened(0.3))
 		else:
-			draw_line(Vector2(half, y), Vector2(-half, y - LATTICE_STEP),
-					steel_color.darkened(0.3), BRACE_W)
+			draw_colored_polygon(FlatProps.sliver(Vector2(half, y), Vector2(-half, y - LATTICE_STEP), BRACE_W), steel_color.darkened(0.3))
 		flip = not flip
 		y -= LATTICE_STEP
 
@@ -214,8 +203,8 @@ func _draw_boom() -> void:
 
 	# pylon above the mast with the two tie cables holding the boom up
 	draw_rect(Rect2(-RAIL, y - PYLON_H, RAIL * 2.0, PYLON_H), steel_color)
-	draw_line(Vector2(0.0, y - PYLON_H + 2.0), Vector2(left + 30.0, top), cable_color, 3.0)
-	draw_line(Vector2(0.0, y - PYLON_H + 2.0), Vector2(right - 12.0, top), cable_color, 3.0)
+	draw_colored_polygon(FlatProps.sliver(Vector2(0.0, y - PYLON_H + 2.0), Vector2(left + 30.0, top), 6.0), cable_color)
+	draw_colored_polygon(FlatProps.sliver(Vector2(0.0, y - PYLON_H + 2.0), Vector2(right - 12.0, top), 6.0), cable_color)
 
 	draw_rect(Rect2(left, top, right - left, RAIL), steel_color)
 	draw_rect(Rect2(left, bottom - RAIL, right - left, RAIL), steel_color)
@@ -223,17 +212,14 @@ func _draw_boom() -> void:
 	var flip := false
 	while x + LATTICE_STEP < right:
 		if flip:
-			draw_line(Vector2(x, bottom - RAIL), Vector2(x + LATTICE_STEP, top + RAIL),
-					steel_color.darkened(0.3), BRACE_W)
+			draw_colored_polygon(FlatProps.sliver(Vector2(x, bottom - RAIL), Vector2(x + LATTICE_STEP, top + RAIL), BRACE_W), steel_color.darkened(0.3))
 		else:
-			draw_line(Vector2(x, top + RAIL), Vector2(x + LATTICE_STEP, bottom - RAIL),
-					steel_color.darkened(0.3), BRACE_W)
+			draw_colored_polygon(FlatProps.sliver(Vector2(x, top + RAIL), Vector2(x + LATTICE_STEP, bottom - RAIL), BRACE_W), steel_color.darkened(0.3))
 		flip = not flip
 		x += LATTICE_STEP
 
 	# counterweight block hanging off the tail
 	draw_rect(Rect2(right - 62.0, top - 26.0, 62.0, boom_height + 52.0), rust_color)
-	draw_rect(Rect2(right - 62.0, top - 26.0, 62.0, boom_height + 52.0), dark_color, false, 3.0)
 
 func _draw_hoist() -> void:
 	var y := _boom_y()
@@ -244,8 +230,8 @@ func _draw_hoist() -> void:
 	draw_rect(Rect2(anchor.x - 34.0, anchor.y - 4.0, 68.0, 22.0), dark_color)
 
 	var claw := claw_local()
-	draw_line(anchor + Vector2(-14.0, 16.0), claw + Vector2(-9.0, -6.0), cable_color, 3.0)
-	draw_line(anchor + Vector2(14.0, 16.0), claw + Vector2(9.0, -6.0), cable_color, 3.0)
+	draw_colored_polygon(FlatProps.sliver(anchor + Vector2(-14.0, 16.0), claw + Vector2(-9.0, -6.0), 5.0), cable_color)
+	draw_colored_polygon(FlatProps.sliver(anchor + Vector2(14.0, 16.0), claw + Vector2(9.0, -6.0), 5.0), cable_color)
 
 	# jaws swing with the cables, so the claw hangs like a pendulum, and open and
 	# shut on their hinge — `jaw_open` scrunches them toward the centre line

@@ -12,7 +12,7 @@ extends Control
 
 const DIGIT_SIZE := Vector2(10.0, 17.0)
 const DIGIT_GAP := 2.5
-const SEGMENT_THICKNESS := 2.5
+const SEGMENT_THICKNESS := 3.5
 const COLON_GAP := 5.0
 ## Empty space between the digits and the recessed screen's own edge, and
 ## between the screen and the board's outer edge.
@@ -21,7 +21,6 @@ const BOARD_MARGIN := 4.0
 
 const VOID_COLOR := UiPalette.VOID
 const LIT_COLOR := UiPalette.ACCENT_YELLOW
-const UNLIT_COLOR := Color(UiPalette.ACCENT_YELLOW, 0.15)
 
 const BOARD_TILT_DEGREES := -1.5
 const BOARD_JITTER_SEED := 7733
@@ -50,6 +49,7 @@ func _ready() -> void:
 	_board.jitter_seed = BOARD_JITTER_SEED
 	_board.jitter = 2.0
 	_board.skirt_height = 4.0
+	_board.nails = false
 
 func _process(delta: float) -> void:
 	_blink_time = fmod(_blink_time + delta, 1.0)
@@ -83,8 +83,8 @@ func _draw_digit(origin: Vector2, digit: int) -> Vector2:
 		# a "1".
 		if digit == 1 and (seg_id == "b" or seg_id == "c"):
 			continue
-		var color := LIT_COLOR if lit.has(seg_id) else UNLIT_COLOR
-		draw_rect(_segment_rect(origin, seg_id), color)
+		if lit.has(seg_id):
+			draw_rect(_segment_rect(origin, seg_id), LIT_COLOR)
 	if digit == 1:
 		var t := SEGMENT_THICKNESS
 		draw_rect(Rect2(origin + Vector2(DIGIT_SIZE.x - t, t), Vector2(t, DIGIT_SIZE.y - 2.0 * t)), LIT_COLOR)

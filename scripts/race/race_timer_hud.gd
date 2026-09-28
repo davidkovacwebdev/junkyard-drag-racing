@@ -10,13 +10,12 @@ extends Control
 
 const DIGIT_SIZE := Vector2(10.0, 17.0)
 const DIGIT_GAP := 2.5
-const SEGMENT_THICKNESS := 2.5
+const SEGMENT_THICKNESS := 3.5
 const COLON_GAP := 5.0
 const BOARD_MARGIN := 4.0
 
 const VOID_COLOR := UiPalette.VOID
 const LIT_COLOR := UiPalette.ACCENT_YELLOW
-const UNLIT_COLOR := Color(UiPalette.ACCENT_YELLOW, 0.15)
 ## Digits flip to this once time's running low — a wordless "wrap it up".
 const WARN_COLOR := UiPalette.DANGER_RED
 const WARN_THRESHOLD := 10.0
@@ -46,6 +45,7 @@ func _ready() -> void:
 	_board.jitter_seed = BOARD_JITTER_SEED
 	_board.jitter = 2.0
 	_board.skirt_height = 4.0
+	_board.nails = false
 
 func set_seconds_remaining(seconds: float) -> void:
 	_seconds_remaining = maxf(seconds, 0.0)
@@ -81,8 +81,8 @@ func _draw_digit(origin: Vector2, digit: int, lit_color: Color) -> Vector2:
 		# a "1".
 		if digit == 1 and (seg_id == "b" or seg_id == "c"):
 			continue
-		var color := lit_color if lit.has(seg_id) else UNLIT_COLOR
-		draw_rect(_segment_rect(origin, seg_id), color)
+		if lit.has(seg_id):
+			draw_rect(_segment_rect(origin, seg_id), lit_color)
 	if digit == 1:
 		var t := SEGMENT_THICKNESS
 		draw_rect(Rect2(origin + Vector2(DIGIT_SIZE.x - t, t), Vector2(t, DIGIT_SIZE.y - 2.0 * t)), lit_color)
