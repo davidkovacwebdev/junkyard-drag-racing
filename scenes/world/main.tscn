@@ -14,7 +14,6 @@
 [ext_resource type="Script" uid="uid://d38elr3bncsx3" path="res://scripts/world/skid_marks_layer.gd" id="12"]
 [ext_resource type="Script" uid="uid://bvsm27bp5u8y8" path="res://scripts/world/water.gd" id="13"]
 [ext_resource type="Script" uid="uid://br7vlahippyej" path="res://scripts/world/terrain.gd" id="14"]
-[ext_resource type="Script" path="res://scripts/world/shark_spawner.gd" id="shark_spawner"]
 [ext_resource type="Script" uid="uid://ds8hajmui5tbe" path="res://scripts/world/biome_marker.gd" id="15"]
 [ext_resource type="PackedScene" path="res://scenes/world/ramp_event.tscn" id="16"]
 [ext_resource type="PackedScene" path="res://scenes/race/race_ramp.tscn" id="17"]
@@ -23,9 +22,11 @@
 [ext_resource type="Script" uid="uid://bo1kwx12twsg5" path="res://scripts/world/puddle_field.gd" id="19_puddle"]
 [ext_resource type="Script" uid="uid://dkr4ur3uxyxfe" path="res://scripts/world/rain_layer.gd" id="20_rain"]
 [ext_resource type="Script" uid="uid://b1lrvw48vx2h2" path="res://scripts/world/minimap_marker.gd" id="21_marker"]
-[ext_resource type="PackedScene" path="res://scenes/world/garbage_truck/garbage_truck.tscn" id="22_garbage_truck"]
 [ext_resource type="PackedScene" path="res://scenes/world/farm.tscn" id="22_farm"]
+[ext_resource type="PackedScene" path="res://scenes/world/garbage_truck/garbage_truck.tscn" id="22_garbage_truck"]
 [ext_resource type="PackedScene" path="res://scenes/world/scrap_forge.tscn" id="23_forge"]
+[ext_resource type="Script" uid="uid://w1y26uy8y6we" path="res://scripts/world/floating_trash_spawner.gd" id="floating_trash_spawner"]
+[ext_resource type="Script" uid="uid://cgja4fmhwax6j" path="res://scripts/world/shark_spawner.gd" id="shark_spawner"]
 
 [sub_resource type="Curve2D" id="Curve2D_688af"]
 _data = {
@@ -188,9 +189,13 @@ curve = SubResource("Curve2D_bolr6")
 position = Vector2(-13324, 11126)
 curve = SubResource("Curve2D_hbyw3")
 
-[node name="Sharks" type="Node2D" parent="."]
+[node name="Sharks" type="Node2D" parent="." unique_id=1392191221]
 z_index = -950
 script = ExtResource("shark_spawner")
+
+[node name="FloatingTrash" type="Node2D" parent="." unique_id=579065408]
+z_index = -955
+script = ExtResource("floating_trash_spawner")
 
 [node name="Roads" type="Node2D" parent="." unique_id=1253797938]
 script = ExtResource("4")

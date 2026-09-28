@@ -31,9 +31,21 @@ const GROUP := &"player"
 ## Top speed multiplier while Shift is held, stacking on top of the
 ## on/off-road multiplier above.
 @export var sprint_speed_multiplier: float = 3.0
-## Deceleration (px/s^2) while Space is held. Overrides any movement input
-## and still scales with road/puddle handling, so braking on wet ground slides.
-@export var brake_deceleration: float = 4200.0
+## How hard Space bites, as a fraction of current speed shed per second
+## (exponential decay, not a fixed px/s^2) — a hard stop from a sprint
+## bleeds off far more speed per frame than easing off a crawl, and the
+## last stretch down to a stop tapers off instead of snapping there.
+## Overrides any movement input and still scales with road/puddle
+## handling, so braking on wet ground slides.
+@export var brake_response: float = 1.5
+## How fast the car's direction of travel catches up to a new input
+## direction, independent of how fast its speed changes (see acceleration/
+## friction) — much lower than those on purpose. The car keeps carrying its
+## old heading into a turn and slides around into the new one over a beat
+## instead of snapping instantly, reading as a drift rather than crisp,
+## point-and-go steering. Also scaled by handling_multiplier, so turns are
+## looser still off-road or on a puddle.
+@export var turn_response: float = 5.0
 ## Same convention as TrashSpawner.roads_path: the exported path first,
 ## falling back to searching the scene for any RoadNetwork if it doesn't
 ## resolve (e.g. this scene got reparented).
@@ -148,6 +160,11 @@ var _tire_screech: SustainedSound
 var _bump_cooldown: float = 0.0
 var _bump_sound: StringName = &"bump"
 var _boost_sound: StringName = &"backfire"
+## Rough total mass of the equipped body + wheels + engine, fed to a
+## GarbageTruck every frame the car touches it so how much it can push (or
+## get pushed off course by) scales with what's actually bolted on (see
+## GarbageTruck.set_contact_push()) rather than being a fixed shove.
+var _car_mass: float = 12.0
 var _sprint_pressed_last: bool = false
 
 func _ready() -> void:
@@ -159,6 +176,7 @@ func _ready() -> void:
 	var car := Inventory.get_selected_car()
 	if car != null:
 		_visual.build_from(car)
+		_car_mass = _compute_car_mass(car)
 	_setup_sounds(car)
 	# Coming back from a place (garage, drag strip race): reappear where we
 	# left the map instead of at the scene's default spawn.
@@ -266,16 +284,49 @@ func _physics_process(delta: float) -> void:
 		# Grip, not speed: the car can still carry its momentum, it just
 		# can't change what it's doing anything like as quickly.
 		handling_multiplier *= puddle_slip_multiplier
-	var base_rate := friction
+
+	# Speed and direction ease independently, braking or not — direction
+	# only ever comes from input_dir (never target_velocity, so it's live
+	# even while braking forces target_velocity to zero), and only ever
+	# catches up at the much slower turn_response, so the car can still be
+	# steered into a slide while shedding speed instead of only ever
+	# decaying in a straight line under braking. Speed tracks its own
+	# target at accel_rate/brake_response same as always.
+	var current_dir := velocity.normalized() if velocity.length() > 1.0 else Vector2.ZERO
+	var target_dir := input_dir.normalized() if input_dir != Vector2.ZERO else current_dir
+	if current_dir == Vector2.ZERO:
+		current_dir = target_dir
+	# Pressing roughly the opposite of the way the car's currently moving
+	# decelerates it in a straight line instead of slerping through an
+	# arbitrary arc — slerp between two near-opposite vectors is a
+	# near-180° singularity anyway (it has to pick some perpendicular to
+	# rotate through), and a real car doesn't spin around when you throw it
+	# into reverse, it slows down first.
+	var reversing := current_dir != Vector2.ZERO and current_dir.dot(target_dir) < -0.7
+	var blended_dir := current_dir if reversing \
+			else current_dir.slerp(target_dir, 1.0 - exp(-turn_response * handling_multiplier * delta))
+
+	var new_speed: float
 	if braking:
-		base_rate = brake_deceleration
-	elif input_dir != Vector2.ZERO:
-		base_rate = acceleration
-	var accel_rate := base_rate * handling_multiplier
-	velocity = velocity.move_toward(target_velocity, accel_rate * delta)
+		new_speed = velocity.length() * exp(-brake_response * handling_multiplier * delta)
+		if new_speed < 1.0:
+			new_speed = 0.0
+	elif reversing:
+		new_speed = move_toward(velocity.length(), 0.0, acceleration * handling_multiplier * delta)
+	else:
+		var base_rate := friction if input_dir == Vector2.ZERO else acceleration
+		new_speed = move_toward(velocity.length(), target_velocity.length(), base_rate * handling_multiplier * delta)
+	velocity = blended_dir * new_speed
 	var velocity_before_move := velocity
 	move_and_slide()
 	_strip_velocity_into_collisions()
+	# target_velocity, not velocity_before_move: pinned against something,
+	# _strip_velocity_into_collisions() zeroes velocity into it every frame,
+	# so velocity_before_move never gets past one frame's worth of
+	# acceleration before being stripped again — target_velocity is what the
+	# player is actually trying to do this frame, straight from input,
+	# unaffected by that ratchet.
+	_notify_garbage_truck_contact(target_velocity)
 
 	# The strip above only removes the component of velocity that's directly
 	# into whatever it hit — a glancing or diagonal hit leaves a tangential
@@ -337,6 +388,49 @@ func _strip_velocity_into_collisions() -> void:
 		var normal := get_slide_collision(i).get_normal()
 		if velocity.dot(normal) < 0.0:
 			velocity = velocity.slide(normal)
+
+## Called every physics frame, hit or not — if the car happens to be
+## touching a GarbageTruck right now, this tells it how hard the player is
+## currently *trying* to press into it (see GarbageTruck.set_contact_push()),
+## every single frame contact lasts. Takes the car's desired velocity
+## (straight from input), not its actual one — pinned against the truck,
+## the actual velocity gets zeroed into it every frame by
+## _strip_velocity_into_collisions(), so it would never read as more than
+## one frame's worth of acceleration. The desired velocity has no such
+## ceiling: holding the stick down reports the same full push every frame
+## for as long as it's held, which is what lets a slow, sustained lean
+## actually walk the truck along instead of only a hard ram doing anything.
+## Every other obstacle (buildings, props) just takes the existing
+## bump/slow-down above; only the truck reacts back, since it's the only
+## thing on the map that isn't nailed down.
+func _notify_garbage_truck_contact(pressing_velocity: Vector2) -> void:
+	for i in get_slide_collision_count():
+		var truck := _as_garbage_truck(get_slide_collision(i).get_collider())
+		if truck != null:
+			truck.set_contact_push(pressing_velocity, _car_mass)
+			return
+
+func _as_garbage_truck(collider: Object) -> GarbageTruck:
+	var node := collider as Node
+	while node != null:
+		if node is GarbageTruck:
+			return node
+		node = node.get_parent()
+	return null
+
+## Rough total mass to represent the car in a collision (see
+## _notify_garbage_truck_contact()) — just the sum of what's actually
+## bolted on, the same stat numbers the garage shows.
+func _compute_car_mass(car: CarModelData) -> float:
+	var total := 0.0
+	if car.body != null:
+		total += car.body.mass
+	if car.engine != null:
+		total += car.engine.mass
+	for wheel in car.wheels:
+		if wheel != null:
+			total += wheel.mass
+	return maxf(total, 1.0)
 
 func _is_touching_shore() -> bool:
 	for i in get_slide_collision_count():
