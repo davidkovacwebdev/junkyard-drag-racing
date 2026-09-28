@@ -42,6 +42,7 @@ var _wobble: float = 0.0:
 		queue_redraw()
 
 func _ready() -> void:
+	_board.nails = false
 	mouse_entered.connect(_on_hover_started)
 	focus_entered.connect(_on_hover_started)
 	mouse_exited.connect(queue_redraw)

@@ -63,7 +63,7 @@ func _ready() -> void:
 ## A loose horse (the farm's paddock) has no hitch and no lead, and stands on
 ## the part's origin so it turns around on the spot.
 func set_hitched(hitched: bool) -> void:
-	for piece: CanvasItem in [$HitchPost, $HitchRing, $HitchHole, _lead]:
+	for piece: CanvasItem in [$HitchPost, $HitchRing, _lead]:
 		piece.visible = hitched
 	if not hitched:
 		_horse.position = Vector2.ZERO

@@ -17,180 +17,53 @@ impact_sound = &"hamster_squeak"
 script = ExtResource("1")
 part_data = SubResource("Resource_wheel_hamster")
 
-[node name="Rim" type="Polygon2D" parent="."]
-color = Color(0.58, 0.6, 0.62, 1)
-polygon = PackedVector2Array(38, 0, 36.71, 9.84, 32.91, 19, 26.87, 26.87, 19, 32.91, 9.84, 36.71, 0, 38, -9.84, 36.71, -19, 32.91, -26.87, 26.87, -32.91, 19, -36.71, 9.84, -38, 0, -36.71, -9.84, -32.91, -19, -26.87, -26.87, -19, -32.91, -9.84, -36.71, -0, -38, 9.84, -36.71, 19, -32.91, 26.87, -26.87, 32.91, -19, 36.71, -9.84)
-
 [node name="Inside" type="Polygon2D" parent="."]
 color = Color(0.17, 0.18, 0.21, 1)
-polygon = PackedVector2Array(35, 0, 33.81, 9.06, 30.31, 17.5, 24.75, 24.75, 17.5, 30.31, 9.06, 33.81, 0, 35, -9.06, 33.81, -17.5, 30.31, -24.75, 24.75, -30.31, 17.5, -33.81, 9.06, -35, 0, -33.81, -9.06, -30.31, -17.5, -24.75, -24.75, -17.5, -30.31, -9.06, -33.81, -0, -35, 9.06, -33.81, 17.5, -30.31, 24.75, -24.75, 30.31, -17.5, 33.81, -9.06)
+polygon = PackedVector2Array(35.1, 8.01, 28.15, 22.45, 15.62, 32.43, 0, 36, -15.62, 32.43, -28.15, 22.45, -35.1, 8.01, -35.1, -8.01, -28.15, -22.45, -15.62, -32.43, 0, -36, 15.62, -32.43, 28.15, -22.45, 35.1, -8.01)
 
 [node name="Spoke0" type="Polygon2D" parent="."]
 color = Color(0.42, 0.43, 0.46, 1)
-polygon = PackedVector2Array(0, 1, 35, 1, 35, -1, 0, -1)
+polygon = PackedVector2Array(-34, 2, 34, 2, 34, -2, -34, -2)
 
 [node name="Spoke1" type="Polygon2D" parent="."]
 color = Color(0.42, 0.43, 0.46, 1)
-polygon = PackedVector2Array(-0.87, 0.5, 16.63, 30.81, 18.37, 29.81, 0.87, -0.5)
+polygon = PackedVector2Array(-18.73, -28.4, 15.27, 30.4, 18.73, 28.4, -15.27, -30.4)
 
 [node name="Spoke2" type="Polygon2D" parent="."]
 color = Color(0.42, 0.43, 0.46, 1)
-polygon = PackedVector2Array(-0.87, -0.5, -18.37, 29.81, -16.63, 30.81, 0.87, 0.5)
+polygon = PackedVector2Array(-15.27, 30.4, 18.73, -28.4, 15.27, -30.4, -18.73, 28.4)
 
-[node name="Spoke3" type="Polygon2D" parent="."]
-color = Color(0.42, 0.43, 0.46, 1)
-polygon = PackedVector2Array(-0, -1, -35, -1, -35, 1, 0, 1)
-
-[node name="Spoke4" type="Polygon2D" parent="."]
-color = Color(0.42, 0.43, 0.46, 1)
-polygon = PackedVector2Array(0.87, -0.5, -16.63, -30.81, -18.37, -29.81, -0.87, 0.5)
-
-[node name="Spoke5" type="Polygon2D" parent="."]
-color = Color(0.42, 0.43, 0.46, 1)
-polygon = PackedVector2Array(0.87, 0.5, 18.37, -29.81, 16.63, -30.81, -0.87, -0.5)
-
-[node name="Rung0" type="Polygon2D" parent="."]
-color = Color(0.72, 0.73, 0.76, 1)
-polygon = PackedVector2Array(35.6, 0, 34.8, 1.39, 33.2, 1.39, 32.4, 0, 33.2, -1.39, 34.8, -1.39)
-
-[node name="Rung1" type="Polygon2D" parent="."]
-color = Color(0.72, 0.73, 0.76, 1)
-polygon = PackedVector2Array(33.94, 10.51, 33.14, 11.89, 31.54, 11.89, 30.74, 10.51, 31.54, 9.12, 33.14, 9.12)
-
-[node name="Rung2" type="Polygon2D" parent="."]
-color = Color(0.72, 0.73, 0.76, 1)
-polygon = PackedVector2Array(29.11, 19.98, 28.31, 21.37, 26.71, 21.37, 25.91, 19.98, 26.71, 18.6, 28.31, 18.6)
-
-[node name="Rung3" type="Polygon2D" parent="."]
-color = Color(0.72, 0.73, 0.76, 1)
-polygon = PackedVector2Array(21.58, 27.51, 20.78, 28.89, 19.18, 28.89, 18.38, 27.51, 19.18, 26.12, 20.78, 26.12)
-
-[node name="Rung4" type="Polygon2D" parent="."]
-color = Color(0.72, 0.73, 0.76, 1)
-polygon = PackedVector2Array(12.11, 32.34, 11.31, 33.72, 9.71, 33.72, 8.91, 32.34, 9.71, 30.95, 11.31, 30.95)
-
-[node name="Rung5" type="Polygon2D" parent="."]
-color = Color(0.72, 0.73, 0.76, 1)
-polygon = PackedVector2Array(1.6, 34, 0.8, 35.39, -0.8, 35.39, -1.6, 34, -0.8, 32.61, 0.8, 32.61)
-
-[node name="Rung6" type="Polygon2D" parent="."]
-color = Color(0.72, 0.73, 0.76, 1)
-polygon = PackedVector2Array(-8.91, 32.34, -9.71, 33.72, -11.31, 33.72, -12.11, 32.34, -11.31, 30.95, -9.71, 30.95)
-
-[node name="Rung7" type="Polygon2D" parent="."]
-color = Color(0.72, 0.73, 0.76, 1)
-polygon = PackedVector2Array(-18.38, 27.51, -19.18, 28.89, -20.78, 28.89, -21.58, 27.51, -20.78, 26.12, -19.18, 26.12)
-
-[node name="Rung8" type="Polygon2D" parent="."]
-color = Color(0.72, 0.73, 0.76, 1)
-polygon = PackedVector2Array(-25.91, 19.98, -26.71, 21.37, -28.31, 21.37, -29.11, 19.98, -28.31, 18.6, -26.71, 18.6)
-
-[node name="Rung9" type="Polygon2D" parent="."]
-color = Color(0.72, 0.73, 0.76, 1)
-polygon = PackedVector2Array(-30.74, 10.51, -31.54, 11.89, -33.14, 11.89, -33.94, 10.51, -33.14, 9.12, -31.54, 9.12)
-
-[node name="Rung10" type="Polygon2D" parent="."]
-color = Color(0.72, 0.73, 0.76, 1)
-polygon = PackedVector2Array(-32.4, 0, -33.2, 1.39, -34.8, 1.39, -35.6, 0, -34.8, -1.39, -33.2, -1.39)
-
-[node name="Rung11" type="Polygon2D" parent="."]
-color = Color(0.72, 0.73, 0.76, 1)
-polygon = PackedVector2Array(-30.74, -10.51, -31.54, -9.12, -33.14, -9.12, -33.94, -10.51, -33.14, -11.89, -31.54, -11.89)
-
-[node name="Rung12" type="Polygon2D" parent="."]
-color = Color(0.72, 0.73, 0.76, 1)
-polygon = PackedVector2Array(-25.91, -19.98, -26.71, -18.6, -28.31, -18.6, -29.11, -19.98, -28.31, -21.37, -26.71, -21.37)
-
-[node name="Rung13" type="Polygon2D" parent="."]
-color = Color(0.72, 0.73, 0.76, 1)
-polygon = PackedVector2Array(-18.38, -27.51, -19.18, -26.12, -20.78, -26.12, -21.58, -27.51, -20.78, -28.89, -19.18, -28.89)
-
-[node name="Rung14" type="Polygon2D" parent="."]
-color = Color(0.72, 0.73, 0.76, 1)
-polygon = PackedVector2Array(-8.91, -32.34, -9.71, -30.95, -11.31, -30.95, -12.11, -32.34, -11.31, -33.72, -9.71, -33.72)
-
-[node name="Rung15" type="Polygon2D" parent="."]
-color = Color(0.72, 0.73, 0.76, 1)
-polygon = PackedVector2Array(1.6, -34, 0.8, -32.61, -0.8, -32.61, -1.6, -34, -0.8, -35.39, 0.8, -35.39)
-
-[node name="Rung16" type="Polygon2D" parent="."]
-color = Color(0.72, 0.73, 0.76, 1)
-polygon = PackedVector2Array(12.11, -32.34, 11.31, -30.95, 9.71, -30.95, 8.91, -32.34, 9.71, -33.72, 11.31, -33.72)
-
-[node name="Rung17" type="Polygon2D" parent="."]
-color = Color(0.72, 0.73, 0.76, 1)
-polygon = PackedVector2Array(21.58, -27.51, 20.78, -26.12, 19.18, -26.12, 18.38, -27.51, 19.18, -28.89, 20.78, -28.89)
-
-[node name="Rung18" type="Polygon2D" parent="."]
-color = Color(0.72, 0.73, 0.76, 1)
-polygon = PackedVector2Array(29.11, -19.98, 28.31, -18.6, 26.71, -18.6, 25.91, -19.98, 26.71, -21.37, 28.31, -21.37)
-
-[node name="Rung19" type="Polygon2D" parent="."]
-color = Color(0.72, 0.73, 0.76, 1)
-polygon = PackedVector2Array(33.94, -10.51, 33.14, -9.12, 31.54, -9.12, 30.74, -10.51, 31.54, -11.89, 33.14, -11.89)
-
-[node name="RimTape" type="Polygon2D" parent="."]
-color = Color(0.7, 0.2, 0.2, 1)
-polygon = PackedVector2Array(26, 25, 30, 21, 33, 24, 29, 28)
-
-[node name="Hub" type="Polygon2D" parent="."]
-color = Color(0.5, 0.5, 0.53, 1)
-polygon = PackedVector2Array(5, 0, 4.05, 2.94, 1.55, 4.76, -1.55, 4.76, -4.05, 2.94, -5, 0, -4.05, -2.94, -1.55, -4.76, 1.55, -4.76, 4.05, -2.94)
-
-[node name="HubBolt" type="Polygon2D" parent="."]
-color = Color(0.75, 0.75, 0.78, 1)
-polygon = PackedVector2Array(2, 0, 1, 1.73, -1, 1.73, -2, 0, -1, -1.73, 1, -1.73)
+[node name="Rim" type="Polygon2D" parent="."]
+polygons = [PackedInt32Array(0, 1, 15, 14), PackedInt32Array(1, 2, 16, 15), PackedInt32Array(2, 3, 17, 16), PackedInt32Array(3, 4, 18, 17), PackedInt32Array(4, 5, 19, 18), PackedInt32Array(5, 6, 20, 19), PackedInt32Array(6, 7, 21, 20), PackedInt32Array(7, 8, 22, 21), PackedInt32Array(8, 9, 23, 22), PackedInt32Array(9, 10, 24, 23), PackedInt32Array(10, 11, 25, 24), PackedInt32Array(11, 12, 26, 25), PackedInt32Array(12, 13, 27, 26), PackedInt32Array(13, 0, 14, 27)]
+color = Color(0.58, 0.6, 0.62, 1)
+polygon = PackedVector2Array(37.05, 8.46, 29.71, 23.69, 16.49, 34.24, 0, 38, -16.49, 34.24, -29.71, 23.69, -37.05, 8.46, -37.05, -8.46, -29.71, -23.69, -16.49, -34.24, 0, -38, 16.49, -34.24, 29.71, -23.69, 37.05, -8.46, 31.2, 7.12, 25.02, 19.95, 13.88, 28.83, 0, 32, -13.88, 28.83, -25.02, 19.95, -31.2, 7.12, -31.2, -7.12, -25.02, -19.95, -13.88, -28.83, 0, -32, 13.88, -28.83, 25.02, -19.95, 31.2, -7.12)
 
 [node name="Hamster" type="Node2D" parent="."]
 position = Vector2(0, 32)
-
-[node name="Tail" type="Polygon2D" parent="Hamster"]
-color = Color(0.95, 0.6, 0.6, 1)
-polygon = PackedVector2Array(-11, -6, -14, -7, -13, -4)
 
 [node name="BackLegs" type="Node2D" parent="Hamster"]
 position = Vector2(-5, -3)
 
 [node name="Leg" type="Polygon2D" parent="Hamster/BackLegs"]
-color = Color(0.95, 0.6, 0.6, 1)
-polygon = PackedVector2Array(-1.5, 0, 1.5, 0, 2, 3, -1, 3)
+color = Color(0.86, 0.58, 0.28, 1)
+polygon = PackedVector2Array(-2, -1, 2, -1, 2.5, 3, -1.5, 3)
 
 [node name="FrontLegs" type="Node2D" parent="Hamster"]
 position = Vector2(5, -3)
 
 [node name="Leg" type="Polygon2D" parent="Hamster/FrontLegs"]
-color = Color(0.95, 0.6, 0.6, 1)
-polygon = PackedVector2Array(-1.5, 0, 1.5, 0, 2, 3, -1, 3)
+color = Color(0.86, 0.58, 0.28, 1)
+polygon = PackedVector2Array(-2, -1, 2, -1, 2.5, 3, -1.5, 3)
 
 [node name="Body" type="Node2D" parent="Hamster"]
 
 [node name="Fur" type="Polygon2D" parent="Hamster/Body"]
 color = Color(0.86, 0.58, 0.28, 1)
-polygon = PackedVector2Array(11, -8, 10.16, -5.51, 7.78, -3.4, 4.21, -1.99, 0, -1.5, -4.21, -1.99, -7.78, -3.4, -10.16, -5.51, -11, -8, -10.16, -10.49, -7.78, -12.6, -4.21, -14.01, -0, -14.5, 4.21, -14.01, 7.78, -12.6, 10.16, -10.49)
-
-[node name="Belly" type="Polygon2D" parent="Hamster/Body"]
-color = Color(0.97, 0.9, 0.78, 1)
-polygon = PackedVector2Array(-7, -4, 7, -4, 5, -2, -5, -2)
-
-[node name="Cheek" type="Polygon2D" parent="Hamster/Body"]
-color = Color(0.97, 0.9, 0.78, 1)
-polygon = PackedVector2Array(10.5, -6.5, 9.83, -4.44, 8.08, -3.17, 5.92, -3.17, 4.17, -4.44, 3.5, -6.5, 4.17, -8.56, 5.92, -9.83, 8.08, -9.83, 9.83, -8.56)
-
-[node name="Ear" type="Polygon2D" parent="Hamster/Body"]
-color = Color(0.93, 0.55, 0.5, 1)
-polygon = PackedVector2Array(6.5, -14, 5.77, -12.23, 4, -11.5, 2.23, -12.23, 1.5, -14, 2.23, -15.77, 4, -16.5, 5.77, -15.77)
+polygon = PackedVector2Array(-12, -2, -10, -11, 0, -15, 9, -13, 13, -7, 12, -2)
 
 [node name="Eye" type="Polygon2D" parent="Hamster/Body"]
 color = Color(0.05, 0.05, 0.05, 1)
-polygon = PackedVector2Array(8.8, -10.5, 8.42, -9.58, 7.5, -9.2, 6.58, -9.58, 6.2, -10.5, 6.58, -11.42, 7.5, -11.8, 8.42, -11.42)
-
-[node name="EyeGlint" type="Polygon2D" parent="Hamster/Body"]
-color = Color(1, 1, 1, 1)
-polygon = PackedVector2Array(8.35, -11, 8.12, -10.61, 7.68, -10.61, 7.45, -11, 7.67, -11.39, 8.12, -11.39)
-
-[node name="Nose" type="Polygon2D" parent="Hamster/Body"]
-color = Color(0.95, 0.6, 0.6, 1)
-polygon = PackedVector2Array(12.2, -8.5, 11.6, -7.46, 10.4, -7.46, 9.8, -8.5, 10.4, -9.54, 11.6, -9.54)
+polygon = PackedVector2Array(7, -11, 10, -11, 10, -8, 7, -8)
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
 polygon = PackedVector2Array(38, 0, 36.71, 9.84, 32.91, 19, 26.87, 26.87, 19, 32.91, 9.84, 36.71, 0, 38, -9.84, 36.71, -19, 32.91, -26.87, 26.87, -32.91, 19, -36.71, 9.84, -38, 0, -36.71, -9.84, -32.91, -19, -26.87, -26.87, -19, -32.91, -9.84, -36.71, -0, -38, 9.84, -36.71, 19, -32.91, 26.87, -26.87, 32.91, -19, 36.71, -9.84)

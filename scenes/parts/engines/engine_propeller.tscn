@@ -18,90 +18,34 @@ power = 5.5
 script = ExtResource("1")
 part_data = SubResource("Resource_propeller")
 
-[node name="BasePlate" type="Polygon2D" parent="."]
+[node name="Post" type="Polygon2D" parent="."]
 color = Color(0.3, 0.3, 0.32, 1)
-polygon = PackedVector2Array(-16, 0, 16, 0, 14, -5, -14, -5)
-
-[node name="Brace" type="Polygon2D" parent="."]
-color = Color(0.45, 0.45, 0.48, 1)
-polygon = PackedVector2Array(-11.87, -3.48, 0.13, -29.48, -2.13, -30.52, -14.13, -4.52)
-
-[node name="Mast" type="Polygon2D" parent="."]
-color = Color(0.55, 0.55, 0.58, 1)
-polygon = PackedVector2Array(2.5, -4, 2.5, -40, -2.5, -40, -2.5, -4)
-
-[node name="JerryCan" type="Polygon2D" parent="."]
-color = Color(0.75, 0.18, 0.13, 1)
-polygon = PackedVector2Array(5, -5, 18, -5, 18, -22, 9, -22, 5, -18)
-
-[node name="JerryCanHandle" type="Polygon2D" parent="."]
-color = Color(0.55, 0.12, 0.1, 1)
-polygon = PackedVector2Array(10, -25, 17, -25, 17, -22, 10, -22)
-
-[node name="JerryCanX" type="Polygon2D" parent="."]
-color = Color(0.6, 0.14, 0.1, 1)
-polygon = PackedVector2Array(7.58, -7.53, 16.58, -18.53, 15.42, -19.47, 6.42, -8.47)
+polygon = PackedVector2Array(-5, -30, 5, -30, 8, 0, -8, 0)
 
 [node name="Motor" type="Polygon2D" parent="."]
 color = Color(0.28, 0.28, 0.3, 1)
-polygon = PackedVector2Array(-18, -48, -2, -48, 0, -45, 0, -35, -2, -32, -18, -32)
+polygon = PackedVector2Array(-24, -50, 2, -50, 6, -46, 6, -34, 2, -30, -24, -30)
 
-[node name="CoolingFin0" type="Polygon2D" parent="."]
-color = Color(0.42, 0.42, 0.45, 1)
-polygon = PackedVector2Array(-15, -47, -13, -47, -13, -33, -15, -33)
-
-[node name="CoolingFin1" type="Polygon2D" parent="."]
-color = Color(0.42, 0.42, 0.45, 1)
-polygon = PackedVector2Array(-11, -47, -9, -47, -9, -33, -11, -33)
-
-[node name="CoolingFin2" type="Polygon2D" parent="."]
-color = Color(0.42, 0.42, 0.45, 1)
-polygon = PackedVector2Array(-7, -47, -5, -47, -5, -33, -7, -33)
-
-[node name="SparkPlug" type="Polygon2D" parent="."]
-color = Color(0.9, 0.88, 0.8, 1)
-polygon = PackedVector2Array(-12, -53, -8, -53, -8, -48, -12, -48)
-
-[node name="OilDrip" type="Polygon2D" parent="."]
-color = Color(0.1, 0.08, 0.06, 0.8)
-polygon = PackedVector2Array(-16, -32, -13, -32, -14, -26)
+[node name="MotorShade" type="Polygon2D" parent="."]
+color = Color(0.22, 0.22, 0.24, 1)
+polygon = PackedVector2Array(-24, -36, 6, -36, 2, -30, -24, -30)
 
 [node name="Propeller" type="Node2D" parent="."]
-position = Vector2(2, -40)
+position = Vector2(10, -40)
 script = ExtResource("3")
 
 [node name="Blur" type="Polygon2D" parent="Propeller"]
 color = Color(0.85, 0.78, 0.6, 0)
-polygon = PackedVector2Array(26, 0, 25.11, 6.73, 22.52, 13, 18.38, 18.38, 13, 22.52, 6.73, 25.11, 0, 26, -6.73, 25.11, -13, 22.52, -18.38, 18.38, -22.52, 13, -25.11, 6.73, -26, 0, -25.11, -6.73, -22.52, -13, -18.38, -18.38, -13, -22.52, -6.73, -25.11, -0, -26, 6.73, -25.11, 13, -22.52, 18.38, -18.38, 22.52, -13, 25.11, -6.73)
+polygon = PackedVector2Array(25.11, 6.73, 18.38, 18.38, 6.73, 25.11, -6.73, 25.11, -18.38, 18.38, -25.11, 6.73, -25.11, -6.73, -18.38, -18.38, -6.73, -25.11, 6.73, -25.11, 18.38, -18.38, 25.11, -6.73)
 
 [node name="Blade0" type="Polygon2D" parent="Propeller"]
 color = Color(0.62, 0.42, 0.22, 1)
-polygon = PackedVector2Array(-3, -3, 3, -3, 5.5, -13, 4, -24, 0, -26.5, -3.5, -23, -4.5, -12)
-
-[node name="BladeGrain0" type="Polygon2D" parent="Propeller"]
-color = Color(0.52, 0.34, 0.17, 1)
-polygon = PackedVector2Array(0, -4, 1.5, -4, 2, -20, 0.5, -20)
-
-[node name="BladeTip0" type="Polygon2D" parent="Propeller"]
-color = Color(0.95, 0.78, 0.2, 1)
-polygon = PackedVector2Array(4.3, -21, 4, -24, 0, -26.5, -3.5, -23, -3.8, -20)
+polygon = PackedVector2Array(-3, -3, 3, -3, 5, -24, 0, -27, -5, -24)
 
 [node name="Blade1" type="Polygon2D" parent="Propeller"]
 color = Color(0.62, 0.42, 0.22, 1)
-polygon = PackedVector2Array(3, 3, -3, 3, -5.5, 13, -4, 24, 0, 26.5, 3.5, 23, 4.5, 12)
-
-[node name="BladeGrain1" type="Polygon2D" parent="Propeller"]
-color = Color(0.52, 0.34, 0.17, 1)
-polygon = PackedVector2Array(0, 4, -1.5, 4, -2, 20, -0.5, 20)
-
-[node name="BladeTip1" type="Polygon2D" parent="Propeller"]
-color = Color(0.95, 0.78, 0.2, 1)
-polygon = PackedVector2Array(-4.3, 21, -4, 24, 0, 26.5, 3.5, 23, 3.8, 20)
+polygon = PackedVector2Array(3, 3, -3, 3, -5, 24, 0, 27, 5, 24)
 
 [node name="Spinner" type="Polygon2D" parent="Propeller"]
 color = Color(0.8, 0.2, 0.15, 1)
-polygon = PackedVector2Array(4.5, 0, 3.64, 2.65, 1.39, 4.28, -1.39, 4.28, -3.64, 2.65, -4.5, 0, -3.64, -2.65, -1.39, -4.28, 1.39, -4.28, 3.64, -2.65)
-
-[node name="SpinnerShine" type="Polygon2D" parent="Propeller"]
-color = Color(0.95, 0.5, 0.45, 1)
-polygon = PackedVector2Array(0.3, -1.2, -0.45, 0.1, -1.95, 0.1, -2.7, -1.2, -1.95, -2.5, -0.45, -2.5)
+polygon = PackedVector2Array(4.76, 2.75, 0, 5.5, -4.76, 2.75, -4.76, -2.75, 0, -5.5, 4.76, -2.75)

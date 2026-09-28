@@ -50,7 +50,7 @@ var _plunger_rest_positions: Dictionary = {}
 
 @onready var _spring: Polygon2D = $Spring
 @onready var _spring_length: float = _measure_height(_spring.polygon)
-@onready var _plunger_parts: Array[Polygon2D] = [$Plunger, $Foot, $FootTread]
+@onready var _plunger_parts: Array[Polygon2D] = [$Plunger, $Foot]
 
 func _ready() -> void:
 	super()

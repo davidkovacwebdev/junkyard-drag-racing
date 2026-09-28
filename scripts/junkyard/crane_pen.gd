@@ -189,25 +189,24 @@ func _draw() -> void:
 	draw_rect(Rect2(-2400.0, 0.0, 4800.0, 1200.0), dirt_color)
 	_draw_wall()
 	draw_rect(pit_rect, pit_color)
-	draw_rect(pit_rect, kerb_color, false, 10.0)
+	draw_rect(Rect2(pit_rect.position, Vector2(pit_rect.size.x, 14.0)), kerb_color)
 	_draw_stains()
 
-## Corrugated sheet along the back of the lot, ribs and all.
+## Sheet-metal wall along the back of the lot, a few wide ribs.
 func _draw_wall() -> void:
 	var top := -900.0
 	var height := 250.0
 	draw_rect(Rect2(-2400.0, top, 4800.0, height), wall_color)
 	var x := -2400.0
 	while x < 2400.0:
-		draw_line(Vector2(x, top), Vector2(x, top + height), wall_dark, 6.0)
-		x += 34.0
-	draw_line(Vector2(-2400.0, top), Vector2(2400.0, top), wall_dark, 10.0)
-	draw_line(Vector2(-2400.0, top + height), Vector2(2400.0, top + height), wall_dark, 10.0)
+		draw_rect(Rect2(x, top, 18.0, height), wall_dark)
+		x += 160.0
 
 ## Oil stains around the machinery, deterministic so the lot doesn't shimmer.
 func _draw_stains() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 11
-	for i in 12:
+	for i in 6:
 		var pos := Vector2(rng.randf_range(-900.0, 800.0), rng.randf_range(20.0, 320.0))
-		draw_circle(pos, rng.randf_range(30.0, 74.0), stain_color)
+		var radius := rng.randf_range(40.0, 80.0)
+		draw_colored_polygon(FlatProps.octagon(pos, radius, radius * 0.6), stain_color)

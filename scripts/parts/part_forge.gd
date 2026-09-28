@@ -24,14 +24,14 @@ extends RefCounted
 
 const MIN_INGREDIENTS := 2
 const MAX_INGREDIENTS := 3
-const MAX_FRONT_SCRAP := 360
-const MAX_BACK_SCRAP := 200
+const MAX_FRONT_SCRAP := 24
+const MAX_BACK_SCRAP := 12
 const MAX_NAME_LETTERS := 12
 ## Donor pieces smaller than this share of the donor's art aren't fused in.
-const MIN_LEFTOVER_SHARE := 0.002
+const MIN_LEFTOVER_SHARE := 0.02
 ## Fused donor pieces bigger than this share of the part go behind it.
 const BACKDROP_SHARE := 0.2
-const MAX_LEFTOVERS := 60
+const MAX_LEFTOVERS := 6
 ## How much a donor's shape comes through, from a featherweight donor to one
 ## that outweighs the base; later donors in a three-part mash pull less.
 const BLEND_RANGE := Vector2(0.35, 0.65)

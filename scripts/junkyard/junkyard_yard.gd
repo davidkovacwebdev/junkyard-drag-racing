@@ -43,11 +43,12 @@ func _draw() -> void:
 func _draw_stains() -> void:
 	var rng := _rng()
 	var half := yard_size / 2.0
-	for i in 14:
+	for i in 6:
 		var pos := Vector2(
 				rng.randf_range(-half.x + 80.0, half.x - 80.0),
 				rng.randf_range(-half.y + 80.0, half.y - 80.0))
-		draw_circle(pos, rng.randf_range(24.0, 58.0), stain_color)
+		var radius := rng.randf_range(36.0, 70.0)
+		draw_colored_polygon(FlatProps.octagon(pos, radius, radius * 0.6), stain_color)
 
 ## Long shallow ruts where cars have been dragged across the lot.
 func _draw_ruts() -> void:
@@ -89,7 +90,7 @@ func _draw_side(from: Vector2, to: Vector2, with_gate: bool) -> void:
 func _draw_rails(from: Vector2, to: Vector2) -> void:
 	var up := Vector2(0.0, -1.0)
 	for offset in PackedFloat32Array([20.0, 54.0, 86.0]):
-		draw_line(from + up * offset, to + up * offset, fence_color, 3.0)
+		draw_colored_polygon(FlatProps.sliver(from + up * offset, to + up * offset, 5.0), fence_color)
 
 ## Two taller, lighter posts framing the way in.
 func _draw_gate_posts(front_y: float) -> void:

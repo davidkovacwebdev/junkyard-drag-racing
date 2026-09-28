@@ -69,7 +69,6 @@ enum Kind {
 ## Inside of the box, visible once the lid swings open.
 @export var interior_color: Color = Color(0.13, 0.15, 0.15, 1)
 @export var trash_color: Color = Color(0.26, 0.24, 0.21, 1)
-@export var can_color: Color = Color(0.62, 0.6, 0.5, 1)
 @export var rust_color: Color = Color(0.55, 0.32, 0.18, 0.75)
 @export var shadow_color: Color = Color(0, 0, 0, 0.16)
 
@@ -115,12 +114,24 @@ const BIN_H := 66.0
 const BIN_LID_H := 9.0
 const BIN_FOOTPRINT := Vector2(56.0, 18.0)
 
-## Lid angle when the prop still has trash in it: closed, but eased up a crack
-## by the junk heaped against it.
-const LID_FULL_ANGLE := -0.10
+## The lid is hinged along the back of the rim and flipped up behind the box.
+## How tall it stands above the rim, as a share of the top width. Full boxes
+## get a lid that is leaned further back by the heap, so it shows less.
+const LID_OPEN_RISE := 0.42
+## A full container's lid lies shut on top, propped up at the front by the
+## heap: this is the gap between the rim and the lid's front lip, in pixels.
+const LID_PROP_GAP := 12.0
+const LID_THICKNESS := 16.0
+## Chance a full small bin has a bag dumped beside it. Full containers always do.
+const BIN_OVERFLOW_CHANCE := 0.4
+## How deep the open top looks (front rim to back rim), as a share of the top width.
+const OPENING_DEPTH := 0.14
+## Small bins keep a side-hinged lid instead. Lid angle when the bin still has
+## trash in it: closed, but eased up a crack by the junk heaped against it.
+const BIN_LID_FULL_ANGLE := -0.10
 ## Lid angle once emptied. Negative swings the free edge up and back (Godot 2D
-## rotation is clockwise for positive angles), opening the box to view.
-const LID_OPEN_ANGLE := -1.15
+## rotation is clockwise for positive angles), opening the bin to view.
+const BIN_LID_OPEN_ANGLE := -1.15
 
 const TRASH_NOUNS := [
 	"bent hubcap", "rusty can", "cracked mirror", "wire bundle",
@@ -338,16 +349,27 @@ func _draw() -> void:
 	var bottom := _width_bottom()
 	var top := _width_top()
 	var height := _height()
-	var lid_h := _lid_height()
 
 	# Contact shadow, so the prop doesn't look like it's hovering.
 	draw_colored_polygon(_ellipse(Vector2(0.0, -2.0), bottom * 0.62, 8.0), shadow_color)
-	_draw_body(bottom, top, height, rng)
-	_draw_interior(top, height)
-	_draw_lid(top, height, lid_h)
-	if filled:
-		_draw_trash(top, height, lid_h, rng)
+	if kind == Kind.CONTAINER and filled:
+		_draw_interior(top, height)
+		_draw_trash(top, height, rng)
+		_draw_body(bottom, top, height, rng)
+		_draw_closed_lid(top, height)
+	elif kind == Kind.CONTAINER:
+		_draw_lid(top, height)
+		_draw_interior(top, height)
+		_draw_body(bottom, top, height, rng)
+	else:
+		_draw_body(bottom, top, height, rng)
+		_draw_bin_interior(top, height)
+		_draw_bin_lid(top, height)
+		if filled:
+			_draw_bin_trash(top, height, rng)
 	_draw_base(bottom)
+	if filled:
+		_draw_overflow(bottom, height)
 
 ## The tapered steel box, plus a shaded side face, ribs and rust patches. Every
 ## shape here is a flat fill — no outline strokes, matching the house/tree art.
@@ -379,113 +401,120 @@ func _draw_body(bottom: float, top: float, height: float, rng: RandomNumberGener
 		Vector2(top * 0.5 - top * shade_share, -height),
 	]), body_color.darkened(0.18))
 
-	# Panel seams as thin flat ridges rather than stroked lines.
-	var ribs := 4 if kind == Kind.CONTAINER else 2
-	var rib_half := 1.5
-	var rib_color := body_color.lightened(0.1)
-	for i in ribs:
-		var t := (float(i) + 0.5) / float(ribs)
-		var xb := lerpf(-bottom * 0.5, bottom * 0.5, t)
-		var xt := xb * (top / bottom)
-		draw_colored_polygon(PackedVector2Array([
-			Vector2(xb - rib_half, -5.0),
-			Vector2(xb + rib_half, -5.0),
-			Vector2(xt + rib_half, -height + 5.0),
-			Vector2(xt - rib_half, -height + 5.0),
-		]), rib_color)
-
-	var patches := 2 if kind == Kind.CONTAINER else 1
-	for i in patches:
+	if kind == Kind.CONTAINER:
 		var center := Vector2(
-			rng.randf_range(-bottom * 0.34, bottom * 0.34),
-			rng.randf_range(-height * 0.78, -height * 0.25))
-		draw_colored_polygon(_blob(center, bottom * 0.24, height * 0.24, rng), rust_color)
+			rng.randf_range(-bottom * 0.3, bottom * 0.3),
+			rng.randf_range(-height * 0.7, -height * 0.3))
+		draw_colored_polygon(_blob(center, bottom * 0.26, height * 0.26, rng), rust_color)
 
-## The shaded inside of the box. Drawn before the lid, so a closed (full) lid
-## hides it and an open (empty) lid leaves it plainly visible.
+## The open top, seen from slightly above: a dark quad between the front rim
+## and the back rim. The trash in a full box sits in here.
 func _draw_interior(top: float, height: float) -> void:
+	var back := _back_rim(top, height)
+	draw_colored_polygon(PackedVector2Array([
+		Vector2(-top * 0.5, -height), Vector2(top * 0.5, -height),
+		Vector2(back.x, back.y), Vector2(-back.x, back.y),
+	]), interior_color)
+
+## Right-hand end of the back rim, where the lid's hinge runs.
+func _back_rim(top: float, height: float) -> Vector2:
+	return Vector2(top * 0.5 - top * 0.05, -height - top * OPENING_DEPTH)
+
+## The lid, flipped up on its back hinge so it stands behind the box: we see
+## its underside, a shade darker, with the grab handle along its top edge.
+func _draw_lid(top: float, height: float) -> void:
+	var overhang := 8.0 if kind == Kind.CONTAINER else 4.0
+	var hinge := _back_rim(top, height)
+	var half := hinge.x + overhang
+	var rise := top * LID_OPEN_RISE
+	var lean := top * 0.06
+	draw_colored_polygon(PackedVector2Array([
+		Vector2(-half, hinge.y),
+		Vector2(half, hinge.y),
+		Vector2(half - lean, hinge.y - rise),
+		Vector2(-half + lean, hinge.y - rise),
+	]), lid_color.darkened(0.12))
+	draw_rect(Rect2(-13.0, hinge.y - rise - 5.0, 26.0, 6.0), trim_color)
+
+## The lid shut over the top and propped up a crack by the heap, so the bags
+## show between the rim and the lid's front lip.
+func _draw_closed_lid(top: float, height: float) -> void:
+	var half := top * 0.5 + 8.0
+	var lip_bottom := -height - LID_PROP_GAP
+	draw_colored_polygon(PackedVector2Array([
+		Vector2(-half, lip_bottom),
+		Vector2(half, lip_bottom),
+		Vector2(half - 4.0, lip_bottom - LID_THICKNESS),
+		Vector2(-half + 4.0, lip_bottom - LID_THICKNESS),
+	]), lid_color)
+	draw_rect(Rect2(-13.0, lip_bottom - LID_THICKNESS - 5.0, 26.0, 6.0), trim_color)
+
+## Bags crammed into the box, their tops squeezing out under the propped lid.
+## The body and lid are drawn over them, so only the middle band shows.
+func _draw_trash(top: float, height: float, rng: RandomNumberGenerator) -> void:
+	var bags := 3
+	var bag_size := Vector2(top * 0.4, height * 0.34)
+	for i in bags:
+		var center := Vector2(
+			lerpf(-top * 0.28, top * 0.28, float(i) / float(bags - 1)),
+			-height - LID_PROP_GAP * 0.5 + rng.randf_range(-2.0, 2.0))
+		draw_colored_polygon(_blob(center, bag_size.x, bag_size.y, rng),
+				trash_color.lightened(0.08 * float(i % 2)))
+
+## The bin's shaded inside, seen through its front. Drawn before the lid, so a
+## closed (full) lid hides it and an open (empty) lid leaves it visible.
+func _draw_bin_interior(top: float, height: float) -> void:
 	var inset := top * 0.07
 	var depth := height * 0.4
 	var half := top * 0.5 - inset
-	var inner := PackedVector2Array([
+	draw_colored_polygon(PackedVector2Array([
 		Vector2(-half, -height + inset * 0.6),
 		Vector2(half, -height + inset * 0.6),
 		Vector2(half * 0.86, -height + depth),
 		Vector2(-half * 0.86, -height + depth),
-	])
-	draw_colored_polygon(inner, interior_color)
-	# A flat lighter far wall, so it reads as a box with depth rather than a
-	# hole. A filled band, not a stroked line — this art has no outlines.
+	]), interior_color)
+
+## The bin's lid, hinged at its left edge and rotated as a unit: nearly shut
+## while there's trash holding it up, swung right back once the bin is empty.
+func _draw_bin_lid(top: float, height: float) -> void:
+	var lid_h := _lid_height()
+	var lid_w := top + 8.0
+	draw_set_transform(Vector2(-lid_w * 0.5, -height), BIN_LID_FULL_ANGLE if filled else BIN_LID_OPEN_ANGLE, Vector2.ONE)
 	draw_colored_polygon(PackedVector2Array([
-		inner[0],
-		inner[1],
-		inner[1] + Vector2(0.0, 5.0),
-		inner[0] + Vector2(0.0, 5.0),
-	]), interior_color.lightened(0.22))
-
-## The lid, hinged at its left edge and rotated as a unit: nearly shut while
-## there's trash holding it up, swung right back once the box is empty.
-func _draw_lid(top: float, height: float, lid_h: float) -> void:
-	var overhang := 8.0 if kind == Kind.CONTAINER else 4.0
-	var lid_w := top + overhang * 2.0
-	var angle := LID_FULL_ANGLE if filled else LID_OPEN_ANGLE
-
-	draw_set_transform(Vector2(-lid_w * 0.5, -height), angle, Vector2.ONE)
-	var lid := PackedVector2Array([
 		Vector2(0.0, 0.0),
 		Vector2(lid_w, -lid_h * 0.18),
 		Vector2(lid_w, -lid_h),
 		Vector2(0.0, -lid_h * 0.82),
-	])
-	draw_colored_polygon(lid, lid_color)
-	# Flat shading bands instead of an outline: a lit top face and a darker
-	# front lip, the same way the crate/building parts model an edge.
-	var edge := 3.0
-	draw_colored_polygon(PackedVector2Array([
-		Vector2(0.0, 0.0),
-		Vector2(lid_w, -lid_h * 0.18),
-		Vector2(lid_w, -lid_h * 0.18 + edge),
-		Vector2(0.0, edge),
-	]), lid_color.darkened(0.22))
-	draw_colored_polygon(PackedVector2Array([
-		Vector2(0.0, -lid_h * 0.82),
-		Vector2(lid_w, -lid_h),
-		Vector2(lid_w, -lid_h + edge),
-		Vector2(0.0, -lid_h * 0.82 + edge),
-	]), lid_color.lightened(0.14))
-	# Grab handle on top, and the hinge pin at this end.
+	]), lid_color)
 	draw_rect(Rect2(lid_w * 0.5 - 13.0, -lid_h - 6.0, 26.0, 6.0), trim_color)
-	draw_circle(Vector2(0.0, -lid_h * 0.4), 4.0, trim_color)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
-## Trash heaped over the rim and squeezing out from under the lid.
-func _draw_trash(top: float, height: float, lid_h: float, rng: RandomNumberGenerator) -> void:
-	var rim := -height
-	# Overflowing past the lid's free (right) edge, the way a full skip looks.
-	var spill := top * 0.5 + (8.0 if kind == Kind.CONTAINER else 4.0)
+## Trash heaped over the bin's rim and squeezing out from under the lid.
+func _draw_bin_trash(top: float, height: float, rng: RandomNumberGenerator) -> void:
+	var lid_h := _lid_height()
 	for i in 2:
-		var center := Vector2(
-			lerpf(top * 0.1, spill + 6.0, float(i) + rng.randf_range(0.1, 0.5)),
-			rim - lid_h * 0.4 - rng.randf_range(0.0, 12.0))
-		draw_colored_polygon(_blob(center, top * 0.26, height * 0.28, rng),
-				trash_color.lightened(rng.randf_range(0.0, 0.12)))
+		var center := Vector2(lerpf(-top * 0.3, top * 0.5, float(i)),
+			-height - lid_h * 0.5 - rng.randf_range(height * 0.04, height * 0.14))
+		draw_colored_polygon(_blob(center, top * 0.34, height * 0.32, rng),
+				trash_color.lightened(0.08 * float(i % 2)))
 
-	var bags := 3 if kind == Kind.CONTAINER else 2
+## Bags dumped on the ground beside a full box: always next to a container,
+## sometimes next to a bin. Uses its own generator so it doesn't reshuffle the
+## rest of the prop's art.
+func _draw_overflow(bottom: float, height: float) -> void:
+	var rng := _rng()
+	rng.seed += 911
+	var bags := 0
+	if kind == Kind.CONTAINER:
+		bags = rng.randi_range(1, 2)
+	elif rng.randf() < BIN_OVERFLOW_CHANCE:
+		bags = 1
+	var side := -1.0 if rng.randf() < 0.5 else 1.0
+	var bag_size := Vector2(height * 0.55, height * 0.42)
 	for i in bags:
-		var center := Vector2(
-			rng.randf_range(-top * 0.34, top * 0.34),
-			rim - lid_h * 0.5 - rng.randf_range(height * 0.06, height * 0.16))
-		draw_colored_polygon(_blob(center, top * 0.3, height * 0.3, rng),
-				trash_color.lightened(rng.randf_range(0.0, 0.1)))
-
-	# A couple of small bits — cans and sticks — poking out of the heap.
-	for i in 2:
-		var center := Vector2(
-			rng.randf_range(-top * 0.4, top * 0.4),
-			rim - lid_h - rng.randf_range(2.0, 12.0))
-		var size := Vector2(rng.randf_range(9.0, 15.0), rng.randf_range(5.0, 8.0))
-		draw_colored_polygon(_rotated_quad(center, size, rng.randf_range(-1.3, 1.3)),
-				can_color)
+		var center := Vector2(side * (bottom * 0.5 + bag_size.x * (0.15 + 0.75 * i)), -bag_size.y * 0.42 + 8.0 * i)
+		draw_colored_polygon(_ellipse(center + Vector2(4.0, bag_size.y * 0.45), bag_size.x * 0.55, 5.0), shadow_color)
+		draw_colored_polygon(_blob(center, bag_size.x, bag_size.y, rng), trash_color.lightened(0.08 * float(i % 2)))
 
 ## Darker skirt and, on the container, the wheels it's meant to roll on.
 func _draw_base(bottom: float) -> void:
@@ -493,7 +522,7 @@ func _draw_base(bottom: float) -> void:
 	draw_rect(Rect2(-bottom * 0.5, -band, bottom, band), body_color.darkened(0.26))
 	if kind == Kind.CONTAINER:
 		for side: float in [-1.0, 1.0]:
-			draw_circle(Vector2(side * bottom * 0.3, -6.0), 5.5, body_color.darkened(0.5))
+			draw_colored_polygon(FlatProps.octagon(Vector2(side * bottom * 0.3, -6.0), 6.0, 6.0), body_color.darkened(0.5))
 
 # --- Geometry helpers ----------------------------------------------------------
 
@@ -505,7 +534,7 @@ func _rng() -> RandomNumberGenerator:
 ## A squashed, slightly irregular lump, used for trash bags and rust blooms.
 func _blob(center: Vector2, width: float, height: float, rng: RandomNumberGenerator) -> PackedVector2Array:
 	var points := PackedVector2Array()
-	var steps := 9
+	var steps := 7
 	for i in steps:
 		var angle := TAU * float(i) / float(steps)
 		var rx := width * 0.5 * (1.0 + rng.randf_range(-0.13, 0.13))

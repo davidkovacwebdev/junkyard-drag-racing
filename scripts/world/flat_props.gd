@@ -9,25 +9,23 @@ const RUBBER_SIDE := Color(0.14, 0.14, 0.14)
 const RUBBER_TOP := Color(0.22, 0.22, 0.21)
 
 ## A stack of `count` tyres standing on `base` (the bottom tyre's ground centre).
+## Each tyre is one slab; alternating tones keep them apart without lines.
 static func draw_tire_stack(canvas: Object, base: Vector2, count: int, radius: float = 16.0, tire_height: float = 9.0) -> void:
 	canvas.draw_colored_polygon(octagon(base + Vector2(4.0, 3.0), radius, radius * 0.45), UiPalette.SHADOW)
 	for i in count:
 		var bottom := base.y - i * tire_height
-		canvas.draw_rect(Rect2(base.x - radius, bottom - tire_height, radius * 2.0, tire_height), RUBBER_SIDE)
-		canvas.draw_colored_polygon(octagon(Vector2(base.x, bottom), radius, radius * 0.45), RUBBER_SIDE)
-		canvas.draw_colored_polygon(octagon(Vector2(base.x, bottom - tire_height), radius, radius * 0.45), RUBBER_TOP)
-	canvas.draw_colored_polygon(octagon(Vector2(base.x, base.y - count * tire_height), radius * 0.5, radius * 0.22), UiPalette.VOID)
+		canvas.draw_rect(Rect2(base.x - radius, bottom - tire_height, radius * 2.0, tire_height), RUBBER_SIDE if i % 2 == 0 else RUBBER_TOP.darkened(0.2))
+	var top := Vector2(base.x, base.y - count * tire_height)
+	canvas.draw_colored_polygon(octagon(top, radius, radius * 0.45), RUBBER_TOP)
+	canvas.draw_colored_polygon(octagon(top, radius * 0.5, radius * 0.22), UiPalette.VOID)
 
-## An upright oil drum standing on `base`, with a shaded side, two hoops and a bung.
+## An upright oil drum standing on `base`, with a shaded side and one hoop.
 static func draw_drum(canvas: Object, base: Vector2, color: Color, radius: float = 12.0, height: float = 30.0) -> void:
 	canvas.draw_colored_polygon(octagon(base + Vector2(4.0, 2.0), radius, radius * 0.45), UiPalette.SHADOW)
-	canvas.draw_colored_polygon(octagon(base, radius, radius * 0.45), color.darkened(0.2))
 	canvas.draw_rect(Rect2(base.x - radius, base.y - height, radius * 2.0, height), color)
 	canvas.draw_rect(Rect2(base.x + radius - 7.0, base.y - height, 7.0, height), color.darkened(0.2))
-	for band_y: float in [base.y - height * 0.33, base.y - height * 0.7]:
-		canvas.draw_rect(Rect2(base.x - radius, band_y, radius * 2.0, 3.0), color.darkened(0.3))
+	canvas.draw_rect(Rect2(base.x - radius, base.y - height * 0.55, radius * 2.0, 4.0), color.darkened(0.3))
 	canvas.draw_colored_polygon(octagon(Vector2(base.x, base.y - height), radius, radius * 0.45), color.lightened(0.12))
-	canvas.draw_colored_polygon(octagon(Vector2(base.x + 4.0, base.y - height), 2.5, 1.5), UiPalette.INK)
 
 ## A flat bar of `thickness` from `from` to `to` — beams, cracks, streaks.
 static func sliver(from: Vector2, to: Vector2, thickness: float) -> PackedVector2Array:

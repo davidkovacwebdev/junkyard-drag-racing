@@ -1,7 +1,7 @@
 class_name Minimap
 extends Control
-## Round overworld minimap, north-up and centred on the player's car: a steel
-## hubcap rim around a flat map disc showing the roads and every
+## Round overworld minimap, north-up and centred on the player's car: a plain
+## steel rim around a flat map disc showing the roads and every
 ## MinimapMarker landmark. The HOME marker never leaves the map — out of range
 ## it's pinned to the rim, pointing the way back.
 ##
@@ -10,13 +10,12 @@ extends Control
 
 @export var world_to_map_scale: float = 0.035
 @export var rim_width: float = 11.0
-@export var road_width_pixels: float = 3.0
+@export var road_width_pixels: float = 4.0
 @export var circle_sides: int = 22
 @export var jitter_pixels: float = 1.2
 @export var jitter_seed: int = 4417
 
 const MAP_COLOR := Color(0.29, 0.35, 0.34)
-const MAP_SHADE := Color(0.24, 0.29, 0.28)
 const ROAD_COLOR := Color(0.58, 0.62, 0.58)
 const HOME_SHADE := Color(0.80, 0.62, 0.08)
 const JUNK_COLOR := Color(0.55, 0.28, 0.14)
@@ -88,35 +87,13 @@ func _circle_points(center: Vector2, radius: float, jitter: float) -> PackedVect
 		points.append(center + Vector2.from_angle(angle) * (radius + rng.randf_range(-jitter, jitter)))
 	return points
 
-func _arc_points(center: Vector2, inner_radius: float, outer_radius: float,
-		from_angle: float, to_angle: float, steps: int) -> PackedVector2Array:
-	var points := PackedVector2Array()
-	for i in steps + 1:
-		points.append(center + Vector2.from_angle(lerpf(from_angle, to_angle, float(i) / steps)) * outer_radius)
-	for i in range(steps, -1, -1):
-		points.append(center + Vector2.from_angle(lerpf(from_angle, to_angle, float(i) / steps)) * inner_radius)
-	return points
-
 # --- Rim ------------------------------------------------------------------------
 
 func _draw() -> void:
-	var center := _center()
-	var radius := _outer_radius()
-	draw_colored_polygon(_circle_points(center + Vector2(3, 4), radius, jitter_pixels), UiPalette.SHADOW)
-	draw_colored_polygon(_circle_points(center, radius, jitter_pixels), UiPalette.STEEL_SHADE)
-	draw_colored_polygon(_circle_points(center + Vector2(-2, -2), radius - 2.0, jitter_pixels), UiPalette.STEEL_BASE)
-	draw_colored_polygon(_arc_points(center + Vector2(-2, -2), radius - 7.0, radius - 4.0,
-			deg_to_rad(195.0), deg_to_rad(250.0), 5), UiPalette.STEEL_LIGHT)
-	var rivet_radius := radius - rim_width * 0.5 - 1.0
-	for angle_degrees in [45.0, 135.0, 225.0, 315.0]:
-		var rivet := center + Vector2.from_angle(deg_to_rad(angle_degrees)) * rivet_radius
-		_draw_square(self, rivet, 1.6, UiPalette.STEEL_DARK)
+	draw_colored_polygon(_circle_points(_center(), _outer_radius(), jitter_pixels), UiPalette.STEEL_BASE)
 
 func _draw_map_disc() -> void:
-	var center := _center()
-	var radius := _map_radius()
-	_map_disc.draw_colored_polygon(_circle_points(center, radius, jitter_pixels * 0.5), MAP_SHADE)
-	_map_disc.draw_colored_polygon(_circle_points(center + Vector2(1.5, 2), radius - 2.0, 0.0), MAP_COLOR)
+	_map_disc.draw_colored_polygon(_circle_points(_center(), _map_radius(), jitter_pixels * 0.5), MAP_COLOR)
 
 # --- Map contents ---------------------------------------------------------------
 

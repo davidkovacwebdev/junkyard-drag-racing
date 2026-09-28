@@ -1,11 +1,27 @@
 ---
 name: ui-style
-description: Visual style guide for all game UI (menus, HUD, panels, buttons, bars, popups). Use whenever creating or restyling any Control-based UI so it matches the flat, cut-out polygon art used by the world.
+description: Visual style guide for all game UI (menus, HUD, minimap, panels, buttons, bars, popups, icons, cursor). Extends the Junk Toy art-style skill with UI-specific components and budgets. Use whenever creating, restyling or reviewing any Control-based UI.
 ---
 
 # Junkyard UI Style
 
-UI is cut from the same flat polygons as the world. Every shape is a solid fill with hard edges, stacked on top of other shapes. No outlines, no gradients, no textures, no blur, no rounded corners. A button is a slab. A panel is a board. A bar is a row of blocks.
+**This skill extends the Junk Toy `art-style` skill. Read that one first.** Everything in it applies to UI unchanged: silhouette plus one feature, nothing thinner than 4 px at drawn size, flat fills, no outlines, the "always cut" list, and the budgets. This file only adds what's specific to UI: the palette, the components, and how the pieces fit together in Godot.
+
+A button is a slab. A panel is a board. A bar is a row of blocks. Every shape is a solid fill with hard edges, stacked on top of other shapes. There are no outlines, gradients, textures, blur or rounded corners.
+
+UI sits on top of the world and repeats a lot (every button, every card, every HUD corner), so it needs to be *even plainer* than world art. A detail that's fine once becomes noise when it's on fourteen buttons.
+
+## UI budgets
+
+| Element | Shapes | What they are |
+|---|---|---|
+| Button | ≤ 5 | shadow, skirt, body, shade strip, yellow hover sliver. No nails. |
+| Panel / board | ≤ 7 | shadow, skirt, body, shade strip, two nails (big panels only), optional tape strip |
+| Card / slot | ≤ 6 | board, dark inset gap, tier tape |
+| Icon (HUD, minimap, inventory) | 3–6 | Junk Toy icon: silhouette, one shade, one feature |
+| HUD frame (minimap rim, clock board) | 1–2 | one plain ring or board. No shadow, rivets, highlight arcs or inner bevels. |
+| Readout (clock, timer) | lit segments only | no ghost/unlit segments, segments ≥ 3.5 px |
+| Cursor | 3 | shadow, body, shade flank |
 
 ## Core rules
 
@@ -17,8 +33,8 @@ UI is cut from the same flat polygons as the world. Every shape is a solid fill 
    - `Shadow` (optional) — black at 0.15–0.2 alpha, offset down/right
    - `Body` — the main tone
    - `Shade` — darker strip on one side (right or bottom)
-   - Details — seams, nails, cracks, tape (thin 2–4 px polygons)
-   - `Highlight` — one small lighter shape, top-left
+   - Detail — at most one, and only on big boards: a pair of nails, or one tape strip. Never on buttons, cards or HUD pieces.
+   - `Highlight` — only as a state cue (the yellow hover/selected sliver), not decoration
 6. **Tone steps, not new colors.** 3–5 steps of the same hue, roughly ±0.04–0.08 per channel apart.
 7. **Salvaged surfaces.** UI reads as scrap: sheet metal, cardboard, tape, rusty steel, warning signs.
 
@@ -56,9 +72,9 @@ Saturation stays low everywhere. Yellow and red are the only loud colors — use
 
 ## Components
 
-**Panel** — `Shadow` → `Skirt` → `Body` → `Shade` strip on bottom/right → 2–4 seams or nails in the corners → optional tape strip or rust streak. Slight tilt. Headers use a smaller yellow plate on top.
+**Panel** — `Shadow` → `Skirt` → `Body` → `Shade` strip on bottom/right → two corner nails on big boards → optional single tape strip. No seams, cracks or rust streaks. Slight tilt. Headers use a smaller yellow plate on top (no nails).
 
-**Button** — a single slab. Normal: body + darker bottom skirt. Hover: body steps one tone lighter and/or a yellow `Highlight` sliver appears. Pressed: shift the body down 2–3 px so the skirt shrinks. Disabled: desaturate toward post grey, alpha ~0.6.
+**Button** — a single slab with no nails. Normal: body + darker bottom skirt. Hover: body steps one tone lighter and/or a yellow `Highlight` sliver appears. Pressed: shift the body down 2–3 px so the skirt shrinks. Disabled: desaturate toward post grey, alpha ~0.6.
 
 **Progress / stat bar** — separate blocks with small gaps. Empty cells dark (`0.35, 0.33, 0.25`), filled cells use an accent. Blocks can be slightly uneven heights.
 
@@ -68,11 +84,15 @@ Saturation stays low everywhere. Yellow and red are the only loud colors — use
 
 **Drop-target highlights** — flat, pulsing translucent yellow shapes over the target (an octagon, or a wash over the polygons). Never a ring or outline.
 
-**Icons** — 3–8 polygons max, one shade, one highlight. Prefer scaling down an existing world part scene over drawing a new icon.
+**Icons** — Junk Toy budget: 3–6 polygons, one shade, no decorative highlight, nothing thinner than 4 px at the icon's drawn size (a 28 px HUD icon can't have a 2 px ring binder). Prefer scaling down an existing world part scene over drawing a new icon.
+
+**Minimap** — one plain steel ring around a flat map disc. Roads are 4 px bars, landmarks are simple two-tone icons, and the player is an arrow. No drop shadow, rivets, rim highlight or inner bevel.
+
+**Digital readouts** (clock, race timer) — a small board with a void screen and chunky seven-segment digits. Draw only the lit segments.
 
 **Dividers** — a thin seam or a strip of hazard stripes (alternating yellow / ink parallelograms, no frame around them). Never a 1 px line.
 
-**Cursor** — a bent offcut of blue-grey steel (the steel tones), with shadow, body, shade flank, one rivet and one highlight. Not yellow: yellow stays reserved for UI state.
+**Cursor** — a bent offcut of blue-grey steel (the steel tones): shadow, body, shade flank. Not yellow: yellow stays reserved for UI state.
 
 **Overlays** — plain black at 0.4–0.6 alpha behind a panel; the panel carries the style.
 
@@ -80,7 +100,7 @@ Saturation stays low everywhere. Yellow and red are the only loud colors — use
 
 - Use the existing components before writing new drawing code:
   - `UiPalette` (`scripts/ui/ui_palette.gd`): the palette above as constants.
-  - `ScrapBoard` (`scripts/ui/scrap_board.gd`): draws one board (shadow, skirt, body, shade, nails, highlight; no frame) with seeded corner jitter and tilt. Everything below builds on it.
+  - `ScrapBoard` (`scripts/ui/scrap_board.gd`): draws one board (shadow, skirt, body, shade, optional nails, optional highlight; no frame) with seeded corner jitter and tilt. Everything below builds on it. Set `nails = false` for anything smaller than a panel.
   - `ScrapPanel` (`scripts/ui/scrap_panel.gd`): a Control board to put labels on (title plates, dialog backs, sign posts).
   - `ScrapButton` (`scripts/ui/scrap_button.gd`): extends `BaseButton` and draws its own slab and straight text. Hover/focus gives a lighter slab, a yellow sliver, an elastic wobble and a `ui_hover` tick. Pressed pushes the slab down; disabled goes grey. Give each one its own `tilt_degrees` and `jitter_seed`.
   - `HazardStripe` (`scripts/ui/hazard_stripe.gd`): divider.
@@ -95,15 +115,18 @@ Saturation stays low everywhere. Yellow and red are the only loud colors — use
 - Plain `Polygon2D` children under a Control are fine for fixed-size decorations that never resize.
 - Do NOT use `StyleBoxFlat` rounded corners, borders, shadows, or anti-aliasing. Flat, square `StyleBoxFlat`s are only for native widgets we can't draw ourselves (scrollbars, tooltips) and live in `scrap_theme.tres`. Layout-only containers use `StyleBoxEmpty` for margins and draw a ScrapBoard in `_draw()`.
 - Dark or dev-tool screens can use the steel tones for the main board with off-white text (see the F1 dev menu); normal screens use wood and cardboard.
-- Name every polygon by what it is (`Body`, `Shade`, `Skirt`, `Seam1`, `NailTopLeft`, `Highlight`).
+- Name every polygon by what it is (`Body`, `Shade`, `Skirt`, `NailTopLeft`, `Highlight`).
 - Keep colors in one shared palette script/const once more than one UI script needs them.
 - Animations stay chunky: snaps, wobbles, and position bumps with tweens. No fades on individual shapes except whole-screen overlays.
 
 ## Checklist before finishing
 
+- [ ] Passes the `art-style` (Junk Toy) checklist
+- [ ] Within the UI budget table above. Repeated elements (buttons, cards) carry no decoration.
 - [ ] Only flat fills — no outlines or frame rings, no gradients, textures, or rounded StyleBoxes
 - [ ] Each element has a darker shade/skirt and at most one highlight
 - [ ] Shapes slightly irregular, text straight
 - [ ] Colors come from the palette (or are tone steps of them)
 - [ ] Yellow/red used only for accent/state
-- [ ] Reads clearly at the game's resolution — ask the user to eyeball it instead of building visual tests
+- [ ] Nothing thinner than 4 px at its drawn size, so check small HUD pieces at their real size
+- [ ] Reads clearly at the game's resolution. Render it with `tools/art_gallery.tscn` (`screens`), or ask the user to eyeball it instead of building visual tests

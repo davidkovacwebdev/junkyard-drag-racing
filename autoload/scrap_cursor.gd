@@ -84,15 +84,12 @@ func _squash() -> void:
 	_squash_tween.tween_property(_pointer, "scale", Vector2.ONE * BASE_SCALE, SPRING_TIME) \
 			.set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
 
-## The arrow itself, a bent offcut of blue-grey steel: shadow, body, shade on
-## the lower flank, one rivet, one highlight. No outline. Tip at the origin,
-## pointing up-left.
+## The arrow itself, a bent offcut of blue-grey steel: shadow, body and shade
+## on the lower flank. No outline. Tip at the origin, pointing up-left.
 class _CursorArt extends Node2D:
 	const BODY := [Vector2(0, 0), Vector2(0, 25), Vector2(6, 19), Vector2(11, 30),
 			Vector2(16, 28), Vector2(11, 17), Vector2(19, 17)]
 	const TAIL := [Vector2(6, 19), Vector2(11, 30), Vector2(16, 28), Vector2(11, 17)]
-	const HIGHLIGHT := [Vector2(2, 5), Vector2(4, 7), Vector2(4, 16), Vector2(2, 18)]
-	const RIVET := [Vector2(6, 11), Vector2(9, 11), Vector2(9, 14), Vector2(6, 14)]
 	const SHADOW_OFFSET := Vector2(3, 4)
 
 	func _draw() -> void:
@@ -103,5 +100,3 @@ class _CursorArt extends Node2D:
 		draw_colored_polygon(shadow, UiPalette.SHADOW)
 		draw_colored_polygon(body, UiPalette.STEEL_BASE)
 		draw_colored_polygon(PackedVector2Array(TAIL), UiPalette.STEEL_SHADE)
-		draw_colored_polygon(PackedVector2Array(HIGHLIGHT), UiPalette.STEEL_LIGHT)
-		draw_colored_polygon(PackedVector2Array(RIVET), UiPalette.STEEL_DARK)
