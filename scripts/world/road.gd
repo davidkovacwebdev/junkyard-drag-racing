@@ -188,6 +188,8 @@ class DrawChunk:
 	## Pairs of points, for `draw_multiline`.
 	var edge_segments := PackedVector2Array()
 	var dash_segments := PackedVector2Array()
+	## Every edge line and dash, baked into one draw command.
+	var markings := TriangleBatch.new()
 
 ## What one authored curve contributes to the network.
 class AuthoredRoad:
@@ -839,12 +841,9 @@ func _draw_chunk_layer(canvas: Node2D, cell: Vector2i, layer: ChunkLayer) -> voi
 			for center in chunk.islands:
 				_draw_island(canvas, center)
 			# Markings are thin enough that loose segments show no seam at the
-			# bends, and one multiline per chunk is one draw call instead of one
-			# per dash.
-			if not chunk.edge_segments.is_empty():
-				canvas.draw_multiline(chunk.edge_segments, edge_color, edge_width, true)
-			if not chunk.dash_segments.is_empty():
-				canvas.draw_multiline(chunk.dash_segments, line_color, line_width, true)
+			# bends. An anti-aliased multiline costs a command per segment, which
+			# is thousands on screen when zoomed out, so they come pre-baked.
+			chunk.markings.commit(canvas)
 
 ## A road surface: thick lines with a disc at every corner, end and chunk seam,
 ## so bends and the joins between chunks come out round instead of notched.
@@ -886,6 +885,9 @@ func _build_draw_chunks() -> void:
 			var chunk := _chunk_at((run[s - 1] + run[s]) * 0.5)
 			chunk.dash_segments.append(run[s - 1])
 			chunk.dash_segments.append(run[s])
+	for chunk: DrawChunk in _draw_chunks.values():
+		chunk.markings.add_segments(chunk.edge_segments, edge_color, edge_width)
+		chunk.markings.add_segments(chunk.dash_segments, line_color, line_width)
 
 func _add_ribbon_pieces(points: PackedVector2Array) -> void:
 	var cell := _chunk_cell((points[0] + points[1]) * 0.5)
