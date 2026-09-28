@@ -33,6 +33,7 @@ DayNightCycle="*res://autoload/day_night_cycle.gd"
 Weather="*res://autoload/weather.gd"
 RaceProgression="*res://autoload/race_progression.gd"
 DevMenu="*res://scenes/ui/dev_menu.tscn"
+FpsCounter="*res://autoload/fps_counter.gd"
 
 [display]
 

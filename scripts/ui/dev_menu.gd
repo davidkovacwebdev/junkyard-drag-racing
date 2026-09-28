@@ -3,7 +3,8 @@ extends CanvasLayer
 ## pickup - so the loot path (spawn, drive over it, Inventory, garage) can be
 ## tested without digging up half the map first.
 ##
-## F1 toggles it, from any scene. The rows are the very same `PartSlot` the
+## F1 toggles it, from any scene, M adds money and P stocks the spare stash with
+## every part. The rows are the very same `PartSlot` the
 ## garage uses, so a part looks and reads identically in both places; clicking
 ## one drops that part on the ground as a real `PartPickup` beside the car. A dev
 ## spawn is not special-cased anywhere downstream - it is collected, copied and
@@ -39,6 +40,8 @@ const _DROP_TIME := 0.5
 ## Scrap amounts offered, smallest first. There is no single "right" amount to
 ## hand a developer, so these are the orders of magnitude the economy spans.
 const _SCRAP_AMOUNTS := [1, 5, 25, 100, 1000]
+const _DEV_MONEY_AMOUNT := 1000
+const _DEV_PART_COPIES := 99
 
 const _PART_PICKUP_SCENE := preload("res://scenes/world/part_pickup.tscn")
 const _SCRAP_PICKUP_SCENE := preload("res://scenes/world/scrap_pickup.tscn")
@@ -130,10 +133,34 @@ func close() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not _enabled:
 		return
-	if event is InputEventKey and event.pressed and not event.echo \
-			and event.physical_keycode == KEY_F1:
-		toggle()
-		get_viewport().set_input_as_handled()
+	if not (event is InputEventKey and event.pressed and not event.echo):
+		return
+	match event.physical_keycode:
+		KEY_F1:
+			toggle()
+			get_viewport().set_input_as_handled()
+		KEY_M:
+			_add_dev_money()
+			get_viewport().set_input_as_handled()
+		KEY_P:
+			_add_every_part()
+			get_viewport().set_input_as_handled()
+
+func _add_dev_money() -> void:
+	Inventory.money += _DEV_MONEY_AMOUNT
+	Sfx.play(&"cash_register", -4.0, 0.0)
+	_set_status("Added $%d. You have $%d." % [_DEV_MONEY_AMOUNT, Inventory.money])
+
+func _add_every_part() -> void:
+	var catalogue: Array[PartData] = []
+	catalogue.append_array(PartDatabase.bodies)
+	catalogue.append_array(PartDatabase.engines)
+	catalogue.append_array(PartDatabase.wheels)
+	for part in catalogue:
+		for i in _DEV_PART_COPIES:
+			Inventory.add_part(part)
+	Sfx.play(&"part_pickup", -4.0, 0.0)
+	_set_status("Added %d of each of %d parts." % [_DEV_PART_COPIES, catalogue.size()])
 
 ## Clicking the dimmed area behind the panel closes, the same as F1.
 func _on_backdrop_input(event: InputEvent) -> void:

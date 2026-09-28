@@ -7,6 +7,8 @@ extends Node
 var bodies: Array[BodyPartData] = []
 var wheels: Array[WheelPartData] = []
 var engines: Array[EnginePartData] = []
+## The engines that turn up as loot in bins and junk heaps.
+var junk_engines: Array[EnginePartData] = []
 
 const _BODY_SCENES := [
 	"res://scenes/parts/bodies/body_classic.tscn",
@@ -95,6 +97,7 @@ const _ENGINE_SCENES := [
 	"res://scenes/parts/engines/engine_co2_tank.tscn",
 	"res://scenes/parts/engines/engine_air_tank.tscn",
 	"res://scenes/parts/engines/engine_firework_rocket.tscn",
+	"res://scenes/parts/engines/engine_horse.tscn",
 ]
 
 func _ready() -> void:
@@ -107,6 +110,7 @@ func _ready() -> void:
 	_assign_tiers(bodies)
 	_assign_tiers(wheels)
 	_assign_tiers(engines)
+	junk_engines.assign(engines.filter(func(engine: EnginePartData) -> bool: return engine.found_in_junk))
 
 ## Ranks a category's parts by performance_score() and splits them into
 ## PartData.TIER_COUNT roughly-even groups — a tier is a quartile within
@@ -124,6 +128,23 @@ static func _assign_tiers(parts: Array) -> void:
 	for i in ranked.size():
 		var part: PartData = ranked[i]
 		part.tier = clampi(1 + (i * PartData.TIER_COUNT) / ranked.size(), 1, PartData.TIER_COUNT)
+
+## Where a part made outside the catalog (the scrap forge's) ranks among the
+## catalog parts of its own category, by the same quartile rule.
+func tier_for(part: PartData) -> int:
+	var catalog: Array = []
+	match part.category:
+		PartData.Category.BODY:
+			catalog = bodies
+		PartData.Category.WHEEL:
+			catalog = wheels
+		PartData.Category.ENGINE:
+			catalog = engines
+	if catalog.is_empty():
+		return PartData.TIER_COUNT
+	var score := part.performance_score()
+	var beaten := catalog.filter(func(other: PartData) -> bool: return other.performance_score() < score).size()
+	return clampi(1 + (beaten * PartData.TIER_COUNT) / catalog.size(), 1, PartData.TIER_COUNT)
 
 ## Instances a part scene just long enough to pull its PartData back out,
 ## tagging it with the scene it came from. The catalog and car-building

@@ -283,10 +283,10 @@ func _spill_part(rng: RandomNumberGenerator) -> void:
 func _pick_part_pool(rng: RandomNumberGenerator) -> Array:
 	var roll := rng.randf()
 	if roll < wheel_share:
-		return _first_filled([PartDatabase.wheels, PartDatabase.bodies, PartDatabase.engines])
+		return _first_filled([PartDatabase.wheels, PartDatabase.bodies, PartDatabase.junk_engines])
 	if roll < wheel_share + body_share:
-		return _first_filled([PartDatabase.bodies, PartDatabase.engines, PartDatabase.wheels])
-	return _first_filled([PartDatabase.engines, PartDatabase.wheels, PartDatabase.bodies])
+		return _first_filled([PartDatabase.bodies, PartDatabase.junk_engines, PartDatabase.wheels])
+	return _first_filled([PartDatabase.junk_engines, PartDatabase.wheels, PartDatabase.bodies])
 
 static func _first_filled(pools: Array) -> Array:
 	for pool in pools:

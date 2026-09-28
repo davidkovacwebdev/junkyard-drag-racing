@@ -63,9 +63,9 @@ func _build_icon() -> void:
 		_icon.queue_free()
 		_icon = null
 		_icon_center = Vector2.ZERO
-	if part == null or part.scene_path.is_empty():
+	var instance := PartFactory.instantiate(part)
+	if instance == null:
 		return
-	var instance: Node2D = (load(part.scene_path) as PackedScene).instantiate()
 	_neutralize(instance)
 	var wrapper := Node2D.new()
 	wrapper.name = "Icon"

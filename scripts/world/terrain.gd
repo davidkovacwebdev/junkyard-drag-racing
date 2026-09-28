@@ -163,6 +163,9 @@ enum Mode {
 ## by `coast_tolerance_deg`, and a sharply curved stretch needs the extra
 ## stages to reach it at all (a 90-degree turn in one segment takes about six).
 const COAST_TESSELLATE_STAGES := 8
+## Group on the shoreline's collision body, so the car can tell running into
+## the sea apart from bumping a building.
+const SHORE_GROUP := &"shore"
 
 ## One island's nested bands, outermost first. Painted in this order, so each
 ## smaller band covers the middle of the one before it and only a ring of that
@@ -286,6 +289,7 @@ func _rebuild() -> void:
 func _build_shore_collision() -> void:
 	var shore_body := StaticBody2D.new()
 	shore_body.name = "ShoreCollision"
+	shore_body.add_to_group(SHORE_GROUP)
 	for coastline in _coastlines:
 		var outline := CollisionPolygon2D.new()
 		outline.build_mode = CollisionPolygon2D.BUILD_SEGMENTS

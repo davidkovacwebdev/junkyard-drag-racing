@@ -24,6 +24,9 @@ enum MaterialType { METAL, WOOD, PLASTIC, CERAMIC, RUBBER, GLASS, FABRIC }
 ## Scene this part's actual visual/physics rig lives in — set by whatever
 ## loads the part (PartDatabase), not authored on the resource itself.
 @export var scene_path: String = ""
+## Set only on parts made at the scrap forge: how the mash differs from the
+## plain part in `scene_path`. See PartFactory.instantiate().
+@export var forge: ForgedLook
 
 ## Calibrated against the actual min/max seen across the current part
 ## catalog — not a physical unit, just enough spread that the worst and
@@ -74,6 +77,11 @@ func performance_score() -> float:
 		+ _normalize(speed, SPEED_RANGE)
 		+ (1.0 - _normalize(mass, MASS_RANGE))
 	) / 3.0
+
+## The catalog part this one is made from. A forged part has its own unique
+## `id`, but per-part assets (engine sound profiles) belong to its base part.
+func catalog_id() -> StringName:
+	return forge.base_part_id if forge != null else id
 
 static func tier_color(tier_value: int) -> Color:
 	return TIER_COLORS[clampi(tier_value, 1, TIER_COUNT) - 1]

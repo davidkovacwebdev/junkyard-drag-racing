@@ -21,6 +21,11 @@ const ROAD_COLOR := Color(0.58, 0.62, 0.58)
 const HOME_SHADE := Color(0.80, 0.62, 0.08)
 const JUNK_COLOR := Color(0.55, 0.28, 0.14)
 const JUNK_SHADE := Color(0.45, 0.22, 0.11)
+const BARN_COLOR := Color(0.62, 0.2, 0.16)
+const BARN_SHADE := Color(0.5, 0.16, 0.13)
+const ANVIL_COLOR := Color(0.26, 0.26, 0.28)
+const ANVIL_SHADE := Color(0.2, 0.2, 0.22)
+const EMBER_COLOR := Color(0.98, 0.62, 0.12)
 const HOME_ICON_SIZE := 7.0
 const LANDMARK_ICON_SIZE := 6.0
 const PLAYER_ARROW_SIZE := 7.0
@@ -192,6 +197,25 @@ func _draw_landmark(kind: MinimapMarker.Kind, at: Vector2) -> void:
 			_icon_layer.draw_colored_polygon(PackedVector2Array([
 				at + Vector2(unit * 0.6, -unit * 0.36), at + Vector2(unit, -unit * 0.6), at + Vector2(unit, unit * 0.6), at + Vector2(unit * 0.6, unit * 0.6),
 			]), UiPalette.CARDBOARD_DARK)
+		MinimapMarker.Kind.FARM:
+			_icon_layer.draw_colored_polygon(PackedVector2Array([
+				at + Vector2(-unit * 0.8, unit * 0.7), at + Vector2(-unit * 0.8, -unit * 0.2), at + Vector2(0, -unit * 0.9),
+				at + Vector2(unit * 0.8, -unit * 0.2), at + Vector2(unit * 0.8, unit * 0.7),
+			]), BARN_COLOR)
+			_icon_layer.draw_colored_polygon(PackedVector2Array([
+				at + Vector2(0, -unit * 0.9), at + Vector2(unit * 0.8, -unit * 0.2), at + Vector2(unit * 0.8, unit * 0.7), at + Vector2(unit * 0.4, unit * 0.7),
+			]), BARN_SHADE)
+			_draw_square(_icon_layer, at + Vector2(0, unit * 0.35), unit * 0.3, UiPalette.TRIM_OFF_WHITE)
+		MinimapMarker.Kind.FORGE:
+			_icon_layer.draw_colored_polygon(PackedVector2Array([
+				at + Vector2(-unit, -unit * 0.5), at + Vector2(unit * 0.8, -unit * 0.5), at + Vector2(unit * 0.8, -unit * 0.1),
+				at + Vector2(unit * 0.3, 0), at + Vector2(unit * 0.5, unit * 0.7), at + Vector2(-unit * 0.5, unit * 0.7),
+				at + Vector2(-unit * 0.3, 0), at + Vector2(-unit * 0.5, -unit * 0.2),
+			]), ANVIL_COLOR)
+			_icon_layer.draw_colored_polygon(PackedVector2Array([
+				at + Vector2(unit * 0.3, 0), at + Vector2(unit * 0.5, unit * 0.7), at + Vector2(unit * 0.15, unit * 0.7), at + Vector2(0, 0),
+			]), ANVIL_SHADE)
+			_draw_square(_icon_layer, at + Vector2(unit * 0.1, -unit * 0.85), unit * 0.2, EMBER_COLOR)
 
 func _draw_square(canvas: CanvasItem, at: Vector2, half_size: float, color: Color) -> void:
 	canvas.draw_colored_polygon(PackedVector2Array([

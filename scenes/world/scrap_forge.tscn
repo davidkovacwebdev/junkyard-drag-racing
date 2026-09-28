@@ -1,0 +1,51 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/forge_building.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/world/forge_prop.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/world/farm_prop.gd" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/world/forge_smith.tscn" id="4"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_forge"]
+resource_local_to_scene = true
+size = Vector2(260, 180)
+
+[node name="ScrapForge" type="Node2D"]
+y_sort_enabled = true
+
+[node name="Pad" type="StaticBody2D" parent="."]
+position = Vector2(-350, -150)
+script = ExtResource("2")
+kind = 3
+pad_size = Vector2(700, 380)
+
+[node name="Building" type="StaticBody2D" parent="."]
+position = Vector2(-60, -20)
+script = ExtResource("1")
+size = Vector2(260, 180)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Building"]
+shape = SubResource("RectangleShape2D_forge")
+
+[node name="Anvil" type="StaticBody2D" parent="."]
+position = Vector2(110, 130)
+script = ExtResource("2")
+
+[node name="QuenchBarrel" type="StaticBody2D" parent="."]
+position = Vector2(170, 110)
+script = ExtResource("2")
+kind = 1
+
+[node name="ScrapHeap" type="StaticBody2D" parent="."]
+position = Vector2(-250, 120)
+script = ExtResource("2")
+kind = 2
+
+[node name="ForgeSmith" parent="." instance=ExtResource("4")]
+position = Vector2(70, 150)
+
+[node name="Sign" type="StaticBody2D" parent="."]
+position = Vector2(250, 220)
+script = ExtResource("3")
+kind = 4
+sign_title = "SCRAP FORGE"
+sign_subtitle = "2 PARTS IN, 1 OUT"

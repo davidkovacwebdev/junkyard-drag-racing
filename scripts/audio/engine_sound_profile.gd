@@ -62,9 +62,10 @@ static var _loaded: Dictionary = {}
 static func for_engine(engine: EnginePartData) -> EngineSoundProfile:
 	if engine == null:
 		return null
-	if _loaded.has(engine.id):
-		return _loaded[engine.id]
-	var path := PROFILE_DIRECTORY + String(engine.id) + ".tres"
+	var profile_id := engine.catalog_id()
+	if _loaded.has(profile_id):
+		return _loaded[profile_id]
+	var path := PROFILE_DIRECTORY + String(profile_id) + ".tres"
 	var profile: EngineSoundProfile = load(path) if ResourceLoader.exists(path) else EngineSoundProfile.new()
-	_loaded[engine.id] = profile
+	_loaded[profile_id] = profile
 	return profile

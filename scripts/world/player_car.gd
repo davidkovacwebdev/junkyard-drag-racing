@@ -91,6 +91,9 @@ const GROUP := &"player"
 
 ## Hitting something harder than this (px/s of speed lost in one step) knocks.
 @export var bump_min_impact_speed: float = 150.0
+## Share of the post-hit sliding speed a hard hit leaves the car with, so a
+## crash bleeds speed off instead of dead-stopping the car.
+@export_range(0.0, 1.0) var hard_hit_speed_kept: float = 0.35
 ## Extra deceleration (px/s^2, on top of normal friction) applied while
 ## touching an obstacle but below bump_min_impact_speed — a glancing slide
 ## along its edge rather than a square hit. See the collision handling in
@@ -98,6 +101,7 @@ const GROUP := &"player"
 @export var collision_contact_friction: float = 2400.0
 @export var engine_volume_db: float = -12.0
 @export var horn_volume_db: float = -6.0
+@export var bump_volume_db: float = -6.0
 @export var tire_screech_volume_db: float = -12.0
 
 ## The ignition only clicks the first time the car shows up this session.
@@ -121,8 +125,9 @@ var _hold_progress: float = 0.0
 @onready var _tooltip_label: Label = $UI/TooltipLabel
 @onready var _hold_bar_bg: Control = $UI/HoldBarBg
 @onready var _hold_bar_fill: Control = $UI/HoldBarBg/HoldBarFill
-@onready var _scrap_label: Label = $UI/ScrapLabel
-@onready var _day_label: Label = $UI/DayLabel
+@onready var _scrap_label: Label = $UI/Resources/ScrapLabel
+@onready var _money_label: Label = $UI/Resources/MoneyLabel
+@onready var _day_label: Label = $UI/DayCounter/DayLabel
 
 var _road_network: RoadNetwork = null
 var _skid_marks: SkidMarksLayer = null
@@ -142,6 +147,7 @@ var _horn: SustainedSound
 var _tire_screech: SustainedSound
 var _bump_cooldown: float = 0.0
 var _bump_sound: StringName = &"bump"
+var _boost_sound: StringName = &"backfire"
 var _sprint_pressed_last: bool = false
 
 func _ready() -> void:
@@ -269,17 +275,19 @@ func _physics_process(delta: float) -> void:
 	velocity = velocity.move_toward(target_velocity, accel_rate * delta)
 	var velocity_before_move := velocity
 	move_and_slide()
+	_strip_velocity_into_collisions()
 
-	# move_and_slide() only strips the component of velocity that's directly
+	# The strip above only removes the component of velocity that's directly
 	# into whatever it hit — a glancing or diagonal hit leaves a tangential
 	# "slide" component alive, and move_toward keeps re-feeding that while
 	# input is held, so it can discharge as a sudden shove once we clear the
 	# obstacle's edge. A hard enough hit (same threshold the bump sound uses)
 	# kills velocity outright instead, so a real collision actually stops the
 	# car rather than storing up momentum for later.
-	var impact_speed := (velocity_before_move - velocity).length()
+	# The sea's edge just blocks the car: no crash stop, no bump.
+	var impact_speed := 0.0 if _is_touching_shore() else (velocity_before_move - velocity).length()
 	if impact_speed > bump_min_impact_speed:
-		velocity = Vector2.ZERO
+		velocity *= hard_hit_speed_kept
 	elif get_slide_collision_count() > 0 and input_dir != Vector2.ZERO:
 		# A softer, glancing touch never crosses the hard-stop threshold above
 		# in any single frame, but it's still in contact — sliding along an
@@ -316,16 +324,34 @@ func _physics_process(delta: float) -> void:
 	# The only thing looting actually tracks right now — a plain running
 	# total, no distinct item types yet — so this is the whole HUD for now.
 	# Money joins it because the scrap dealer at the junkyard pays out.
-	_scrap_label.text = "Scrap: %d    $%d" % [Inventory.scrap, Inventory.money]
-	_day_label.text = "Day %d" % DayNightCycle.day
+	_scrap_label.text = str(Inventory.scrap)
+	_money_label.text = str(Inventory.money)
+	_day_label.text = str(DayNightCycle.day)
 
 	_process_interaction(delta)
+
+## In floating motion mode move_and_slide() moves the body but never touches
+## `velocity`, so pushing into a wall would keep full speed forever.
+func _strip_velocity_into_collisions() -> void:
+	for i in get_slide_collision_count():
+		var normal := get_slide_collision(i).get_normal()
+		if velocity.dot(normal) < 0.0:
+			velocity = velocity.slide(normal)
+
+func _is_touching_shore() -> bool:
+	for i in get_slide_collision_count():
+		var collider := get_slide_collision(i).get_collider() as Node
+		if collider != null and collider.is_in_group(TerrainNetwork.SHORE_GROUP):
+			return true
+	return false
 
 ## Engine, horn and tyres ride on the car, so they sit dead centre of the
 ## camera. The engine voice comes from whatever engine is bolted on.
 func _setup_sounds(car: CarModelData) -> void:
 	if car != null and car.body != null:
 		_bump_sound = car.body.impact_sound
+	if car != null and car.engine != null:
+		_boost_sound = car.engine.boost_sound
 	var profile := EngineSoundProfile.for_engine(car.engine if car != null else null)
 	if profile != null:
 		_engine_sound = EngineSound.new()
@@ -333,7 +359,7 @@ func _setup_sounds(car: CarModelData) -> void:
 		_engine_sound.volume_db = engine_volume_db
 		add_child(_engine_sound)
 		if not _engine_started_this_session:
-			Sfx.play(&"ignition_click", -6.0, 0.0)
+			Sfx.play(car.engine.start_sound, -6.0, 0.0)
 			_engine_sound.start_up(0.35)
 	_engine_started_this_session = true
 	_horn = _add_sustained_sound(&"horn_loop", horn_volume_db)
@@ -360,12 +386,12 @@ func _update_sounds(delta: float, input_dir: Vector2, skidding: bool, impact_spe
 
 	_bump_cooldown -= delta
 	if impact_speed > bump_min_impact_speed and _bump_cooldown <= 0.0:
-		Sfx.play(_bump_sound, linear_to_db(clampf(impact_speed / max_speed, 0.3, 1.0)))
+		Sfx.play(_bump_sound, bump_volume_db + linear_to_db(clampf(impact_speed / max_speed, 0.3, 1.0)))
 		_bump_cooldown = 0.3
 
 	var sprint_pressed := Input.is_physical_key_pressed(KEY_SHIFT)
 	if sprint_pressed and not _sprint_pressed_last and input_dir != Vector2.ZERO and _engine_sound != null:
-		Sfx.play(&"backfire", -6.0)
+		Sfx.play(_boost_sound, -6.0)
 	_sprint_pressed_last = sprint_pressed
 
 ## Lean the whole car into its vertical movement: climbing (W/Up) tips the

@@ -19,21 +19,33 @@ class AssembledCar:
 ## at `spawn_position`. Wheels are matched to the body's WheelMount markers
 ## in order; extra wheel scenes beyond the body's mount count are ignored.
 static func assemble(body_scene: PackedScene, wheel_scenes: Array[PackedScene], engine_scene: PackedScene, parent: Node, spawn_position: Vector2) -> AssembledCar:
+	var wheel_instances: Array[CarWheel] = []
+	for scene in wheel_scenes:
+		wheel_instances.append(scene.instantiate() as CarWheel)
+	var engine_instance: Node2D = engine_scene.instantiate() if engine_scene != null else null
+	return assemble_parts(body_scene.instantiate() as CarBody, wheel_instances, engine_instance, parent, spawn_position)
+
+## assemble() for parts that are already instanced (see PartFactory), which is
+## how a forged part gets onto a track with its mashed art and its own stats.
+## Takes ownership of every instance passed in; wheels beyond the body's mount
+## count are freed.
+static func assemble_parts(body_instance: CarBody, wheel_instances: Array[CarWheel], engine_instance: Node2D, parent: Node, spawn_position: Vector2) -> AssembledCar:
 	var root := Node2D.new()
 	root.name = "Car"
 	root.position = spawn_position
 	parent.add_child(root)
 
-	var body_instance := body_scene.instantiate() as CarBody
 	root.add_child(body_instance)
 
 	var mounts := body_instance.get_wheel_mounts()
 	var wheels: Array[CarWheel] = []
 	var joints: Array[PinJoint2D] = []
-	var wheel_count := mini(wheel_scenes.size(), mounts.size())
+	var wheel_count := mini(wheel_instances.size(), mounts.size())
+	for i in range(wheel_count, wheel_instances.size()):
+		wheel_instances[i].free()
 	for i in wheel_count:
 		var mount := mounts[i]
-		var wheel_instance := wheel_scenes[i].instantiate() as CarWheel
+		var wheel_instance := wheel_instances[i]
 		root.add_child(wheel_instance)
 		wheel_instance.global_position = mount.global_position
 		wheel_instance.chassis = body_instance
@@ -52,11 +64,9 @@ static func assemble(body_scene: PackedScene, wheel_scenes: Array[PackedScene], 
 		for j in range(i + 1, wheels.size()):
 			wheels[i].add_collision_exception_with(wheels[j])
 
-	var engine_instance: Node2D = null
 	var engine_power := 0.0
 	var engine_data: EnginePartData = null
-	if engine_scene != null:
-		engine_instance = engine_scene.instantiate()
+	if engine_instance != null:
 		body_instance.add_child(engine_instance)
 		# Ride on the body's EngineMount so the engine sits where THIS
 		# body's art says it goes (hood/top/stern), not on the body origin.
@@ -139,7 +149,7 @@ static func assemble(body_scene: PackedScene, wheel_scenes: Array[PackedScene], 
 
 ## Same as assemble(), but starting from a saved CarModelData (the format
 ## Inventory/the garage use) instead of separate body/wheel/engine scenes —
-## loads each part's own scene_path and hands off to assemble(). Every race
+## instances each part through PartFactory and hands off to assemble_parts(). Every race
 ## setup script that puts the player's own garage car on a track goes
 ## through this, so there's one place that knows how a CarModelData turns
 ## into a real rig. Returns null if the car has no body (or the body has
@@ -148,15 +158,12 @@ static func assemble(body_scene: PackedScene, wheel_scenes: Array[PackedScene], 
 static func assemble_from_car_data(car_data: CarModelData, parent: Node, spawn_position: Vector2) -> AssembledCar:
 	if car_data == null or car_data.body == null or car_data.body.scene_path.is_empty():
 		return null
-	var body_scene: PackedScene = load(car_data.body.scene_path)
-	var wheel_scenes: Array[PackedScene] = []
+	var wheel_instances: Array[CarWheel] = []
 	for wheel in car_data.wheels:
 		if wheel != null and not wheel.scene_path.is_empty():
-			wheel_scenes.append(load(wheel.scene_path))
-	var engine_scene: PackedScene = null
-	if car_data.engine != null and not car_data.engine.scene_path.is_empty():
-		engine_scene = load(car_data.engine.scene_path)
-	return assemble(body_scene, wheel_scenes, engine_scene, parent, spawn_position)
+			wheel_instances.append(PartFactory.instantiate(wheel) as CarWheel)
+	return assemble_parts(PartFactory.instantiate(car_data.body) as CarBody, wheel_instances,
+			PartFactory.instantiate(car_data.engine), parent, spawn_position)
 
 ## The part's own art colour, taken off its first Polygon2D. Nested search on
 ## purpose: the race harness reparents a part's art under a wrapper node, and

@@ -112,9 +112,7 @@ func _ready() -> void:
 		camera.targets = bodies
 
 func register_car(car_name: String, car: CarAssembler.AssembledCar) -> void:
-	var icon_scene_path := ""
-	if car.body != null and car.body.part_data != null:
-		icon_scene_path = car.body.part_data.scene_path
+	var body_part_data: PartData = car.body.part_data if car.body != null else null
 	_entries.append({
 		"name": car_name,
 		"car": car,
@@ -126,7 +124,7 @@ func register_car(car_name: String, car: CarAssembler.AssembledCar) -> void:
 		# Last known x while the body was still valid, for ranking cars
 		# that never cross the line (destroyed, or the clock just ran out).
 		"last_x": 0.0,
-		"icon_scene_path": icon_scene_path,
+		"body_part_data": body_part_data,
 	})
 
 ## Escape always leaves the race — mid-race, after the flag, or while the
@@ -293,7 +291,7 @@ func _build_results_data(standings: Array[Dictionary]) -> Array[Dictionary]:
 		else:
 			display_name = random_names[name_i]
 			name_i += 1
-		result.append({"name": display_name, "icon_scene_path": entry["icon_scene_path"]})
+		result.append({"name": display_name, "body_part_data": entry["body_part_data"]})
 	return result
 
 func _end_race(reason: String) -> void:

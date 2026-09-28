@@ -44,20 +44,29 @@ extends Node2D
 ## safety net in the editor if the viewport transform comes back degenerate).
 const FALLBACK_RECT := Rect2(-6000.0, -4000.0, 12000.0, 8000.0)
 
+const RIPPLE_SHADER := preload("res://shaders/water_ripples.gdshader")
+
 var _time: float = 0.0
+## The ripples are worked out on the GPU, so the whole sea is one rect however
+## far the camera is zoomed out.
+var _surface := ShaderMaterial.new()
 
 func _ready() -> void:
 	_time = 0.0
+	_surface.shader = RIPPLE_SHADER
+	# Set on the server rather than through `material`, so the editor never
+	# saves a generated material into the scene.
+	RenderingServer.canvas_item_set_material(get_canvas_item(), _surface.get_rid())
 	set_process(true)
 
 func _process(delta: float) -> void:
 	_time += delta
+	_update_surface()
+	# The rect follows the camera, so it still has to be re-issued every frame.
 	queue_redraw()
 
 func _draw() -> void:
-	var rect := _visible_rect()
-	draw_rect(rect, deep_color)
-	_draw_ripples(rect)
+	draw_rect(_visible_rect(), Color.WHITE)
 
 ## The part of this node's own space the camera can see, in local coordinates,
 ## grown by `view_margin` on every side.
@@ -77,20 +86,15 @@ func _visible_rect() -> Rect2:
 		return FALLBACK_RECT
 	return rect.grow(view_margin)
 
-## One pass of the ripple grid, snapped to whole cells so the pattern is
-## identical wherever the camera happens to be looking.
-func _draw_ripples(rect: Rect2) -> void:
+func _update_surface() -> void:
 	var spacing := maxf(ripple_spacing, 32.0)
-	var drift := fposmod(_time * drift_speed, spacing)
-	var first_row := int(floor(rect.position.y / spacing))
-	var first_col := int(floor(rect.position.x / spacing))
-	var rows := int(ceil(rect.size.y / spacing)) + 2
-	var cols := int(ceil(rect.size.x / spacing)) + 2
-	for r in rows:
-		var row := first_row + r
-		var offset := spacing * ripple_row_offset * float(row & 1)
-		for c in cols:
-			var col := first_col + c
-			var bob := sin(_time * bob_speed + float(row) * 1.7 + float(col) * 0.8)
-			var head := Vector2(float(col) * spacing + offset + drift, float(row) * spacing + bob * bob_height)
-			draw_line(head, head + Vector2(ripple_length, 0.0), ripple_color, ripple_width, true)
+	_surface.set_shader_parameter(&"deep_color", deep_color)
+	_surface.set_shader_parameter(&"ripple_color", ripple_color)
+	_surface.set_shader_parameter(&"ripple_width", ripple_width)
+	_surface.set_shader_parameter(&"ripple_length", ripple_length)
+	_surface.set_shader_parameter(&"ripple_spacing", spacing)
+	_surface.set_shader_parameter(&"ripple_row_offset", ripple_row_offset)
+	_surface.set_shader_parameter(&"drift", fposmod(_time * drift_speed, spacing))
+	_surface.set_shader_parameter(&"wave_time", _time)
+	_surface.set_shader_parameter(&"bob_speed", bob_speed)
+	_surface.set_shader_parameter(&"bob_height", bob_height)

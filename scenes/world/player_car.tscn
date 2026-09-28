@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/player_car.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/world/car_view.tscn" id="2"]
@@ -8,6 +8,7 @@
 [ext_resource type="Script" path="res://scripts/world/digital_clock.gd" id="6"]
 [ext_resource type="Script" path="res://scripts/ui/minimap.gd" id="7"]
 [ext_resource type="Script" path="res://scripts/world/headlights.gd" id="8"]
+[ext_resource type="Script" path="res://scripts/ui/hud_icon.gd" id="9"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
 size = Vector2(90, 32)
@@ -64,37 +65,89 @@ grow_vertical = 0
 mouse_filter = 2
 script = ExtResource("6")
 
-[node name="DayLabel" type="Label" parent="UI"]
-anchors_preset = -1
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -100.0
-offset_top = 16.0
-offset_right = 100.0
-offset_bottom = 52.0
-grow_horizontal = 2
+[node name="DayCounter" type="HBoxContainer" parent="UI"]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -290.0
+offset_top = -92.0
+offset_right = -222.0
+offset_bottom = -58.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="CalendarIcon" type="Control" parent="UI/DayCounter"]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+script = ExtResource("9")
+kind = 2
+
+[node name="DayLabel" type="Label" parent="UI/DayCounter"]
+layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 5
 theme_override_font_sizes/font_size = 22
-horizontal_alignment = 1
-text = "Day 1"
+vertical_alignment = 1
+text = "1"
 
-[node name="ScrapLabel" type="Label" parent="UI"]
-anchors_preset = -1
+[node name="Resources" type="HBoxContainer" parent="UI"]
+anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -280.0
-offset_top = 20.0
+offset_left = -320.0
+offset_top = 18.0
 offset_right = -20.0
-offset_bottom = 56.0
+offset_bottom = 54.0
 grow_horizontal = 0
+mouse_filter = 2
+alignment = 2
+theme_override_constants/separation = 6
+
+[node name="ScrapIcon" type="Control" parent="UI/Resources"]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+script = ExtResource("9")
+kind = 0
+
+[node name="ScrapLabel" type="Label" parent="UI/Resources"]
+layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 5
 theme_override_font_sizes/font_size = 22
-horizontal_alignment = 2
-text = "Scrap: 0"
+vertical_alignment = 1
+text = "0"
+
+[node name="ResourceGap" type="Control" parent="UI/Resources"]
+custom_minimum_size = Vector2(14, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="MoneyIcon" type="Control" parent="UI/Resources"]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+script = ExtResource("9")
+kind = 1
+
+[node name="MoneyLabel" type="Label" parent="UI/Resources"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 22
+vertical_alignment = 1
+text = "0"
 
 [node name="HoldBarBg" type="ColorRect" parent="UI"]
 anchors_preset = -1

@@ -21,6 +21,10 @@ const CAR_WIDTH := 90.0
 ## plus wheels sticking out at the corners).
 const RIG_WIDTH := 210.0
 const WORLD_SCALE := CAR_WIDTH / RIG_WIDTH
+## Art that hangs off a car without being part of its size (the horse pulling
+## it). `measure_bounds` can be told to skip it so the car isn't fitted as if it
+## were twice as long.
+const OUTRIGGER_GROUP := &"part_outrigger"
 
 ## Shrink a loose part to the size the world's cars wear it at.
 ##
@@ -43,7 +47,8 @@ static func apply_to(node: Node2D, factor: float = WORLD_SCALE) -> void:
 ## through each child's own transform. Parts are authored around their own
 ## origin with the art possibly nested, so this is how callers find out how
 ## big a part actually is (to ground it, or to keep neighbours clear of it).
-static func measure_bounds(node: Node) -> Rect2:
+## `skip_outriggers` leaves out anything in OUTRIGGER_GROUP.
+static func measure_bounds(node: Node, skip_outriggers: bool = false) -> Rect2:
 	var bounds := Rect2()
 	var has_any := false
 	var stack: Array[Array] = [[node, Transform2D.IDENTITY]]
@@ -51,6 +56,8 @@ static func measure_bounds(node: Node) -> Rect2:
 		var entry: Array = stack.pop_back()
 		var current: Node = entry[0]
 		var xform: Transform2D = entry[1]
+		if skip_outriggers and current.is_in_group(OUTRIGGER_GROUP):
+			continue
 		if current is Node2D:
 			xform = xform * (current as Node2D).get_transform()
 		if current is Polygon2D:

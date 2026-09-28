@@ -14,6 +14,7 @@
 [ext_resource type="Script" uid="uid://d38elr3bncsx3" path="res://scripts/world/skid_marks_layer.gd" id="12"]
 [ext_resource type="Script" uid="uid://bvsm27bp5u8y8" path="res://scripts/world/water.gd" id="13"]
 [ext_resource type="Script" uid="uid://br7vlahippyej" path="res://scripts/world/terrain.gd" id="14"]
+[ext_resource type="Script" path="res://scripts/world/shark_spawner.gd" id="shark_spawner"]
 [ext_resource type="Script" uid="uid://ds8hajmui5tbe" path="res://scripts/world/biome_marker.gd" id="15"]
 [ext_resource type="PackedScene" path="res://scenes/world/ramp_event.tscn" id="16"]
 [ext_resource type="PackedScene" path="res://scenes/race/race_ramp.tscn" id="17"]
@@ -23,6 +24,8 @@
 [ext_resource type="Script" uid="uid://dkr4ur3uxyxfe" path="res://scripts/world/rain_layer.gd" id="20_rain"]
 [ext_resource type="Script" uid="uid://b1lrvw48vx2h2" path="res://scripts/world/minimap_marker.gd" id="21_marker"]
 [ext_resource type="PackedScene" path="res://scenes/world/garbage_truck/garbage_truck.tscn" id="22_garbage_truck"]
+[ext_resource type="PackedScene" path="res://scenes/world/farm.tscn" id="22_farm"]
+[ext_resource type="PackedScene" path="res://scenes/world/scrap_forge.tscn" id="23_forge"]
 
 [sub_resource type="Curve2D" id="Curve2D_688af"]
 _data = {
@@ -185,6 +188,10 @@ curve = SubResource("Curve2D_bolr6")
 position = Vector2(-13324, 11126)
 curve = SubResource("Curve2D_hbyw3")
 
+[node name="Sharks" type="Node2D" parent="."]
+z_index = -950
+script = ExtResource("shark_spawner")
+
 [node name="Roads" type="Node2D" parent="." unique_id=1253797938]
 script = ExtResource("4")
 mode = 1
@@ -277,6 +284,20 @@ position = Vector2(-1200, 994)
 [node name="MinimapMarker" type="Node2D" parent="Sortables/Junkyard" unique_id=591956851]
 script = ExtResource("21_marker")
 kind = 2
+
+[node name="Farm" parent="Sortables" unique_id=200357493 instance=ExtResource("22_farm")]
+position = Vector2(-2139, 6878)
+
+[node name="MinimapMarker" type="Node2D" parent="Sortables/Farm" unique_id=1099980425]
+script = ExtResource("21_marker")
+kind = 4
+
+[node name="ScrapForge" parent="Sortables" unique_id=271006383 instance=ExtResource("23_forge")]
+position = Vector2(6813, -822)
+
+[node name="MinimapMarker" type="Node2D" parent="Sortables/ScrapForge" unique_id=2109602639]
+script = ExtResource("21_marker")
+kind = 5
 
 [node name="Ramp" parent="Sortables" unique_id=1499947680 instance=ExtResource("16")]
 position = Vector2(460, 300)

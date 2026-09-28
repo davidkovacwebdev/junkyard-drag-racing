@@ -210,13 +210,13 @@ func _spawn_random_part(rng: RandomNumberGenerator) -> void:
 	var pool: Array[PartData] = []
 	pool.append_array(PartDatabase.bodies)
 	pool.append_array(PartDatabase.wheels)
-	pool.append_array(PartDatabase.engines)
+	pool.append_array(PartDatabase.junk_engines)
 	if pool.is_empty():
 		return
 	var part: PartData = pool[rng.randi() % pool.size()]
-	if part.scene_path.is_empty():
+	var instance := PartFactory.instantiate(part)
+	if instance == null:
 		return
-	var instance: Node2D = (load(part.scene_path) as PackedScene).instantiate()
 	if instance is RigidBody2D:
 		instance.gravity_scale = 0.0
 	_art.add_child(instance)

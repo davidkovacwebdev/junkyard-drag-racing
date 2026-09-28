@@ -43,13 +43,20 @@ const NAMES: Array[StringName] = [
 	&"crane_clang",
 	&"crane_miss",
 	&"rooster_crow",
+	&"horse_neigh",
+	&"forge_hammer",
+	&"forge_quench",
+	&"crucible_drop",
+	&"shark_splash",
 	&"rain_loop",
+	&"furnace_loop",
 ]
 
 const LOOPING: Array[StringName] = [
 	&"horn_loop",
 	&"tire_screech_loop",
 	&"rain_loop",
+	&"furnace_loop",
 ]
 
 const CAR_SOUNDS: Array[StringName] = [
@@ -81,7 +88,9 @@ const UI_SOUNDS: Array[StringName] = [
 ]
 
 const AMBIENT_SOUNDS: Array[StringName] = [
+	&"shark_splash",
 	&"rain_loop",
+	&"furnace_loop",
 ]
 
 ## The AudioSettings bus a sound plays on, so each volume slider covers it.
@@ -137,7 +146,13 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"crane_clang": return _crane_clang(rng)
 		&"crane_miss": return _crane_miss(rng)
 		&"rooster_crow": return _rooster_crow()
+		&"horse_neigh": return _horse_neigh(rng)
+		&"forge_hammer": return _forge_hammer(rng)
+		&"forge_quench": return _forge_quench(rng)
+		&"shark_splash": return _shark_splash(rng)
+		&"crucible_drop": return _crucible_drop(rng)
 		&"rain_loop": return _rain_loop(rng)
+		&"furnace_loop": return _furnace_loop(rng)
 	push_error("SoundLibrary: unknown sound '%s'" % sound_name)
 	return Synth.silence(0.05)
 
@@ -553,6 +568,38 @@ static func _rooster_crow() -> PackedFloat32Array:
 		squawk.call(0.55, 820.0, 1040.0, 560.0),
 	])
 
+## A whinny: a nasal cry that climbs, shakes and falls away, then a snort out
+## of the nose.
+static func _horse_neigh(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var duration := 1.0
+	var shape := [[0.0, 620.0], [0.12, 1050.0], [0.35, 980.0], [0.75, 560.0], [duration, 420.0]]
+	var vibrato_rate := 13.0
+	var pitch: Array = []
+	var steps := int(duration * vibrato_rate * 4.0)
+	for step in steps + 1:
+		var t := duration * step / steps
+		var depth := 0.04 + 0.1 * t
+		pitch.append([t, Synth.curve(shape, t) * (1.0 + depth * sin(TAU * vibrato_rate * t))])
+	var overtone: Array = []
+	for point in pitch:
+		overtone.append([point[0], point[1] * 2.02])
+	var cry := Synth.tones(duration, [pitch, overtone], {
+		square = 0.35,
+		amp = [[0.0, 0.0], [0.05, 1.0], [0.6, 0.8], [duration, 0.0]],
+		peak = 0.6,
+	})
+	var breath := Synth.noise_sweep(duration, {
+		freq = [[0.0, 1400.0], [duration, 900.0]], q = [[0.0, 2.0]],
+		amp = [[0.0, 0.0], [0.1, 0.4], [duration, 0.0]], peak = 0.25,
+	}, rng)
+	var snort := Synth.noise_sweep(0.22, {
+		freq = [[0.0, 500.0], [0.22, 300.0]], q = [[0.0, 1.5]],
+		amp = [[0.0, 0.0], [0.02, 1.0], [0.22, 0.0]], peak = 0.5,
+	}, rng)
+	var out := Synth.mix_into(cry, breath, 0.0, 0.6)
+	out = Synth.concat([out, Synth.silence(0.08), snort])
+	return Synth.finish(out, 0.75)
+
 # --- Junk handling ------------------------------------------------------------
 
 ## Lid bang, then junk rattling around inside the bin.
@@ -585,6 +632,64 @@ static func _crane_miss(rng: RandomNumberGenerator) -> PackedFloat32Array:
 	Synth.mix_into(out, Synth.thump(0.15, 500.0, 0.003, 0.06, rng), 0.0, 0.6)
 	return Synth.finish(out, 0.6)
 
+# --- Scrap forge ----------------------------------------------------------------
+
+## Hammer on a hot lump over the anvil: a hard knock, a bright anvil ring and a
+## dull, slightly bent overtone, because nothing here is in tune.
+static func _forge_hammer(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.thump(0.5, 420.0, 0.002, 0.08, rng)
+	Synth.mix_into(out, _metal_ring(0.5, 1850.0, 45.0, 0.18, rng), 0.0, 0.55)
+	Synth.mix_into(out, _metal_ring(0.45, 2710.0, 40.0, 0.1, rng), 0.0, 0.3)
+	Synth.mix_into(out, _metal_ring(0.4, 780.0, 20.0, 0.07, rng), 0.0, 0.3)
+	return Synth.finish(out)
+
+## Glowing mash dunked in the water barrel: a spit, then a hiss that sinks and
+## bubbles away.
+static func _forge_quench(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.noise_sweep(1.3, {
+		freq = [[0.0, 5200.0], [0.25, 3600.0], [1.3, 1400.0]],
+		q = [[0.0, 0.9]],
+		highpass = 900.0,
+		amp = [[0.0, 0.0], [0.02, 1.0], [0.3, 0.6], [1.3, 0.0]],
+	}, rng)
+	for bubble in 7:
+		var offset := 0.3 + bubble * 0.12 + rng.randf_range(0.0, 0.05)
+		var pitch := rng.randf_range(500.0, 900.0)
+		var blip := Synth.tones(0.05, [[[0.0, pitch], [0.05, pitch * 1.6]]], {
+			amp = [[0.0, 0.0], [0.005, 1.0], [0.05, 0.0]],
+		})
+		Synth.mix_into(out, blip, offset, 0.2 * (1.0 - bubble / 8.0))
+	Synth.mix_into(out, Synth.thump(0.15, 700.0, 0.002, 0.05, rng), 0.0, 0.4)
+	return Synth.finish(out, 0.7)
+
+## A shark breaking the surface or going under: a low watery slosh with a
+## spray of droplets, softer and rounder than a paddle slap.
+static func _shark_splash(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.noise_sweep(0.6, {
+		freq = [[0.0, 350.0], [0.15, 900.0], [0.6, 300.0]],
+		q = [[0.0, 1.2]],
+		amp = [[0.0, 0.0], [0.08, 1.0], [0.6, 0.0]],
+	}, rng)
+	Synth.mix_into(out, Synth.thump(0.25, 160.0, 0.02, 0.1, rng), 0.0, 0.6)
+	var spray := Synth.noise_sweep(0.35, {
+		freq = [[0.0, 3600.0], [0.35, 2200.0]],
+		q = [[0.0, 2.5]],
+		amp = [[0.0, 0.0], [0.05, 1.0], [0.35, 0.0]],
+		highpass = 1800.0,
+	}, rng)
+	Synth.mix_into(out, spray, 0.08, 0.2)
+	return Synth.finish(out, 0.7)
+
+## A part tossed into the crucible: a heavy clunk and a couple of rattles as it
+## settles.
+static func _crucible_drop(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.thump(0.35, 260.0, 0.003, 0.12, rng)
+	Synth.mix_into(out, _metal_ring(0.3, 620.0, 16.0, 0.09, rng), 0.0, 0.4)
+	for rattle in 2:
+		Synth.mix_into(out, _metal_ring(0.1, rng.randf_range(1300.0, 2200.0), 12.0, 0.03, rng),
+				0.09 + rattle * 0.07, 0.3)
+	return Synth.finish(out)
+
 # --- Ambience -----------------------------------------------------------------
 
 ## Steady hiss of rain on tarmac. Level is set by the player from
@@ -598,3 +703,26 @@ static func _rain_loop(rng: RandomNumberGenerator) -> PackedFloat32Array:
 		fade = 0.0,
 		peak = 0.7,
 	}, rng)
+
+## The forge's furnace roaring away: a low rumble with a breathy flutter from
+## the bellows. Flat level so it loops cleanly.
+static func _furnace_loop(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.noise_sweep(2.0, {
+		freq = [[0.0, 180.0]],
+		q = [[0.0, 1.2]],
+		lowpass = 900.0,
+		amp = [[0.0, 1.0]],
+		fade = 0.0,
+		peak = 0.7,
+	}, rng)
+	var flutter := Synth.noise_sweep(2.0, {
+		freq = [[0.0, 700.0]],
+		q = [[0.0, 2.0]],
+		amp = [[0.0, 1.0]],
+		fade = 0.0,
+		peak = 0.3,
+	}, rng)
+	for i in out.size():
+		var t := float(i) / Synth.SAMPLE_RATE
+		out[i] += flutter[i] * (0.5 + 0.5 * sin(TAU * 3.0 * t))
+	return Synth.finish(out, 0.6, 0.0)

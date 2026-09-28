@@ -17,7 +17,7 @@ func _ready() -> void:
 
 ## `standings` holds up to 3 places in order, each a Dictionary with
 ## "name" (already resolved to "Player" or a random opponent name) and
-## "icon_scene_path" (the car body's scene, may be empty).
+## "body_part_data" (the car body's PartData, may be null).
 func show_results(standings: Array[Dictionary]) -> void:
 	for child in _rows.get_children():
 		child.queue_free()
@@ -43,7 +43,7 @@ func _add_row(place_text: String, entry: Dictionary) -> void:
 	var icon: PartIcon = PART_ICON_SCENE.instantiate()
 	icon.custom_minimum_size = ROW_ICON_SIZE
 	row.add_child(icon)
-	icon.show_part(entry.get("icon_scene_path", ""))
+	icon.show_part(entry.get("body_part_data"))
 
 	var name_label := Label.new()
 	name_label.text = entry.get("name", "???")

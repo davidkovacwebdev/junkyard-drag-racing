@@ -72,6 +72,15 @@ func take_stashed(scene_path: String) -> PartData:
 			return part
 	return null
 
+## Pull this exact copy out of the spare stash (the scrap forge melts down the
+## very parts the player picked). False when it isn't loose in the stash.
+func take_spare(part: PartData) -> bool:
+	var index := spare_parts.find(part)
+	if index == -1:
+		return false
+	spare_parts.remove_at(index)
+	return true
+
 ## How many copies of `part` the player owns, fitted or loose. Matched by id,
 ## since copies of the same part are interchangeable — only the count matters.
 func owned_count(part: PartData) -> int:
