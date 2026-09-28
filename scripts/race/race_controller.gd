@@ -16,7 +16,9 @@ extends Node2D
 signal race_ended(winner_name: String)
 
 @export var finish_x: float = 2000.0
-@export var max_duration: float = 20.0
+## Grinding early-game parts can leave a race with no way to actually
+## finish, so the race is hard-capped regardless of how far anyone got.
+@export var max_duration: float = 60.0
 @export var camera_path: NodePath
 @export var finish_boost_force: float = 180000.0
 ## Y the camera locks to (at x = finish_x) once the first car crosses —
@@ -34,8 +36,37 @@ signal race_ended(winner_name: String)
 ## just one entry, that car being destroyed alone satisfies "all
 ## finished" and would otherwise cut away the very same physics step the
 ## crash happens, before PartShatter's pieces have even had a frame to
-## fly.
+## fly. Ignored whenever a results screen is set — that stays up until the
+## player dismisses it instead of leaving on a timer (except headless runs,
+## which have nobody to click anything and fall back to this).
 @export var end_delay: float = 0.0
+## If none of the still-alive cars have moved faster than
+## stall_speed_threshold for this many seconds, the race ends early — bad
+## enough parts can leave every car too weak to move at all, and without
+## this the race would just sit doing nothing until max_duration runs out.
+@export var stall_timeout: float = 5.0
+## Speed (px/s) below which a car counts as "not moving" for the stall
+## check above. Matches MIN_FORWARD_SPEED in single_lane_race_setup.gd,
+## the threshold this codebase already uses elsewhere to call a car stopped.
+@export var stall_speed_threshold: float = 25.0
+## Off for scenes that aren't really a race — e.g. race_ramp.tscn's
+## single-car jump, which is *meant* to settle to a stop — so the stall
+## check doesn't fire there and cut the scene short.
+@export var check_stalls: bool = true
+## Optional countdown widget (see race_timer_hud.gd) fed with
+## max_duration - elapsed every physics step. Left unset on scenes with no
+## timer HUD.
+@export var timer_hud_path: NodePath
+## Optional podium screen (see results_screen.gd) shown with the top 3
+## places once the race ends, before end_delay hands off to exit_scene_path.
+@export var results_screen_path: NodePath
+## Optional "give up" button (see surrender() below). Left unset on
+## scenes with no such button.
+@export var surrender_button_path: NodePath
+## How long into the race the surrender button waits before appearing —
+## no point offering an out before the player's even seen how this run's
+## parts drive.
+@export var surrender_delay: float = 5.0
 ## Where Escape (and the end-of-race handoff) goes when `exit_scene_path`
 ## isn't set. Escape always has to get you out of a race, so there's a hard
 ## fallback rather than a dead key on the standalone test scenes.
@@ -47,6 +78,14 @@ var _elapsed := 0.0
 var _race_over := false
 var _winner_name := ""
 var _log_timer := 0.0
+var _stall_timer := 0.0
+var _timer_hud: RaceTimerHud = null
+var _results_screen: ResultsScreen = null
+var _surrender_button: ScrapButton = null
+## Entries in the order they actually crossed the finish line — 1st, 2nd,
+## 3rd place is exactly this order, separate from `_entries`' registration
+## order.
+var _finish_order: Array[Dictionary] = []
 ## Set the moment we start leaving, so Escape and the end-of-race handoff
 ## can both fire without queueing two scene changes.
 var _exiting := false
@@ -55,6 +94,12 @@ const LOG_INTERVAL := 1.0
 func _ready() -> void:
 	DayNightCycle.advance_hours(4.0)
 	camera = get_node_or_null(camera_path) as CameraFollow
+	_timer_hud = get_node_or_null(timer_hud_path) as RaceTimerHud
+	_results_screen = get_node_or_null(results_screen_path) as ResultsScreen
+	_surrender_button = get_node_or_null(surrender_button_path) as ScrapButton
+	if _surrender_button != null:
+		_surrender_button.visible = false
+		_surrender_button.pressed.connect(surrender)
 	# CarRig children finish assembling in their own _ready() before this
 	# one runs (Godot calls _ready bottom-up), so `assembled` is populated.
 	for child in get_children():
@@ -67,19 +112,48 @@ func _ready() -> void:
 		camera.targets = bodies
 
 func register_car(car_name: String, car: CarAssembler.AssembledCar) -> void:
-	_entries.append({"name": car_name, "car": car, "finished": false})
+	var icon_scene_path := ""
+	if car.body != null and car.body.part_data != null:
+		icon_scene_path = car.body.part_data.scene_path
+	_entries.append({
+		"name": car_name,
+		"car": car,
+		"finished": false,
+		# Set true only by _finish_car() — actually crossing finish_x, as
+		# opposed to "finished" which also covers being destroyed or the
+		# race ending under it. Standings need to tell those apart.
+		"crossed": false,
+		# Last known x while the body was still valid, for ranking cars
+		# that never cross the line (destroyed, or the clock just ran out).
+		"last_x": 0.0,
+		"icon_scene_path": icon_scene_path,
+	})
 
 ## Escape always leaves the race — mid-race, after the flag, or while the
 ## cars are still assembling. Handled in _input rather than _unhandled_input
 ## so no on-screen UI can swallow the key first. Matches the physical-key
 ## style used elsewhere (garage.gd) plus the built-in ui_cancel action.
+##
+## Once the results screen is up, a left click dismisses it too — it has no
+## button of its own, so this is the only way to continue past it besides
+## Escape, and it gets its own click sound since (unlike a mid-race Escape)
+## it's a deliberate "I'm done looking" UI action.
 func _input(event: InputEvent) -> void:
 	if not event.is_pressed() or event.is_echo():
 		return
-	if event.is_action("ui_cancel") \
-			or (event is InputEventKey and event.physical_keycode == KEY_ESCAPE):
-		get_viewport().set_input_as_handled()
-		exit_race()
+	var showing_results := _race_over and _results_screen != null
+	var is_cancel: bool = (
+			event.is_action("ui_cancel")
+			or (event is InputEventKey and event.physical_keycode == KEY_ESCAPE))
+	var is_click: bool = (
+			showing_results and event is InputEventMouseButton
+			and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT)
+	if not (is_cancel or is_click):
+		return
+	get_viewport().set_input_as_handled()
+	if showing_results:
+		Sfx.play(&"ui_click", Sfx.UI_CLICK_VOLUME_DB)
+	exit_race()
 
 func _physics_process(delta: float) -> void:
 	if _race_over:
@@ -99,18 +173,53 @@ func _physics_process(delta: float) -> void:
 			# Body shattered before crossing the line — car's out of the race.
 			entry["finished"] = true
 			continue
+		entry["last_x"] = car.body.global_position.x
 		if car.body.global_position.x >= finish_x:
 			_finish_car(entry)
 		else:
 			all_finished = false
 
+	_update_stall_timer(delta)
+	if _timer_hud != null:
+		_timer_hud.set_seconds_remaining(max_duration - _elapsed)
+	if _surrender_button != null and not _surrender_button.visible and _elapsed >= surrender_delay:
+		_surrender_button.visible = true
+
 	if all_finished:
 		_end_race("ALL FINISHED")
 	elif _elapsed >= max_duration:
 		_end_race("TIMEOUT")
+	elif check_stalls and _stall_timer >= stall_timeout:
+		_end_race("STALLED")
+
+## Ticks up while every still-racing car is under stall_speed_threshold,
+## resets the instant any one of them isn't — so a single car limping
+## forward is enough to keep the race alive, but a full grid stuck on bad
+## parts won't just sit there until max_duration.
+func _update_stall_timer(delta: float) -> void:
+	if not check_stalls:
+		return
+	var any_active := false
+	var any_moving := false
+	for entry in _entries:
+		if entry["finished"]:
+			continue
+		var car: CarAssembler.AssembledCar = entry["car"]
+		if not is_instance_valid(car.body):
+			continue
+		any_active = true
+		if car.body.linear_velocity.length() > stall_speed_threshold:
+			any_moving = true
+			break
+	if any_active and not any_moving:
+		_stall_timer += delta
+	else:
+		_stall_timer = 0.0
 
 func _finish_car(entry: Dictionary) -> void:
 	entry["finished"] = true
+	entry["crossed"] = true
+	_finish_order.append(entry)
 	var car: CarAssembler.AssembledCar = entry["car"]
 	car.body.boost_force = finish_boost_force
 	RaceCarAudio.play(self, &"backfire", car.body.global_position, -2.0)
@@ -134,9 +243,70 @@ func _log_status() -> void:
 				wheel_speeds.append(snappedf(wheel.angular_velocity, 0.01))
 		print("[t=%.1f] %s x=%.1f y=%.1f wheel_w=%s" % [_elapsed, entry["name"], car.body.global_position.x, car.body.global_position.y, str(wheel_speeds)])
 
+## Bails out of a still-running race — giving up on a bad build beats
+## grinding out the rest of max_duration. AI cars are ranked exactly as if
+## the clock had run out this instant; the player is dropped to last no
+## matter their own position, since surrendering means conceding, not
+## "whoever's ahead when I click wins".
+func surrender() -> void:
+	if _race_over:
+		return
+	_end_race("SURRENDER")
+
+## Cars that actually crossed the line, in crossing order, then everyone
+## else (still racing or destroyed) ranked by how far they got — so a race
+## that ends by TIMEOUT or STALLED before anyone finishes still produces a
+## sensible podium instead of an empty one. `force_player_last` is for
+## surrender(): the player's own entry gets moved to the very end
+## regardless of where it would otherwise land.
+func _compute_standings(force_player_last: bool = false) -> Array[Dictionary]:
+	var standings: Array[Dictionary] = _finish_order.duplicate()
+	var rest: Array[Dictionary] = []
+	for entry in _entries:
+		if not entry["crossed"]:
+			rest.append(entry)
+	rest.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["last_x"] > b["last_x"])
+	standings.append_array(rest)
+	if force_player_last:
+		for i in standings.size():
+			if (standings[i]["name"] as String).begins_with("Player_"):
+				standings.append(standings.pop_at(i))
+				break
+	return standings
+
+## Top 3 standings turned into what ResultsScreen actually shows: the
+## player's own entry stays "Player", every AI car gets a random, distinct
+## placeholder driver name (see name_gen.gd) picked fresh each race.
+func _build_results_data(standings: Array[Dictionary]) -> Array[Dictionary]:
+	var top := standings.slice(0, mini(3, standings.size()))
+	var ai_count := 0
+	for entry in top:
+		if not (entry["name"] as String).begins_with("Player_"):
+			ai_count += 1
+	var random_names := NameGen.random_names(ai_count)
+	var result: Array[Dictionary] = []
+	var name_i := 0
+	for entry in top:
+		var display_name: String
+		if (entry["name"] as String).begins_with("Player_"):
+			display_name = "Player"
+		else:
+			display_name = random_names[name_i]
+			name_i += 1
+		result.append({"name": display_name, "icon_scene_path": entry["icon_scene_path"]})
+	return result
+
 func _end_race(reason: String) -> void:
 	_race_over = true
 	print(">>> RACE OVER (%s) after %.2fs" % [reason, _elapsed])
+	if _surrender_button != null:
+		_surrender_button.visible = false
+	if reason == "STALLED" or reason == "SURRENDER":
+		Sfx.play(&"race_stalled", -6.0, 0.0)
+	else:
+		Sfx.play(&"results_fanfare", -4.0, 0.0)
+	if _results_screen != null:
+		_results_screen.show_results(_build_results_data(_compute_standings(reason == "SURRENDER")))
 	for entry in _entries:
 		var car: CarAssembler.AssembledCar = entry["car"]
 		if not is_instance_valid(car.body):
@@ -144,6 +314,12 @@ func _end_race(reason: String) -> void:
 			continue
 		print("    %s final x=%.1f%s" % [entry["name"], car.body.global_position.x, " [finished]" if entry["finished"] else ""])
 	race_ended.emit(_winner_name)
+	# A results screen stays up until the player dismisses it (see _input) —
+	# no timer needed. Headless runs have nobody to click anything, so they
+	# always fall through to the old timer/instant handoff instead of
+	# hanging forever.
+	if _results_screen != null and DisplayServer.get_name() != "headless":
+		return
 	if end_delay > 0.0:
 		get_tree().create_timer(end_delay).timeout.connect(exit_race)
 	else:
