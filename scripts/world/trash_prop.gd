@@ -15,9 +15,10 @@ extends StaticBody2D
 ## the orb and not here: nothing is yours until you've actually run over it.
 ##
 ## Whether a prop is full outlives the map. The spawner gives each one a
-## `loot_id`, and WorldState remembers which are empty and restocks a few of them
-## every in-game day — the city starts mostly picked-over, so a full bin is worth
-## a detour. See WorldState.is_prop_full().
+## `loot_id`, and WorldState remembers which are empty and refills every one of
+## them in a single pass each morning (sometime between 8 and 9 AM) — the city
+## starts mostly picked-over, so a full bin is worth a detour. See
+## WorldState.is_prop_full() and WorldState.restocked.
 ##
 ## **Art space**: origin at the prop's ground contact point, everything drawn
 ## above it (negative Y). That's deliberate and is what makes the Y-sort against
@@ -148,6 +149,15 @@ func _ready() -> void:
 	# only thing that knows which props are empty and which have restocked.
 	filled = WorldState.is_prop_full(loot_id)
 	_apply_state()
+	WorldState.restocked.connect(_on_world_restocked)
+
+## The morning restock just refilled the whole city — pick up the change
+## immediately instead of waiting for the next map reload, so a prop the
+## player emptied yesterday visibly reopens while they're still driving
+## around today.
+func _on_world_restocked() -> void:
+	if not filled:
+		filled = WorldState.is_prop_full(loot_id)
 
 ## Size the collision to this kind's footprint and decide whether the prop is
 ## still worth offering to the player.

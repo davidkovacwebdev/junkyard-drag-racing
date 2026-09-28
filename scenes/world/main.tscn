@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" path="res://scenes/garage/garage.tscn" id="3"]
 [ext_resource type="Script" uid="uid://cu6o77berdu32" path="res://scripts/world/road.gd" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/world/drag_strip.tscn" id="5"]
-[ext_resource type="PackedScene" path="res://scenes/world/pause_menu.tscn" id="6"]
+[ext_resource type="PackedScene" uid="uid://bgff7e404jhvq" path="res://scenes/world/pause_menu.tscn" id="6"]
 [ext_resource type="Script" uid="uid://cxavmo7w253pf" path="res://scripts/world/trash_spawner.gd" id="7"]
 [ext_resource type="PackedScene" path="res://scenes/world/junkyard.tscn" id="8"]
 [ext_resource type="Script" uid="uid://ndh2o15pw6to" path="res://scripts/world/house_spawner.gd" id="9"]
@@ -22,6 +22,7 @@
 [ext_resource type="Script" uid="uid://bo1kwx12twsg5" path="res://scripts/world/puddle_field.gd" id="19_puddle"]
 [ext_resource type="Script" uid="uid://dkr4ur3uxyxfe" path="res://scripts/world/rain_layer.gd" id="20_rain"]
 [ext_resource type="Script" uid="uid://b1lrvw48vx2h2" path="res://scripts/world/minimap_marker.gd" id="21_marker"]
+[ext_resource type="PackedScene" path="res://scenes/world/garbage_truck/garbage_truck.tscn" id="22_garbage_truck"]
 
 [sub_resource type="Curve2D" id="Curve2D_688af"]
 _data = {
@@ -264,6 +265,8 @@ interior_scene = ExtResource("3")
 
 [node name="Trash" type="Node2D" parent="Sortables" unique_id=260557314]
 script = ExtResource("7")
+
+[node name="GarbageTruck" parent="Sortables" unique_id=865574232 instance=ExtResource("22_garbage_truck")]
 
 [node name="Houses" type="Node2D" parent="Sortables" unique_id=1527741676]
 script = ExtResource("9")

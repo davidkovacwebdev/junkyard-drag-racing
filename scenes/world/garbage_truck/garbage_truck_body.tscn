@@ -1,0 +1,60 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_body.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/body_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_garbage_truck"]
+script = ExtResource("2")
+id = &"body_garbage_truck"
+display_name = "Garbage Truck"
+mass = 40.0
+speed = 2.0
+
+[node name="BodyGarbageTruck" type="RigidBody2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_garbage_truck")
+
+[node name="Hopper" type="Polygon2D" parent="."]
+color = Color(0.32, 0.4, 0.3, 1)
+polygon = PackedVector2Array(-160, 16, -160, -130, 20, -130, 32, -92, 32, 16)
+
+[node name="HopperShade" type="Polygon2D" parent="."]
+color = Color(0.26, 0.33, 0.25, 1)
+polygon = PackedVector2Array(-160, -30, -160, 16, 32, 16, 32, -30)
+
+[node name="HopperRoofLight" type="Polygon2D" parent="."]
+color = Color(0.38, 0.47, 0.36, 1)
+polygon = PackedVector2Array(-160, -130, 20, -130, 20, -114, -160, -114)
+
+[node name="HazardStripe" type="Polygon2D" parent="."]
+color = Color(0.95, 0.75, 0.1, 1)
+polygon = PackedVector2Array(-155, -75, 15, -75, 15, -60, -155, -60)
+
+[node name="Cab" type="Polygon2D" parent="."]
+color = Color(0.38, 0.47, 0.36, 1)
+polygon = PackedVector2Array(32, 16, 32, -20, 56, -66, 136, -66, 156, -36, 156, 16)
+
+[node name="CabShade" type="Polygon2D" parent="."]
+color = Color(0.3, 0.38, 0.29, 1)
+polygon = PackedVector2Array(32, -8, 32, 16, 156, 16, 156, -8)
+
+[node name="Windshield" type="Polygon2D" parent="."]
+color = Color(0.55, 0.75, 0.8, 0.85)
+polygon = PackedVector2Array(58, -62, 132, -62, 148, -38, 60, -38)
+
+[node name="Bumper" type="Polygon2D" parent="."]
+color = Color(0.2, 0.2, 0.21, 1)
+polygon = PackedVector2Array(150, -6, 160, -6, 160, 14, 150, 14)
+
+[node name="Skirt" type="Polygon2D" parent="."]
+color = Color(0.16, 0.19, 0.15, 1)
+polygon = PackedVector2Array(-160, 8, 160, 8, 160, 16, -160, 16)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(-160, 16, -160, -130, 20, -130, 32, -92, 32, -20, 56, -66, 136, -66, 156, -36, 156, 16)
+
+[node name="WheelMount0" type="Marker2D" parent="."]
+position = Vector2(-100, 16)
+
+[node name="WheelMount1" type="Marker2D" parent="."]
+position = Vector2(95, 16)
