@@ -14,6 +14,7 @@
 [ext_resource type="Script" uid="uid://d38elr3bncsx3" path="res://scripts/world/skid_marks_layer.gd" id="12"]
 [ext_resource type="Script" uid="uid://bvsm27bp5u8y8" path="res://scripts/world/water.gd" id="13"]
 [ext_resource type="Script" uid="uid://br7vlahippyej" path="res://scripts/world/terrain.gd" id="14"]
+[ext_resource type="Script" path="res://scripts/world/shark_spawner.gd" id="shark_spawner"]
 [ext_resource type="Script" uid="uid://ds8hajmui5tbe" path="res://scripts/world/biome_marker.gd" id="15"]
 [ext_resource type="PackedScene" path="res://scenes/world/ramp_event.tscn" id="16"]
 [ext_resource type="PackedScene" path="res://scenes/race/race_ramp.tscn" id="17"]
@@ -185,6 +186,10 @@ curve = SubResource("Curve2D_bolr6")
 [node name="Path2D4" type="Path2D" parent="Terrain" unique_id=1927772466]
 position = Vector2(-13324, 11126)
 curve = SubResource("Curve2D_hbyw3")
+
+[node name="Sharks" type="Node2D" parent="."]
+z_index = -950
+script = ExtResource("shark_spawner")
 
 [node name="Roads" type="Node2D" parent="." unique_id=1253797938]
 script = ExtResource("4")

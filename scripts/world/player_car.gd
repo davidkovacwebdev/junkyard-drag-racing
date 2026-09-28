@@ -125,8 +125,9 @@ var _hold_progress: float = 0.0
 @onready var _tooltip_label: Label = $UI/TooltipLabel
 @onready var _hold_bar_bg: Control = $UI/HoldBarBg
 @onready var _hold_bar_fill: Control = $UI/HoldBarBg/HoldBarFill
-@onready var _scrap_label: Label = $UI/ScrapLabel
-@onready var _day_label: Label = $UI/DayLabel
+@onready var _scrap_label: Label = $UI/Resources/ScrapLabel
+@onready var _money_label: Label = $UI/Resources/MoneyLabel
+@onready var _day_label: Label = $UI/DayCounter/DayLabel
 
 var _road_network: RoadNetwork = null
 var _skid_marks: SkidMarksLayer = null
@@ -323,8 +324,9 @@ func _physics_process(delta: float) -> void:
 	# The only thing looting actually tracks right now — a plain running
 	# total, no distinct item types yet — so this is the whole HUD for now.
 	# Money joins it because the scrap dealer at the junkyard pays out.
-	_scrap_label.text = "Scrap: %d    $%d" % [Inventory.scrap, Inventory.money]
-	_day_label.text = "Day %d" % DayNightCycle.day
+	_scrap_label.text = str(Inventory.scrap)
+	_money_label.text = str(Inventory.money)
+	_day_label.text = str(DayNightCycle.day)
 
 	_process_interaction(delta)
 

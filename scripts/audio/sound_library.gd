@@ -47,6 +47,7 @@ const NAMES: Array[StringName] = [
 	&"forge_hammer",
 	&"forge_quench",
 	&"crucible_drop",
+	&"shark_splash",
 	&"rain_loop",
 	&"furnace_loop",
 ]
@@ -87,6 +88,7 @@ const UI_SOUNDS: Array[StringName] = [
 ]
 
 const AMBIENT_SOUNDS: Array[StringName] = [
+	&"shark_splash",
 	&"rain_loop",
 	&"furnace_loop",
 ]
@@ -147,6 +149,7 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"horse_neigh": return _horse_neigh(rng)
 		&"forge_hammer": return _forge_hammer(rng)
 		&"forge_quench": return _forge_quench(rng)
+		&"shark_splash": return _shark_splash(rng)
 		&"crucible_drop": return _crucible_drop(rng)
 		&"rain_loop": return _rain_loop(rng)
 		&"furnace_loop": return _furnace_loop(rng)
@@ -657,6 +660,24 @@ static func _forge_quench(rng: RandomNumberGenerator) -> PackedFloat32Array:
 		})
 		Synth.mix_into(out, blip, offset, 0.2 * (1.0 - bubble / 8.0))
 	Synth.mix_into(out, Synth.thump(0.15, 700.0, 0.002, 0.05, rng), 0.0, 0.4)
+	return Synth.finish(out, 0.7)
+
+## A shark breaking the surface or going under: a low watery slosh with a
+## spray of droplets, softer and rounder than a paddle slap.
+static func _shark_splash(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.noise_sweep(0.6, {
+		freq = [[0.0, 350.0], [0.15, 900.0], [0.6, 300.0]],
+		q = [[0.0, 1.2]],
+		amp = [[0.0, 0.0], [0.08, 1.0], [0.6, 0.0]],
+	}, rng)
+	Synth.mix_into(out, Synth.thump(0.25, 160.0, 0.02, 0.1, rng), 0.0, 0.6)
+	var spray := Synth.noise_sweep(0.35, {
+		freq = [[0.0, 3600.0], [0.35, 2200.0]],
+		q = [[0.0, 2.5]],
+		amp = [[0.0, 0.0], [0.05, 1.0], [0.35, 0.0]],
+		highpass = 1800.0,
+	}, rng)
+	Synth.mix_into(out, spray, 0.08, 0.2)
 	return Synth.finish(out, 0.7)
 
 ## A part tossed into the crucible: a heavy clunk and a couple of rattles as it
