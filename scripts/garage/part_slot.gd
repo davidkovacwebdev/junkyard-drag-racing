@@ -47,12 +47,16 @@ func _set_hovering(value: bool) -> void:
 
 func set_part(new_part: PartData, count: int = 1) -> void:
 	part = new_part
-	_icon.show_part(part.scene_path if part != null else "")
+	_icon.show_part(part)
 	_title_label.text = _title_for(part, count)
 	_durability_bar.set_rating(_rating(part.durability, PartData.DURABILITY_RANGE) if part != null else 0)
 	_speed_bar.set_rating(_rating(part.speed, PartData.SPEED_RANGE) if part != null else 0)
 	_mass_bar.set_rating(_rating(part.mass, PartData.MASS_RANGE) if part != null else 0)
 	queue_redraw()
+
+## Update just the copy count in the title, without re-rendering the icon.
+func set_count(count: int) -> void:
+	_title_label.text = _title_for(part, count)
 
 ## "Standard Wheel x2" — how many copies of this part the player owns, fitted
 ## or loose. Fitting MOVES a copy rather than cloning one, so the count is what

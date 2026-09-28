@@ -13,12 +13,12 @@ extends SubViewportContainer
 func get_preview_texture() -> Texture2D:
 	return _viewport.get_texture()
 
-func show_part(scene_path: String) -> void:
+func show_part(part: PartData) -> void:
 	for child in _viewport.get_children():
 		child.queue_free()
-	if scene_path.is_empty():
+	var instance := PartFactory.instantiate(part)
+	if instance == null:
 		return
-	var instance: Node2D = (load(scene_path) as PackedScene).instantiate()
 	if instance is RigidBody2D:
 		# Same physics rigs the drag-race rig drives — freeze so the icon
 		# just sits still instead of falling under gravity.

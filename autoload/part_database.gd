@@ -129,6 +129,23 @@ static func _assign_tiers(parts: Array) -> void:
 		var part: PartData = ranked[i]
 		part.tier = clampi(1 + (i * PartData.TIER_COUNT) / ranked.size(), 1, PartData.TIER_COUNT)
 
+## Where a part made outside the catalog (the scrap forge's) ranks among the
+## catalog parts of its own category, by the same quartile rule.
+func tier_for(part: PartData) -> int:
+	var catalog: Array = []
+	match part.category:
+		PartData.Category.BODY:
+			catalog = bodies
+		PartData.Category.WHEEL:
+			catalog = wheels
+		PartData.Category.ENGINE:
+			catalog = engines
+	if catalog.is_empty():
+		return PartData.TIER_COUNT
+	var score := part.performance_score()
+	var beaten := catalog.filter(func(other: PartData) -> bool: return other.performance_score() < score).size()
+	return clampi(1 + (beaten * PartData.TIER_COUNT) / catalog.size(), 1, PartData.TIER_COUNT)
+
 ## Instances a part scene just long enough to pull its PartData back out,
 ## tagging it with the scene it came from. The catalog and car-building
 ## code both need that scene_path so they can instantiate the real part.

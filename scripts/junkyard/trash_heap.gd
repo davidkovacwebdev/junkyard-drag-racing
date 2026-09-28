@@ -293,14 +293,4 @@ func _random_part(rng: RandomNumberGenerator) -> PartData:
 	return pool[rng.randi() % pool.size()]
 
 func _instantiate(data: PartData) -> Node2D:
-	if data == null or data.scene_path.is_empty():
-		return null
-	var scene := load(data.scene_path) as PackedScene
-	if scene == null:
-		push_warning("TrashHeap: part scene '%s' won't load." % data.scene_path)
-		return null
-	var instance: Node = scene.instantiate()
-	if not (instance is Node2D):
-		instance.free()
-		return null
-	return instance as Node2D
+	return PartFactory.instantiate(data)

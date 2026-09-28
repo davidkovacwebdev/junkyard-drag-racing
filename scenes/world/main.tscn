@@ -23,6 +23,7 @@
 [ext_resource type="Script" uid="uid://dkr4ur3uxyxfe" path="res://scripts/world/rain_layer.gd" id="20_rain"]
 [ext_resource type="Script" uid="uid://b1lrvw48vx2h2" path="res://scripts/world/minimap_marker.gd" id="21_marker"]
 [ext_resource type="PackedScene" path="res://scenes/world/farm.tscn" id="22_farm"]
+[ext_resource type="PackedScene" path="res://scenes/world/scrap_forge.tscn" id="23_forge"]
 
 [sub_resource type="Curve2D" id="Curve2D_688af"]
 _data = {
@@ -282,6 +283,13 @@ position = Vector2(-2139, 6878)
 [node name="MinimapMarker" type="Node2D" parent="Sortables/Farm" unique_id=1099980425]
 script = ExtResource("21_marker")
 kind = 4
+
+[node name="ScrapForge" parent="Sortables" unique_id=271006383 instance=ExtResource("23_forge")]
+position = Vector2(6813, -822)
+
+[node name="MinimapMarker" type="Node2D" parent="Sortables/ScrapForge" unique_id=2109602639]
+script = ExtResource("21_marker")
+kind = 5
 
 [node name="Ramp" parent="Sortables" unique_id=1499947680 instance=ExtResource("16")]
 position = Vector2(460, 300)

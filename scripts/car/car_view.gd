@@ -58,7 +58,7 @@ func build_from(car: CarModelData) -> void:
 		queue_redraw()
 		return
 
-	_body = _instance_visual(car.body.scene_path) as CarBody
+	_body = _instance_visual(car.body) as CarBody
 	_fit.add_child(_body)
 
 	var raw_mounts: Array[Marker2D] = _body.get_wheel_mounts()
@@ -69,7 +69,7 @@ func build_from(car: CarModelData) -> void:
 	for i in raw_positions.size():
 		var wheel_data: WheelPartData = car.wheels[i] if i < car.wheels.size() else null
 		if wheel_data != null and not wheel_data.scene_path.is_empty():
-			var wheel := _instance_visual(wheel_data.scene_path)
+			var wheel := _instance_visual(wheel_data)
 			wheel.position = raw_positions[i]
 			_fit.add_child(wheel)
 			_wheels.append(wheel)
@@ -80,7 +80,7 @@ func build_from(car: CarModelData) -> void:
 		_engine_mount_raw = engine_mount.position
 
 	if car.engine != null and not car.engine.scene_path.is_empty():
-		_engine = _instance_visual(car.engine.scene_path)
+		_engine = _instance_visual(car.engine)
 		_body.add_child(_engine)
 		# Engines are authored with their origin at the mounting base, so
 		# snapping to this body's EngineMount seats them on the hood/top/
@@ -144,8 +144,8 @@ func _clear() -> void:
 	_engine_mount_raw = Vector2.ZERO
 	_engine_mount_local = Vector2.ZERO
 
-func _instance_visual(scene_path: String) -> Node2D:
-	var instance: Node2D = (load(scene_path) as PackedScene).instantiate()
+func _instance_visual(part: PartData) -> Node2D:
+	var instance := PartFactory.instantiate(part)
 	_neutralize_physics(instance)
 	return instance
 
