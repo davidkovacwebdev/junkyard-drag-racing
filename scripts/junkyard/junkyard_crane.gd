@@ -41,6 +41,15 @@ extends Node2D
 @export var sway_amplitude: float = 0.06
 @export var sway_speed: float = 0.7
 
+@export_group("Claw")
+## The clamshell grab: two half-round shells hinged at the top that close into
+## one ring. This is the ring's outer radius, so the shut claw is twice this
+## tall, measured down from the hinge.
+@export var claw_radius: float = 34.0
+## How thick each shell is. Chunky on purpose: it's also the collision wall the
+## pen's claw shoves junk with, and a thin shell lets pieces slip through it.
+@export var claw_thickness: float = 12.0
+
 @export_group("Rigging")
 ## How far the trolley may run along the boom, in this node's own x: negative
 ## is back toward the counterweight, positive is out over the heap. That the
@@ -63,11 +72,13 @@ const RAIL := 14.0
 const LATTICE_STEP := 124.0
 const BRACE_W := 10.0
 const PYLON_H := 120.0
-## How far below the claw block the jaws reach.
-const JAW_DROP := 52.0
-## How far a jaw swings out from shut to wide open, radians. The blades are
-## drawn rigid and rotated by this (see `_draw_hoist()`).
-const JAW_SWING := 0.62
+## How far below the claw block the shells hang from their hinge.
+const HINGE_DROP := 6.0
+## How far a shell swings out from shut to wide open, radians. The shells are
+## rigid and rotated by this about the hinge (see `shell_rotation()`).
+const JAW_SWING := 1.0
+## Segments in one half of the ring: half a 14-gon, the round-thing budget.
+const SHELL_SEGMENTS := 7
 
 var _time: float = 0.0
 ## Current pendulum angle of the claw, radians. Positive swings it toward +x.
@@ -137,6 +148,37 @@ func claw_tip_global() -> Vector2:
 ## Where the claw parks: the exported trolley spot with the exported cable out.
 func rest_claw_local() -> Vector2:
 	return Vector2(-trolley_offset, _boom_y() + boom_height * 0.5 + hoist_length)
+
+## Where the two shells hinge, in this node's space: just under the claw block,
+## swinging with it.
+func hinge_local() -> Vector2:
+	return claw_local() + Vector2(0.0, HINGE_DROP).rotated(_sway)
+
+## How far a shell is turned about the hinge right now, for `side` -1 (left)
+## or +1 (right). Opening swings each shell's tip outward and up.
+func shell_rotation(side: float) -> float:
+	return _sway - side * JAW_SWING * jaw_open
+
+## One shell in hinge space (hinge at the origin, +y down): half of a thick
+## ring whose centre sits `claw_radius` below the hinge, on the `side` half.
+## Shut, the two halves meet top and bottom and make the whole ring.
+func shell_polygon(side: float) -> PackedVector2Array:
+	var outer := claw_radius
+	var inner := maxf(claw_radius - claw_thickness, 1.0)
+	var centre := Vector2(0.0, claw_radius)
+	var points := PackedVector2Array()
+	for i in SHELL_SEGMENTS + 1:
+		var angle := -PI * 0.5 + side * PI * float(i) / float(SHELL_SEGMENTS)
+		points.append(centre + Vector2(cos(angle), sin(angle)) * outer)
+	for i in range(SHELL_SEGMENTS, -1, -1):
+		var angle := -PI * 0.5 + side * PI * float(i) / float(SHELL_SEGMENTS)
+		points.append(centre + Vector2(cos(angle), sin(angle)) * inner)
+	return points
+
+## Shell fill: the right one is the shade step of the left, so the pair reads
+## as one lit object without a separate shade strip.
+func shell_color(side: float) -> Color:
+	return steel_color.darkened(0.2 if side < 0.0 else 0.38)
 
 ## Keep the Claw node — and therefore anything parented to it — at the jaws.
 func _update_claw() -> void:
@@ -233,33 +275,19 @@ func _draw_hoist() -> void:
 	draw_colored_polygon(FlatProps.sliver(anchor + Vector2(-14.0, 16.0), claw + Vector2(-9.0, -6.0), 5.0), cable_color)
 	draw_colored_polygon(FlatProps.sliver(anchor + Vector2(14.0, 16.0), claw + Vector2(9.0, -6.0), 5.0), cable_color)
 
-	# jaws swing with the cables, so the claw hangs like a pendulum, and open and
-	# shut on their hinge — `jaw_open` scrunches them toward the centre line
+	# the block the shells hinge on, swinging with the cables
+	var block := Vector2(claw_radius * 0.8, claw_radius * 0.5)
 	draw_set_transform(claw, _sway, Vector2.ONE)
-	draw_rect(Rect2(-16.0, -14.0, 32.0, 24.0), dark_color)
+	draw_rect(Rect2(-block.x * 0.5, HINGE_DROP + 4.0 - block.y, block.x, block.y), dark_color)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	_draw_shells()
 
-	# The jaws pivot on their hinges rather than shrinking toward each other: a
-	# blade scaled to `jaw_open` collapses onto a line when shut, and the
-	# renderer can't triangulate that (it floods the log with "Invalid polygon
-	# data" every frame). A rotation keeps every blade the same solid shape at
-	# every opening — and a claw that swings on a hinge is what the real thing
-	# does anyway.
-	# One jaw blade in hinge-local space: x outward (the other side is mirrored),
-	# y down — a tapering wedge whose tip leans in toward the centre line, so two
-	# mirrored blades read as a shut claw at rest and an open one swung out.
-	# A local, not a const: a `PackedVector2Array(...)` call isn't a constant
-	# expression, and the mirror loop needs a fresh array per side anyway.
-	var blade_shape := PackedVector2Array([
-		Vector2(0.0, -4.0), Vector2(13.0, 2.0),
-		Vector2(5.0, JAW_DROP - 6.0), Vector2(1.0, JAW_DROP - 12.0),
-	])
-	var hinge := claw + Vector2(0.0, 6.0).rotated(_sway)
-	var swing := JAW_SWING * jaw_open
-	var steel := steel_color.darkened(0.25)
+## The two clamshell halves, pivoting on the hinge rather than shrinking toward
+## each other, so each keeps its solid shape at every opening. A subclass that
+## builds the shells as real bodies (see `CraneRig`) draws them there instead.
+func _draw_shells() -> void:
+	var hinge := hinge_local()
 	for side in PackedFloat32Array([-1.0, 1.0]):
-		var blade := PackedVector2Array()
-		for vertex in blade_shape:
-			blade.append(Vector2(vertex.x * side, vertex.y))
-		draw_set_transform(hinge, _sway + side * swing, Vector2.ONE)
-		draw_colored_polygon(blade, steel)
+		draw_set_transform(hinge, shell_rotation(side), Vector2.ONE)
+		draw_colored_polygon(shell_polygon(side), shell_color(side))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)

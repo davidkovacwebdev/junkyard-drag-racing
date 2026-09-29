@@ -25,14 +25,6 @@ extends Node2D
 ## The dug-out area junk is tipped into, in this node's own space: the scene's
 ## walls sit on its left and right edges.
 @export var pit_rect: Rect2 = Rect2(-380.0, 0.0, 680.0, 260.0)
-## Where the player goes when the dig is over. A visit is one dig, so the pen
-## kicks them back to the yard as soon as the claw is up — empty this and it
-## leaves them standing in the pen instead, which is what the smoke test wants
-## when it drives several digs in one visit.
-@export_file("*.tscn") var exit_scene: String = "res://scenes/junkyard/junkyard.tscn"
-## How long the haul stays on screen before the scene changes. Long enough to
-## read the summary, short enough not to feel like a loading screen.
-@export var exit_delay: float = 1.7
 
 @export_group("Colors")
 @export var sky_color: Color = Color(0.34, 0.36, 0.37, 1)
@@ -69,8 +61,9 @@ func _ready() -> void:
 	_crane.missed.connect(_on_missed)
 	_crane.denied.connect(_on_denied)
 	_crane.dig_finished.connect(_on_dig_finished)
-	_hint.text = "A / D  roll the claw over the heap     Space  sink it and haul up what it grabs ($%d)     Esc  leave" % _crane.grab_cost
-	_set_line("Roll the claw out over the junk, then hit Space. It sinks, it shuts, and everything it closed on is yours — one dig per visit.")
+	_hint.text = "A / D  roll the claw over the heap     Space  drop the claw ($%d a go), Space again to shut it     Esc  leave" % _crane.grab_cost
+	_set_line("Roll the claw out over the junk and hit Space to drop it. Hit Space again to shut it - whatever it's holding is yours. $%d a go, as long as your money lasts."
+			% _crane.grab_cost)
 	_refresh()
 
 # --- What came up --------------------------------------------------------------
@@ -87,37 +80,27 @@ func _on_dug(item: Node2D, part: PartData, scrap: int) -> void:
 		_haul_scrap += scrap
 	_refresh()
 
-## The claw is back at the trolley: say what it came up with, show it over the
-## heap, then head back to the yard. A visit to the pen is one dig.
+## The claw is back at the trolley: say what it came up with and show it over
+## the heap. The player stays in the pen — the crane is ready for another go
+## straight away, and they leave with Back / Esc when they're done.
 ##
-## The crane is shut off for the duration — a Space press in the last moment
-## before the scene changes shouldn't start a second dig nobody paid for.
+## Saved after every dig, catch or miss: the money is already spent, and a
+## player who quits from the pen shouldn't lose the parts they paid for.
 func _on_dig_finished(caught: int) -> void:
-	_crane.controls_enabled = false
-	var summary := _summarise(caught)
-	_set_line(summary)
 	if caught > 0:
-		_popup(summary, POPUP_AT)
+		_set_line(_summarise(caught))
+		_popup(_summarise(caught), POPUP_AT)
 		Sfx.play(&"part_pickup" if not _haul.is_empty() else &"scrap_pickup", -4.0, 0.0)
 	_refresh()
 	_haul.clear()
 	_haul_scrap = 0
-	if exit_delay > 0.0:
-		await get_tree().create_timer(exit_delay).timeout
-	if not is_inside_tree():
-		return
-	if exit_scene.is_empty():
-		# Staying put (see `exit_scene`): hand the controls back so another dig
-		# can be lined up. This is the mode the smoke test runs in.
-		_crane.controls_enabled = true
-		return
-	_leave()
+	SaveSystem.save_game()
 
 func _on_missed() -> void:
 	if _heap.is_empty():
 		_set_line("The heap's picked clean - there's nothing left down there to grab.")
 	else:
-		_set_line("The jaws come up on bare floor. Nothing under the claw that time - and nothing charged for it.")
+		_set_line("The jaws come up empty. That's $%d down - line it up and try again." % _crane.grab_cost)
 	_refresh()
 
 func _on_denied() -> void:
@@ -136,13 +119,6 @@ func _summarise(caught: int) -> String:
 	if _haul_scrap > 0:
 		bits.append("%d scrap" % _haul_scrap)
 	return "Up comes %s." % " and ".join(bits)
-
-## Hand the player back to the yard with the haul saved.
-func _leave() -> void:
-	if exit_scene.is_empty():
-		return
-	SaveSystem.save_game()
-	get_tree().change_scene_to_file(exit_scene)
 
 # --- HUD -----------------------------------------------------------------------
 

@@ -42,6 +42,7 @@ const NAMES: Array[StringName] = [
 	&"wrench_clunk",
 	&"crane_clang",
 	&"crane_miss",
+	&"crane_shove",
 	&"rooster_crow",
 	&"horse_neigh",
 	&"forge_hammer",
@@ -147,6 +148,7 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"wrench_clunk": return _wrench_clunk(rng)
 		&"crane_clang": return _crane_clang(rng)
 		&"crane_miss": return _crane_miss(rng)
+		&"crane_shove": return _crane_shove(rng)
 		&"rooster_crow": return _rooster_crow()
 		&"horse_neigh": return _horse_neigh(rng)
 		&"forge_hammer": return _forge_hammer(rng)
@@ -634,6 +636,14 @@ static func _crane_miss(rng: RandomNumberGenerator) -> PackedFloat32Array:
 	var out := _metal_ring(0.3, 900.0, 18.0, 0.07, rng)
 	Synth.mix_into(out, Synth.thump(0.15, 500.0, 0.003, 0.06, rng), 0.0, 0.6)
 	return Synth.finish(out, 0.6)
+
+## Heavy shell shoving through the heap: a dull, low knock with a short tinny
+## rattle of the junk it hit, nothing ringing — the clang is saved for the bite.
+static func _crane_shove(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.thump(0.28, 170.0, 0.006, 0.12, rng)
+	Synth.mix_into(out, Synth.thump(0.12, 900.0, 0.002, 0.03, rng), 0.02, 0.35)
+	Synth.mix_into(out, _metal_ring(0.2, 470.0, 12.0, 0.05, rng), 0.0, 0.2)
+	return Synth.finish(out, 0.7)
 
 # --- Scrap forge ----------------------------------------------------------------
 

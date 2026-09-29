@@ -1,15 +1,16 @@
 class_name DragStripBetCard
 extends Control
-## One rival in the bet field: a driver's placeholder name over a live icon
-## of their car's body, picked with a click. `picked` flags it the same way
-## ScrapButton flags a selected tab — pushed in with the yellow sliver — so
-## the chosen car reads as chosen without a ring or outline.
+## One rival in the bet field: a driver's placeholder name over a live
+## preview of their full car (body, engine and wheels), picked with a click.
+## `picked` flags it the same way ScrapButton flags a selected tab — pushed
+## in with the yellow sliver — so the chosen car reads as chosen without a
+## ring or outline.
 
 signal pressed
 
 const CARD_SIZE := Vector2(140.0, 170.0)
 
-@onready var _icon: PartIcon = $Icon
+@onready var _car_view: CarView = $CarPreview
 @onready var _name_label: Label = $NameLabel
 
 var _board := ScrapBoard.new()
@@ -27,10 +28,10 @@ func _on_hover() -> void:
 	Sfx.play(&"ui_hover", -14.0)
 	queue_redraw()
 
-func setup(driver_name: String, body_part_data: BodyPartData) -> void:
+func setup(driver_name: String, car_model: CarModelData) -> void:
 	_name_label.text = driver_name
-	if body_part_data != null:
-		_icon.show_part(body_part_data)
+	if car_model != null:
+		_car_view.build_from(car_model)
 
 func set_picked(value: bool) -> void:
 	_picked = value

@@ -5,16 +5,19 @@ extends Node2D
 ## Unlike the calm, art-directed pile in the yard (see junkyard_pile.gd, which
 ## has to be placid because the player drives through it), this one is dumped:
 ## every piece is a real RigidBody2D with gravity on, dropped in from above the
-## frame and left to fall, roll and stack into a mound on the pen floor. Nothing
-## is placed by hand, so the heap is a different shape every visit and digging
-## in it is a genuine guess about what's under the claw.
+## frame and left to fall, roll and stack into a mound on the pen floor.
 ##
-## The heap is also the crane's eyes. `items_at()` is a physics query at the
-## jaws, so a grab takes the bodies that are actually there — including the real
-## car parts buried in the junk, each of which still carries its own PartData
-## and is exactly the part the player ends up owning. It's plural because a
-## claw driven down into a heap doesn't pick one thing out: it scoops up
-## whatever it passes through on the way down.
+## Every piece is a real car part, and the heap is layered so the player can
+## read it: tier-2 parts are tipped in first and make the bottom, tier-1 parts
+## are let go once those have landed and lie on top in plain sight. Aiming at
+## the surface gets you something you can see; the better stuff means digging
+## through it.
+##
+## The crane's claw is a pair of real bodies in the same physics world, so it
+## shoves these parts aside and scoops them up like any other collision; the
+## heap only answers what a piece is (`part_of()`) and lets go of it (`take()`).
+## Each piece carries its own PartData, and is exactly the part the player ends
+## up owning.
 ##
 ## Origin is the pen floor, +y down, art extends upward, so it Y-sorts against
 ## the crane like any other prop.
@@ -24,44 +27,57 @@ extends Node2D
 @export var drop_half_width: float = 260.0
 ## Pull the pin from this far up (the junk starts off-screen and rains in).
 @export var drop_height: float = 760.0
-## Extra height spread over the whole load, so the pieces arrive one after
-## another like a truck tipping rather than landing as a single deck.
-@export var drop_stagger: float = 420.0
-@export var chunk_count: int = 26
-## How many real, equippable car parts are buried in the junk.
-@export var part_count: int = 6
-## Smallest and largest scrap chunk (max vertex distance from its centre).
-@export var chunk_min: float = 14.0
-@export var chunk_max: float = 32.0
-## Scrap a chunk is worth, per pixel of its radius. Tuned so a haul of junk
-## covers part of a dig but never all of it — the money is in the parts.
-@export var scrap_per_radius: float = 1.5
+## Clear air left between one piece and the next in the drop queue. Each piece
+## starts a whole piece-height above the last, so none of them spawn inside
+## each other — overlapping bodies shove apart hard enough to fire a part out
+## of the pen.
+@export var drop_gap: float = 12.0
+## How many tier-2 parts make up the bottom layer. Tipped in first, so they
+## end up under everything else: the prize you have to dig for.
+@export var deep_count: int = 7
+## How many tier-1 parts lie on top. Queued above the bottom layer, so the
+## surface of the heap is all junk-grade and in plain sight.
+@export var top_count: int = 7
+## Extra air between the bottom layer's queue and the top layer's, so the top
+## lands on a bottom that has already come to rest instead of mixing into it.
+@export var layer_gap: float = 500.0
+## How far below the floor a piece has to be to count as lost through it.
+## Some parts' collision shapes are fine jagged stars (the saw blade) that, at
+## heap scale, break into slivers thin enough to slip through the floor under a
+## heavy landing. A lost piece is dropped back on the heap rather than gone.
+@export var lost_depth: float = 300.0
 ## Fixed seed = the same heap every visit; 0 = tipped fresh every time.
 @export var heap_seed: int = 0
 
 const ITEM_GROUP := &"heap_item"
 
-const _JUNK_COLORS := [
-	Color(0.45, 0.4, 0.35, 1),
-	Color(0.55, 0.3, 0.2, 1),
-	Color(0.3, 0.3, 0.32, 1),
-	Color(0.6, 0.5, 0.2, 1),
-	Color(0.4, 0.45, 0.3, 1),
-	Color(0.5, 0.15, 0.15, 1),
-	Color(0.25, 0.35, 0.4, 1),
-]
-
 ## Everything lying in the heap, in the order it was tipped in.
 var _items: Array[Node2D] = []
-## Friction/bounce for the junk, shared by every chunk.
+## Friction/bounce for the junk, shared by every piece.
 var _material: PhysicsMaterial = null
 
 func _ready() -> void:
 	var rng := _rng()
-	for i in chunk_count:
-		_spawn_chunk(rng, i)
-	for i in part_count:
-		_spawn_part(rng, chunk_count + i)
+	# Height the next piece starts at: climbs as the queue grows (-y is up).
+	var cursor := -drop_height
+	for i in deep_count:
+		cursor = _spawn_part(rng, 2, cursor)
+	cursor -= layer_gap
+	for i in top_count:
+		cursor = _spawn_part(rng, 1, cursor)
+
+func _physics_process(_delta: float) -> void:
+	for item in _items:
+		if not is_instance_valid(item) or item.position.y < lost_depth:
+			continue
+		var body := item as RigidBody2D
+		if body == null or body.freeze:
+			continue
+		var at := to_global(Vector2(randf_range(-drop_half_width, drop_half_width) * 0.5, -drop_height))
+		PhysicsServer2D.body_set_state(body.get_rid(), PhysicsServer2D.BODY_STATE_TRANSFORM, Transform2D(body.rotation, at))
+		body.global_position = at
+		body.linear_velocity = Vector2.ZERO
+		body.angular_velocity = 0.0
 
 func _rng() -> RandomNumberGenerator:
 	var rng := RandomNumberGenerator.new()
@@ -121,8 +137,9 @@ func part_of(node: Node) -> PartData:
 			return nested
 	return null
 
-## Scrap a junk chunk is worth. A part isn't junk and is worth no scrap — it's
-## the part itself the player keeps.
+## Scrap a piece is worth, from its `scrap` meta. The heap is all parts now and
+## a part is worth no scrap — it's the part itself the player keeps — but a
+## piece tagged by hand still weighs in.
 func scrap_of(node: Node) -> int:
 	if node.has_meta(&"scrap"):
 		return int(node.get_meta(&"scrap"))
@@ -162,46 +179,34 @@ func item_bounds() -> Rect2:
 
 # --- Tipping the load in -------------------------------------------------------
 
-func _spawn_chunk(rng: RandomNumberGenerator, index: int) -> void:
-	var radius := rng.randf_range(chunk_min, chunk_max)
-	var body := RigidBody2D.new()
-	body.mass = maxf(1.0, radius * 0.12)
-	body.physics_material_override = _junk_material()
-	var poly := _chunk_polygon(radius, rng)
-	var visual := Polygon2D.new()
-	visual.polygon = poly
-	visual.color = _JUNK_COLORS[rng.randi() % _JUNK_COLORS.size()]
-	body.add_child(visual)
-	var collision := CollisionPolygon2D.new()
-	collision.polygon = poly
-	body.add_child(collision)
-	body.set_meta(&"scrap", maxi(1, int(round(radius * scrap_per_radius))))
-	_tip(body, _drop_point(rng, index))
-	body.rotation = rng.randf_range(0.0, TAU)
-
-## A real part scene from the same catalog the garage browses, shrunk to the
-## size the world's cars wear it at (PartScale), so the heap is in scale with
-## the claw.
-func _spawn_part(rng: RandomNumberGenerator, index: int) -> void:
-	var body := _build_part(rng)
+## A real part scene of `tier` from the same catalog the garage browses,
+## shrunk to the size the world's cars wear it at (PartScale), so the heap is
+## in scale with the claw. Its lowest point starts at `cursor`; returns the
+## height the next piece in the queue starts at, clear above this one.
+func _spawn_part(rng: RandomNumberGenerator, tier: int, cursor: float) -> float:
+	var body := _build_part(rng, tier)
 	if body == null:
-		return
-	_tip(body, _drop_point(rng, index))
+		return cursor
+	# The diagonal, not the height: the piece is tipped in at a random angle.
+	var size := PartScale.measure_bounds(body).size.length()
+	var at := Vector2(rng.randf_range(-drop_half_width, drop_half_width), cursor - size * 0.5)
+	_tip(body, at)
 	body.rotation = rng.randf_range(0.0, TAU)
+	return cursor - size - drop_gap
 
 ## One loose part, ready to be tipped in, or null if the catalog couldn't supply
 ## one.
 ##
 ## Rolls again rather than giving up when a pick turns out to be unusable, so
-## `part_count` is what actually lands in the heap. Two picks need rejecting: a
+## the layer counts are what actually land in the heap. Two picks need rejecting: a
 ## paddle wheel, which forces its own rotation to a fixed angle every physics
 ## tick even at rest (car_paddle.gd's "parked" branch) and so never tumbles
 ## naturally while falling and settling — reads as the piece rigidly shoving
 ## through the pile instead of landing in it; and a part whose art measures to
 ## nothing, which has no shape to collide with.
-func _build_part(rng: RandomNumberGenerator) -> RigidBody2D:
+func _build_part(rng: RandomNumberGenerator, tier: int) -> RigidBody2D:
 	for attempt in 8:
-		var node := _instantiate(_random_part(rng))
+		var node := _instantiate(_random_part(rng, tier))
 		if node == null:
 			continue
 		PartScale.apply_to(node)
@@ -226,22 +231,16 @@ func _build_part(rng: RandomNumberGenerator) -> RigidBody2D:
 func _tip(body: RigidBody2D, at: Vector2) -> void:
 	body.position = at
 	add_child(body)
-	body.name = "%s%d" % ["Junk" if body.get("part_data") == null else "Part", _items.size()]
+	body.name = "Part%d" % _items.size()
 	body.mass = clampf(body.mass, 1.0, 30.0)
 	body.can_sleep = true
 	body.linear_damp = 0.3
 	body.angular_damp = 0.5
+	# The top of the queue lands fast, and a small part under a big one can be
+	# driven straight through the floor between two ticks without this.
+	body.continuous_cd = RigidBody2D.CCD_MODE_CAST_SHAPE
 	body.add_to_group(ITEM_GROUP)
 	_items.append(body)
-
-## Where a piece starts its fall: somewhere over the pen, high up, staggered so
-## the load arrives over a few seconds instead of all at once.
-func _drop_point(rng: RandomNumberGenerator, index: int) -> Vector2:
-	var total := maxi(1, chunk_count + part_count)
-	var spread := drop_stagger * float(index) / float(total)
-	return Vector2(
-			rng.randf_range(-drop_half_width, drop_half_width),
-			-drop_height - spread)
 
 ## Give a part with no physics of its own — an engine — a body to be dropped in.
 ## Its art is hung on a shape cut to the art's own bounds, so it collides as the
@@ -271,23 +270,17 @@ func _junk_material() -> PhysicsMaterial:
 		_material.bounce = 0.04
 	return _material
 
-## Irregular blob: evenly spaced vertices at varying distances, so it reads as a
-## lump of scrap rather than a die.
-func _chunk_polygon(radius: float, rng: RandomNumberGenerator) -> PackedVector2Array:
-	var count := rng.randi_range(5, 9)
-	var points := PackedVector2Array()
-	for i in count:
-		var angle := TAU * float(i) / float(count) + rng.randf_range(-0.14, 0.14)
-		points.append(Vector2(cos(angle), sin(angle)) * radius * rng.randf_range(0.68, 1.0))
-	return points
-
-## Anything from the catalog that can be dropped and grabbed: bodies, wheels and
-## engines, the same pools the garage and the yard's scenery heap draw from.
-func _random_part(rng: RandomNumberGenerator) -> PartData:
+## Anything of `tier` from the catalog that can be dropped and grabbed:
+## bodies, wheels and engines, the same pools the garage and the yard's scenery
+## heap draw from. Falls back to the whole pool if nothing is that tier.
+func _random_part(rng: RandomNumberGenerator, tier: int) -> PartData:
 	var pool: Array[PartData] = []
 	pool.append_array(PartDatabase.bodies)
 	pool.append_array(PartDatabase.wheels)
 	pool.append_array(PartDatabase.junk_engines)
+	var matching := pool.filter(func(part: PartData) -> bool: return part.tier == tier)
+	if not matching.is_empty():
+		pool.assign(matching)
 	if pool.is_empty():
 		return null
 	return pool[rng.randi() % pool.size()]

@@ -216,20 +216,23 @@ func _roll_bet_field() -> void:
 		_bet_field_names.append(car_name)
 		var card := _BET_CARD_SCENE.instantiate()
 		_bet_field_list.add_child(card)
-		card.setup(names[i], _body_part_data(rival["body"]))
+		card.setup(names[i], _rival_car_model(rival))
 		card.pressed.connect(_on_bet_card_pressed.bind(i))
 		_bet_cards.append(card)
 
 ## Rival specs only carry scene paths (see RaceProgression.pick_rivals), so
-## the PartData shown on the bet card comes from a throwaway instance of the
-## body scene — the same field PartFactory would read off a live car, just
-## fetched without racing the car first.
-static func _body_part_data(body_path: String) -> BodyPartData:
-	var scene := load(body_path) as PackedScene
-	var instance := scene.instantiate()
-	var data: BodyPartData = instance.get("part_data")
-	instance.free()
-	return data
+## the full car shown on the bet card is assembled from throwaway PartData
+## loads of those paths — the same fields PartFactory would read off a live
+## car, just fetched without racing the car first.
+static func _rival_car_model(rival: Dictionary) -> CarModelData:
+	var model := CarModelData.new()
+	model.body = PartDatabase.load_part_data(rival["body"]) as BodyPartData
+	model.engine = PartDatabase.load_part_data(rival["engine"]) as EnginePartData
+	var wheels: Array[WheelPartData] = []
+	for wheel_path in rival["wheels"]:
+		wheels.append(PartDatabase.load_part_data(wheel_path) as WheelPartData)
+	model.wheels = wheels
+	return model
 
 func _on_bet_card_pressed(index: int) -> void:
 	_bet_pick_index = index

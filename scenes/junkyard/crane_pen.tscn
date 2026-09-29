@@ -29,7 +29,9 @@ y_sort_enabled = true
 [node name="Heap" type="Node2D" parent="Yard" unique_id=598081456]
 position = Vector2(-60, 0)
 script = ExtResource("3_heap")
-drop_half_width = 200.0
+drop_half_width = 70.0
+deep_count = 14
+top_count = 14
 
 [node name="Crane" type="Node2D" parent="Yard" unique_id=669219238]
 position = Vector2(400, 0)
@@ -43,6 +45,8 @@ sway_speed = 0.5
 trolley_min = -290.0
 trolley_max = 780.0
 hoist_max = 580.0
+claw_radius = 28.0
+claw_thickness = 12.0
 
 [node name="CraneBase" type="StaticBody2D" parent="Yard/Crane" unique_id=125880466]
 

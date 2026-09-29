@@ -1,19 +1,16 @@
 [gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/race/drag_strip_bet_card.gd" id="1"]
-[ext_resource type="PackedScene" path="res://scenes/garage/part_icon.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/world/car_view.tscn" id="2"]
 
 [node name="DragStripBetCard" type="Control"]
 custom_minimum_size = Vector2(140, 170)
 layout_mode = 2
 script = ExtResource("1")
 
-[node name="Icon" parent="." instance=ExtResource("2")]
-layout_mode = 0
-offset_left = 20.0
-offset_top = 16.0
-offset_right = 120.0
-offset_bottom = 116.0
+[node name="CarPreview" parent="." instance=ExtResource("2")]
+position = Vector2(70, 66)
+auto_fit_width = 85.0
 
 [node name="NameLabel" type="Label" parent="."]
 layout_mode = 0

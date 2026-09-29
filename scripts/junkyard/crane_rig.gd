@@ -9,29 +9,29 @@ extends JunkyardCrane
 ##   - A / D roll the trolley along the boom, lining the claw up over a spot in
 ##     the heap (arrow keys do the same thing, for anyone who'd rather not reach
 ##     for WASD),
-##   - Space drops the claw: the jaws sink until they land on something, close
-##     on the piece they landed on (and anything jammed against it), and the
-##     winch hauls the lot back to the trolley.
+##   - Space drops the claw, and Space again shuts it. The claw eases to a stop
+##     on the first thing it touches and hangs there open until told to shut;
+##     pressing Space on the way down shuts it right where it is. Either way the
+##     winch then hauls up whatever the jaws have hold of.
 ##
-## The winch is deliberately not on a key of its own. Aiming is the game and
-## depth is not a decision the player should have to make — so the claw takes
-## itself down, and what comes up is decided by where the player parked it. One
-## press is one dig, and one dig is one grab: `items_at()` is a shape query
-## against the real bodies in the heap (see `TrashHeap`), so what comes up is
-## whatever the jaws actually closed around — normally the single piece they
-## landed on, and a neighbour too when the two were lying in a tight clump.
+## The claw here is real. Its two clamshell halves are heavy `RigidBody2D`s in
+## the same physics world as the heap, servoed every tick toward the pose the
+## rigging says they should have (hinge under the block, turned by `jaw_open`).
+## Heavy is the point: going down, the shells' outer faces shove the junk aside
+## instead of passing through it, and closing, their tips sweep in along the
+## bottom and scoop up what's between them. Something too big or too wedged
+## wins — the shell stalls against it and the claw comes up half open, maybe
+## dropping what it had.
 ##
-## It stops where it lands rather than at the bottom of the cable's travel. A
-## claw driven all the way down ploughs clean through the pile and comes up with
-## a column of junk whether or not it touched anything, which reads as the crane
-## ignoring its own jaws — and it makes every dig the same dig. Landing on the
-## nearest thing under the teeth is what a grab looks like, and it makes aim
-## matter: the piece the jaws stop on is the piece you walk away with.
+## The winch is deliberately not on a key of its own: the claw finds the top of
+## the pile by itself. The player picks where (A / D) and when the jaws bite
+## (Space) — early, to snatch at something on the way down, or once it's
+## settled around a piece.
 ##
-## A dig is charged for when the jaws close on something, not when they go down:
-## coming up empty-handed is free, and so is being told you can't afford the
-## dig. The claw doesn't pick a target — a body in the heap *is* the part you
-## walk away with, not a roll on a loot table.
+## What you walk away with is decided by physics, not a query: when the claw is
+## back at the trolley, every heap piece whose centre is inside the closed ring
+## is the haul. Every dig costs `grab_cost` up front, catch or miss; being told
+## you can't afford one is free.
 ##
 ## The machine reports, it doesn't bank: `dug` fires once per piece with the
 ## item and what it was worth, `dig_finished` when the claw is back at the
@@ -39,92 +39,111 @@ extends JunkyardCrane
 ## the haul.
 ##
 ## Sway stays on while driving, because a claw that hangs still is a claw that
-## aims itself. The jaws read their position *as drawn*, sway and all, so the
-## pendulum is a thing to time rather than a thing to fight.
+## aims itself.
 
-## One piece grabbed off the heap: `part` is the car part it was (null for plain
-## junk), `scrap` what the junk is worth. Exactly one of them is set.
+## One piece hauled out of the heap: `part` is the car part it was (null for
+## plain junk), `scrap` what the junk is worth. Exactly one of them is set.
 ##
 ## Fires once per piece in a haul, *before* the piece is freed, so a handler can
 ## still read it.
 signal dug(item: Node2D, part: PartData, scrap: int)
-## The jaws came up empty.
+## The claw came up empty.
 signal missed()
-## Something was down there, and the wallet couldn't cover the dig.
+## The wallet couldn't cover a dig, so the claw never went down.
 signal denied()
 ## The claw is back at the trolley and the dig is over. `caught` is how many
 ## pieces came up — 0 for a miss. The crane is idle again by the time this
 ## lands.
 signal dig_finished(caught: int)
 
-## The heap this crane works. Its `items_at()` is the jaws' eyes.
+const SIDES: Array[float] = [-1.0, 1.0]
+
+## The heap this crane works: what counts as loot inside the shut claw.
 @export var heap_path: NodePath = ^"../Heap"
-## What one dig costs, taken off the wallet only when the jaws close on
-## something. Expensive on purpose: the junk in a basketful is worth a fraction
-## of this, so the money is in what else comes up with it.
+## What one dig costs, taken off the wallet as the claw sets off, whether or not
+## it comes up with anything.
 @export var grab_cost: int = 100
 ## Trolley speed along the boom.
 @export var trolley_speed: float = 190.0
 ## How far below its parked height the winch will pay the cable out at most.
-## A limit, not a destination: the claw bites in wherever it lands (see
-## `bite_depth`) and only comes down this far when there's nothing down there to
-## land on. Wants to be a little more than the heap's own depth, so a dig over a
-## gap reaches the floor instead of hanging in mid-air.
+## A limit, not a destination: the claw stops wherever the shells stall and only
+## comes down this far when nothing stops it.
 @export var dig_depth: float = 260.0
 ## How fast the winch pays out and hauls back.
 @export var dig_speed: float = 300.0
-## How far past the first touch the claw drives on before it shuts. Stopping on
-## contact alone leaves the teeth balanced on top of the piece, which looks like
-## the claw gave up a jaw's length short of it, so it bites in by about half a
-## jaw. Keep it below `jaw_reach` — bite deeper than the jaws can reach and they
-## can close with the thing they landed on already behind them.
-@export var bite_depth: float = 30.0
-## The nose probe that decides a dig has landed: a small circle at the teeth.
-## Small on purpose — "touching" is the teeth, not the jaws' whole reach, and
-## probing at the hinge would have the claw stop a blade's length above the heap.
-@export var contact_radius: float = 10.0
-## How wide the jaws open: the radius a body has to be within of the teeth for
-## the jaws to be around it. Roughly the claw's own width, and the hard limit on
-## what a dig can come up with.
-@export var jaw_reach: float = 38.0
-## What counts as a clump: a piece this close to the one the jaws landed on is
-## treated as jammed against it and comes up too. Small on purpose, so a dig is
-## normally one piece — the junk has to be genuinely nested for the jaws to close
-## on two at once. Raise it and digs start scooping.
-@export var clump_radius: float = 28.0
-## How long the jaws take to shut or open.
-@export var jaw_time: float = 0.16
-## How long a grabbed piece takes to disappear once the haul is up.
+## How much further the claw eases down after the shells first touch
+## something, before it stops and shuts. About half the open claw's reach, so
+## the tips sink around the piece they met rather than stopping on top of it.
+@export var bite_depth: float = 22.0
+## How long the shells take to open or shut. Slow enough to scoop: a snap shut
+## just flicks junk out from under the tips.
+@export var jaw_time: float = 0.45
+## How long a hauled piece takes to disappear once the claw is up.
 @export var vanish_time: float = 0.45
-## Cleared by whatever owns the pen once the dig is over and the player is on
-## their way out, so a Space press in the last moment of a scene change can't
-## start a second dig.
+## Cleared by whatever owns the crane to take the controls off the player (a
+## scene change on its way, a cutscene); the claw ignores A / D / Space then.
 @export var controls_enabled: bool = true
 
-var _digging: bool = false
-var _heap: TrashHeap = null
-## The piece the jaws landed on last dig: what the dig was aimed at, and what
-## they closed on. Null on a dig that found nothing. Reset at the start of every
-## sink, so it always describes the dig just gone rather than an old one.
-var _landed_on: Node2D = null
-## How deep the winch paid out on the last dig: the hoist length the jaws
-## actually stopped at, which is wherever they landed — not `dig_depth`. Zero
-## until the first dig. Read-only for anyone outside; the pen doesn't need it,
-## but it's the one number that says where the claw bit, and it's otherwise
-## thrown away as soon as the claw winds back up.
-var last_bite_hoist: float = 0.0
+@export_group("Shell physics")
+## Mass of each shell. Heap junk weighs 1-30, so this is what lets the shells
+## push through the pile instead of riding up on it — but a floor, or a pile
+## packed against it, still stops them.
+@export var shell_mass: float = 240.0
+## Top speed the servo may drive a shell at. Caps the shove a shell gives junk
+## when it's been held back and snaps free.
+@export var servo_speed: float = 700.0
+## Top spin rate the servo may turn a shell at, radians per second.
+@export var servo_spin: float = 8.0
+## How hard a shell holds its angle against junk shoving on its tip, as a
+## multiple of a mass hung out at the tip. Too low and the pile pries the open
+## claw flat; too high and nothing can ever jam it.
+@export var shell_stiffness: float = 3.0
+## How far a shell may trail the hinge before it counts as held back.
+@export var stall_lag: float = 8.0
+## How far, in radians, a shell may be turned off its pose before it counts as
+## held back — a claw jammed open on something too big has stopped too.
+@export var stall_angle: float = 0.3
+## Physics ticks in a row a shell has to be held back for the claw to call it
+## the bottom. A few, so one knock off a tumbling chunk doesn't stop the dig.
+@export var stall_ticks: int = 5
+## How long the haul gets to settle in the shut claw before it's counted.
+@export var settle_time: float = 0.3
+## Shortest gap between two shove thuds, so a claw ploughing through a pile
+## rumbles rather than machine-guns.
+@export var shove_gap: float = 0.14
 
-## The piece the last dig landed on, if it found one. The single most useful
-## thing to know about a dig: it's what the haul is built around.
-func landed_on() -> Node2D:
-	return _landed_on
+var _digging: bool = false
+## Set by the second Space press (or `close_claw()`) while the claw is down:
+## stop sinking and shut the jaws.
+var _close_requested: bool = false
+## True from the moment the claw starts down until the jaws start to shut —
+## the window in which Space means "close" rather than "drop".
+var _awaiting_close: bool = false
+var _heap: TrashHeap = null
+## The two clamshell halves, left then right (same order as `SIDES`).
+var _shells: Array[RigidBody2D] = []
+## Seconds until another shove thud may play.
+var _shove_cooldown: float = 0.0
+## How deep the winch paid out on the last dig: the hoist length the shells
+## stalled at (or `dig_depth`, if nothing stopped them). Zero until the first
+## dig.
+var last_bite_hoist: float = 0.0
 
 func _ready() -> void:
 	super._ready()
 	_heap = _find_heap()
+	for side in SIDES:
+		_shells.append(_build_shell(side))
+	_set_shells_solid(false)
 
 func _physics_process(delta: float) -> void:
-	if _digging or not controls_enabled:
+	_drive_shells(delta)
+	_shove_cooldown = maxf(_shove_cooldown - delta, 0.0)
+	if not controls_enabled:
+		return
+	if _digging:
+		if _awaiting_close and Input.is_action_just_pressed(&"ui_accept"):
+			close_claw()
 		return
 	# The claw hangs at -trolley, so pressing right has to push the trolley back
 	# toward the mast. That's the whole of the player's control: where in the
@@ -135,7 +154,17 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed(&"ui_accept"):
 		dig()
 
-## True while the jaws are working, so a HUD can grey itself out.
+## Shut the claw now, if it's on its way down or hanging open waiting to be
+## shut. What Space does mid-dig; a test or a cutscene can call it too.
+func close_claw() -> void:
+	if _awaiting_close:
+		_close_requested = true
+
+## True while the claw is down and open, waiting for Space to shut it.
+func is_awaiting_close() -> bool:
+	return _awaiting_close
+
+## True while the claw is working, so a HUD can grey itself out.
 func is_digging() -> bool:
 	return _digging
 
@@ -143,12 +172,17 @@ func is_digging() -> bool:
 func heap() -> TrashHeap:
 	return _heap
 
-## Work the claw: sink the open jaws until they land on something, shut them on
-## whatever is between them, and haul the lot back to the trolley.
+## The two shell bodies, left then right.
+func shells() -> Array[RigidBody2D]:
+	return _shells.duplicate()
+
+## Work the claw: sink it open until the shells stall, shut them on whatever is
+## between them, haul the lot back to the trolley, and bank what stayed inside.
 ##
-## Free to miss, free to be broke — the wallet is only touched once the jaws have
-## closed on something. Await this if you want to know when the claw is free
-## again; `dig_finished` reports the same moment to anyone who didn't.
+## Every dig costs `grab_cost`, taken as the claw sets off, whatever it comes up
+## with; being told you can't afford one is free. Await this if you want to know
+## when the claw is free again; `dig_finished` reports the same moment to anyone
+## who didn't.
 func dig() -> void:
 	if _digging:
 		return
@@ -161,187 +195,213 @@ func dig() -> void:
 		Sfx.play(&"denied", -6.0, 0.0)
 		denied.emit()
 		return
+	# Paid up front, like a coin in an arcade claw: the money is for the go, not
+	# for what comes up, so a miss costs the same as a catch.
+	Inventory.spend_money(grab_cost)
+	Sfx.play(&"cash_register", -10.0, 0.05)
 	_digging = true
+	_set_shells_solid(true)
 
-	# Down with the jaws open until they hit something, or the cable runs out.
-	# Nothing is charged yet — we don't know what's in the basket.
-	var caught := await _sink(heap)
+	_close_requested = false
+	_awaiting_close = true
+	await _sink()
+	# Settled and open: hang there until the player says bite.
+	while not _close_requested and is_inside_tree():
+		await get_tree().physics_frame
+	_awaiting_close = false
+	_close_requested = false
+	Sfx.play_at(&"crane_clang", jaw_mouth_global(), -2.0)
+	await _snap_jaws(0.0)
+	# A beat for the shells to finish grinding shut on anything that held them.
+	await get_tree().create_timer(0.15).timeout
+	var gripped := _grip(heap)
+	await _haul_up(gripped)
+	if settle_time > 0.0:
+		await get_tree().create_timer(settle_time).timeout
+
+	var caught := trapped(heap)
+	for item in gripped:
+		if is_instance_valid(item) and not caught.has(item):
+			caught.append(item)
 	if caught.is_empty():
 		Sfx.play_at(&"crane_miss", jaw_mouth_global(), -4.0)
-		await _haul_up()
+		await _snap_jaws(1.0)
+		_set_shells_solid(false)
 		_digging = false
 		missed.emit()
 		dig_finished.emit(0)
 		return
 
-	# Shut on the haul, lift it, and pay for it on the way up. The pieces ride
-	# with the jaws — carried out of the heap, not left to fade where they lay.
-	Sfx.play_at(&"crane_clang", jaw_mouth_global(), -2.0)
-	await _snap_jaws(0.0)
-	await _carry_up(caught)
-	Inventory.spend_money(grab_cost)
 	for item in caught:
-		if not is_instance_valid(item):
-			continue
+		var body := item as RigidBody2D
+		if body != null:
+			body.freeze = true
 		var part := heap.part_of(item)
 		var scrap := heap.scrap_of(item)
 		heap.take(item)
 		dug.emit(item, part, scrap)
 	await _fade_away_all(caught)
 	await _snap_jaws(1.0)
+	_set_shells_solid(false)
 	_digging = false
 	dig_finished.emit(caught.size())
 
-## World position of the jaw teeth — where the claw actually meets the heap.
-##
-## `claw_tip_global()` is the *hinge* the blades hang from; the teeth are a
-## whole jaw below it. A grab aimed at the hinge closes on a patch of air above
-## the piece the player was looking at, and a landing probe up there stops the
-## claw in mid-air with the heap still a blade's length under it.
-func jaw_mouth_global() -> Vector2:
-	return to_global(claw_local() + Vector2(0.0, JAW_DROP))
-
-## Pay the cable out from wherever the trolley has the claw, down until the jaws
-## touch something, and report what they close on there.
-##
-## Both the landing probe and the grab read the teeth (see `jaw_mouth_global()`),
-## and the descent stops a bite past the first touch rather than at `dig_depth`:
-## so a dig over open floor runs the full travel and comes up empty, and a dig
-## that lands comes back up with the piece under the jaws.
-func _sink(heap: TrashHeap) -> Array[Node2D]:
-	_landed_on = null
-	var target := clampf(hoist + dig_depth, hoist_min, hoist_max)
-	if dig_speed <= 0.0:
-		# Instant sink: there's no descent to feel a landing on, so the jaws
-		# simply take what they came down around.
-		place_hoist(target)
-		last_bite_hoist = hoist
-		_landed_on = _nearest(heap, jaw_reach)
-		return _bite(heap, jaw_reach)
-	# -1 until the teeth meet something, then the hoist length they met it at.
-	var landed := -1.0
-	while hoist < target:
-		place_hoist(minf(hoist + dig_speed * get_physics_process_delta_time(), target))
-		if landed < 0.0:
-			_landed_on = _nearest(heap, contact_radius)
-			if _landed_on != null:
-				# Teeth are on something. Note where, and keep going: the jaws
-				# want to close around the piece, not balance on top of it.
-				landed = hoist
-		elif hoist >= landed + bite_depth:
-			break
-		await get_tree().physics_frame
-	last_bite_hoist = hoist
-	return _bite(heap, jaw_reach)
-
-## What the jaws close on, given where they stopped: the piece they landed on,
-## plus anything wedged tight enough against it to come up in the same bite.
-##
-## "Wedged" is measured centre to centre. A shape query would be the obvious
-## way to ask, but in a tipped pile almost every piece touches its neighbours,
-## so overlap alone turns most digs into a two-piece haul — the opposite of the
-## feel we're after. Two centres inside `clump_radius` of each other means the
-## pieces are sitting on top of one another, which is a genuine clump.
-##
-## A dig that never landed on anything comes up empty, whatever is down there.
-func _bite(heap: TrashHeap, reach: float) -> Array[Node2D]:
+## Every heap piece sitting inside the ring the shut shells make: its centre
+## within the ring's hollow. That's the whole test — a piece that's in there
+## after the ride up was carried, and one that slid out wasn't.
+func trapped(heap: TrashHeap) -> Array[Node2D]:
 	var caught: Array[Node2D] = []
-	if _landed_on == null or not is_instance_valid(_landed_on):
-		return caught
-	caught.append(_landed_on)
-	var anchor := _landed_on.global_position
-	var mouth := jaw_mouth_global()
+	var centre := ring_centre_global()
+	var hollow := claw_radius - claw_thickness * 0.5
 	for item in heap.items():
-		if item == _landed_on:
-			continue
-		if item.global_position.distance_to(anchor) > clump_radius:
-			continue
-		# Still has to be between the jaws: a neighbour of a piece the teeth
-		# caught at the very edge of their reach would otherwise be hauled up
-		# from outside the closed jaws.
-		if item.global_position.distance_to(mouth) > reach:
-			continue
-		caught.append(item)
+		if is_instance_valid(item) and item.global_position.distance_to(centre) < hollow:
+			caught.append(item)
 	return caught
 
-## The heap piece nearest `point`, within `radius` of it, or null if the query
-## came up empty. Nearest rather than first: the teeth reach into a pile, so the
-## thing they actually met is the one closest to them.
-func _nearest(heap: TrashHeap, radius: float) -> Node2D:
-	var mouth := jaw_mouth_global()
-	var best: Node2D = null
-	var best_distance := INF
-	for item in heap.items_at(mouth, radius):
-		var distance := item.global_position.distance_to(mouth)
-		if distance < best_distance:
-			best_distance = distance
-			best = item
-	return best
+## Centre of the ring the shut shells make.
+func ring_centre_global() -> Vector2:
+	return to_global(hinge_local() + Vector2(0.0, claw_radius).rotated(_sway))
 
-## Wind the claw back up to the height the trolley parks it at.
-func _haul_up() -> void:
-	if dig_speed <= 0.0:
-		place_hoist(rest_hoist())
-		return
+## World position of the bottom of the shut claw — where it meets the heap, and
+## where its sounds come from.
+func jaw_mouth_global() -> Vector2:
+	return to_global(hinge_local() + Vector2(0.0, claw_radius * 2.0).rotated(_sway))
+
+## Pay the cable out until the shells touch something, then ease off and stop
+## a short `bite_depth` further down — so the claw settles into the top of the
+## pile around the first thing it meets instead of ploughing on to the floor.
+## A stall (something it can't shove) still stops it on the spot, and so does
+## the cable running out. Then take back the slack, so the winch isn't still
+## pressing the shells into whatever they landed on while they close.
+func _sink() -> void:
+	var target := clampf(hoist + dig_depth, hoist_min, hoist_max)
+	var held := 0
+	var braking := false
+	while hoist < target - 0.5 and not _close_requested:
+		var speed := dig_speed
+		if braking:
+			# Slows in proportion to the bite left, down to a crawl, so the stop
+			# reads as the claw feeling its way in rather than hitting a wall.
+			speed = maxf(dig_speed * (target - hoist) / maxf(bite_depth, 1.0), dig_speed * 0.1)
+		place_hoist(minf(hoist + speed * get_physics_process_delta_time(), target))
+		await get_tree().physics_frame
+		if not braking and _shells_touching():
+			braking = true
+			target = minf(target, hoist + bite_depth)
+		if _shell_lag() > stall_lag or _shell_twist() > stall_angle:
+			held += 1
+			if held >= stall_ticks:
+				break
+		else:
+			held = 0
+	place_hoist(hoist - _shell_lag())
+	last_bite_hoist = hoist
+
+## True once either shell is in contact with anything — junk or floor.
+func _shells_touching() -> bool:
+	for shell in _shells:
+		if not shell.get_colliding_bodies().is_empty():
+			return true
+	return false
+
+## Heap pieces the shut claw has a grip on: pinched between both shells, the
+## one way a piece too big for the ring comes up. Touching a single shell, or
+## just propping one open, isn't a grip — that piece stays in the heap. Each
+## gripped one is locked to the
+## claw for the ride up, the way real jaws clamping down would hold it, instead
+## of being left to friction and sliding out.
+##
+## The jaws are parked where they stopped, so the servo stops trying to close
+## through the piece, and the shells stop colliding with it, so nothing jitters
+## while it's carried.
+func _grip(heap: TrashHeap) -> Array[Node2D]:
+	var touching: Array = []
+	for shell in _shells:
+		var mine: Array[Node2D] = []
+		for body in shell.get_colliding_bodies():
+			var item := heap.item_of(body)
+			if item != null and not mine.has(item):
+				mine.append(item)
+		touching.append(mine)
+	var gripped: Array[Node2D] = []
+	for i in touching.size():
+		for item: Node2D in touching[i]:
+			if gripped.has(item):
+				continue
+			if touching[1 - i].has(item):
+				gripped.append(item)
+	if gripped.is_empty():
+		return gripped
+	set_jaw_open(_actual_jaw_open())
+	for item in gripped:
+		var body := item as RigidBody2D
+		if body == null:
+			continue
+		body.freeze_mode = RigidBody2D.FREEZE_MODE_KINEMATIC
+		body.freeze = true
+		for shell in _shells:
+			shell.add_collision_exception_with(body)
+	return gripped
+
+## How open the shells really are, read off their bodies rather than
+## `jaw_open` — the wider of the two, since that's the one holding the jaws
+## apart.
+func _actual_jaw_open() -> float:
+	var widest := 0.0
+	for i in _shells.size():
+		var shut := global_rotation + shell_rotation(SIDES[i]) + SIDES[i] * JAW_SWING * jaw_open
+		widest = maxf(widest, absf(angle_difference(shut, _shells[i].global_rotation)) / JAW_SWING)
+	return clampf(widest, 0.0, 1.0)
+
+## How far the most-twisted shell is turned off the pose it's being driven to.
+func _shell_twist() -> float:
+	var twist := 0.0
+	for i in _shells.size():
+		var target := global_rotation + shell_rotation(SIDES[i])
+		twist = maxf(twist, absf(angle_difference(_shells[i].global_rotation, target)))
+	return twist
+
+## How far the furthest-behind shell trails the hinge it's being driven to.
+func _shell_lag() -> float:
+	var hinge := to_global(hinge_local())
+	var lag := 0.0
+	for shell in _shells:
+		lag = maxf(lag, shell.global_position.distance_to(hinge))
+	return lag
+
+## Wind the claw back up to the height the trolley parks it at, carrying
+## `gripped` locked to the hinge by the offset each was clamped at.
+func _haul_up(gripped: Array[Node2D] = []) -> void:
+	var offsets: Array[Vector2] = []
+	var hinge := to_global(hinge_local())
+	for item in gripped:
+		offsets.append(item.global_position - hinge)
 	var target := rest_hoist()
+	if dig_speed <= 0.0:
+		place_hoist(target)
+		_pin(gripped, offsets)
+		return
 	while hoist > target:
 		place_hoist(maxf(hoist - dig_speed * get_physics_process_delta_time(), target))
+		_pin(gripped, offsets)
 		await get_tree().physics_frame
+	_pin(gripped, offsets)
 
-## Ride the caught pieces up with the jaws, so the claw visibly brings the haul
-## out of the heap instead of leaving it to fade where it lay.
-##
-## Each piece is frozen and pinned to the teeth by the offset it was grabbed at,
-## so the pieces climb with the claw and settle in the closed jaws. The pin has
-## to go through the physics server: a frozen body's transform is owned by the
-## server, so writing `global_position` alone gets silently undone on the next
-## step — the same reason a parked piece has to be set with `body_set_state`.
-func _carry_up(items: Array[Node2D]) -> void:
-	var offsets: Array[Vector2] = []
-	var mouth := jaw_mouth_global()
-	for item in items:
-		if not is_instance_valid(item):
-			offsets.append(Vector2.ZERO)
-			continue
-		var body := item as RigidBody2D
-		if body != null:
-			body.freeze = true
-			body.linear_velocity = Vector2.ZERO
-			body.angular_velocity = 0.0
-		offsets.append(item.global_position - mouth)
-	# The hoist loop from `_haul_up`, but every step pins the haul to the teeth
-	# first so the pieces climb with the claw.
-	if dig_speed <= 0.0:
-		place_hoist(rest_hoist())
-	else:
-		var target := rest_hoist()
-		while hoist > target:
-			place_hoist(maxf(hoist - dig_speed * get_physics_process_delta_time(), target))
-			_pin_haul(items, offsets)
-			await get_tree().physics_frame
-	_pin_haul(items, offsets)
-
-## Put each grabbed piece back on the teeth, keeping the offset it was caught at.
-##
-## Two writes, in this order: `body_set_state` tells the physics server where the
-## body now is (so the next sync doesn't snap it back), and `global_position`
-## moves the node itself (so it reads and renders there this very frame). A
-## frozen body's node transform is owned by the server, so either write alone is
-## quietly undone on the next step.
-func _pin_haul(items: Array[Node2D], offsets: Array[Vector2]) -> void:
-	var mouth := jaw_mouth_global()
+## Put each gripped piece back at its offset from the hinge. Two writes: the
+## physics server's copy (a frozen body's transform belongs to the server, so
+## the node alone is undone next step) and the node's, so it draws there now.
+func _pin(items: Array[Node2D], offsets: Array[Vector2]) -> void:
+	var hinge := to_global(hinge_local())
 	for i in items.size():
 		var item := items[i]
 		if not is_instance_valid(item):
 			continue
-		var target := mouth + offsets[i]
+		var at := hinge + offsets[i]
 		var body := item as RigidBody2D
 		if body != null:
-			PhysicsServer2D.body_set_state(body.get_rid(),
-					PhysicsServer2D.BODY_STATE_TRANSFORM, Transform2D(body.rotation, target))
-			body.global_position = target
-		else:
-			item.global_position = target
+			PhysicsServer2D.body_set_state(body.get_rid(), PhysicsServer2D.BODY_STATE_TRANSFORM,
+					Transform2D(body.rotation, at))
+		item.global_position = at
 
 ## The cable length the claw hangs at when the trolley parks it — where a dig
 ## ends as well as starts, so the claw always returns to the same height.
@@ -383,6 +443,79 @@ func _snap_jaws(open: float) -> void:
 	tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	tween.tween_property(self, "jaw_open", open, jaw_time)
 	await tween.finished
+
+
+# --- The shells ----------------------------------------------------------------
+
+## One clamshell half as a real body: the base class's shell outline as both its
+## art and its collision, heavy, weightless (the servo holds it up, not the
+## cable), and never asleep so the servo always has hold of it.
+func _build_shell(side: float) -> RigidBody2D:
+	var shell := RigidBody2D.new()
+	shell.name = "ShellLeft" if side < 0.0 else "ShellRight"
+	shell.mass = shell_mass
+	# Turn about the hinge, not the half-ring's own centroid, so the servo's
+	# spin and its pull on the hinge are the same motion instead of fighting.
+	shell.center_of_mass_mode = RigidBody2D.CENTER_OF_MASS_MODE_CUSTOM
+	shell.center_of_mass = Vector2.ZERO
+	# The shape's own inertia is a thin arc's — junk shoving on the far tip,
+	# a whole ring's height from the hinge, pries it wide open. Hang the mass
+	# out at the tips instead so a shell holds its angle like it holds its line.
+	shell.inertia = shell_mass * pow(claw_radius * 2.0, 2.0) * shell_stiffness
+	shell.gravity_scale = 0.0
+	shell.can_sleep = false
+	shell.continuous_cd = RigidBody2D.CCD_MODE_CAST_SHAPE
+	shell.contact_monitor = true
+	# Enough to see every piece a shell is pressed against when it shuts: the
+	# grip (see `_grip()`) is built from this list.
+	shell.max_contacts_reported = 8
+	var outline := shell_polygon(side)
+	var art := Polygon2D.new()
+	art.polygon = outline
+	art.color = shell_color(side)
+	shell.add_child(art)
+	var collision := CollisionPolygon2D.new()
+	collision.polygon = outline
+	shell.add_child(collision)
+	add_child(shell)
+	shell.global_transform = Transform2D(global_rotation + shell_rotation(side), to_global(hinge_local()))
+	for other in _shells:
+		shell.add_collision_exception_with(other)
+	shell.body_entered.connect(_on_shell_hit)
+	return shell
+
+## Drive each shell toward where the rigging says it should be: on the hinge,
+## turned by `jaw_open`. Velocity, not position — so the physics server still
+## gets to stop a shell that runs into something heavier than it can shove.
+func _drive_shells(delta: float) -> void:
+	if delta <= 0.0:
+		return
+	var hinge := to_global(hinge_local())
+	for i in _shells.size():
+		var shell := _shells[i]
+		var target_rotation := global_rotation + shell_rotation(SIDES[i])
+		shell.linear_velocity = ((hinge - shell.global_position) / delta).limit_length(servo_speed)
+		shell.angular_velocity = clampf(angle_difference(shell.global_rotation, target_rotation) / delta,
+				-servo_spin, servo_spin)
+
+## The shells are bodies with their own art, so the base class's drawn pair
+## would only be a ghost lagging behind them.
+func _draw_shells() -> void:
+	pass
+
+## Shells only touch the world during a dig. Parked, the junk being tipped in
+## falls straight through them instead of piling up in an open claw.
+func _set_shells_solid(solid: bool) -> void:
+	for shell in _shells:
+		shell.collision_layer = 1 if solid else 0
+		shell.collision_mask = 1 if solid else 0
+
+## A shell ran into something: a dull shove thud, rate-limited.
+func _on_shell_hit(_body: Node) -> void:
+	if not _digging or _shove_cooldown > 0.0:
+		return
+	_shove_cooldown = shove_gap
+	Sfx.play_at(&"crane_shove", jaw_mouth_global(), -8.0)
 
 ## -1 while the negative key or action is held, +1 for the positive one, 0 for
 ## neither or both. Both keyboard routes work because the arrow keys ship as
