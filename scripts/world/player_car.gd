@@ -45,7 +45,7 @@ const GROUP := &"player"
 ## instead of snapping instantly, reading as a drift rather than crisp,
 ## point-and-go steering. Also scaled by handling_multiplier, so turns are
 ## looser still off-road or on a puddle.
-@export var turn_response: float = 5.0
+@export var turn_response: float = 2.5
 ## Same convention as TrashSpawner.roads_path: the exported path first,
 ## falling back to searching the scene for any RoadNetwork if it doesn't
 ## resolve (e.g. this scene got reparented).
