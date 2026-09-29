@@ -17,3 +17,7 @@ torso_scene = ExtResource("7_3ito7")
 head_scene = ExtResource("4_3hwuf")
 hair_scene = ExtResource("3_nqrq8")
 eyes_scene = ExtResource("2_s4wsj")
+voice_pitch_hz = 150.0
+voice_throat = 1.05
+voice_rasp = 0.55
+voice_wobble = 0.1

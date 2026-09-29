@@ -23,3 +23,5 @@ extends Resource
 @export var races_won: int = 0
 @export var day: int = 1
 @export var time_of_day: float = 0.0
+## One-time cutscenes already played (see Cutscenes.play_once()).
+@export var seen_cutscenes: Array[StringName] = []

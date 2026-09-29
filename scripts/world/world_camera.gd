@@ -42,6 +42,8 @@ func _ready() -> void:
 	_car = get_parent() as CharacterBody2D
 
 func _unhandled_input(event: InputEvent) -> void:
+	if Cutscenes.is_active():
+		return
 	if event is InputEventMouseButton and event.is_pressed():
 		match event.button_index:
 			MOUSE_BUTTON_WHEEL_UP:

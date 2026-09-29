@@ -13,15 +13,13 @@ extends CharacterBody2D
 ## bins. Separately, and rarely, it drops a bit of its own load on the road —
 ## almost always scrap, very occasionally a real part.
 ##
-## A real CharacterBody2D, not just a visual mover: it drives its road with
-## move_and_collide() every frame (see _advance_along_road()), so it's
-## genuinely blocked by anything actually in its way instead of sailing
-## through it while merely reporting a slower speed. `collision_mask = 2`
-## on purpose — the only thing on that layer is the player (see
-## player_car.tscn), so it never snags on roadside props or buildings it
-## was never meant to notice; `collision_layer = 1` is unchanged, so the
-## player's own move_and_slide still sees this truck as an obstacle exactly
-## like it always has.
+## It isn't locked to its road: it has its own 2D velocity and steers toward
+## a point `lookahead_distance` ahead along its route, only ever changing
+## that velocity at `steer_acceleration`. So the player can ram it, shove it
+## off the road or lean on it, and it drifts back onto its route on its own
+## once let go. `collision_mask = 1` so it's blocked by the same world
+## obstacles the player is (buildings, props, the shore) as well as the
+## player's car itself, which also sits on layer 1.
 
 @export var speed: float = 260.0
 ## Junction radius: when the road it's on runs out, any other road with an
@@ -39,10 +37,8 @@ extends CharacterBody2D
 @export var tilt_response: float = 6.0
 
 @export_group("Skid marks")
-## A sharp junction turn counts as a skid the same way a player's sudden
-## direction change does; this truck can't brake or accelerate its way into
-## one; it's always exactly cruising speed, so the only trigger it needs is
-## "the road just bent hard".
+## The truck skids whenever it's moving this far off the way it wants to go —
+## a sharp junction turn, or sliding after being shoved.
 @export var skid_angle_threshold: float = deg_to_rad(35.0)
 @export var skid_mark_color: Color = Color(0.05, 0.05, 0.05, 0.55)
 @export var skid_mark_width: float = 7.0
@@ -76,21 +72,26 @@ extends CharacterBody2D
 ## table) — this is background traffic, not the car you're driving.
 @export var engine_volume_db: float = -18.0
 
+@export_group("Steering")
+## How far ahead along its route the truck aims. Longer rejoins the road in
+## a wider, lazier curve after being knocked off it.
+@export var lookahead_distance: float = 220.0
+## The most the truck can change its own velocity per second. Low enough that
+## a hit actually knocks it around before it gets itself back on course.
+@export var steer_acceleration: float = 420.0
+
 @export_group("Collision")
-## Rough "how heavy is this truck" figure — see set_contact_push(), which
-## blends the truck's speed toward the presser's by other_mass/(other_mass
-## + mass). Kept within reach of a well-built car's mass (car parts run
-## roughly 3-22 each, so a maxed-out body+wheels+engine tops out well under
-## 100) rather than wildly above it, so a heavy build sustaining a push can
-## actually walk this thing around and not just take a fixed haircut off
-## its cruising speed. Not a real physics mass; the truck never simulates.
-@export var mass: float = 110.0
-## How fast the truck's actual travel speed tracks whatever it should be
-## doing right now — its contact push target while something's leaning on
-## it (see set_contact_push()), or its own nominal cruising speed the
-## instant nothing is. Higher makes pushing feel direct and a hit feel like
-## a real slam; lower makes both mushier.
-@export var recovery_rate: float = 3.5
+## Rough "how heavy is this truck" figure, weighed against the car's summed
+## part masses (see PlayerCar._compute_car_mass()) to decide how much of a
+## ram or a push the truck actually takes.
+@export var mass: float = 160.0
+## How quickly a sustained push drags the truck along, before the mass share.
+@export var push_response: float = 14.0
+@export var honk_cooldown: float = 3.0
+## A shove at least this fast, or ending up this far off its route, earns
+## the player an annoyed honk.
+@export var honk_min_impact_speed: float = 120.0
+@export var honk_off_route_distance: float = 110.0
 
 @onready var _visual: CarView = $Visual as CarView
 
@@ -100,13 +101,15 @@ var _rng := RandomNumberGenerator.new()
 
 var _current_road: PackedVector2Array = PackedVector2Array()
 var _current_road_length: float = 0.0
+## Arc length along _current_road of the point closest to the truck.
 var _travelled: float = 0.0
 var _forward: bool = true
+## Where the route continues after _current_road runs out — picked as soon as
+## the lookahead first spills past its end, so the aim point flows around the
+## junction instead of pinning to the road's last vertex.
+var _next_road: PackedVector2Array = PackedVector2Array()
+var _next_forward: bool = true
 
-## Inherited from CharacterBody2D — set each frame in _advance_along_road()
-## purely for the tilt/wheel-roll/skid formulas to read, same as PlayerCar
-## does with its own; this truck's actual movement goes through
-## move_and_collide(), not move_and_slide(), so nothing here consumes it.
 var _facing_right: bool = true
 var _tilt: float = 0.0
 var _last_move_dir: Vector2 = Vector2.RIGHT
@@ -114,19 +117,9 @@ var _skid_last_stamp: Array = []
 
 var _collect_timer: float = 0.0
 var _drop_timer: float = 0.0
-
-## Actual current rate _travelled changes at, in path-pixels/sec — eased
-## every frame toward whatever _advance_along_road() decides is the target
-## right now (see set_contact_push()), so speeding up, slowing, stopping or
-## reversing is always a smooth ease, never a snap.
-var _travel_speed: float = 0.0
-## Set fresh every physics frame something is touching the truck (see
-## set_contact_push(), called from PlayerCar._physics_process); consumed and
-## cleared by _advance_along_road() each frame, so it silently reverts to
-## nominal cruising the instant nothing calls it in again — no separate
-## "contact ended" event needed.
-var _contact_active: bool = false
-var _contact_target_speed: float = 0.0
+var _honk_timer: float = 0.0
+var _in_contact_last_frame: bool = false
+var _in_contact_this_frame: bool = false
 
 func _ready() -> void:
 	_rng.randomize()
@@ -146,7 +139,7 @@ func _build_visual() -> void:
 	var body := PartDatabase.load_part_data(
 			"res://scenes/world/garbage_truck/garbage_truck_body.tscn") as BodyPartData
 	var wheel := PartDatabase.load_part_data(
-			"res://scenes/parts/wheels/wheel_tractor.tscn") as WheelPartData
+			"res://scenes/parts/wheels/wheel_standard.tscn") as WheelPartData
 	var model := CarModelData.new()
 	model.body = body
 	model.wheels = [wheel, wheel]
@@ -185,67 +178,68 @@ func _physics_process(delta: float) -> void:
 		_drop_timer = _rng.randf_range(drop_check_interval_min, drop_check_interval_max)
 		_maybe_drop_loot()
 
-## Eases _travel_speed toward whichever target applies right now — the
-## contact-push target something touching the truck set this very frame
-## (see set_contact_push()), or its own nominal cruising rate (±speed) the
-## instant nothing did — and moves `_travel_speed * delta` along the current
-## road's arc length, hopping to a connecting road (or turning around) once
-## it runs off either end. Continuous and live: as long as something keeps
-## pushing every frame, the truck keeps tracking that push (a slow lean
-## carries it slowly, a fast ram slams it into reverse); the moment contact
-## stops, it eases straight back to cruising speed on its own.
 func _advance_along_road(delta: float) -> void:
-	var nominal_speed := speed if _forward else -speed
-	var target_speed := _contact_target_speed if _contact_active else nominal_speed
-	_contact_active = false
-	_travel_speed = lerpf(_travel_speed, target_speed, 1.0 - exp(-recovery_rate * delta))
+	_honk_timer -= delta
+	_in_contact_last_frame = _in_contact_this_frame
+	_in_contact_this_frame = false
 
-	var tentative_travelled := _travelled + _travel_speed * delta
-	if tentative_travelled >= _current_road_length:
-		_handle_road_end(_current_road[_current_road.size() - 1])
-		tentative_travelled = _travelled
-	elif tentative_travelled <= 0.0:
-		_handle_road_end(_current_road[0])
-		tentative_travelled = _travelled
+	_travelled = _closest_travelled(_current_road, global_position, _travelled, lookahead_distance * 2.0)
+	if _reached_next_road():
+		_switch_to_next_road()
 
-	var sample := _sample_along(_current_road, clampf(tentative_travelled, 0.0, _current_road_length))
-	var point: Vector2 = sample[0]
-	var tangent: Vector2 = sample[1]
-	if tangent.length_squared() <= 0.0:
-		return
-	var move_dir := tangent if _travel_speed >= 0.0 else -tangent
-	velocity = tangent * _travel_speed
+	var aim := _aim_point()
+	var desired_dir := (aim - global_position).normalized()
+	velocity = velocity.move_toward(desired_dir * speed, steer_acceleration * delta)
 
-	if move_dir.x > 0.01:
+	if desired_dir.x > 0.01:
 		_facing_right = true
-	elif move_dir.x < -0.01:
+	elif desired_dir.x < -0.01:
 		_facing_right = false
 	_visual.scale.x = 1.0 if _facing_right else -1.0
 
+	var move_dir := velocity.normalized() if velocity.length() > 1.0 else _last_move_dir
 	var skidding: bool = (
-			velocity.length() > 1.0
-			and absf(_last_move_dir.angle_to(move_dir)) > skid_angle_threshold)
+			velocity.length() > 60.0
+			and absf(desired_dir.angle_to(move_dir)) > skid_angle_threshold)
 	_last_move_dir = move_dir
 	_update_skid_marks(skidding)
 
-	# The actual move — real collision, not a teleport. Something solid in
-	# the way (only the player can be, see collision_mask above) leaves the
-	# truck short of `point` instead of sailing through; _travelled is then
-	# resynced to how far it actually got (projected onto the road's own
-	# direction), so next frame picks up from the real position, not the
-	# blocked-through one.
-	var before := global_position
-	move_and_collide(point - global_position)
-	_travelled = clampf(_travelled + (global_position - before).dot(tangent), 0.0, _current_road_length)
+	var collision := move_and_collide(velocity * delta)
+	if collision != null:
+		velocity = velocity.slide(collision.get_normal())
+		move_and_collide(collision.get_remainder().slide(collision.get_normal()))
 
-## Reached the end of the current road. Prefer hopping onto another road
-## whose own end sits within `hop_radius` of this point — a real junction —
-## picked at random if more than one qualifies; otherwise just turn around
-## and keep driving the same road the other way.
-func _handle_road_end(end_point: Vector2) -> void:
-	var roads := _road_network.get_road_polylines()
+	var off_route := global_position.distance_to(_sample_along(_current_road, _travelled)[0])
+	if off_route > honk_off_route_distance:
+		_try_honk()
+
+## The point `lookahead_distance` further along the route, spilling onto
+## _next_road (chosen on demand) once it runs past this road's end.
+func _aim_point() -> Vector2:
+	if _lookahead_spill() > 0.0 and _next_road.is_empty():
+		_choose_next_road()
+	var spill := _lookahead_spill()
+	if spill <= 0.0:
+		var ahead := _travelled + lookahead_distance if _forward else _travelled - lookahead_distance
+		return _sample_along(_current_road, ahead)[0]
+	var next_length := _polyline_length(_next_road)
+	var on_next := clampf(spill if _next_forward else next_length - spill, 0.0, next_length)
+	return _sample_along(_next_road, on_next)[0]
+
+## How far the lookahead runs past the end of the current road (≤ 0 while
+## it's still on it).
+func _lookahead_spill() -> float:
+	var remaining := _current_road_length - _travelled if _forward else _travelled
+	return lookahead_distance - remaining
+
+## Prefer another road whose end sits within `hop_radius` of where this one
+## runs out — a real junction — picked at random. A dead end instead turns
+## the truck around on this same road right away, so it swings back before
+## the end rather than nosing into it.
+func _choose_next_road() -> void:
+	var end_point := _road_end_point()
 	var candidates: Array[Dictionary] = []
-	for road in roads:
+	for road in _road_network.get_road_polylines():
 		if road == _current_road or road.size() < 2:
 			continue
 		if road[0].distance_to(end_point) <= hop_radius:
@@ -254,49 +248,59 @@ func _handle_road_end(end_point: Vector2) -> void:
 			candidates.append({"road": road, "forward": false})
 	if candidates.is_empty():
 		_forward = not _forward
-		_travelled = clampf(_travelled, 0.0, _current_road_length)
-		_travel_speed = speed if _forward else -speed
 		return
 	var chosen: Dictionary = candidates[_rng.randi_range(0, candidates.size() - 1)]
-	_current_road = chosen["road"]
-	_current_road_length = _polyline_length(_current_road)
-	_forward = chosen["forward"]
-	_travelled = 0.0 if _forward else _current_road_length
-	_travel_speed = speed if _forward else -speed
+	_next_road = chosen["road"]
+	_next_forward = chosen["forward"]
 
-## Called every physics frame something is touching the truck (see
-## PlayerCar._notify_garbage_truck_contact()) — `pressing_velocity` is
-## whatever velocity that thing is *currently trying* to move at (its own
-## pre-collision intended velocity, not whatever it's actually managing
-## against the truck), `other_mass` its rough mass.
-##
-## Sets this frame's target travel speed to a blend of the truck's own
-## nominal cruising speed and the presser's push, weighted by mass share —
-## physically, "what speed would the two of them settle on together". The
-## push uses the presser's full speed, not just however much of it happens
-## to line up with the truck's current heading — a real collision can land
-## at any angle (a T-bone crossing the road, a glancing sideswipe, catching
-## up to it mid-turn), and one of those shouldn't fail to register just
-## because it isn't pointed the same way the truck is *right now*. Only the
-## sign of the alignment decides which way it pushes: roughly opposing the
-## truck's travel shoves it backward (the usual head-on ram); roughly
-## matching it (catching up from behind) shoves it forward/speeds it up
-## instead, same as a real rear-end would. A light tap barely shifts the
-## blend (target stays near cruising speed); a slow heavy lean pulls the
-## target near that push speed and _advance_along_road() tracks it there
-## for as long as contact holds, which is what lets something heavy enough
-## walk the truck along at its own pace; a fast hard ram pulls the target
-## sharply the other way for a real slam. Nothing here moves the truck
-## directly — this only ever sets where _advance_along_road() eases toward
-## next.
-func set_contact_push(pressing_velocity: Vector2, other_mass: float) -> void:
+## Junction roads can meet anywhere within `hop_radius` of each other, so
+## the handover happens once the truck is nearer the next road's entry than
+## this road's end, not only when it literally reaches the end.
+func _reached_next_road() -> bool:
+	if _next_road.is_empty():
+		return false
+	var entry := _next_road[0] if _next_forward else _next_road[_next_road.size() - 1]
+	var remaining := _current_road_length - _travelled if _forward else _travelled
+	return remaining <= 20.0 \
+			or global_position.distance_to(entry) <= global_position.distance_to(_road_end_point())
+
+func _road_end_point() -> Vector2:
+	return _current_road[_current_road.size() - 1] if _forward else _current_road[0]
+
+func _switch_to_next_road() -> void:
+	_current_road = _next_road
+	_current_road_length = _polyline_length(_current_road)
+	_forward = _next_forward
+	_travelled = 0.0 if _forward else _current_road_length
+	_next_road = PackedVector2Array()
+
+## Called every physics frame the player's car is touching the truck (see
+## PlayerCar._notify_garbage_truck_contact()). `pressing_velocity` is what the
+## car is trying to drive at, `contact_normal` points from the truck toward
+## the car. Only the part of the push aimed into the truck counts, so a
+## sideswipe shoves it sideways and a rear-ender shoves it forward. The first
+## frame of contact lands as a mass-weighted impulse (the ram); every frame
+## after drags it along at a mass-weighted rate (the lean), which the truck's
+## own steering keeps fighting.
+func set_contact_push(pressing_velocity: Vector2, contact_normal: Vector2, other_mass: float) -> void:
+	_in_contact_this_frame = true
+	var push_dir := -contact_normal
+	var push_speed := pressing_velocity.dot(push_dir)
+	var gap := push_speed - velocity.dot(push_dir)
+	if gap <= 0.0:
+		return
 	var share := other_mass / (other_mass + mass)
-	var travel_dir := _last_move_dir if _last_move_dir != Vector2.ZERO else Vector2.RIGHT
-	var alignment := signf(pressing_velocity.dot(travel_dir))
-	var along := clampf(alignment * pressing_velocity.length(), -2400.0, 2400.0)
-	var nominal_speed := speed if _forward else -speed
-	_contact_target_speed = lerpf(nominal_speed, along, share)
-	_contact_active = true
+	var step := share if not _in_contact_last_frame \
+			else 1.0 - exp(-push_response * share * get_physics_process_delta_time())
+	velocity += push_dir * gap * step
+	if not _in_contact_last_frame and gap * share >= honk_min_impact_speed:
+		_try_honk()
+
+func _try_honk() -> void:
+	if _honk_timer > 0.0:
+		return
+	_honk_timer = honk_cooldown
+	Sfx.play_at(&"truck_honk", global_position, -6.0)
 
 func _pick_new_road() -> void:
 	var roads := _road_network.get_road_polylines()
@@ -310,7 +314,6 @@ func _pick_new_road() -> void:
 	_current_road_length = _polyline_length(_current_road)
 	_forward = true
 	_travelled = 0.0
-	_travel_speed = speed
 
 ## Any full bin/dumpster (see TrashProp, group "trash") close enough right
 ## now gets emptied — quietly, no orbs spilled. The reward for a bin is
@@ -435,6 +438,26 @@ static func _sample_along(points: PackedVector2Array, distance: float) -> Array:
 	var last := points[points.size() - 1]
 	var previous := points[points.size() - 2]
 	return [last, (last - previous).normalized()]
+
+## Arc length of the point on `points` closest to `position`, only looking
+## within `window` of `around` so a road that doubles back past itself can't
+## make the truck's progress jump to the wrong stretch.
+static func _closest_travelled(points: PackedVector2Array, position: Vector2, around: float, window: float) -> float:
+	var best_distance := INF
+	var best_travelled := around
+	var travelled := 0.0
+	for i in range(points.size() - 1):
+		var a := points[i]
+		var b := points[i + 1]
+		var segment := a.distance_to(b)
+		if segment > 0.0 and travelled + segment >= around - window and travelled <= around + window:
+			var t := clampf((position - a).dot(b - a) / (segment * segment), 0.0, 1.0)
+			var distance := position.distance_squared_to(a.lerp(b, t))
+			if distance < best_distance:
+				best_distance = distance
+				best_travelled = travelled + t * segment
+		travelled += segment
+	return best_travelled
 
 ## Same resolution convention as PlayerCar/TrashSpawner: the exported path
 ## first, falling back to searching the scene for any RoadNetwork.

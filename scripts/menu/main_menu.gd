@@ -16,6 +16,7 @@ func _on_new_game_pressed() -> void:
 	WorldState.clear()
 	RaceProgression.reset()
 	DayNightCycle.reset()
+	Cutscenes.clear_seen()
 	SaveSystem.delete_save()
 	get_tree().change_scene_to_file("res://scenes/world/main.tscn")
 

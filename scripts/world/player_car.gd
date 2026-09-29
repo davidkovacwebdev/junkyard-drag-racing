@@ -170,6 +170,8 @@ var _sprint_pressed_last: bool = false
 func _ready() -> void:
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	add_to_group(GROUP)
+	Cutscenes.started.connect(_set_hud_visible.bind(false))
+	Cutscenes.finished.connect(_set_hud_visible.bind(true))
 	_road_network = _resolve_roads()
 	_skid_marks = _resolve_skid_marks()
 	_puddles = _resolve_puddles()
@@ -185,11 +187,16 @@ func _ready() -> void:
 	# If E was still held when the previous scene ended, don't let it count
 	# as a fresh press here — that would instantly re-enter the place we
 	# just exited.
-	_interact_pressed_last = Input.is_physical_key_pressed(KEY_E)
-	_test_pressed_last = Input.is_physical_key_pressed(KEY_T)
+	_interact_pressed_last = _is_key_held(KEY_E)
+	_test_pressed_last = _is_key_held(KEY_T)
 
 func get_road_network() -> RoadNetwork:
 	return _road_network
+
+## Every drive/interact key goes through here, so a cutscene can take the
+## wheel just by being active.
+func _is_key_held(keycode: Key) -> bool:
+	return not Cutscenes.is_active() and Input.is_physical_key_pressed(keycode)
 
 const _DRIVE_KEYS := [KEY_W, KEY_A, KEY_S, KEY_D, KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT, KEY_SPACE, KEY_E, KEY_T, KEY_H, KEY_SHIFT]
 
@@ -215,6 +222,8 @@ func _notification(what: int) -> void:
 ## the yard. Anything the click handles is consumed so it can't double up with
 ## the E path.
 func _unhandled_input(event: InputEvent) -> void:
+	if Cutscenes.is_active():
+		return
 	if event is InputEventMouseButton:
 		var click := event as InputEventMouseButton
 		if click.button_index == MOUSE_BUTTON_LEFT and click.pressed:
@@ -245,13 +254,13 @@ func _clicked_interactable(point: Vector2) -> Object:
 
 func _physics_process(delta: float) -> void:
 	var input_dir := Vector2.ZERO
-	if Input.is_physical_key_pressed(KEY_A) or Input.is_physical_key_pressed(KEY_LEFT):
+	if _is_key_held(KEY_A) or _is_key_held(KEY_LEFT):
 		input_dir.x -= 1.0
-	if Input.is_physical_key_pressed(KEY_D) or Input.is_physical_key_pressed(KEY_RIGHT):
+	if _is_key_held(KEY_D) or _is_key_held(KEY_RIGHT):
 		input_dir.x += 1.0
-	if Input.is_physical_key_pressed(KEY_W) or Input.is_physical_key_pressed(KEY_UP):
+	if _is_key_held(KEY_W) or _is_key_held(KEY_UP):
 		input_dir.y -= 1.0
-	if Input.is_physical_key_pressed(KEY_S) or Input.is_physical_key_pressed(KEY_DOWN):
+	if _is_key_held(KEY_S) or _is_key_held(KEY_DOWN):
 		input_dir.y += 1.0
 
 	if input_dir.x > 0.0:
@@ -270,13 +279,13 @@ func _physics_process(delta: float) -> void:
 	# Compared against velocity as it stood BEFORE this frame's move_toward
 	# touches it — "the car was already heading this way" — against the
 	# input direction just read above, "now the player wants that way".
-	var braking := Input.is_physical_key_pressed(KEY_SPACE)
+	var braking := _is_key_held(KEY_SPACE)
 	var skidding := _is_skidding(input_dir, on_puddle) or (braking and velocity.length() > skid_min_speed)
 
 	var target_velocity := Vector2.ZERO
 	if input_dir != Vector2.ZERO and not braking:
 		var speed_multiplier := on_road_speed_multiplier if on_road else off_road_speed_multiplier
-		if Input.is_physical_key_pressed(KEY_SHIFT):
+		if _is_key_held(KEY_SHIFT):
 			speed_multiplier *= sprint_speed_multiplier
 		target_velocity = input_dir.normalized() * max_speed * speed_multiplier
 	var handling_multiplier := on_road_handling_multiplier if on_road else off_road_handling_multiplier
@@ -405,9 +414,10 @@ func _strip_velocity_into_collisions() -> void:
 ## thing on the map that isn't nailed down.
 func _notify_garbage_truck_contact(pressing_velocity: Vector2) -> void:
 	for i in get_slide_collision_count():
-		var truck := _as_garbage_truck(get_slide_collision(i).get_collider())
+		var collision := get_slide_collision(i)
+		var truck := _as_garbage_truck(collision.get_collider())
 		if truck != null:
-			truck.set_contact_push(pressing_velocity, _car_mass)
+			truck.set_contact_push(pressing_velocity, collision.get_normal(), _car_mass)
 			return
 
 func _as_garbage_truck(collider: Object) -> GarbageTruck:
@@ -475,7 +485,7 @@ func _update_sounds(delta: float, input_dir: Vector2, skidding: bool, impact_spe
 	if _engine_sound != null:
 		_engine_sound.rpm = 1.0 - exp(-velocity.length() / max_speed * 1.2)
 		_engine_sound.throttle = 1.0 if input_dir != Vector2.ZERO else 0.0
-	_horn.set_active(Input.is_physical_key_pressed(KEY_H))
+	_horn.set_active(_is_key_held(KEY_H))
 	_tire_screech.set_level(clampf(velocity.length() / max_speed, 0.4, 1.0) if skidding else 0.0)
 
 	_bump_cooldown -= delta
@@ -483,7 +493,7 @@ func _update_sounds(delta: float, input_dir: Vector2, skidding: bool, impact_spe
 		Sfx.play(_bump_sound, bump_volume_db + linear_to_db(clampf(impact_speed / max_speed, 0.3, 1.0)))
 		_bump_cooldown = 0.3
 
-	var sprint_pressed := Input.is_physical_key_pressed(KEY_SHIFT)
+	var sprint_pressed := _is_key_held(KEY_SHIFT)
 	if sprint_pressed and not _sprint_pressed_last and input_dir != Vector2.ZERO and _engine_sound != null:
 		Sfx.play(_boost_sound, -6.0)
 	_sprint_pressed_last = sprint_pressed
@@ -640,7 +650,18 @@ func _find_interactables() -> Array[Object]:
 			found.append(body)
 	return found
 
+## Cutscenes play without the HUD in the way. The night tint lives in the
+## same layer but is part of the world's look, so it stays.
+func _set_hud_visible(shown: bool) -> void:
+	for child in $UI.get_children():
+		if child.name != &"NightOverlay" and child != _hold_bar_bg:
+			child.visible = shown
+	if not shown:
+		_hide_hold_bar()
+
 func _process_interaction(delta: float) -> void:
+	if Cutscenes.is_active():
+		return
 	var candidates := _find_interactables()
 
 	# Prefer something E can actually work on. A click-only target (the scrap
@@ -666,7 +687,7 @@ func _process_interaction(delta: float) -> void:
 		_tooltip_label.visible = false
 
 	var hold_duration := _hold_duration_for(target)
-	var interact_pressed := Input.is_physical_key_pressed(KEY_E)
+	var interact_pressed := _is_key_held(KEY_E)
 
 	if target != null and interact_pressed and hold_duration > 0.0:
 		if _holding_target != target:
@@ -692,7 +713,7 @@ func _process_interaction(delta: float) -> void:
 	# instead of its real interior_scene, if it has one — lets a place like
 	# the drag strip offer an in-progress alternate version to try without
 	# touching what E drops you into.
-	var test_pressed := Input.is_physical_key_pressed(KEY_T)
+	var test_pressed := _is_key_held(KEY_T)
 	if target != null and test_pressed and not _test_pressed_last:
 		_activate_test(target)
 	_test_pressed_last = test_pressed

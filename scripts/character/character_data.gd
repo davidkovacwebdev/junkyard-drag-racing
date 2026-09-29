@@ -26,6 +26,16 @@ extends Resource
 @export var eyes_scene: PackedScene
 @export var accessory_scene: PackedScene
 
+@export_group("Voice")
+## How they sound in a CharacterDialog (see CharacterVoice). 0 leaves the
+## voice untuned: one gets derived from `display_name` instead.
+@export_range(0.0, 400.0) var voice_pitch_hz: float = 0.0
+## Formant scale: below 1 is a big, deep chest, above 1 a tiny squeaky head.
+@export_range(0.6, 1.6) var voice_throat: float = 1.0
+@export_range(0.0, 1.0) var voice_rasp: float = 0.0
+## Pitch wobble, from steady to a nervous quaver.
+@export_range(0.0, 1.0) var voice_wobble: float = 0.0
+
 func get_part(slot: CharacterPartData.Slot) -> PackedScene:
 	match slot:
 		CharacterPartData.Slot.LEGS:

@@ -74,6 +74,7 @@ func _snapshot() -> SaveData:
 	data.races_won = RaceProgression.races_won
 	data.day = DayNightCycle.day
 	data.time_of_day = DayNightCycle.time_of_day
+	data.seen_cutscenes = Cutscenes.get_seen()
 	return data
 
 func _write_save(data: SaveData) -> void:
@@ -103,6 +104,7 @@ func load_game() -> bool:
 	RaceProgression.races_won = data.races_won
 	DayNightCycle.day = data.day
 	DayNightCycle.time_of_day = data.time_of_day
+	Cutscenes.restore_seen(data.seen_cutscenes)
 	return true
 
 ## Called by New Game so starting over doesn't leave a stale save

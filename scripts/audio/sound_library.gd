@@ -11,6 +11,8 @@ extends RefCounted
 const NAMES: Array[StringName] = [
 	&"ui_click",
 	&"ui_hover",
+	&"dialog_open",
+	&"cutscene_whoosh",
 	&"ignition_click",
 	&"headlight_click",
 	&"engine_stall",
@@ -50,6 +52,7 @@ const NAMES: Array[StringName] = [
 	&"crucible_drop",
 	&"shark_splash",
 	&"trash_splash",
+	&"truck_honk",
 	&"rain_loop",
 	&"furnace_loop",
 ]
@@ -87,6 +90,8 @@ const CAR_SOUNDS: Array[StringName] = [
 const UI_SOUNDS: Array[StringName] = [
 	&"ui_click",
 	&"ui_hover",
+	&"dialog_open",
+	&"cutscene_whoosh",
 ]
 
 const AMBIENT_SOUNDS: Array[StringName] = [
@@ -117,6 +122,8 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 	match sound_name:
 		&"ui_click": return _ui_click(rng)
 		&"ui_hover": return _ui_hover()
+		&"dialog_open": return _dialog_open(rng)
+		&"cutscene_whoosh": return _cutscene_whoosh(rng)
 		&"ignition_click": return _ignition_click(rng)
 		&"headlight_click": return _headlight_click(rng)
 		&"engine_stall": return _engine_stall(rng)
@@ -124,6 +131,7 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"race_stalled": return _race_stalled()
 		&"results_fanfare": return _results_fanfare()
 		&"horn_loop": return _horn_loop()
+		&"truck_honk": return _truck_honk()
 		&"tire_screech_loop": return _tire_screech_loop(rng)
 		&"bump": return _bump(rng)
 		&"collision": return _collision(rng)
@@ -207,6 +215,14 @@ static func _backfire(rng: RandomNumberGenerator) -> PackedFloat32Array:
 ## Steady two-tone horn, exactly 1 s so both 330 Hz and 415 Hz finish whole
 ## cycles and the loop point is seamless. Attack/release come from the player's
 ## volume fade (see SustainedSound), not from the samples.
+## Two grumpy low square-wave honks — the garbage truck telling you off.
+static func _truck_honk() -> PackedFloat32Array:
+	return Synth.tones(0.56, [[[0.0, 196.0]], [[0.0, 233.0]]], {
+		square = 0.55,
+		amp = [[0.0, 0.0], [0.01, 1.0], [0.17, 1.0], [0.2, 0.0],
+				[0.29, 0.0], [0.3, 1.0], [0.52, 1.0], [0.55, 0.0]],
+	})
+
 static func _horn_loop() -> PackedFloat32Array:
 	return Synth.tones(1.0, [[[0.0, 330.0]], [[0.0, 415.0]]], {
 		square = 0.4,
@@ -487,6 +503,27 @@ static func _ui_click(rng: RandomNumberGenerator) -> PackedFloat32Array:
 		out[i] = lowpass.step(rng.randf_range(-1.0, 1.0)) * envelope \
 				+ sin(TAU * 1400.0 * t) * envelope * 0.3
 	return Synth.finish(out, 0.6)
+
+## A cardboard board slapped down on a counter, with a little upward pop so
+## it reads as "someone's talking to you" rather than a crash.
+static func _dialog_open(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.thump(0.22, 420.0, 0.003, 0.09, rng)
+	Synth.mix_into(out, Synth.tones(0.09, [[[0.0, 330.0], [0.09, 520.0]]], {
+		square = 0.3,
+		amp = [[0.0, 0.0], [0.005, 1.0], [0.09, 0.0]],
+	}), 0.01, 0.35)
+	return Synth.finish(out, 0.7)
+
+## The letterbox bars sliding shut: a falling whoosh of air and a soft
+## cardboard thud as they land.
+static func _cutscene_whoosh(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.noise_sweep(0.45, {
+		freq = [[0.0, 2200.0], [0.4, 500.0]],
+		q = [[0.0, 1.4]],
+		amp = [[0.0, 0.0], [0.25, 1.0], [0.4, 0.2], [0.45, 0.0]],
+	}, rng)
+	Synth.mix_into(out, Synth.thump(0.2, 300.0, 0.004, 0.1, rng), 0.38, 0.9)
+	return Synth.finish(out, 0.7)
 
 ## Tiny dull tick as the cursor slides onto a button — a fingernail on tin.
 static func _ui_hover() -> PackedFloat32Array:

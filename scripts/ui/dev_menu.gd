@@ -3,8 +3,8 @@ extends CanvasLayer
 ## pickup - so the loot path (spawn, drive over it, Inventory, garage) can be
 ## tested without digging up half the map first.
 ##
-## F1 toggles it, from any scene, M adds money and P stocks the spare stash with
-## every part. The rows are the very same `PartSlot` the
+## F1 toggles it, from any scene, M adds money, P stocks the spare stash with
+## every part and F2 plays the demo cutscene. The rows are the very same `PartSlot` the
 ## garage uses, so a part looks and reads identically in both places; clicking
 ## one drops that part on the ground as a real `PartPickup` beside the car. A dev
 ## spawn is not special-cased anywhere downstream - it is collected, copied and
@@ -144,6 +144,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 		KEY_P:
 			_add_every_part()
+			get_viewport().set_input_as_handled()
+		KEY_F2:
+			Cutscenes.play(DemoCutscene.new())
 			get_viewport().set_input_as_handled()
 
 func _add_dev_money() -> void:

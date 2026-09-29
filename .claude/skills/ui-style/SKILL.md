@@ -104,6 +104,7 @@ Saturation stays low everywhere. Yellow and red are the only loud colors — use
   - `ScrapPanel` (`scripts/ui/scrap_panel.gd`): a Control board to put labels on (title plates, dialog backs, sign posts).
   - `ScrapButton` (`scripts/ui/scrap_button.gd`): extends `BaseButton` and draws its own slab and straight text. Hover/focus gives a lighter slab, a yellow sliver, an elastic wobble and a `ui_hover` tick. Pressed pushes the slab down; disabled goes grey. Give each one its own `tilt_degrees` and `jitter_seed`.
   - `HazardStripe` (`scripts/ui/hazard_stripe.gd`): divider.
+  - `CharacterDialog` (`scenes/ui/character_dialog.tscn`): the standard popup for talking to any character. The speaker stands torso-up on a board in the right third of the screen. Their line types out on a cardboard board top-left, with numbered ScrapButton options under it. It slides and pops in and out, number keys pick an option and Esc closes it. The speaker talks in their own `CharacterVoice`. Call `open(name, character_data)`, then `say(line)`, `set_note(text)` and `set_options([CharacterDialog.Option.new(text, callable, disabled)])`. Every NPC conversation uses it (see `scrap_dealer.gd`).
   - `BackButton` (`scenes/ui/back_button.tscn`): a ScrapButton that leaves the screen (Esc too).
   - `StatBar` (`scenes/garage/stat_bar.tscn`): 5 drawn blocks with uneven heights.
   - `PartSlot` (`scenes/garage/part_slot.tscn`): the cardboard part card, shared by the garage and the F1 dev menu.
