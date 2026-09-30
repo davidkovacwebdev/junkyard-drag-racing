@@ -13,6 +13,7 @@ const NAMES: Array[StringName] = [
 	&"ui_hover",
 	&"dialog_open",
 	&"cutscene_whoosh",
+	&"outfit_swap",
 	&"ignition_click",
 	&"headlight_click",
 	&"engine_stall",
@@ -92,6 +93,7 @@ const UI_SOUNDS: Array[StringName] = [
 	&"ui_hover",
 	&"dialog_open",
 	&"cutscene_whoosh",
+	&"outfit_swap",
 ]
 
 const AMBIENT_SOUNDS: Array[StringName] = [
@@ -124,6 +126,7 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"ui_hover": return _ui_hover()
 		&"dialog_open": return _dialog_open(rng)
 		&"cutscene_whoosh": return _cutscene_whoosh(rng)
+		&"outfit_swap": return _outfit_swap(rng)
 		&"ignition_click": return _ignition_click(rng)
 		&"headlight_click": return _headlight_click(rng)
 		&"engine_stall": return _engine_stall(rng)
@@ -524,6 +527,20 @@ static func _cutscene_whoosh(rng: RandomNumberGenerator) -> PackedFloat32Array:
 	}, rng)
 	Synth.mix_into(out, Synth.thump(0.2, 300.0, 0.004, 0.1, rng), 0.38, 0.9)
 	return Synth.finish(out, 0.7)
+
+## A shirt snapped out and thrown on: two quick cloth flaps, the second one
+## brighter, like shaking out a jacket.
+static func _outfit_swap(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var flap := func(freq: float) -> PackedFloat32Array:
+		return Synth.noise_sweep(0.07, {
+			freq = [[0.0, freq], [0.07, freq * 0.6]],
+			q = [[0.0, 1.8]],
+			amp = [[0.0, 0.0], [0.008, 1.0], [0.07, 0.0]],
+		}, rng)
+	var out := Synth.silence(0.16)
+	Synth.mix_into(out, flap.call(1300.0), 0.0, 0.7)
+	Synth.mix_into(out, flap.call(2100.0), 0.07, 1.0)
+	return Synth.finish(out, 0.6)
 
 ## Tiny dull tick as the cursor slides onto a button — a fingernail on tin.
 static func _ui_hover() -> PackedFloat32Array:

@@ -9,7 +9,7 @@ extends Node
 ##   Screen  — fade_out, fade_in, title_card
 ##   Actors  — spawn_actor, walk, hop, fall_over, stand_up, face
 ##   Talk    — subtitle (typed in the bottom bar in the speaker's own voice,
-##             moves on by itself)
+##             moves on by itself; `{player}` becomes the player's name)
 ##   Misc    — wait, sound
 ##
 ## Actors are cleaned up when the cutscene ends. Which one-time scenes have
@@ -177,7 +177,7 @@ func subtitle(speaker_name: String, character: CharacterData, line: String, acto
 	_subtitle_name.text = speaker_name.to_upper()
 	_subtitle_name.visible = true
 	_subtitle_line.visible = true
-	_speech.speak(_subtitle_line, line, character)
+	_speech.speak(_subtitle_line, PlayerProfile.fill(line), character)
 	if is_instance_valid(actor):
 		actor.talking = true
 	while _speech.is_typing() and not _skipping:

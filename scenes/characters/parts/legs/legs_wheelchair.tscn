@@ -8,39 +8,56 @@ script = ExtResource("2")
 id = &"legs_wheelchair"
 display_name = "Wheelchair"
 slot = 0
+npc_only = true
 
 [node name="LegsWheelchair" type="Node2D"]
 script = ExtResource("1")
 part_data = SubResource("Resource_legs_wheelchair")
 
-[node name="HandleLeft" type="Polygon2D" parent="."]
+[node name="FlagPole" type="Polygon2D" parent="."]
 color = Color(0.3, 0.31, 0.34, 1)
-polygon = PackedVector2Array(-38, -100, -30, -100, -30, -184, -34, -192, -44, -192, -44, -185, -38, -183)
+polygon = PackedVector2Array(54, -90, 59, -90, 61, -266, 56, -266)
 
-[node name="HandleRight" type="Polygon2D" parent="."]
+[node name="FlagConfederate" type="Polygon2D" parent="."]
+color = Color(0.68, 0.18, 0.16, 1)
+polygon = PackedVector2Array(61, -266, 101, -266, 101, -240, 61, -240)
+
+[node name="Saltire" type="Polygon2D" parent="."]
+color = Color(0.2, 0.27, 0.5, 1)
+polygon = PackedVector2Array(61, -266, 67, -266, 81, -257, 95, -266, 101, -266, 101, -262, 87, -253, 101, -244, 101, -240, 95, -240, 81, -249, 67, -240, 61, -240, 61, -244, 75, -253, 61, -262)
+
+[node name="FlagTrans" type="Polygon2D" parent="."]
+color = Color(0.45, 0.76, 0.92, 1)
+polygon = PackedVector2Array(61, -224, 101, -224, 101, -198, 61, -198)
+
+[node name="TransPink" type="Polygon2D" parent="."]
+color = Color(0.93, 0.62, 0.72, 1)
+polygon = PackedVector2Array(61, -218.8, 101, -218.8, 101, -203.2, 61, -203.2)
+
+[node name="TransWhite" type="Polygon2D" parent="."]
+color = Color(0.96, 0.96, 0.96, 1)
+polygon = PackedVector2Array(61, -213.6, 101, -213.6, 101, -208.4, 61, -208.4)
+
+[node name="Frame" type="Polygon2D" parent="."]
 color = Color(0.3, 0.31, 0.34, 1)
-polygon = PackedVector2Array(38, -100, 30, -100, 30, -184, 34, -192, 44, -192, 44, -185, 38, -183)
+polygon = PackedVector2Array(-52, -30, 52, -30, 52, -21, -52, -21)
 
-[node name="WheelLeft" type="Polygon2D" parent="."]
-color = Color(0.16, 0.16, 0.18, 1)
-polygon = PackedVector2Array(-12, -46, -18.2, -23, -35, -6.2, -58, 0, -81, -6.2, -97.8, -23, -104, -46, -97.8, -69, -81, -85.8, -58, -92, -35, -85.8, -18.2, -69)
+[node name="TyreLeft" type="Polygon2D" parent="."]
+color = Color(0.13, 0.13, 0.15, 1)
+polygon = PackedVector2Array(-60, -100, -54, -100, -48, -94, -48, -6, -54, 0, -60, 0, -66, -6, -66, -94)
 
-[node name="WheelRight" type="Polygon2D" parent="."]
-color = Color(0.16, 0.16, 0.18, 1)
-polygon = PackedVector2Array(12, -46, 18.2, -23, 35, -6.2, 58, 0, 81, -6.2, 97.8, -23, 104, -46, 97.8, -69, 81, -85.8, 58, -92, 35, -85.8, 18.2, -69)
+[node name="TyreRight" type="Polygon2D" parent="."]
+color = Color(0.13, 0.13, 0.15, 1)
+polygon = PackedVector2Array(54, -100, 60, -100, 66, -94, 66, -6, 60, 0, 54, 0, 48, -6, 48, -94)
 
-[node name="HubLeft" type="Polygon2D" parent="."]
-color = Color(0.62, 0.62, 0.64, 1)
-polygon = PackedVector2Array(-44, -46, -48.1, -55.9, -58, -60, -67.9, -55.9, -72, -46, -67.9, -36.1, -58, -32, -48.1, -36.1)
+[node name="ShinLeft" type="Polygon2D" parent="."]
+color = Color(0.3, 0.4, 0.55, 1)
+polygon = PackedVector2Array(-23, -44, -6, -44, -7, -18, -22, -18)
 
-[node name="HubRight" type="Polygon2D" parent="."]
-color = Color(0.62, 0.62, 0.64, 1)
-polygon = PackedVector2Array(44, -46, 48.1, -55.9, 58, -60, 67.9, -55.9, 72, -46, 67.9, -36.1, 58, -32, 48.1, -36.1)
+[node name="ShinRight" type="Polygon2D" parent="."]
+color = Color(0.3, 0.4, 0.55, 1)
+polygon = PackedVector2Array(6, -44, 23, -44, 22, -18, 7, -18)
 
-[node name="Seat" type="Polygon2D" parent="."]
-color = Color(0.3, 0.31, 0.34, 1)
-polygon = PackedVector2Array(-46, -104, 46, -104, 46, -92, -46, -92)
-
-[node name="Pants" type="Polygon2D" parent="."]
-color = Color(0.36, 0.34, 0.3, 1)
-polygon = PackedVector2Array(-28, -108, 28, -106, 28, -82, 22, -82, 23, -24, 7, -24, 6, -82, -6, -82, -7, -24, -23, -24, -22, -82, -28, -82)
+[node name="Knees" type="Polygon2D" parent="."]
+color = Color(0.37, 0.48, 0.63, 1)
+polygon = PackedVector2Array(-38, -66, -3, -66, 0, -60, 3, -66, 38, -66, 38, -42, 3, -42, 0, -46, -3, -42, -38, -42)

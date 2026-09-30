@@ -1,9 +1,9 @@
 class_name MainMenu
 extends Control
 ## The main menu, shown once LoadingScreen has finished rendering the music. New Game
-## resets Inventory/WorldState to a fresh start and drops the player
-## into the open world; Continue loads SaveSystem's save instead and is
-## only enabled when one actually exists. Settings/Credits are real
+## opens character creation, which resets the game and drops the player into
+## the open world once they've built their character; Continue loads
+## SaveSystem's save instead and is only enabled when one actually exists. Settings/Credits are real
 ## screens, just placeholder content for now.
 
 @onready var _continue_button: BaseButton = $Buttons/ContinueButton
@@ -12,13 +12,7 @@ func _ready() -> void:
 	_continue_button.disabled = not SaveSystem.has_save()
 
 func _on_new_game_pressed() -> void:
-	Inventory.reset()
-	WorldState.clear()
-	RaceProgression.reset()
-	DayNightCycle.reset()
-	Cutscenes.clear_seen()
-	SaveSystem.delete_save()
-	get_tree().change_scene_to_file("res://scenes/world/main.tscn")
+	get_tree().change_scene_to_file("res://scenes/menu/character_creation.tscn")
 
 func _on_continue_pressed() -> void:
 	SaveSystem.load_game()

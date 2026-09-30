@@ -12,15 +12,17 @@ extends Node
 ## autosave writes on a worker thread from a snapshot. Every save writes to a
 ## temp file and swaps it in, so quitting mid-write never corrupts the save.
 ##
-## Never actually writes while sitting on the main menu — otherwise the
-## periodic tick could clobber an existing save before the player has
-## even chosen Continue. That's a live check against the current scene
-## every time, not a flag some caller has to remember to flip, so
-## there's nowhere for it to get stuck wrong.
+## Never actually writes while on a menu screen (anything under
+## scenes/menu: the main menu, settings, credits, character creation) —
+## otherwise the periodic tick could clobber an existing save with a blank
+## game before the player has even chosen Continue. That's a live check
+## against the current scene every time, not a flag some caller has to
+## remember to flip, so there's nowhere for it to get stuck wrong.
 ##
 ## Running with `-- --no-save` (probes and tools) never writes or deletes
 ## the save, so a test run can't clobber the player's progress.
 
+const MENU_SCENES_DIR := "res://scenes/menu/"
 const SAVE_PATH := "user://save.tres"
 const TEMP_SAVE_PATH := "user://save.tmp.tres"
 const AUTOSAVE_INTERVAL := 10.0
@@ -47,13 +49,13 @@ func has_save() -> bool:
 	return FileAccess.file_exists(SAVE_PATH)
 
 func save_game() -> void:
-	if _saving_disabled or _on_main_menu():
+	if _saving_disabled or _on_menu_screen():
 		return
 	_wait_for_background_save()
 	_write_save(_snapshot())
 
 func _save_in_background() -> void:
-	if _on_main_menu() or _background_save_task != -1:
+	if _on_menu_screen() or _background_save_task != -1:
 		return
 	var data := _snapshot()
 	_background_save_task = WorkerThreadPool.add_task(_write_save.bind(data))
@@ -84,6 +86,8 @@ func _snapshot() -> SaveData:
 	data.day = DayNightCycle.day
 	data.time_of_day = DayNightCycle.time_of_day
 	data.seen_cutscenes = Cutscenes.get_seen()
+	data.player_name = PlayerProfile.player_name
+	data.player_character = PlayerProfile.character
 	return data
 
 func _write_save(data: SaveData) -> void:
@@ -114,6 +118,8 @@ func load_game() -> bool:
 	DayNightCycle.day = data.day
 	DayNightCycle.time_of_day = data.time_of_day
 	Cutscenes.restore_seen(data.seen_cutscenes)
+	PlayerProfile.player_name = data.player_name
+	PlayerProfile.character = data.player_character
 	return true
 
 ## Called by New Game so starting over doesn't leave a stale save
@@ -122,6 +128,6 @@ func delete_save() -> void:
 	if not _saving_disabled and has_save():
 		DirAccess.remove_absolute(SAVE_PATH)
 
-func _on_main_menu() -> bool:
+func _on_menu_screen() -> bool:
 	var scene := get_tree().current_scene
-	return scene != null and scene.name == "MainMenu"
+	return scene != null and scene.scene_file_path.begins_with(MENU_SCENES_DIR)

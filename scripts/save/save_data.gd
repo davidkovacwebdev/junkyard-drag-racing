@@ -25,3 +25,7 @@ extends Resource
 @export var time_of_day: float = 0.0
 ## One-time cutscenes already played (see Cutscenes.play_once()).
 @export var seen_cutscenes: Array[StringName] = []
+## The name the player typed on the character creation screen.
+@export var player_name: String = ""
+## The player's own look from character creation. Null on older saves.
+@export var player_character: CharacterData = null

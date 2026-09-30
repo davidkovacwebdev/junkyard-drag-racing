@@ -8,6 +8,7 @@ script = ExtResource("2")
 id = &"eyes_grumpy"
 display_name = "Grumpy Eyes"
 slot = 5
+npc_only = true
 
 [node name="GrumpyEyes" type="Node2D"]
 script = ExtResource("1")
