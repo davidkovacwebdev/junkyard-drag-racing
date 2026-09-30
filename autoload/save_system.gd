@@ -18,14 +18,23 @@ extends Node
 ## game before the player has even chosen Continue. That's a live check
 ## against the current scene every time, not a flag some caller has to
 ## remember to flip, so there's nowhere for it to get stuck wrong.
+##
+## Running with `-- --no-save` (probes and tools) never writes or deletes
+## the save, so a test run can't clobber the player's progress.
 
 const MENU_SCENES_DIR := "res://scenes/menu/"
 const SAVE_PATH := "user://save.tres"
 const TEMP_SAVE_PATH := "user://save.tmp.tres"
 const AUTOSAVE_INTERVAL := 10.0
 
+var _saving_disabled := "--no-save" in OS.get_cmdline_user_args()
+
 var _autosave_timer: float = 0.0
 var _background_save_task: int = -1
+
+func _ready() -> void:
+	if _saving_disabled:
+		set_process(false)
 
 func _process(delta: float) -> void:
 	_autosave_timer += delta
@@ -40,7 +49,7 @@ func has_save() -> bool:
 	return FileAccess.file_exists(SAVE_PATH)
 
 func save_game() -> void:
-	if _on_menu_screen():
+	if _saving_disabled or _on_menu_screen():
 		return
 	_wait_for_background_save()
 	_write_save(_snapshot())
@@ -123,7 +132,7 @@ func load_game() -> bool:
 ## Called by New Game so starting over doesn't leave a stale save
 ## sitting there claiming to be continuable.
 func delete_save() -> void:
-	if has_save():
+	if not _saving_disabled and has_save():
 		DirAccess.remove_absolute(SAVE_PATH)
 
 func _on_menu_screen() -> bool:

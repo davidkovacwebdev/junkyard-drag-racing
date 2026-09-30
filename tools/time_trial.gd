@@ -67,7 +67,7 @@ func _start_batch() -> void:
 		for wheel_path in spec["wheels"]:
 			wheel_scenes.append(load(wheel_path))
 		var car := CarAssembler.assemble(load(spec["body"]), wheel_scenes, load(spec["engine"]),
-				_batch_root, Vector2(SPAWN_X, floor_y - 15.0))
+				_batch_root, Vector2(SPAWN_X, floor_y))
 		_batch_specs.append(spec)
 		_batch_cars.append(car)
 

@@ -14,18 +14,7 @@ extends Node2D
 @export var race_controller_path: NodePath
 @export var camera_path: NodePath
 
-## On the flat start, comfortably clear of the floor. Went the other
-## direction from an earlier attempt at this: a smaller gap (-3, even
-## -15) turned out to make the actual problem WORSE, not better — logged
-## the raw pre-clamp velocity every step (see the settle window below)
-## and found the "bounce" isn't a drop-impact at all, it's the physics
-## solver fighting a genuine overlap between a wheel and the floor at
-## spawn, recomputing a large push-out correction fresh every step for
-## as long as the overlap persists, shrinking only as those pushes
-## gradually clear it. A wheel's own radius (up to ~47 on the chunkiest
-## catalog parts) means a few pixels of body clearance can still leave
-## the wheel itself buried; this is comfortably past that for every part
-## in the catalog, so there's nothing left to correct in the first place.
+## Above the flat start; the car settles onto the floor from here.
 const SPAWN_POSITION := Vector2(-200.0, -60.0)
 
 ## A permanent kick to every wheel's own rotation, for this whole scene.
@@ -71,12 +60,6 @@ const SPAWN_POSITION := Vector2(-200.0, -60.0)
 ## flat before the real, gradual climb across the hill even begins.
 const START_ANGULAR_VELOCITY := 8.0
 const MAX_ANGULAR_VELOCITY := 45.0
-## How fast the wheel's spin ramps up to whatever its current target is —
-## brisk enough to keep up with the target's own climb without lagging
-## noticeably behind, and with MASS_MULTIPLIER now making the chassis
-## much heavier, a snappier ramp is what keeps the wheel actually pulling
-## that extra weight along instead of just slipping under it.
-const MOTOR_ACCEL := 45.0
 ## Extra wheel target speed (rad/s) per radian the chassis is currently
 ## tilted nose-down. The car settles to roughly the local slope's own
 ## angle as it rolls along it (rolling contact naturally matches the
@@ -124,8 +107,7 @@ const DAMAGE_REARM_X := 12350.0
 ## less, which reads as weight instead of the light, jumpy bounce a
 ## lighter body was getting knocked around by. Also gives the wheels'
 ## forced spin more grip to bite into, converting more of it into real
-## chassis speed instead of slipping — part of why MOTOR_ACCEL went up
-## alongside this.
+## chassis speed instead of slipping.
 const MASS_MULTIPLIER := 3.0
 
 var _player_car: CarAssembler.AssembledCar
@@ -173,7 +155,6 @@ func _ready() -> void:
 	_player_car = car
 	for wheel in car.wheels:
 		wheel.target_angular_velocity = 0.0
-		wheel.motor_accel = MOTOR_ACCEL
 
 ## How many physics steps the rig stays frozen before unfreezing and
 ## starting the settle-then-climb sequence below.
@@ -181,19 +162,6 @@ const FREEZE_STEPS := 3
 ## Once unfrozen, held at zero wheel rotation for this long so the car
 ## finishes settling under plain gravity before the motor's own kick
 ## lands on top of it too.
-##
-## SPAWN_POSITION's clearance is what actually matters for avoiding a
-## visible "hop" at spawn, not this window on its own — too small a gap
-## (tried -3, even the original -15) left a wheel's own collision shape
-## still slightly overlapping the floor at spawn, and the solver was
-## recomputing a large push-out correction fresh every physics step for
-## as long as that overlap persisted, not just once — logged the raw
-## pre-clamp velocity every step to confirm (a magnitude-40 clamp landed
-## on it each step, and the RAW value was still ~330+ the very next step
-## regardless). SPAWN_POSITION now clears every wheel in the catalog with
-## room to spare, so there's no overlap left to correct in the first
-## place; this window+clamp just keeps the resulting ordinary fall from
-## that height looking gentle instead of like a sudden drop.
 const SETTLE_DURATION := 0.3
 ## Body speed is clamped to this during that same window.
 const SETTLE_MAX_SPEED := 40.0

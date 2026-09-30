@@ -1,30 +1,17 @@
 class_name CarWheel
 extends RigidBody2D
-## Physics body for a car's WHEEL part. This IS the car's drive: the
-## wheel is a motor that forces its own rotation (torque-limited ramp to
-## a target speed), and real ground friction against its actual polygon
-## shape — round, square, a toilet bowl, whatever — converts that
-## guaranteed rotation into the car's forward push through the
-## PinJoint2D to the body.
-##
-## The rotation is forced directly inside _integrate_forces rather than
-## via apply_torque/angular_velocity in _physics_process. That matters:
-## a wheel with any flat resting face against a flat floor is a
-## degenerate contact Godot's solver clamps to zero rotation no matter
-## how much torque or target velocity you throw at it from the outside
-## (confirmed empirically). Overriding the resolved transform inside
-## _integrate_forces — the one hook that runs after the solver, giving
-## us the final say — sidesteps that entirely, so wild non-round wheel
-## shapes still work exactly like round ones: the wheel spins, and
-## whatever normal/friction forces its actual silhouette generates
-## against the ground are what push the car, bumps and all.
+## Physics body for a car's WHEEL part. This IS the car's drive: an
+## electric-style motor torques the wheel (full torque from a standstill,
+## fading to none at its top spin speed) and pushes the same torque back
+## into the chassis. Nothing moves the car but the friction the wheel's
+## actual polygon shape — round, square, a toilet bowl, whatever — finds
+## against the ground, so a wheel only turns as far as the car rolls
+## unless the torque is more than its grip can hold, and then it spins.
 
 @export var part_data: WheelPartData
 
-## The rigid body this wheel is jointed to, set by CarAssembler. Every
-## current wheel pushes the car purely through ground friction and never
-## reads this, but it's there for a subclass that wants to shove the
-## chassis directly instead. Optional so a wheel scene still works
+## The rigid body this wheel is jointed to, set by CarAssembler. It takes
+## the motor's reaction torque. Optional so a wheel scene still works
 ## standalone.
 var chassis: RigidBody2D
 
@@ -32,10 +19,8 @@ var chassis: RigidBody2D
 ## wheel clockwise, which rolls the car toward +x (forward/right).
 var target_angular_velocity: float = 0.0
 
-## Torque limit, expressed as max change in spin speed per second.
-var motor_accel: float = 20.0
-
-var _drive_speed: float = 0.0
+## Motor torque at a standstill. CarAssembler sets it from the engine.
+var stall_torque: float = 0.0
 
 ## This wheel's rolling radius in its own authored (local) units, measured
 ## from its artwork the first time it's needed. Negative = not measured yet.
@@ -56,18 +41,15 @@ func _integrate_forces(state: PhysicsDirectBodyState2D) -> void:
 		return
 	var target := _current_target_speed()
 	if target == 0.0:
-		_drive_speed = state.angular_velocity
 		return
-	var step := state.get_step()
-	_drive_speed = move_toward(_drive_speed, target, motor_accel * step)
-	var new_rotation := state.transform.get_rotation() + _drive_speed * step
-	state.transform = Transform2D(new_rotation, state.transform.get_origin())
-	state.angular_velocity = _drive_speed
+	var torque := stall_torque * signf(target) * clampf(1.0 - state.angular_velocity / target, -1.0, 1.0)
+	state.apply_torque(torque)
+	if chassis != null:
+		chassis.apply_torque(-torque)
 
-## Knocks the motor's current spin down to `fraction_kept` of itself; it ramps
-## back up at motor_accel like a standing start.
+## Knocks the wheel's spin down to `fraction_kept` of itself.
 func lose_spin(fraction_kept: float) -> void:
-	_drive_speed *= fraction_kept
+	angular_velocity *= fraction_kept
 
 ## The spin speed the motor is heading for right now. A wheel with a mind of
 ## its own (the hamster wheel) overrides this; 0 lets the wheel roll freely.

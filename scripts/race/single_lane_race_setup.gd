@@ -137,11 +137,9 @@ extends Node2D
 @export var cosmetic_drift_enabled := true
 
 const CAR_COUNT := 5
-## Where the cars drop from: all lined up on the same x, SPAWN_HEIGHT_ABOVE_LANE
-## above their lane's road surface, so they still fall onto it under real
-## gravity. Lanes only collide with their own slab, so sharing a column is safe.
+## Where the cars start: all lined up on the same x, each on its own lane's
+## road. Lanes only collide with their own slab, so sharing a column is safe.
 const SPAWN_X := 150.0
-const SPAWN_HEIGHT_ABOVE_LANE := 15.0
 
 ## --- Cosmetic up/down drift ---------------------------------------------------
 
@@ -801,11 +799,10 @@ func _spawn_sparks(at: Vector2, color: Color) -> void:
 	var cleanup := get_tree().create_timer(particles.lifetime + 0.2)
 	cleanup.timeout.connect(particles.queue_free)
 
-## SPAWN_HEIGHT_ABOVE_LANE above the lane's own road surface, so the car still
-## drops onto it under real gravity. World space, not lane-local: the cars are
+## On the lane's own road surface. World space, not lane-local: the cars are
 ## not parented to the lanes.
 func _spawn_position(lane: int) -> Vector2:
-	return Vector2(SPAWN_X, _surface_y[lane] - SPAWN_HEIGHT_ABOVE_LANE)
+	return Vector2(SPAWN_X, _surface_y[lane])
 
 func _on_race_ended(winner_name: String) -> void:
 	var player_won := winner_name == _player_car_name
