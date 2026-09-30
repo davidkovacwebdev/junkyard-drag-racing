@@ -38,6 +38,7 @@ FpsCounter="*res://autoload/fps_counter.gd"
 Cutscenes="*res://autoload/cutscenes.gd"
 Quests="*res://autoload/quests.gd"
 Journal="*res://autoload/journal.gd"
+Trunk="*res://autoload/trunk.gd"
 
 [display]
 
