@@ -20,6 +20,8 @@ const NAMES: Array[StringName] = [
 	&"quest_complete",
 	&"beer_sip",
 	&"grandpa_twitch",
+	&"trunk_open",
+	&"trunk_close",
 	&"ignition_click",
 	&"headlight_click",
 	&"engine_stall",
@@ -103,6 +105,8 @@ const UI_SOUNDS: Array[StringName] = [
 	&"journal_flip",
 	&"quest_added",
 	&"quest_complete",
+	&"trunk_open",
+	&"trunk_close",
 ]
 
 const AMBIENT_SOUNDS: Array[StringName] = [
@@ -142,6 +146,8 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"quest_complete": return _quest_complete()
 		&"beer_sip": return _beer_sip(rng)
 		&"grandpa_twitch": return _grandpa_twitch(rng)
+		&"trunk_open": return _trunk_open(rng)
+		&"trunk_close": return _trunk_close(rng)
 		&"ignition_click": return _ignition_click(rng)
 		&"headlight_click": return _headlight_click(rng)
 		&"engine_stall": return _engine_stall(rng)
@@ -639,6 +645,24 @@ static func _grandpa_twitch(rng: RandomNumberGenerator) -> PackedFloat32Array:
 		}), t, rng.randf_range(0.5, 1.0))
 		t += length + rng.randf_range(0.005, 0.03)
 	return Synth.finish(out, 0.55)
+
+## Popping a rusty trunk: the latch clacks, the hinges groan as the lid
+## swings up, and it bounces to a stop.
+static func _trunk_open(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.6)
+	Synth.mix_into(out, Synth.thump(0.05, 2400.0, 0.001, 0.02, rng), 0.0, 0.7)
+	Synth.mix_into(out, Synth.tones(0.34, [[[0.0, 190.0], [0.3, 320.0]]], {
+		square = 0.6,
+		amp = [[0.0, 0.0], [0.04, 0.35], [0.28, 0.25], [0.34, 0.0]],
+	}), 0.05, 0.5)
+	Synth.mix_into(out, Synth.thump(0.16, 260.0, 0.004, 0.08, rng), 0.4, 0.8)
+	return Synth.finish(out, 0.65)
+
+## Slamming it shut: a heavy tinny thud with the latch catching in it.
+static func _trunk_close(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.thump(0.3, 320.0, 0.003, 0.12, rng)
+	Synth.mix_into(out, Synth.thump(0.05, 2800.0, 0.001, 0.02, rng), 0.03, 0.6)
+	return Synth.finish(out, 0.75)
 
 ## Tiny dull tick as the cursor slides onto a button — a fingernail on tin.
 static func _ui_hover() -> PackedFloat32Array:

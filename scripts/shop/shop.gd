@@ -34,7 +34,8 @@ const PREVIEW_LAYER := 5
 @export_group("Lines")
 @export var greet_line: String = "Welcome, welcome! Everything's for sale. Almost everything works."
 @export var browse_line: String = "Anything else catch your eye?"
-@export var bought_line: String = "Pleasure doin' business."
+@export var bought_line: String = "Pleasure doin' business. It's in your trunk."
+@export var full_line: String = "Your trunk's full, pal. Make some room first."
 @export var broke_line: String = "Come back when you got the cash, pal."
 @export var owned_line: String = "You already got one of those."
 
@@ -115,6 +116,9 @@ func _on_item_picked(item: ItemData) -> void:
 func _on_buy_pressed(item: ItemData) -> void:
 	if Inventory.has_item(item.id):
 		_dialog.say(owned_line)
+	elif Inventory.is_trunk_full():
+		Sfx.play(&"denied", -6.0, 0.0)
+		_dialog.say(full_line)
 	elif Inventory.buy_item(item):
 		Sfx.play(&"cash_register", -4.0, 0.0)
 		_dialog.say(bought_line)

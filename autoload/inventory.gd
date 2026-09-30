@@ -38,6 +38,8 @@ var spare_parts: Array[PartData] = []
 ## Tools and gadgets bought at the shop (see ItemData). Owning one is all
 ## there is to it: an item is either had or not.
 var owned_items: Array[ItemData] = []
+## Spaces in the trunk (I), and so the most items the player can carry.
+const ITEM_SLOTS := 6
 
 ## Add to the scrap tally. Returns the new total.
 func add_scrap(amount: int) -> int:
@@ -189,10 +191,13 @@ func has_item(id: StringName) -> bool:
 			return true
 	return false
 
-## Pays for `item` and adds it. False (and nothing changes) when it's already
-## owned or the player can't afford it.
+func is_trunk_full() -> bool:
+	return owned_items.size() >= ITEM_SLOTS
+
+## Pays for `item` and puts it in the trunk. False (and nothing changes) when
+## it's already owned, the trunk is full, or the player can't afford it.
 func buy_item(item: ItemData) -> bool:
-	if item == null or has_item(item.id) or money < item.price:
+	if item == null or has_item(item.id) or is_trunk_full() or money < item.price:
 		return false
 	money -= item.price
 	owned_items.append(item)
