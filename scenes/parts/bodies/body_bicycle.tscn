@@ -8,6 +8,10 @@
 script = ExtResource("2")
 id = &"body_bicycle"
 display_name = "Rusty Bicycle"
+suspension_sag = 6.0
+suspension_travel = 12.0
+suspension_damping_ratio = 0.5
+suspension_wheel_protection = 0.3
 mass = 3.0
 durability = 30.0
 speed = 3.3

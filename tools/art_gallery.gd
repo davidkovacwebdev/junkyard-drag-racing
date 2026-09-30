@@ -1,6 +1,6 @@
 extends Node2D
 ## Renders art sheets to PNG so the art can be reviewed side by side:
-##   godot res://tools/art_gallery.tscn -- <out_dir> [parts|world|race|screens|all]
+##   godot res://tools/art_gallery.tscn -- <out_dir> [parts|world|race|ramp|screens|all]
 ## Parts go in a labelled grid; world set pieces get one shot each.
 
 const CELL := Vector2(260, 220)
@@ -12,6 +12,7 @@ const WORLD_SHOTS := [
 	{"name": "farm", "scene": "res://scenes/world/farm.tscn", "zoom": 0.9},
 	{"name": "forge", "scene": "res://scenes/world/scrap_forge.tscn", "zoom": 1.1},
 	{"name": "drag_strip", "scene": "res://scenes/world/drag_strip.tscn", "zoom": 0.45},
+	{"name": "rally_stage", "scene": "res://scenes/world/rally_stage.tscn", "zoom": 0.45},
 ]
 
 const PROP_ROW := [
@@ -51,6 +52,9 @@ func _ready() -> void:
 		await _shoot_parts()
 	if _mode in ["race", "all"]:
 		await _shoot_screen("race", "res://scenes/race/race_drag_strip.tscn")
+		await _shoot_screen("race_rally", "res://scenes/race/race_rally.tscn")
+	if _mode in ["ramp", "all"]:
+		await _shoot_ramp_run()
 	if _mode in ["screens", "all"]:
 		for shot in SCREEN_SHOTS:
 			await _shoot_screen(shot[0], shot[1])
@@ -121,6 +125,27 @@ func _shoot_screen(shot_name: String, scene_path: String) -> void:
 	var path := _out_dir.path_join(shot_name + ".png")
 	get_viewport().get_texture().get_image().save_png(path)
 	print("saved ", path)
+	screen.queue_free()
+	await get_tree().process_frame
+
+## The ramp jump as it plays, one shot every couple of seconds, then the
+## landing side (the crowd and the end wall) at race zoom.
+func _shoot_ramp_run() -> void:
+	get_window().size = Vector2i(1600, 900)
+	var screen: Node = load("res://scenes/race/race_ramp.tscn").instantiate()
+	get_tree().root.add_child(screen)
+	for i in 6:
+		await get_tree().create_timer(2.0).timeout
+		await RenderingServer.frame_post_draw
+		get_viewport().get_texture().get_image().save_png(_out_dir.path_join("ramp_%d.png" % i))
+	var camera := screen.get_node("MainCamera") as CameraFollow
+	camera.targets = []
+	camera.lock_on(Vector2(7300.0, 2450.0))
+	await get_tree().create_timer(2.0).timeout
+	for i in 3:
+		await RenderingServer.frame_post_draw
+	get_viewport().get_texture().get_image().save_png(_out_dir.path_join("ramp_landing.png"))
+	print("saved ramp shots")
 	screen.queue_free()
 	await get_tree().process_frame
 

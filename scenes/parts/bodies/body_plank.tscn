@@ -7,6 +7,10 @@
 script = ExtResource("2")
 id = &"body_plank"
 display_name = "Plank"
+suspension_sag = 3.0
+suspension_travel = 6.0
+suspension_damping_ratio = 0.2
+suspension_wheel_protection = 0.2
 mass = 14.0
 durability = 60.0
 speed = 3.1

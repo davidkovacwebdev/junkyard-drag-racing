@@ -25,6 +25,7 @@
 [ext_resource type="PackedScene" path="res://scenes/world/farm.tscn" id="22_farm"]
 [ext_resource type="PackedScene" path="res://scenes/world/garbage_truck/garbage_truck.tscn" id="22_garbage_truck"]
 [ext_resource type="PackedScene" path="res://scenes/world/scrap_forge.tscn" id="23_forge"]
+[ext_resource type="PackedScene" path="res://scenes/world/rally_stage.tscn" id="24_rally"]
 [ext_resource type="Script" uid="uid://w1y26uy8y6we" path="res://scripts/world/floating_trash_spawner.gd" id="floating_trash_spawner"]
 [ext_resource type="Script" uid="uid://cgja4fmhwax6j" path="res://scripts/world/shark_spawner.gd" id="shark_spawner"]
 [ext_resource type="Resource" path="res://buildings/shop.tres" id="shop_building"]
@@ -118,6 +119,12 @@ point_count = 3
 [sub_resource type="Curve2D" id="Curve2D_road_forestlink"]
 _data = {
 "points": PackedVector2Array(0, 0, 0, 0, -1509, -677, -89.8578, -89.77156, 89.8578, 89.77156, -1261, -436, 0, 0, 0, 0, -1023, -149)
+}
+point_count = 3
+
+[sub_resource type="Curve2D" id="Curve2D_road_rallylink"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 6592, 743, 60, -160, -60, 160, 6300, 1150, 0, 0, 0, 0, 6060, 1470)
 }
 point_count = 3
 
@@ -244,6 +251,9 @@ curve = SubResource("Curve2D_road_forestlink")
 [node name="DragStripLink" type="Path2D" parent="Roads" unique_id=690803523]
 curve = SubResource("Curve2D_road_dragstriplink")
 
+[node name="RallyLink" type="Path2D" parent="Roads" unique_id=1733019482]
+curve = SubResource("Curve2D_road_rallylink")
+
 [node name="SkidMarks" type="Node2D" parent="." unique_id=344039305]
 script = ExtResource("12")
 
@@ -256,6 +266,13 @@ position = Vector2(3200, 0)
 [node name="MinimapMarker" type="Node2D" parent="DragStrip" unique_id=238757149]
 script = ExtResource("21_marker")
 kind = 1
+
+[node name="RallyStage" parent="." unique_id=1400628117 instance=ExtResource("24_rally")]
+position = Vector2(7150, 1650)
+
+[node name="MinimapMarker" type="Node2D" parent="RallyStage" unique_id=1873546020]
+script = ExtResource("21_marker")
+kind = 7
 
 [node name="Sortables" type="Node2D" parent="." unique_id=58475017]
 y_sort_enabled = true
@@ -320,6 +337,7 @@ kind = 5
 [node name="Ramp" parent="Sortables" unique_id=1499947680 instance=ExtResource("16")]
 position = Vector2(460, 300)
 interior_scene = ExtResource("17")
+debug_race_scene = ExtResource("17")
 
 [node name="MinimapMarker" type="Node2D" parent="Sortables/Ramp" unique_id=963194865]
 script = ExtResource("21_marker")

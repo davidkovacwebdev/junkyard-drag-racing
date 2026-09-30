@@ -695,13 +695,10 @@ func _process_interaction(delta: float) -> void:
 
 	_interact_pressed_last = interact_pressed
 
-	# A second, parallel entry point: T opens a target's test_interior_scene
-	# instead of its real interior_scene, if it has one — lets a place like
-	# the drag strip offer an in-progress alternate version to try without
-	# touching what E drops you into.
+	# T at a race entrance starts a debug race with random cars (see DebugRace).
 	var test_pressed := _is_key_held(KEY_T)
 	if target != null and test_pressed and not _test_pressed_last:
-		_activate_test(target)
+		_enter_debug_race(target)
 	_test_pressed_last = test_pressed
 
 ## True for a target that only answers to a mouse click. It still advertises
@@ -776,10 +773,9 @@ func _activate(target: Object) -> void:
 		Sfx.play(&"door_close", -4.0)
 		get_tree().change_scene_to_packed(interior)
 
-## T's counterpart to _activate(): only ever switches scene, since a
-## test entry point has no loot-style interact() of its own to call.
-func _activate_test(target: Object) -> void:
-	var interior = target.get("test_interior_scene")
-	if interior is PackedScene:
+func _enter_debug_race(target: Object) -> void:
+	var race_scene = target.get("debug_race_scene")
+	if race_scene is PackedScene:
 		Sfx.play(&"door_close", -4.0)
-		get_tree().change_scene_to_packed(interior)
+		DebugRace.request()
+		get_tree().change_scene_to_packed(race_scene)

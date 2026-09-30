@@ -7,6 +7,10 @@
 script = ExtResource("2")
 id = &"body_fridge"
 display_name = "Fridge"
+suspension_sag = 2.0
+suspension_travel = 5.0
+suspension_damping_ratio = 0.3
+suspension_wheel_protection = 0.16
 mass = 18.0
 durability = 110.0
 speed = 3.0

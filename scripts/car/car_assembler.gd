@@ -10,6 +10,8 @@ extends RefCounted
 const LOOSE_WHEEL_DAMP := 1.5
 ## Each wheel motor's stall torque per point of engine power.
 const STALL_TORQUE_PER_POWER := 300000.0
+## Global buff on every engine's power, so all cars get faster together.
+const ENGINE_POWER_MULTIPLIER := 1.5625
 ## Gap left under a car's lowest point at spawn: enough to not start inside
 ## the ground, small enough that it settles instead of dropping.
 const SPAWN_GAP := 1.0
@@ -45,7 +47,8 @@ static func assemble_parts(body_instance: CarBody, wheel_instances: Array[CarWhe
 
 	var mounts := body_instance.get_wheel_mounts()
 	var wheels: Array[CarWheel] = []
-	var joints: Array[PinJoint2D] = []
+	var joints: Array[Joint2D] = []
+	var joints_by_wheel: Array[Array] = []
 	var wheel_count := mini(wheel_instances.size(), mounts.size())
 	for i in range(wheel_count, wheel_instances.size()):
 		wheel_instances[i].free()
@@ -57,17 +60,17 @@ static func assemble_parts(body_instance: CarBody, wheel_instances: Array[CarWhe
 		wheel_instance.chassis = body_instance
 		wheels.append(wheel_instance)
 
-		var joint := PinJoint2D.new()
-		root.add_child(joint)
-		joint.global_position = mount.global_position
-		joint.node_a = joint.get_path_to(body_instance)
-		joint.node_b = joint.get_path_to(wheel_instance)
-		joints.append(joint)
-
 	# Placed by its lowest point, not its body origin:
 	# wheels hang below the body by different amounts, and a wheel spawned
 	# inside the road gets blasted out by the solver hard enough to break parts.
 	root.position.y += spawn_position.y - SPAWN_GAP - _lowest_collision_y(root)
+
+	# Hung only after the move: a joint keeps the anchor it was made with and
+	# yanks its wheel back there on the first step.
+	for i in wheel_count:
+		var wheel_joints := _suspend_wheel(body_instance, wheels[i], mounts[i].global_position, wheel_count, root)
+		joints_by_wheel.append(wheel_joints)
+		joints.append_array(wheel_joints)
 
 	# Neighbouring wheels on a short body can overlap; left colliding they
 	# grind against each other and jam the car.
@@ -84,7 +87,7 @@ static func assemble_parts(body_instance: CarBody, wheel_instances: Array[CarWhe
 		body_instance.place_engine(engine_instance)
 		engine_data = engine_instance.get("part_data")
 		if engine_data != null:
-			engine_power = engine_data.power
+			engine_power = engine_data.power * ENGINE_POWER_MULTIPLIER
 
 	var autosteer := CarAutosteer.new()
 	autosteer.body = body_instance
@@ -110,20 +113,25 @@ static func assemble_parts(body_instance: CarBody, wheel_instances: Array[CarWhe
 	# rest of the car keeps going, lopsided). The body breaking detaches
 	# every joint — there's nothing left to hold the wheels on, so they
 	# carry on rolling riderless.
+	var suspension_wheel_protection: float = body_instance.part_data.suspension_wheel_protection if body_instance.part_data != null else 0.0
 	for i in wheels.size():
 		var wheel: CarWheel = wheels[i]
-		var joint: PinJoint2D = joints[i]
+		var wheel_joints: Array = joints_by_wheel[i]
 		var wheel_damage := CarPartDamage.new()
 		wheel_damage.target = wheel
 		wheel_damage.part_data = wheel.part_data
 		wheel_damage.absorption = wheel.part_data.absorption if wheel.part_data != null else 0.0
+		wheel_damage.ground_absorption = suspension_wheel_protection
+		wheel.contact_monitor = true
+		wheel.max_contacts_reported = 4
 		wheel.add_child(wheel_damage)
 		wheel_damage.broken.connect(func() -> void:
 			if not is_instance_valid(wheel):
 				return
 			print("BREAK: ", root.name, " lost a ", wheel.part_data.display_name if wheel.part_data else "wheel")
-			if is_instance_valid(joint):
-				joint.queue_free()
+			for joint in wheel_joints:
+				if is_instance_valid(joint):
+					joint.queue_free()
 			wheels.erase(wheel)
 			PartShatter.shatter(wheel, _get_part_color(wheel), root)
 		)
@@ -132,6 +140,10 @@ static func assemble_parts(body_instance: CarBody, wheel_instances: Array[CarWhe
 	body_damage.target = body_instance
 	body_damage.part_data = body_instance.part_data
 	body_damage.absorption = _average_absorption(wheels)
+	body_damage.ground_absorption = suspension_wheel_protection
+	body_damage.linked_contact_parts = wheels
+	body_instance.contact_monitor = true
+	body_instance.max_contacts_reported = 4
 	body_instance.add_child(body_damage)
 	body_damage.broken.connect(func() -> void:
 		if not is_instance_valid(body_instance):
@@ -175,6 +187,44 @@ static func assemble_from_car_data(car_data: CarModelData, parent: Node, spawn_p
 			wheel_instances.append(PartFactory.instantiate(wheel) as CarWheel)
 	return assemble_parts(PartFactory.instantiate(car_data.body) as CarBody, wheel_instances,
 			PartFactory.instantiate(car_data.engine), parent, spawn_position)
+
+## Hangs `wheel` off the body on a sprung, damped slide along the body's own
+## up/down axis: a groove keeps the axle in line under its mount, and a spring
+## holds the body up. The body's BodyPartData sets how soft it is. Spring
+## rates are worked out from the body's weight, so the same settings feel the
+## same on a light mattress and a heavy radiator.
+static func _suspend_wheel(body: CarBody, wheel: CarWheel, mount: Vector2, wheel_count: int, root: Node2D) -> Array[Joint2D]:
+	var data := body.part_data
+	var sag: float = data.suspension_sag if data != null else 6.0
+	var travel: float = data.suspension_travel if data != null else 14.0
+	var damping_ratio: float = data.suspension_damping_ratio if data != null else 0.7
+	var gravity: float = ProjectSettings.get_setting("physics/2d/default_gravity")
+	var weight_on_wheel := body.mass * gravity * body.gravity_scale / wheel_count
+	var stiffness := weight_on_wheel / maxf(sag, 0.5)
+	var sprung_mass := body.mass / wheel_count * wheel.mass / (body.mass / wheel_count + wheel.mass)
+
+	var top := mount - body.global_transform.y.normalized() * travel
+
+	var groove := GrooveJoint2D.new()
+	root.add_child(groove)
+	groove.global_position = top
+	groove.global_rotation = body.global_rotation
+	groove.length = travel * 2.0
+	groove.initial_offset = travel
+	groove.node_a = groove.get_path_to(body)
+	groove.node_b = groove.get_path_to(wheel)
+
+	var spring := DampedSpringJoint2D.new()
+	root.add_child(spring)
+	spring.global_position = top
+	spring.global_rotation = body.global_rotation
+	spring.length = travel
+	spring.rest_length = travel + sag
+	spring.stiffness = stiffness
+	spring.damping = damping_ratio * 2.0 * sqrt(stiffness * sprung_mass)
+	spring.node_a = spring.get_path_to(body)
+	spring.node_b = spring.get_path_to(wheel)
+	return [groove, spring]
 
 ## The part's own art colour, taken off its first Polygon2D. Nested search on
 ## purpose: the race harness reparents a part's art under a wrapper node, and

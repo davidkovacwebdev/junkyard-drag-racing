@@ -12,6 +12,8 @@ extends Node
 
 signal broken
 
+const GROUP := &"car_part_damage"
+
 @export var target: RigidBody2D
 @export var part_data: PartData
 
@@ -24,6 +26,12 @@ const IMPACT_SOUND_COOLDOWN := 0.15
 ## 0..1 share of impact damage soaked up before it counts. Only bumps and
 ## landings: apply_damage() from anything else is taken in full.
 var absorption: float = 0.0
+## 0..1 extra share soaked up only when the hit came from the ground, not
+## from another car. Needs contact_monitor on the target to tell them apart.
+var ground_absorption: float = 0.0
+## Other parts whose contacts also count when telling a ground hit from a car
+## hit (the body lands through its wheels, so it checks them too).
+var linked_contact_parts: Array = []
 var max_durability: float = 100.0
 var current_durability: float = 100.0
 var is_broken: bool = false
@@ -32,6 +40,7 @@ var _prev_velocity := Vector2.ZERO
 var _impact_sound_cooldown := 0.0
 
 func _ready() -> void:
+	add_to_group(GROUP)
 	if part_data != null:
 		max_durability = part_data.durability
 	current_durability = max_durability
@@ -66,12 +75,24 @@ func _physics_process(delta: float) -> void:
 	if delta_v < IMPACT_VELOCITY_THRESHOLD:
 		return
 	var momentum := target.mass * delta_v
-	apply_damage(momentum * DAMAGE_PER_MOMENTUM * (1.0 - absorption))
+	var total_absorption := absorption
+	if ground_absorption > 0.0 and _is_ground_hit():
+		total_absorption = 1.0 - (1.0 - absorption) * (1.0 - ground_absorption)
+	apply_damage(momentum * DAMAGE_PER_MOMENTUM * (1.0 - total_absorption))
 	if not is_broken and _impact_sound_cooldown <= 0.0:
 		_impact_sound_cooldown = IMPACT_SOUND_COOLDOWN
 		var loudness := clampf(delta_v / LOUDEST_IMPACT_VELOCITY, 0.25, 1.0)
 		var impact_sound := part_data.impact_sound if part_data != null else &"bump"
 		RaceCarAudio.play(self, impact_sound, target.global_position, linear_to_db(loudness))
+
+func _is_ground_hit() -> bool:
+	for part in [target] + linked_contact_parts:
+		if not is_instance_valid(part):
+			continue
+		for body in part.get_colliding_bodies():
+			if body is RigidBody2D:
+				return false
+	return true
 
 func apply_damage(amount: float) -> void:
 	if is_broken or not is_instance_valid(target):

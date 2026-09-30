@@ -8,6 +8,10 @@
 script = ExtResource("2")
 id = &"body_wrecked_car"
 display_name = "Wrecked Car"
+suspension_sag = 8.0
+suspension_travel = 18.0
+suspension_damping_ratio = 0.7
+suspension_wheel_protection = 0.45
 mass = 20.0
 speed = 3.0
 

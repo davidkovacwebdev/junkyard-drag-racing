@@ -31,6 +31,10 @@ func _ready() -> void:
 		mass = part_data.mass
 	can_sleep = false
 	continuous_cd = RigidBody2D.CCD_MODE_CAST_SHAPE
+	# A free axle: the project's default angular damping brakes a spinning
+	# wheel and caps how fast a car can roll downhill.
+	angular_damp_mode = RigidBody2D.DAMP_MODE_REPLACE
+	angular_damp = 0.0
 
 func _integrate_forces(state: PhysicsDirectBodyState2D) -> void:
 	# A frozen wheel is decoration, not physics: CarView freezes the ones on
@@ -42,7 +46,7 @@ func _integrate_forces(state: PhysicsDirectBodyState2D) -> void:
 	var target := _current_target_speed()
 	if target == 0.0:
 		return
-	var torque := stall_torque * signf(target) * clampf(1.0 - state.angular_velocity / target, -1.0, 1.0)
+	var torque := stall_torque * signf(target) * clampf(1.0 - state.angular_velocity / target, 0.0, 1.0)
 	state.apply_torque(torque)
 	if chassis != null:
 		chassis.apply_torque(-torque)

@@ -9,6 +9,10 @@ script = ExtResource("2")
 color = Color(0.78, 0.18, 0.2, 1)
 id = &"body_classic"
 display_name = "Classic Car"
+suspension_sag = 9.0
+suspension_travel = 20.0
+suspension_damping_ratio = 0.75
+suspension_wheel_protection = 0.55
 mass = 18.0
 speed = 3.0
 

@@ -68,7 +68,7 @@ func _ready() -> void:
 	if Engine.is_editor_hint():
 		return
 	for rect in _solid_rects():
-		_add_solid(rect)
+		RoundedRectShape.add_solid(self, rect)
 
 func _draw() -> void:
 	_update_extent()
@@ -267,14 +267,6 @@ func _solid_rects() -> Array[Rect2]:
 	for spot in _pit_spots():
 		rects.append(Rect2(spot.x - 54.0, spot.y - 20.0, 124.0, 36.0))
 	return rects
-
-func _add_solid(rect: Rect2) -> void:
-	var body := StaticBody2D.new()
-	body.position = rect.get_center()
-	var shape := CollisionShape2D.new()
-	shape.shape = RoundedRectShape.build(rect.size, minf(12.0, rect.size.y * 0.3))
-	body.add_child(shape)
-	add_child(body)
 
 # --- Geometry helpers ----------------------------------------------------------
 
