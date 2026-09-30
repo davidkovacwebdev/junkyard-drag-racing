@@ -16,9 +16,12 @@ extends CanvasLayer
 const LAYER := 45
 const MENU_SCENES_DIR := "res://scenes/menu/"
 const RACE_SCENES_DIR := "res://scenes/race/"
+const WORLD_SCENE := "res://scenes/world/main.tscn"
 const BOARD_SIZE := Vector2(840, 470)
 const LIST_WIDTH := 250.0
 const TOAST_SECONDS := 3.5
+## How long a card stays up when more are waiting behind it.
+const TOAST_SECONDS_BUSY := 1.8
 const OVERLAY_ALPHA := 0.5
 
 var _open: bool = false
@@ -44,9 +47,12 @@ var _toast_header: Label
 var _toast_title: Label
 var _toast_hint: Label
 var _toast_tween: Tween
-## A card waiting for a character dialog to close, so it doesn't land on top
-## of the conversation: [header, title, hint], or empty.
-var _pending_toast: Array = []
+## Cards waiting their turn, oldest first: [header, title, hint, sound,
+## quest id, stale_when_done]. One
+## shows at a time, and none while a character dialog is open, so a quest
+## finishing and its follow-up starting show one after the other instead of
+## the second wiping out the first.
+var _card_queue: Array = []
 
 func _ready() -> void:
 	layer = LAYER
@@ -97,15 +103,18 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _process(_delta: float) -> void:
-	_tracker.visible = Quests.tracked != null and not _open and hud_allowed()
+	_tracker.visible = Quests.tracked != null and not _open and hud_allowed() and _in_world()
 	if _tracker.visible:
 		_refresh_tracker()
 	if _toast.visible and (not hud_allowed() or _dialog_open()):
 		_toast.visible = false
-	if not _pending_toast.is_empty() and not _dialog_open():
-		var card := _pending_toast
-		_pending_toast = []
-		_show_toast(card[0], card[1], card[2])
+	# A "new quest" or "objective done" card for a quest that's finished by
+	# now is old news: drop it rather than show it.
+	while not _card_queue.is_empty() and _card_queue[0][5] and Quests.is_complete(_card_queue[0][4]):
+		_card_queue.pop_front()
+	if not _toast.visible and not _card_queue.is_empty() and hud_allowed() and not _dialog_open():
+		var card: Array = _card_queue.pop_front()
+		_show_card(card[0], card[1], card[2], card[3])
 
 ## The world (or a building) is on screen and nothing else has the player.
 func _can_open() -> bool:
@@ -119,6 +128,12 @@ func hud_allowed() -> bool:
 		return false
 	var path := scene.scene_file_path
 	return not path.begins_with(MENU_SCENES_DIR) and not path.begins_with(RACE_SCENES_DIR)
+
+## The open world itself, not a building interior: the only place the
+## tracker shows.
+func _in_world() -> bool:
+	var scene := get_tree().current_scene
+	return scene != null and scene.scene_file_path == WORLD_SCENE
 
 func _dialog_open() -> bool:
 	for dialog in get_tree().get_nodes_in_group(CharacterDialog.GROUP):
@@ -258,8 +273,9 @@ func _show_detail() -> void:
 	_giver_label.visible = not _selected.giver.is_empty()
 	_description_label.text = PlayerProfile.fill(_selected.description)
 	_objective_label.text = "Done!" if done else "To do: %s" % Quests.objective_text(_selected)
-	_reward_label.text = "Reward: $%d" % _selected.reward_money
-	_reward_label.visible = _selected.reward_money > 0 and not done
+	var reward := Quests.reward_text(_selected)
+	_reward_label.text = "Reward: %s" % reward
+	_reward_label.visible = not reward.is_empty() and not done
 	_track_button.visible = not done
 	var tracking := Quests.tracked == _selected
 	_track_button.selected = tracking
@@ -326,24 +342,24 @@ func _build_toast() -> void:
 
 func _on_quest_added(quest: QuestData) -> void:
 	_refresh_tracker()
-	_show_toast("NEW QUEST", quest.title, "Press J to open your journal")
-	Sfx.play(&"quest_added", -4.0, 0.0)
+	_queue_card("NEW QUEST", quest.title, "Press J to open your journal", &"quest_added", quest.id, true)
 
 func _on_quest_ready(quest: QuestData) -> void:
 	_refresh_tracker()
-	_show_toast("OBJECTIVE DONE", quest.title, Quests.objective_text(quest))
-	Sfx.play(&"quest_added", -4.0, 0.0)
+	_queue_card("OBJECTIVE DONE", quest.title, Quests.objective_text(quest), &"quest_added", quest.id, true)
 
 func _on_quest_completed(quest: QuestData) -> void:
 	_refresh_tracker()
-	var hint := "Reward: $%d" % quest.reward_money if quest.reward_money > 0 else "Nice work."
-	_show_toast("QUEST COMPLETE", quest.title, hint)
-	Sfx.play(&"quest_complete", -4.0, 0.0)
+	var reward := Quests.reward_text(quest)
+	var hint := "Reward: %s" % reward if not reward.is_empty() else "Nice work."
+	_queue_card("QUEST COMPLETE", quest.title, hint, &"quest_complete", quest.id, false)
 
-func _show_toast(header: String, title: String, hint: String) -> void:
-	if _dialog_open():
-		_pending_toast = [header, title, hint]
-		return
+func _queue_card(header: String, title: String, hint: String, sound: StringName,
+		quest_id: StringName, stale_when_done: bool) -> void:
+	_card_queue.append([header, title, hint, sound, quest_id, stale_when_done])
+
+func _show_card(header: String, title: String, hint: String, sound: StringName) -> void:
+	Sfx.play(sound, -4.0, 0.0)
 	_toast_header.text = header
 	_toast_title.text = title
 	_toast_hint.text = hint
@@ -352,7 +368,7 @@ func _show_toast(header: String, title: String, hint: String) -> void:
 	if _toast_tween != null:
 		_toast_tween.kill()
 	_toast_tween = create_tween()
-	_toast_tween.tween_interval(TOAST_SECONDS)
+	_toast_tween.tween_interval(TOAST_SECONDS_BUSY if not _card_queue.is_empty() else TOAST_SECONDS)
 	_toast_tween.tween_callback(func() -> void: _toast.visible = false)
 
 # --- Helpers ---------------------------------------------------------------------------

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" path="res://scripts/quests/quest_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"fit_first_part"
+title = "Grease Monkey"
+giver = "Grandpa"
+description = "Grandpa handed over his old generator. \"Better than that lawn mower you call an engine.\"
+
+Drive into the garage and bolt it onto your car: drag it from your spare parts onto the car."
+objective = "Fit the Old Generator to your car in the garage"
+objective_place = "Garage"
+fit_part_goal = "res://scenes/parts/engines/engine_generator.tscn"
+return_to_giver = false

@@ -70,6 +70,12 @@ extends Node2D
 ## Plots props must stay out of, on top of the road network's own `clear_areas`.
 ## Defaults to the drag strip, whose asphalt starts at world x 1800.
 @export var keep_out_areas: Array[Rect2] = [Rect2(1720.0, -560.0, 3300.0, 1120.0), Rect2(-1100.0, -1120.0, 1000.0, 600.0)]
+## Props that land in here are dropped after the layout is decided, rather
+## than steering the layout around the area like `keep_out_areas` does. So
+## every other prop keeps its spot and its id (and with it whether it was
+## looted in a save). Defaults to the front of the player's garage, which
+## the story keeps clear for Grandpa and the starter car.
+@export var remove_areas: Array[Rect2] = [Rect2(-10.0, -60.0, 520.0, 190.0)]
 
 func _ready() -> void:
 	# Deferred so it runs once the whole scene has come up: the road node is
@@ -319,6 +325,9 @@ func _place_prop(spot: Vector2, use_container: bool, rng: RandomNumberGenerator,
 	prop.display_name = "Trash Container" if use_container else "Trash Bin"
 	if not body_palette.is_empty():
 		prop.body_color = body_palette[rng.randi_range(0, body_palette.size() - 1)]
+	if _in_remove_area(spot):
+		prop.free()
+		return true
 	prop.position = spot
 	# Props stay upright: this is a side-on world, so a rotated bin would just
 	# look broken rather than turned to face the street.
@@ -326,6 +335,12 @@ func _place_prop(spot: Vector2, use_container: bool, rng: RandomNumberGenerator,
 	prop.add_to_group(&"trash")
 	get_parent().add_child(prop)
 	return true
+
+func _in_remove_area(spot: Vector2) -> bool:
+	for area in remove_areas:
+		if area.has_point(spot):
+			return true
+	return false
 
 # --- Polyline helpers ----------------------------------------------------------
 

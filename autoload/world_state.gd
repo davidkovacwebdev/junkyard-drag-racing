@@ -21,6 +21,9 @@ var player_position: Vector2 = Vector2.ZERO
 ## the first load would snap the player to the origin, which happens to be
 ## correct here but is not something to rely on.
 var has_player_position: bool = false
+## The world camera's zoom, so stepping into the shop (or any other place)
+## and back out doesn't reset it. 0 until the player first zooms.
+var camera_zoom: float = 0.0
 
 ## Props the player has emptied, and the in-game day each was emptied on. An id
 ## in here is empty right now; an id that isn't is full. See `is_prop_full()`.
@@ -129,6 +132,7 @@ func restore_looted(snapshot: Dictionary) -> void:
 func clear() -> void:
 	player_position = Vector2.ZERO
 	has_player_position = false
+	camera_zoom = 0.0
 	_empty_since.clear()
 	_refilled.clear()
 	_restock_plan_day = 0

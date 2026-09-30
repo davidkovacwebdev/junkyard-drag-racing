@@ -38,6 +38,9 @@ var _target_zoom: float = 1.0
 var _car: CharacterBody2D
 
 func _ready() -> void:
+	# Pick up the zoom from before the player went into a building.
+	if WorldState.camera_zoom > 0.0:
+		zoom = Vector2.ONE * clampf(WorldState.camera_zoom, min_zoom, max_zoom)
 	_target_zoom = clampf(zoom.x, min_zoom, max_zoom)
 	_car = get_parent() as CharacterBody2D
 
@@ -67,6 +70,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _zoom_by(factor: float) -> void:
 	_target_zoom = clampf(_target_zoom * factor, min_zoom, max_zoom)
+	WorldState.camera_zoom = _target_zoom
 
 func _process(delta: float) -> void:
 	_update_zoom(delta)

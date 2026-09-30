@@ -7,6 +7,15 @@ extends Control
 ##
 ## The disc clips its children, so the road layer is drawn once in world
 ## space and only moved each frame; the icon layer redraws every frame.
+##
+## A quest giver (the `quest_giver` group) with a quest available shows as a
+## little copy of their own head, pinned to the rim like HOME when they're
+## out of range, so the player can always find who has work for them.
+##
+## Whatever the tracked quest sends the player to (Quests.tracked_target(): a
+## place like the Shop, or the giver once it's time to hand in) is lit up: a
+## pulsing yellow disc behind its icon, or a yellow backing behind the
+## giver's head, and pinned to the rim too.
 
 @export var world_to_map_scale: float = 0.035
 @export var rim_width: float = 11.0
@@ -32,12 +41,27 @@ const HOME_ICON_SIZE := 7.0
 const LANDMARK_ICON_SIZE := 6.0
 const PLAYER_ARROW_SIZE := 7.0
 const MOVING_SPEED := 10.0
+## Quest-giver heads: how small the character is drawn, which point of the
+## character (a head's middle, in character space) sits on the map spot, and
+## the dark disc behind it so it reads against the map.
+const HEAD_SCALE := 0.17
+const HEAD_CENTER_Y := -200.0
+const HEAD_BACK_RADIUS := 11.0
+const GIVER_GROUP := &"quest_giver"
+## The quest-target glow: its size around an icon, and how fast it pulses.
+const TARGET_GLOW_RADIUS := 10.0
+## HOME's icon is already yellow, so its glow is drawn wider to show as a ring.
+const HOME_GLOW_RADIUS := 15.0
+const TARGET_PULSE_SPEED := 5.0
+const TARGET_GLOW := Color(0.95, 0.75, 0.10, 0.55)
 
 var _map_disc: Control
 var _road_layer: Node2D
 var _icon_layer: Node2D
 var _player: PlayerCar
 var _player_heading: float = 0.0
+## Quest giver node -> its head on the map.
+var _heads: Dictionary = {}
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -71,6 +95,7 @@ func _process(_delta: float) -> void:
 		_player_heading = _player.velocity.angle()
 	_road_layer.position = _center() - _player.global_position * world_to_map_scale
 	_icon_layer.queue_redraw()
+	_update_quest_heads()
 
 func _center() -> Vector2:
 	return size * 0.5
@@ -116,15 +141,83 @@ func _draw_icons() -> void:
 	var center := _center()
 	var map_radius := _map_radius()
 	var home_position := Vector2.INF
+	var home_is_target := false
+	var target := Quests.tracked_target()
 	for marker: MinimapMarker in get_tree().get_nodes_in_group(MinimapMarker.GROUP):
 		var offset := (marker.global_position - _player.global_position) * world_to_map_scale
 		if marker.kind == MinimapMarker.Kind.HOME:
 			home_position = center + offset.limit_length(map_radius - HOME_ICON_SIZE - 2.0)
+			home_is_target = home_is_target or (not target.is_empty() and _marker_name(marker) == target)
+		elif not target.is_empty() and _marker_name(marker) == target:
+			var at := center + offset.limit_length(map_radius - TARGET_GLOW_RADIUS - 1.0)
+			_draw_target_glow(at)
+			_draw_landmark(marker.kind, at)
 		elif offset.length() < map_radius + LANDMARK_ICON_SIZE:
 			_draw_landmark(marker.kind, center + offset)
 	_draw_player_arrow(center)
 	if home_position != Vector2.INF:
+		if home_is_target:
+			_draw_target_glow(home_position, HOME_GLOW_RADIUS)
 		_draw_home(home_position)
+
+## The name of the place a marker sits on (its parent's display name).
+static func _marker_name(marker: MinimapMarker) -> String:
+	var place := marker.get_parent()
+	return String(place.get("display_name")) if place != null and place.get("display_name") != null else ""
+
+func _draw_target_glow(at: Vector2, radius: float = TARGET_GLOW_RADIUS) -> void:
+	var pulse := 0.85 + 0.15 * sin(Time.get_ticks_msec() * 0.001 * TARGET_PULSE_SPEED)
+	var disc := PackedVector2Array()
+	for i in 8:
+		disc.append(at + Vector2.from_angle(TAU * (i + 0.5) / 8.0) * radius * pulse)
+	_icon_layer.draw_colored_polygon(disc, TARGET_GLOW)
+
+func _update_quest_heads() -> void:
+	for giver in _heads.keys():
+		if not is_instance_valid(giver):
+			(_heads[giver] as Node2D).queue_free()
+			_heads.erase(giver)
+	var center := _center()
+	var reach := _map_radius() - HEAD_BACK_RADIUS - 1.0
+	var target := Quests.tracked_target()
+	for giver in get_tree().get_nodes_in_group(GIVER_GROUP):
+		var giver_name := String(giver.get("display_name"))
+		var is_target := not target.is_empty() and giver_name == target
+		var waiting := is_target or not Quests.available_from(giver_name).is_empty()
+		var head: Node2D = _heads.get(giver)
+		if head == null:
+			if not waiting:
+				continue
+			head = _make_head(giver.get("character_data") as CharacterData)
+			_map_disc.add_child(head)
+			_heads[giver] = head
+		head.visible = waiting
+		(head.get_node("Backing") as Polygon2D).color = UiPalette.ACCENT_YELLOW if is_target else UiPalette.INK
+		if waiting:
+			var offset := ((giver as Node2D).global_position - _player.global_position) * world_to_map_scale
+			head.position = center + offset.limit_length(reach)
+
+## Just the head, hair, eyes and accessory of `character`, shrunk onto a dark
+## disc.
+func _make_head(character: CharacterData) -> Node2D:
+	var root := Node2D.new()
+	var backing := Polygon2D.new()
+	backing.name = "Backing"
+	var disc := PackedVector2Array()
+	for i in 8:
+		disc.append(Vector2.from_angle(TAU * (i + 0.5) / 8.0) * HEAD_BACK_RADIUS)
+	backing.polygon = disc
+	backing.color = UiPalette.INK
+	root.add_child(backing)
+	if character != null:
+		var face := CharacterData.new()
+		face.head_scene = character.head_scene
+		face.hair_scene = character.hair_scene
+		face.eyes_scene = character.eyes_scene
+		face.accessory_scene = character.accessory_scene
+		var rig := CharacterAssembler.assemble(face, root, Vector2(0.0, -HEAD_CENTER_Y * HEAD_SCALE))
+		rig.scale = Vector2.ONE * HEAD_SCALE
+	return root
 
 func _draw_player_arrow(at: Vector2) -> void:
 	var forward := Vector2.from_angle(_player_heading)

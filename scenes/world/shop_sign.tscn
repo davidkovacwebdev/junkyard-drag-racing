@@ -1,0 +1,30 @@
+[gd_scene format=3]
+
+[node name="ShopSign" type="Node2D"]
+
+[node name="PostLeft" type="Polygon2D" parent="."]
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-44, 0, -36, 0, -36, -34, -44, -34)
+
+[node name="PostRight" type="Polygon2D" parent="."]
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(36, 0, 44, 0, 44, -34, 36, -34)
+
+[node name="Board" type="Polygon2D" parent="."]
+color = Color(0.55, 0.4, 0.28, 1)
+polygon = PackedVector2Array(-72, -32, 70, -35, 72, -84, -70, -82)
+
+[node name="Shade" type="Polygon2D" parent="."]
+color = Color(0.46, 0.33, 0.22, 1)
+polygon = PackedVector2Array(-72, -32, 70, -35, 70, -43, -72, -40)
+
+[node name="Lettering" type="Label" parent="."]
+offset_left = -70.0
+offset_top = -84.0
+offset_right = 70.0
+offset_bottom = -40.0
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 34
+text = "SHOP"
+horizontal_alignment = 1
+vertical_alignment = 1

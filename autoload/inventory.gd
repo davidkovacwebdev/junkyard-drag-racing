@@ -191,6 +191,13 @@ func has_item(id: StringName) -> bool:
 			return true
 	return false
 
+## Takes an item out of the trunk (a quest giver keeping it, say).
+func remove_item(id: StringName) -> void:
+	for item in owned_items:
+		if item.id == id:
+			owned_items.erase(item)
+			return
+
 func is_trunk_full() -> bool:
 	return owned_items.size() >= ITEM_SLOTS
 

@@ -93,6 +93,7 @@ func _snapshot() -> SaveData:
 	data.quests_completed = Quests.completed.duplicate()
 	data.tracked_quest = Quests.tracked
 	data.quests_ready = Quests.ready_ids.duplicate()
+	data.quests_available = Quests.available.duplicate()
 	return data
 
 func _write_save(data: SaveData) -> void:
@@ -126,7 +127,8 @@ func load_game() -> bool:
 	Cutscenes.restore_seen(data.seen_cutscenes)
 	PlayerProfile.player_name = data.player_name
 	PlayerProfile.character = data.player_character
-	Quests.restore(data.quests_active, data.quests_completed, data.quests_ready, data.tracked_quest)
+	Quests.restore(data.quests_active, data.quests_completed, data.quests_ready,
+			data.quests_available, data.tracked_quest)
 	return true
 
 ## Called by New Game so starting over doesn't leave a stale save

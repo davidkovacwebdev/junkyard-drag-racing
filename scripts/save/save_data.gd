@@ -36,5 +36,7 @@ extends Resource
 @export var tracked_quest: QuestData = null
 ## Ids of quests whose goal is met, waiting to be handed back to the giver.
 @export var quests_ready: Array[StringName] = []
+## Quests unlocked but not taken yet (their giver's head is on the map).
+@export var quests_available: Array[QuestData] = []
 ## Tools and gadgets bought at the shop (see ItemData).
 @export var owned_items: Array[ItemData] = []

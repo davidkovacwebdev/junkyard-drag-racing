@@ -1,6 +1,7 @@
 extends Node
 ## The cutscene director (autoload `Cutscenes`). Plays a Cutscene as a movie:
-## the player can't do anything but watch (Esc skips). Letterbox bars slide
+## the player can't do anything but watch (Space moves the dialogue on, Esc
+## skips the whole scene). Letterbox bars slide
 ## in over the HUD, the player's controls lock, the scene's script runs, then
 ## the camera eases back to the player and the bars slide out.
 ##
@@ -36,6 +37,8 @@ const SKIP_STEP_SECONDS := 1000.0
 
 var _active: bool = false
 var _skipping: bool = false
+## Space was pressed: hurry the current subtitle along.
+var _next_line_requested: bool = false
 var _seen: Array[StringName] = []
 
 var _layer: CanvasLayer
@@ -187,11 +190,20 @@ func subtitle(speaker_name: String, character: CharacterData, line: String, acto
 	_speech.speak(_subtitle_line, PlayerProfile.fill(line), character)
 	if is_instance_valid(actor):
 		actor.talking = true
+	_next_line_requested = false
 	while _speech.is_typing() and not _skipping:
+		if _next_line_requested:
+			# First Space finishes the line; a second one moves on.
+			_next_line_requested = false
+			_speech.finish()
 		await get_tree().process_frame
 	if is_instance_valid(actor):
 		actor.talking = false
-	await wait(SUBTITLE_HOLD + line.length() * SUBTITLE_HOLD_PER_LETTER)
+	var left := SUBTITLE_HOLD + line.length() * SUBTITLE_HOLD_PER_LETTER
+	while left > 0.0 and not _skipping and not _next_line_requested:
+		await get_tree().process_frame
+		left -= get_process_delta_time()
+	_next_line_requested = false
 
 # --- Steps: camera ---------------------------------------------------------------------
 
@@ -259,11 +271,18 @@ func face(actor: CutsceneActor, right: bool) -> void:
 
 # --- Internals ------------------------------------------------------------------------------
 
+## Esc skips the whole cutscene; Space hurries the current subtitle along
+## (finishes typing it, or moves on to the next line once it's all shown).
 func _input(event: InputEvent) -> void:
-	if _active and event is InputEventKey and event.pressed and not event.echo \
-			and event.keycode == KEY_ESCAPE:
-		get_viewport().set_input_as_handled()
-		skip()
+	if not (_active and event is InputEventKey and event.pressed and not event.echo):
+		return
+	match event.keycode:
+		KEY_ESCAPE:
+			get_viewport().set_input_as_handled()
+			skip()
+		KEY_SPACE:
+			get_viewport().set_input_as_handled()
+			_next_line_requested = true
 
 func _process(delta: float) -> void:
 	if not is_instance_valid(_camera):
@@ -361,9 +380,9 @@ func _build_screen() -> void:
 	_hide_subtitle()
 
 	var hint := _make_label(UiPalette.TRIM_OFF_WHITE, 14)
-	hint.text = "Esc  skip"
+	hint.text = "Space  next line      Esc  skip scene"
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	hint.anchor_left = 0.8
+	hint.anchor_left = 0.5
 	hint.anchor_right = 0.98
 	hint.anchor_top = 0.2
 	hint.anchor_bottom = 0.8

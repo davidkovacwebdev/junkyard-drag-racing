@@ -39,6 +39,7 @@ Cutscenes="*res://autoload/cutscenes.gd"
 Quests="*res://autoload/quests.gd"
 Journal="*res://autoload/journal.gd"
 Trunk="*res://autoload/trunk.gd"
+QuestDebugger="*res://autoload/quest_debugger.gd"
 
 [display]
 

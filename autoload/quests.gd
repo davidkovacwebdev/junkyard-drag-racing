@@ -11,6 +11,10 @@ extends Node
 ## `turn_in()`, which finishes it and pays the reward. Without it, the quest
 ## finishes (and pays) on the spot.
 ##
+## Finishing a quest makes the quests in its `unlocks` *available*: not in
+## the log yet, but waiting with their giver (whose head the minimap shows)
+## until the player talks to them.
+##
 ## The first quest given while nothing is tracked gets tracked straight away,
 ## so a new player sees what to do without opening the journal.
 
@@ -18,6 +22,8 @@ signal quest_added(quest: QuestData)
 ## The goal is met and the player should go back to the giver.
 signal quest_ready(quest: QuestData)
 signal quest_completed(quest: QuestData)
+## A quest can now be taken from its giver, or no longer can (it was taken).
+signal available_changed
 signal tracked_changed(quest: QuestData)
 
 ## In the order they were given, oldest first. Ready quests are still here.
@@ -25,25 +31,52 @@ var active: Array[QuestData] = []
 var completed: Array[QuestData] = []
 ## Ids of active quests whose goal is met, waiting to be handed in.
 var ready_ids: Array[StringName] = []
+## Unlocked quests the player hasn't taken yet.
+var available: Array[QuestData] = []
 ## Shown by the on-screen tracker. Null when nothing is tracked.
 var tracked: QuestData = null
 
 func _process(_delta: float) -> void:
 	# Iterate a copy: finishing a quest takes it out of `active`.
 	for quest: QuestData in active.duplicate():
-		if quest.scrap_goal <= 0:
+		if quest.scrap_goal <= 0 and quest.item_goal == null and quest.fit_part_goal.is_empty():
 			continue
-		var enough := Inventory.scrap >= quest.scrap_goal
-		if enough and not is_ready(quest.id):
+		var met := _goal_reached(quest)
+		if met and not is_ready(quest.id):
 			goal_met(quest.id)
-		elif not enough and is_ready(quest.id) and hands_over_scrap(quest):
-			# Sold or spent some before handing it in: back to gathering.
+		elif not met and is_ready(quest.id) and (hands_over_scrap(quest) or hands_over_item(quest)):
+			# Sold, spent or lost it before handing it in: back to the goal.
 			ready_ids.erase(quest.id)
+
+func _goal_reached(quest: QuestData) -> bool:
+	if quest.scrap_goal > 0 and Inventory.scrap < quest.scrap_goal:
+		return false
+	if quest.item_goal != null and not Inventory.has_item(quest.item_goal.id):
+		return false
+	if not quest.fit_part_goal.is_empty() and not _part_fitted(quest.fit_part_goal):
+		return false
+	return true
+
+## Whether any car the player owns wears the part from `scene_path`.
+static func _part_fitted(scene_path: String) -> bool:
+	for car in Inventory.owned_cars:
+		if car == null:
+			continue
+		if car.body != null and car.body.scene_path == scene_path:
+			return true
+		if car.engine != null and car.engine.scene_path == scene_path:
+			return true
+		for wheel in car.wheels:
+			if wheel != null and wheel.scene_path == scene_path:
+				return true
+	return false
 
 func reset() -> void:
 	active.clear()
 	completed.clear()
 	ready_ids.clear()
+	available.clear()
+	available_changed.emit()
 	tracked = null
 	tracked_changed.emit(null)
 
@@ -52,6 +85,9 @@ func reset() -> void:
 func give(quest: QuestData) -> void:
 	if quest == null or has_quest(quest.id) or is_complete(quest.id):
 		return
+	if _find(available, quest.id) != null:
+		available.erase(_find(available, quest.id))
+		available_changed.emit()
 	active.append(quest)
 	quest_added.emit(quest)
 	if tracked == null:
@@ -75,11 +111,13 @@ func turn_in(id: StringName) -> int:
 	if not is_ready(id):
 		return -1
 	var quest := _find(active, id)
+	if not _goal_reached(quest):
+		ready_ids.erase(id)
+		return -1
 	if hands_over_scrap(quest):
-		if Inventory.scrap < quest.scrap_goal:
-			ready_ids.erase(id)
-			return -1
 		Inventory.scrap -= quest.scrap_goal
+	if hands_over_item(quest):
+		Inventory.remove_item(quest.item_goal.id)
 	return complete(id)
 
 ## Finishes the quest and pays its reward, whatever state it was in. Returns
@@ -92,7 +130,20 @@ func complete(id: StringName) -> int:
 	ready_ids.erase(id)
 	completed.append(quest)
 	Inventory.money += quest.reward_money
+	var part := reward_part_data(quest)
+	if part != null:
+		Inventory.add_part(part)
 	quest_completed.emit(quest)
+	for next in quest.follow_ups:
+		give(next)
+	var unlocked := false
+	for next in quest.unlocks:
+		if next != null and not has_quest(next.id) and not is_complete(next.id) \
+				and _find(available, next.id) == null:
+			available.append(next)
+			unlocked = true
+	if unlocked:
+		available_changed.emit()
 	if tracked == quest:
 		set_tracked(active.back() if not active.is_empty() else null)
 	return quest.reward_money
@@ -100,6 +151,39 @@ func complete(id: StringName) -> int:
 ## Whether handing `quest` in costs the player its scrap goal.
 static func hands_over_scrap(quest: QuestData) -> bool:
 	return quest.scrap_goal > 0 and quest.hand_over_scrap and quest.return_to_giver
+
+## Whether handing `quest` in takes its item goal out of the trunk.
+static func hands_over_item(quest: QuestData) -> bool:
+	return quest.item_goal != null and quest.hand_over_item and quest.return_to_giver
+
+## Unlocked quests `giver_name` has waiting for the player, oldest first.
+func available_from(giver_name: String) -> Array[QuestData]:
+	var found: Array[QuestData] = []
+	for quest in available:
+		if quest.giver == giver_name:
+			found.append(quest)
+	return found
+
+## The catalogue entry for `quest`'s reward part, or null.
+static func reward_part_data(quest: QuestData) -> PartData:
+	if quest == null or quest.reward_part.is_empty():
+		return null
+	for list: Array in [PartDatabase.bodies, PartDatabase.engines, PartDatabase.wheels]:
+		for part: PartData in list:
+			if part.scene_path == quest.reward_part:
+				return part
+	return null
+
+## What finishing `quest` pays, for the journal and cards ("$50 + Old
+## Generator"), or "" when it pays nothing.
+static func reward_text(quest: QuestData) -> String:
+	var bits: PackedStringArray = []
+	if quest.reward_money > 0:
+		bits.append("$%d" % quest.reward_money)
+	var part := reward_part_data(quest)
+	if part != null:
+		bits.append(part.display_name)
+	return " + ".join(bits)
 
 ## Tracks `quest`, or stops tracking with null.
 func set_tracked(quest: QuestData) -> void:
@@ -136,18 +220,33 @@ func objective_text(quest: QuestData) -> String:
 			return "Done!"
 		if hands_over_scrap(quest):
 			return "Bring the %d scrap back to %s" % [quest.scrap_goal, quest.giver]
+		if hands_over_item(quest):
+			return "Bring the %s back to %s" % [quest.item_goal.display_name, quest.giver]
 		return "Go back to %s" % quest.giver
 	var text := PlayerProfile.fill(quest.objective)
 	if quest.scrap_goal > 0:
 		text += " (%d / %d)" % [mini(Inventory.scrap, quest.scrap_goal), quest.scrap_goal]
 	return text
 
+## The name of whatever the tracked quest sends the player to right now,
+## for the minimap to light up: the giver once it's ready to hand in,
+## otherwise its `objective_place`. Empty when there's nothing to point at.
+func tracked_target() -> String:
+	if tracked == null:
+		return ""
+	if is_ready(tracked.id):
+		return tracked.giver if tracked.return_to_giver else ""
+	return tracked.objective_place
+
 ## For SaveSystem: putting a saved log back.
 func restore(saved_active: Array[QuestData], saved_completed: Array[QuestData],
-		saved_ready: Array[StringName], saved_tracked: QuestData) -> void:
+		saved_ready: Array[StringName], saved_available: Array[QuestData],
+		saved_tracked: QuestData) -> void:
 	active = saved_active.duplicate()
 	completed = saved_completed.duplicate()
 	ready_ids = saved_ready.duplicate()
+	available = saved_available.duplicate()
+	available_changed.emit()
 	tracked = _find(active, saved_tracked.id) if saved_tracked != null else null
 	tracked_changed.emit(tracked)
 

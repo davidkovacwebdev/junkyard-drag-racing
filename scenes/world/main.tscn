@@ -16,7 +16,7 @@
 [ext_resource type="Script" uid="uid://br7vlahippyej" path="res://scripts/world/terrain.gd" id="14"]
 [ext_resource type="Script" uid="uid://ds8hajmui5tbe" path="res://scripts/world/biome_marker.gd" id="15"]
 [ext_resource type="PackedScene" path="res://scenes/world/ramp_event.tscn" id="16"]
-[ext_resource type="PackedScene" path="res://scenes/race/race_ramp.tscn" id="17"]
+[ext_resource type="PackedScene" uid="uid://c4vta4hvasns2" path="res://scenes/race/race_ramp.tscn" id="17"]
 [ext_resource type="PackedScene" path="res://scenes/world/composed_tree.tscn" id="17_bolr6"]
 [ext_resource type="Resource" uid="uid://cm4qhmwwrhvy0" path="res://trees/spruce.tres" id="18_hbyw3"]
 [ext_resource type="Script" uid="uid://bo1kwx12twsg5" path="res://scripts/world/puddle_field.gd" id="19_puddle"]
@@ -30,6 +30,7 @@
 [ext_resource type="Script" uid="uid://cgja4fmhwax6j" path="res://scripts/world/shark_spawner.gd" id="shark_spawner"]
 [ext_resource type="Resource" path="res://buildings/shop.tres" id="shop_building"]
 [ext_resource type="PackedScene" path="res://scenes/shop/shop.tscn" id="shop_interior"]
+[ext_resource type="PackedScene" path="res://scenes/world/shop_sign.tscn" id="shop_sign"]
 [ext_resource type="Script" uid="uid://bu5uxu5bnirmt" path="res://scripts/world/story_director.gd" id="story_director"]
 
 [sub_resource type="Curve2D" id="Curve2D_688af"]
@@ -122,17 +123,17 @@ _data = {
 }
 point_count = 3
 
-[sub_resource type="Curve2D" id="Curve2D_road_rallylink"]
-_data = {
-"points": PackedVector2Array(0, 0, 0, 0, 6592, 743, 60, -160, -60, 160, 6300, 1150, 0, 0, 0, 0, 6060, 1470)
-}
-point_count = 3
-
 [sub_resource type="Curve2D" id="Curve2D_road_dragstriplink"]
 _data = {
 "points": PackedVector2Array(242.242, 79.86001, -242.242, -79.86001, 2829, 1288, 201.7, 158.7, -201.7, -158.7, 1950, 850, 107.2, 179.3, -107.2, -179.3, 1500, 300, 0, 0, 0, 0, 1307, -226)
 }
 point_count = 4
+
+[sub_resource type="Curve2D" id="Curve2D_road_rallylink"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 6592, 743, 60, -160, -60, 160, 6300, 1150, 0, 0, 0, 0, 6060, 1470)
+}
+point_count = 3
 
 [node name="Main" type="Node2D" unique_id=1332585834]
 
@@ -296,10 +297,13 @@ display_name = "Garage"
 interior_scene = ExtResource("3")
 
 [node name="Shop" parent="Sortables" unique_id=2001893504 instance=ExtResource("2")]
-position = Vector2(620, 560)
+position = Vector2(1045, -1552)
 building_data = ExtResource("shop_building")
 display_name = "Shop"
 interior_scene = ExtResource("shop_interior")
+
+[node name="Sign" parent="Sortables/Shop" unique_id=1983843478 instance=ExtResource("shop_sign")]
+position = Vector2(0, -136)
 
 [node name="MinimapMarker" type="Node2D" parent="Sortables/Shop" unique_id=844854616]
 script = ExtResource("21_marker")
@@ -337,7 +341,6 @@ kind = 5
 [node name="Ramp" parent="Sortables" unique_id=1499947680 instance=ExtResource("16")]
 position = Vector2(460, 300)
 interior_scene = ExtResource("17")
-debug_race_scene = ExtResource("17")
 
 [node name="MinimapMarker" type="Node2D" parent="Sortables/Ramp" unique_id=963194865]
 script = ExtResource("21_marker")

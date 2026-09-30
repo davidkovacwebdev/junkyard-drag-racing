@@ -1,6 +1,8 @@
 [gd_resource type="Resource" script_class="QuestData" format=3 uid="uid://csbb7fnhpkqq7"]
 
 [ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://items/wrench.tres" id="2_wrench"]
+[ext_resource type="Resource" path="res://quests/fit_part.tres" id="3_next"]
 
 [resource]
 script = ExtResource("1_script")
@@ -11,3 +13,10 @@ description = "Grandpa needs a new wrench. There doesn't seem to be one under th
 
 Go find a new one"
 objective = "Find Grandpa's better wrench ( Try the shop )"
+objective_place = "Shop"
+start_cutscene = "res://cutscenes/grandpa_intro.tres"
+item_goal = ExtResource("2_wrench")
+reminder_line = "Where's my wrench?! This chair ain't gonna fix itself! ...Well, it might. I've seen things."
+turn_in_line = "Now THAT'S a wrench. *CLANG* ...Good as new. Here, take my old generator. It's better than that lawn mower you call an engine. Go bolt it on in the garage."
+reward_part = "res://scenes/parts/engines/engine_generator.tscn"
+follow_ups = Array[ExtResource("1_script")]([ExtResource("3_next")])

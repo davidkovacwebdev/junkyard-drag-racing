@@ -4,16 +4,21 @@ extends StaticBody2D
 ## leans back for a sip of beer every few seconds.
 ##
 ## Drive up and press E to talk (the standard CharacterDialog). He's a quest
-## giver: if one of his quests is ready to hand in, talking to him finishes
-## it and pays the reward; if one is still in progress he nags; otherwise he
-## wants to be left alone. Duck-typed for PlayerCar like the scrap dealer: a
-## `display_name`, `get_interact_prompt()` and `interact()`, on a body the car
-## can bump into. He holds still while a
-## cutscene runs, so the scene can call `sip()`, `twitch()` and `bang()` on its
-## own beats instead.
+## giver, in this order of business:
+##   1. a quest of his is ready to hand in: talking finishes it and pays up,
+##      and if that unlocked another of his, he offers it right away;
+##   2. he has a quest available (his head is on the minimap): talking plays
+##      its start cutscene, which gives it;
+##   3. one of his quests is in progress: he nags;
+##   4. otherwise he wants to be left alone.
+## Duck-typed for PlayerCar like the scrap dealer: a `display_name`,
+## `get_interact_prompt()` and `interact()`, on a body the car can bump into.
+## In the `quest_giver` group with his `character_data`, which is how the
+## minimap finds him and draws his head.
 ##
-## The bent wrench only comes out for `bang()` (the wrench quest's scene);
-## `show_wrench()` keeps it in his hand.
+## He holds still while a cutscene runs, so the scene can call `sip()`,
+## `twitch()` and `bang()` on its own beats instead. The bent wrench only
+## comes out for `bang()`, when he whacks at his busted wheelchair.
 ##
 ## `actor` is a plain CutsceneActor, so cutscenes can hand it to
 ## Cutscenes.subtitle() for the talking squash like any spawned actor.
@@ -27,9 +32,10 @@ const WRENCH := preload("res://scenes/characters/props/bent_wrench.tscn")
 const ACTOR_SCALE := 0.55
 ## His left hand, in character space. The beer stays in his right.
 const HAND := Vector2(-37.0, -104.0)
+## The wrench's swing: back, then down onto the wheelchair's tyre beside him.
 const REST_ANGLE := -0.2
-const WINDUP_ANGLE := 0.6
-const STRIKE_ANGLE := -1.2
+const WINDUP_ANGLE := 0.5
+const STRIKE_ANGLE := -2.6
 const BANG_VOLUME_DB := -10.0
 const WRENCH_Z := 10
 ## How far he leans back to drink, and how often he does it when idle.
@@ -40,6 +46,7 @@ const SIP_VOLUME_DB := -12.0
 const TWITCH_JOLTS_PER_SECOND := 18.0
 const TWITCH_PIXELS := 5.0
 const TWITCH_ANGLE := 0.09
+const GIVER_GROUP := &"quest_giver"
 
 ## Which way he's turned. The wrench is in his left hand, so facing left
 ## puts it on his right-hand side of the screen.
@@ -56,6 +63,8 @@ const TWITCH_ANGLE := 0.09
 @export var default_turn_in_line: String = "About time."
 
 var actor: CutsceneActor
+## What the minimap draws his head from.
+var character_data: CharacterData = CHARACTER
 
 var _wrench: Node2D
 var _next_sip: float = 2.0
@@ -66,6 +75,7 @@ var _dialog: CharacterDialog
 var _talker: Node2D = null
 
 func _ready() -> void:
+	add_to_group(GIVER_GROUP)
 	actor = CutsceneActor.new()
 	actor.setup(CHARACTER, ACTOR_SCALE)
 	add_child(actor)
@@ -104,6 +114,8 @@ func get_interact_prompt() -> String:
 	var quest := _ready_quest()
 	if quest != null:
 		return "%s: Press E to hand in \"%s\"" % [display_name, quest.title]
+	if not Quests.available_from(display_name).is_empty():
+		return "%s: Press E to talk (new quest)" % display_name
 	return "%s: Press E to talk" % display_name
 
 ## He sits right by the garage door: talking to him wins over walking in.
@@ -115,6 +127,9 @@ func interact(talker: Node = null) -> void:
 	if _dialog.is_open():
 		return
 	_talker = talker as Node2D
+	if _ready_quest() == null and not Quests.available_from(display_name).is_empty():
+		_start_quest(Quests.available_from(display_name)[0])
+		return
 	_dialog.open(display_name, CHARACTER)
 	var quest := _ready_quest()
 	if quest != null:
@@ -124,16 +139,46 @@ func interact(talker: Node = null) -> void:
 		if Quests.hands_over_scrap(quest):
 			Sfx.play(&"scrap_pickup", -6.0, 0.0)
 			note = "-%d scrap   " % quest.scrap_goal
+		if Quests.hands_over_item(quest):
+			note = "-%s   " % quest.item_goal.display_name
 		if reward > 0:
 			Sfx.play(&"cash_register", -4.0, 0.0)
-			note += "+$%d   You have $%d" % [reward, Inventory.money]
+			note += "+$%d   You have $%d   " % [reward, Inventory.money]
+		var part := Quests.reward_part_data(quest)
+		if part != null:
+			Sfx.play(&"part_pickup", -6.0, 0.0)
+			note += "+%s (spare parts)" % part.display_name
 		_dialog.set_note(note)
 	elif not Quests.quests_from(display_name).is_empty():
 		var current := Quests.quests_from(display_name)[0]
 		_dialog.say(PlayerProfile.fill(_line_or(current.reminder_line, default_reminder_line)))
 	else:
 		_dialog.say(PlayerProfile.fill(idle_line))
-	_dialog.set_options([CharacterDialog.Option.new("Walk away", _dialog.close)])
+	var options := [CharacterDialog.Option.new("Walk away", _dialog.close)]
+	if not Quests.available_from(display_name).is_empty():
+		options.push_front(CharacterDialog.Option.new("Need anything else?", _on_anything_else))
+	_dialog.set_options(options)
+
+func _on_anything_else() -> void:
+	var next := Quests.available_from(display_name)
+	_dialog.close()
+	if not next.is_empty():
+		_start_quest(next[0])
+
+## Takes an available quest: plays its start cutscene (which gives it), or
+## just gives it when it has none.
+func _start_quest(quest: QuestData) -> void:
+	var scene: Cutscene = null
+	if not quest.start_cutscene.is_empty():
+		scene = ResourceLoader.load(quest.start_cutscene, "", ResourceLoader.CACHE_MODE_REPLACE) as Cutscene
+	if scene == null:
+		Quests.give(quest)
+		return
+	if "grandpa" in scene:
+		scene.set("grandpa", self)
+	if scene.gives_quest == null:
+		scene.gives_quest = quest
+	Cutscenes.play(scene)
 
 ## The oldest of his quests that's ready to hand in, if any.
 func _ready_quest() -> QuestData:
@@ -183,6 +228,8 @@ func bang(volume_db: float = BANG_VOLUME_DB) -> Tween:
 	_swing.tween_property(_wrench, "rotation", STRIKE_ANGLE, 0.07).set_ease(Tween.EASE_IN)
 	_swing.tween_callback(func() -> void:
 		Sfx.play_at(&"wrench_clunk", global_position, volume_db, 0.12))
+	# Rests on the tyre a beat, so the hit reads before it lifts.
+	_swing.tween_interval(0.12)
 	_swing.tween_property(_wrench, "rotation", REST_ANGLE, 0.25).set_ease(Tween.EASE_OUT)
 	return _swing
 

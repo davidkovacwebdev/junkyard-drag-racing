@@ -1,8 +1,9 @@
 class_name GrandpaIntroCutscene
 extends Cutscene
-## The opening scene, right after character creation: Grandpa is next to the
-## starter car, whacking it with a bent wrench and raging, and sends the
-## player off to find a better one.
+## Grandpa's wrench quest: he's trying to fix his busted wheelchair by
+## whacking it with a bent wrench, raging, and sends the player off to find a
+## better one. Unlocked by the scraps quest; plays when the player talks to
+## him while it's available (GrandpaNpc), and gives "The Better Wrench".
 ##
 ## The words live in res://cutscenes/grandpa_intro.tres — open it and edit
 ## `lines` in the inspector. The scene's beats hang off the lines:
@@ -26,9 +27,9 @@ const GRANDPA := preload("res://characters/grandpa.tres")
 ]
 
 @export_group("Staging")
-## Where the player's own character stands, relative to their car: just
-## behind it, in front of the garage door, getting yelled at.
-@export var player_offset := Vector2(5.0, -25.0)
+## Where the player's own character stands, relative to Grandpa (the car
+## could be parked anywhere nearby when the player takes this quest).
+@export var player_offset := Vector2(110.0, -40.0)
 @export var zoom: float = 1.9
 ## Aims above the pair's feet so heads (and the flag) stay in frame.
 @export var camera_lift: float = 70.0
@@ -45,12 +46,13 @@ func play() -> void:
 	var car := Cutscenes.get_tree().get_first_node_in_group(PlayerCar.GROUP) as Node2D
 	if car == null or not is_instance_valid(grandpa):
 		return
-	var middle := (car.global_position + grandpa.global_position) * 0.5 + Vector2(0.0, -camera_lift)
+	var player_spot := grandpa.global_position + player_offset
+	var middle := (player_spot + grandpa.global_position) * 0.5 + Vector2(0.0, -camera_lift)
 
 	await Cutscenes.fade_out(0.0)
 	var player: CutsceneActor = null
 	if PlayerProfile.character != null:
-		player = Cutscenes.spawn_actor(PlayerProfile.character, car.global_position + player_offset, false)
+		player = Cutscenes.spawn_actor(PlayerProfile.character, player_spot, false)
 	Cutscenes.cut_to(middle, zoom)
 	await Cutscenes.fade_in(0.8)
 
