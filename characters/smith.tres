@@ -1,6 +1,6 @@
-[gd_resource type="Resource" script_class="CharacterData" format=3]
+[gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://ck4rfy6u1g2oi"]
 
-[ext_resource type="Script" path="res://scripts/character/character_data.gd" id="1"]
+[ext_resource type="Script" uid="uid://ckj8s3h32w3wv" path="res://scripts/character/character_data.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/characters/parts/legs/legs_cargo.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/characters/parts/boots/boots_steel.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://scenes/characters/parts/torsos/torso_muscle.tscn" id="4"]
@@ -22,4 +22,3 @@ accessory_scene = ExtResource("8")
 voice_pitch_hz = 82.0
 voice_throat = 0.78
 voice_rasp = 0.4
-voice_wobble = 0.0

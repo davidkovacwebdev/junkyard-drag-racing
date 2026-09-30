@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" path="res://scenes/garage/garage.tscn" id="3"]
 [ext_resource type="Script" uid="uid://cu6o77berdu32" path="res://scripts/world/road.gd" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/world/drag_strip.tscn" id="5"]
-[ext_resource type="PackedScene" uid="uid://bgff7e404jhvq" path="res://scenes/world/pause_menu.tscn" id="6"]
+[ext_resource type="PackedScene" path="res://scenes/world/pause_menu.tscn" id="6"]
 [ext_resource type="Script" uid="uid://cxavmo7w253pf" path="res://scripts/world/trash_spawner.gd" id="7"]
 [ext_resource type="PackedScene" path="res://scenes/world/junkyard.tscn" id="8"]
 [ext_resource type="Script" uid="uid://ndh2o15pw6to" path="res://scripts/world/house_spawner.gd" id="9"]
@@ -66,9 +66,9 @@ point_count = 6
 
 [sub_resource type="Curve2D" id="Curve2D_5bu78"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, 2710, 1252, 0, 0, 0, 0, 4054, 873, 0, 0, 0, 0, 5245, 1122, 0, 0, 0, 0, 5451, 1718, 0, 0, 0, 0, 4920, 3755, 0, 0, 0, 0, 3804, 4762, 0, 0, 0, 0, -1053, 7176, 0, 0, 0, 0, -2115, 7439, 0, 0, 0, 0, -3045.9907, 7281.2827, 0, 0, 0, 0, -3439.2905, 6835.5425, 0, 0, 0, 0, -3688, 5157, 0, 0, 0, 0, -3787.044, 3304.521, 0, 0, 0, 0, -3668, 2934, 0, 0, 0, 0, -3168, 2422, 0, 0, 0, 0, -3228, 1862, 0, 0, 0, 0, -3694.0066, 1100.1338, 53.820023, 134.55005, -53.820023, -134.55005, -3935, 665, 0, 0, 0, 0, -4765, 34)
+"points": PackedVector2Array(-635.7009, -232.12143, 635.7009, 232.12143, 2792, 1276, -512.6624, 129.11499, 512.6624, -129.11499, 4054, 873, -208.86247, -159.49498, 208.86247, 159.49498, 5245, 1122, -3.7974994, -182.27997, 3.7974994, 182.27997, 5451, 1718, 0, 0, 0, 0, 4920, 3755, 0, 0, 0, 0, 4112, 4509, 270.09225, -220.78969, -270.09225, 220.78969, 3804, 4762, 0, 0, 0, 0, -1053, 7176, 0, 0, 0, 0, -2115, 7439, 0, 0, 0, 0, -3045.9907, 7281.2827, 0, 0, 0, 0, -3439.2905, 6835.5425, 0, 0, 0, 0, -3688, 5157, 0, 0, 0, 0, -3787.044, 3304.521, 0, 0, 0, 0, -3668, 2934, 0, 0, 0, 0, -3168, 2422, 0, 0, 0, 0, -3228, 1862, 0, 0, 0, 0, -3694.0066, 1100.1338, 53.820023, 134.55005, -53.820023, -134.55005, -3935, 665, 0, 0, 0, 0, -4765, 34)
 }
-point_count = 18
+point_count = 19
 
 [sub_resource type="Curve2D" id="Curve2D_road_ring"]
 _data = {
@@ -114,13 +114,13 @@ point_count = 3
 
 [sub_resource type="Curve2D" id="Curve2D_road_forestlink"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, -1509, -677, -81, -88, 81, 88, -1300, -420, 0, 0, 0, 0, -1023, -149)
+"points": PackedVector2Array(0, 0, 0, 0, -1509, -677, -89.8578, -89.77156, 89.8578, 89.77156, -1261, -436, 0, 0, 0, 0, -1023, -149)
 }
 point_count = 3
 
 [sub_resource type="Curve2D" id="Curve2D_road_dragstriplink"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, 2710, 1252, 201.7, 158.7, -201.7, -158.7, 1950, 850, 107.2, 179.3, -107.2, -179.3, 1500, 300, 0, 0, 0, 0, 1307, -226)
+"points": PackedVector2Array(242.242, 79.86001, -242.242, -79.86001, 2829, 1288, 201.7, 158.7, -201.7, -158.7, 1950, 850, 107.2, 179.3, -107.2, -179.3, 1500, 300, 0, 0, 0, 0, 1307, -226)
 }
 point_count = 4
 
