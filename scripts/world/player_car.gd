@@ -38,14 +38,6 @@ const GROUP := &"player"
 ## Overrides any movement input and still scales with road/puddle
 ## handling, so braking on wet ground slides.
 @export var brake_response: float = 1.5
-## How fast the car's direction of travel catches up to a new input
-## direction, independent of how fast its speed changes (see acceleration/
-## friction) — much lower than those on purpose. The car keeps carrying its
-## old heading into a turn and slides around into the new one over a beat
-## instead of snapping instantly, reading as a drift rather than crisp,
-## point-and-go steering. Also scaled by handling_multiplier, so turns are
-## looser still off-road or on a puddle.
-@export var turn_response: float = 2.5
 ## Same convention as TrashSpawner.roads_path: the exported path first,
 ## falling back to searching the scene for any RoadNetwork if it doesn't
 ## resolve (e.g. this scene got reparented).
@@ -294,38 +286,15 @@ func _physics_process(delta: float) -> void:
 		# can't change what it's doing anything like as quickly.
 		handling_multiplier *= puddle_slip_multiplier
 
-	# Speed and direction ease independently, braking or not — direction
-	# only ever comes from input_dir (never target_velocity, so it's live
-	# even while braking forces target_velocity to zero), and only ever
-	# catches up at the much slower turn_response, so the car can still be
-	# steered into a slide while shedding speed instead of only ever
-	# decaying in a straight line under braking. Speed tracks its own
-	# target at accel_rate/brake_response same as always.
-	var current_dir := velocity.normalized() if velocity.length() > 1.0 else Vector2.ZERO
-	var target_dir := input_dir.normalized() if input_dir != Vector2.ZERO else current_dir
-	if current_dir == Vector2.ZERO:
-		current_dir = target_dir
-	# Pressing roughly the opposite of the way the car's currently moving
-	# decelerates it in a straight line instead of slerping through an
-	# arbitrary arc — slerp between two near-opposite vectors is a
-	# near-180° singularity anyway (it has to pick some perpendicular to
-	# rotate through), and a real car doesn't spin around when you throw it
-	# into reverse, it slows down first.
-	var reversing := current_dir != Vector2.ZERO and current_dir.dot(target_dir) < -0.7
-	var blended_dir := current_dir if reversing \
-			else current_dir.slerp(target_dir, 1.0 - exp(-turn_response * handling_multiplier * delta))
-
-	var new_speed: float
 	if braking:
-		new_speed = velocity.length() * exp(-brake_response * handling_multiplier * delta)
-		if new_speed < 1.0:
-			new_speed = 0.0
-	elif reversing:
-		new_speed = move_toward(velocity.length(), 0.0, acceleration * handling_multiplier * delta)
+		var braked_speed := velocity.length() * exp(-brake_response * handling_multiplier * delta)
+		if input_dir != Vector2.ZERO:
+			var steered_velocity := input_dir.normalized() * velocity.length()
+			velocity = velocity.move_toward(steered_velocity, acceleration * handling_multiplier * delta)
+		velocity = velocity.limit_length(braked_speed) if braked_speed >= 1.0 else Vector2.ZERO
 	else:
 		var base_rate := friction if input_dir == Vector2.ZERO else acceleration
-		new_speed = move_toward(velocity.length(), target_velocity.length(), base_rate * handling_multiplier * delta)
-	velocity = blended_dir * new_speed
+		velocity = velocity.move_toward(target_velocity, base_rate * handling_multiplier * delta)
 	var velocity_before_move := velocity
 	move_and_slide()
 	_strip_velocity_into_collisions()
