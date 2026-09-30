@@ -8,6 +8,11 @@ extends RefCounted
 ## Damping on wheels left rolling after the body breaks. Round ones would
 ## otherwise roll forever: the physics has no rolling resistance.
 const LOOSE_WHEEL_DAMP := 1.5
+## Each wheel motor's stall torque per point of engine power.
+const STALL_TORQUE_PER_POWER := 300000.0
+## Gap left under a car's lowest point at spawn: enough to not start inside
+## the ground, small enough that it settles instead of dropping.
+const SPAWN_GAP := 1.0
 
 class AssembledCar:
 	var root: Node2D
@@ -15,8 +20,9 @@ class AssembledCar:
 	var wheels: Array[CarWheel] = []
 	var engine: Node2D
 
-## Instances and wires everything under a new root Node2D added to `parent`
-## at `spawn_position`. Wheels are matched to the body's WheelMount markers
+## Instances and wires everything under a new root Node2D added to `parent`.
+## The body origin goes at `spawn_position.x`, and `spawn_position.y` is the
+## ground the car stands on. Wheels are matched to the body's WheelMount markers
 ## in order; extra wheel scenes beyond the body's mount count are ignored.
 static func assemble(body_scene: PackedScene, wheel_scenes: Array[PackedScene], engine_scene: PackedScene, parent: Node, spawn_position: Vector2) -> AssembledCar:
 	var wheel_instances: Array[CarWheel] = []
@@ -58,6 +64,11 @@ static func assemble_parts(body_instance: CarBody, wheel_instances: Array[CarWhe
 		joint.node_b = joint.get_path_to(wheel_instance)
 		joints.append(joint)
 
+	# Placed by its lowest point, not its body origin:
+	# wheels hang below the body by different amounts, and a wheel spawned
+	# inside the road gets blasted out by the solver hard enough to break parts.
+	root.position.y += spawn_position.y - SPAWN_GAP - _lowest_collision_y(root)
+
 	# Neighbouring wheels on a short body can overlap; left colliding they
 	# grind against each other and jam the car.
 	for i in wheels.size():
@@ -79,12 +90,12 @@ static func assemble_parts(body_instance: CarBody, wheel_instances: Array[CarWhe
 	autosteer.body = body_instance
 	body_instance.add_child(autosteer)
 
-	# Engine power IS each wheel's target rotation speed (rad/s) — every
-	# wheel's motor tries to hold this same speed, like a solid driven
-	# axle. The car's actual ground speed emerges from how well each
-	# wheel's shape can grip at that spin rate, not from a separate force.
+	# Engine power is each wheel's top spin speed (rad/s) and scales its
+	# torque. The car's ground speed comes only from how well each wheel's
+	# shape grips the ground under that torque.
 	for wheel in wheels:
 		wheel.target_angular_velocity = engine_power
+		wheel.stall_torque = engine_power * STALL_TORQUE_PER_POWER
 
 	RaceCarAudio.register(root)
 	var engine_sound_profile := EngineSoundProfile.for_engine(engine_data)
@@ -173,6 +184,19 @@ static func _get_part_color(node: Node) -> Color:
 		if child is Polygon2D:
 			return (child as Polygon2D).color
 	return Color(0.5, 0.5, 0.5, 1.0)
+
+static func _lowest_collision_y(car_root: Node2D) -> float:
+	var lowest := -INF
+	for collider in car_root.find_children("*", "CollisionPolygon2D", true, false):
+		var polygon_node := collider as CollisionPolygon2D
+		for point in polygon_node.polygon:
+			lowest = maxf(lowest, (polygon_node.global_transform * point).y)
+	for collider in car_root.find_children("*", "CollisionShape2D", true, false):
+		var shape_node := collider as CollisionShape2D
+		if shape_node.shape != null:
+			var bounds := shape_node.global_transform * shape_node.shape.get_rect()
+			lowest = maxf(lowest, bounds.end.y)
+	return lowest if lowest > -INF else car_root.global_position.y
 
 static func _average_absorption(wheels: Array[CarWheel]) -> float:
 	var total := 0.0

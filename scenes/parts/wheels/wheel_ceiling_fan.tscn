@@ -37,4 +37,4 @@ color = Color(0.3, 0.3, 0.32, 1)
 polygon = PackedVector2Array(8, 0, 6.93, 4, 4, 6.93, 0, 8, -4, 6.93, -6.93, 4, -8, 0, -6.93, -4, -4, -6.93, 0, -8, 4, -6.93, 6.93, -4)
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
-polygon = PackedVector2Array(8, 0, 6.93, 4, 4, 6.93, 0, 8, -4, 6.93, -6.93, 4, -8, 0, -6.93, -4, -4, -6.93, 0, -8, 4, -6.93, 6.93, -4)
+polygon = PackedVector2Array(50, 0, 44, 9, 9, 44, 0, 50, -9, 44, -44, 9, -50, 0, -44, -9, -9, -44, 0, -50, 9, -44, 44, -9)

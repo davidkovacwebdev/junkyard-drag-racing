@@ -50,6 +50,10 @@ enabled=PackedStringArray("res://addons/character_creator/plugin.cfg")
 theme/custom="res://themes/scrap_theme.tres"
 theme/custom_font="res://assets/fonts/Poco.ttf"
 
+[physics]
+
+common/physics_ticks_per_second=120
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"

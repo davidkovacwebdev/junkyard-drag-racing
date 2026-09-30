@@ -11,7 +11,6 @@ extends Node2D
 const CAR_COUNT := 6
 const LANE_HEIGHT := 230.0
 const SPAWN_X := 150.0
-const SPAWN_HEIGHT_ABOVE_LANE := 15.0
 
 var body_scenes: Array[PackedScene] = [
 	preload("res://scenes/parts/bodies/body_plank.tscn"),
@@ -60,7 +59,7 @@ func _ready() -> void:
 	# assembled in the garage is what they drive here too.
 	var lane := 0
 	var player_car := Inventory.get_selected_car()
-	var player_spawn := Vector2(SPAWN_X, lane * LANE_HEIGHT - SPAWN_HEIGHT_ABOVE_LANE)
+	var player_spawn := Vector2(SPAWN_X, lane * LANE_HEIGHT)
 	var player_assembled := CarAssembler.assemble_from_car_data(player_car, cars_container, player_spawn)
 	if player_assembled != null:
 		var car_name := "Player_%s" % player_car.display_name
@@ -76,7 +75,7 @@ func _ready() -> void:
 		var engine_scene: PackedScene = engine_scenes[randi() % engine_scenes.size()]
 
 		var lane_top := i * LANE_HEIGHT
-		var spawn_position := Vector2(SPAWN_X, lane_top - SPAWN_HEIGHT_ABOVE_LANE)
+		var spawn_position := Vector2(SPAWN_X, lane_top)
 		var car := CarAssembler.assemble(body_scene, [wheel_front, wheel_back], engine_scene, cars_container, spawn_position)
 
 		var car_name := "Car%d_%s_%s+%s_%s" % [
