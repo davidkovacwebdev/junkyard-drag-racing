@@ -23,6 +23,11 @@ const _BODY_SCENES := [
 	"res://scenes/parts/bodies/body_limo.tscn",
 	"res://scenes/parts/bodies/body_radiator.tscn",
 	"res://scenes/parts/bodies/body_bicycle.tscn",
+	"res://scenes/parts/bodies/body_upside_down_car.tscn",
+	"res://scenes/parts/bodies/body_half_car.tscn",
+	"res://scenes/parts/bodies/body_airplane.tscn",
+	"res://scenes/parts/bodies/body_vertical_car.tscn",
+	"res://scenes/parts/bodies/body_trex_fossil.tscn",
 ]
 const _WHEEL_SCENES := [
 	"res://scenes/parts/wheels/wheel_standard.tscn",
@@ -54,9 +59,14 @@ const _WHEEL_SCENES := [
 	"res://scenes/parts/wheels/wheel_prosthetic_leg.tscn",
 	"res://scenes/parts/wheels/wheel_tractor.tscn",
 	"res://scenes/parts/wheels/wheel_hamster.tscn",
+	"res://scenes/parts/wheels/wheel_flat.tscn",
+	"res://scenes/parts/wheels/wheel_giant.tscn",
+	"res://scenes/parts/wheels/wheel_robot_leg.tscn",
+	"res://scenes/parts/wheels/wheel_tank_track.tscn",
 ]
 const _ENGINE_SCENES := [
 	"res://scenes/parts/engines/engine_v6.tscn",
+	"res://scenes/parts/engines/engine_v8.tscn",
 	"res://scenes/parts/engines/engine_jet.tscn",
 	"res://scenes/parts/engines/engine_sail.tscn",
 	"res://scenes/parts/engines/engine_propeller.tscn",

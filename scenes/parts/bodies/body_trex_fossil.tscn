@@ -1,0 +1,55 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_body.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/body_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_trex_fossil"]
+script = ExtResource("2")
+id = &"body_trex_fossil"
+display_name = "T-Rex Fossil"
+mass = 11.0
+durability = 60.0
+speed = 3.8
+material_type = 3
+max_wheels = 2
+impact_sound = &"bone_clatter"
+
+[node name="BodyTrexFossil" type="RigidBody2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_trex_fossil")
+
+[node name="Polygon2D" type="Polygon2D" parent="."]
+color = Color(0.87, 0.83, 0.71, 1)
+polygon = PackedVector2Array(-172, -46, -100, -56, -20, -64, 58, -76, 66, -62, -20, -50, -100, -42, -172, -40)
+
+[node name="Ribs" type="Polygon2D" parent="."]
+color = Color(0.87, 0.83, 0.71, 1)
+polygon = PackedVector2Array(-60, -52, 50, -64, 50, -40, 45, -40, 45, 0, 35, 0, 35, -40, 25, -40, 25, 10, 15, 10, 15, -40, 5, -40, 5, 13, -5, 13, -5, -40, -15, -40, -15, 8, -25, 8, -25, -40, -35, -40, -35, -6, -45, -6, -45, -40, -60, -40)
+
+[node name="TinyArm" type="Polygon2D" parent="."]
+color = Color(0.7, 0.65, 0.53, 1)
+polygon = PackedVector2Array(44, -46, 64, -36, 68, -26, 61, -29, 59, -22, 54, -30, 42, -38)
+
+[node name="Jaw" type="Polygon2D" parent="."]
+color = Color(0.7, 0.65, 0.53, 1)
+polygon = PackedVector2Array(84, -60, 150, -62, 142, -48, 94, -44)
+
+[node name="Skull" type="Polygon2D" parent="."]
+color = Color(0.87, 0.83, 0.71, 1)
+polygon = PackedVector2Array(56, -92, 84, -104, 124, -102, 150, -88, 152, -68, 144, -60, 138, -68, 130, -60, 124, -68, 116, -60, 110, -68, 64, -62)
+
+[node name="EyeSocket" type="Polygon2D" parent="."]
+color = Color(0.3, 0.26, 0.22, 1)
+polygon = PackedVector2Array(114.6, -83.34, 108.0, -77.22, 99.4, -79.88, 97.4, -88.66, 104.0, -94.78, 112.6, -92.12)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(-172, -46, -60, -58, 56, -92, 84, -104, 124, -102, 150, -88, 152, -62, 142, -46, 94, -42, 50, -40, 45, 0, -5, 13, -45, -6, -60, -40, -172, -40)
+
+[node name="WheelMount0" type="Marker2D" parent="."]
+position = Vector2(-40, 12)
+
+[node name="WheelMount1" type="Marker2D" parent="."]
+position = Vector2(40, 12)
+
+[node name="EngineMount" type="Marker2D" parent="."]
+position = Vector2(-24, -60)

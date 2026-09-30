@@ -1,0 +1,68 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_prosthetic_leg.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/wheel_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_robot_leg"]
+script = ExtResource("2")
+id = &"wheel_robot_leg"
+display_name = "Long Robot Leg"
+mass = 7.0
+durability = 140.0
+absorption = 0.6
+speed = 4.4
+material_type = 0
+impact_sound = &"robot_stomp"
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_knee"]
+radius = 10.0
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_rubber_pad"]
+friction = 0.9
+
+[node name="WheelRobotLeg" type="RigidBody2D"]
+center_of_mass_mode = 1
+center_of_mass = Vector2(0, 0)
+physics_material_override = SubResource("PhysicsMaterial_rubber_pad")
+script = ExtResource("1")
+part_data = SubResource("Resource_robot_leg")
+thigh_length = 56.0
+shin_length = 62.0
+standing_height = 96.0
+step_reach = 40.0
+step_lift = 24.0
+cadence_per_power = 0.16
+support_stiffness = 7000.0
+support_damping = 300.0
+drag_force = 12000.0
+top_speed_per_power = 55.0
+limp = 0.05
+map_step_distance = 260.0
+
+[node name="Thigh" type="Node2D" parent="."]
+
+[node name="Plate" type="Polygon2D" parent="Thigh"]
+color = Color(0.62, 0.63, 0.66, 1)
+polygon = PackedVector2Array(-11, -8, 11, -8, 8, 56, -8, 56)
+
+[node name="Shin" type="Node2D" parent="."]
+position = Vector2(0, 56)
+
+[node name="Piston" type="Polygon2D" parent="Shin"]
+color = Color(0.45, 0.46, 0.5, 1)
+polygon = PackedVector2Array(-6, 0, 6, 0, 6, 62, -6, 62)
+
+[node name="Knee" type="Polygon2D" parent="Shin"]
+color = Color(0.9, 0.72, 0.2, 1)
+polygon = PackedVector2Array(10, 0, 7.07, 7.07, 0, 10, -7.07, 7.07, -10, 0, -7.07, -7.07, 0, -10, 7.07, -7.07)
+
+[node name="Foot" type="Node2D" parent="."]
+position = Vector2(0, 118)
+
+[node name="Pad" type="Polygon2D" parent="Foot"]
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-14, -10, 12, -10, 22, -4, 22, 0, -16, 0)
+
+[node name="KneeBumper" type="CollisionShape2D" parent="."]
+position = Vector2(0, 58)
+shape = SubResource("CircleShape2D_knee")

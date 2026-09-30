@@ -22,6 +22,11 @@ var body_scenes: Array[PackedScene] = [
 	preload("res://scenes/parts/bodies/body_limo.tscn"),
 	preload("res://scenes/parts/bodies/body_radiator.tscn"),
 	preload("res://scenes/parts/bodies/body_bicycle.tscn"),
+	preload("res://scenes/parts/bodies/body_upside_down_car.tscn"),
+	preload("res://scenes/parts/bodies/body_half_car.tscn"),
+	preload("res://scenes/parts/bodies/body_airplane.tscn"),
+	preload("res://scenes/parts/bodies/body_vertical_car.tscn"),
+	preload("res://scenes/parts/bodies/body_trex_fossil.tscn"),
 ]
 
 var wheel_scenes: Array[PackedScene] = [
@@ -35,10 +40,15 @@ var wheel_scenes: Array[PackedScene] = [
 	preload("res://scenes/parts/wheels/wheel_prosthetic_leg.tscn"),
 	preload("res://scenes/parts/wheels/wheel_tractor.tscn"),
 	preload("res://scenes/parts/wheels/wheel_hamster.tscn"),
+	preload("res://scenes/parts/wheels/wheel_flat.tscn"),
+	preload("res://scenes/parts/wheels/wheel_giant.tscn"),
+	preload("res://scenes/parts/wheels/wheel_robot_leg.tscn"),
+	preload("res://scenes/parts/wheels/wheel_tank_track.tscn"),
 ]
 
 var engine_scenes: Array[PackedScene] = [
 	preload("res://scenes/parts/engines/engine_v6.tscn"),
+	preload("res://scenes/parts/engines/engine_v8.tscn"),
 	preload("res://scenes/parts/engines/engine_boiler.tscn"),
 	preload("res://scenes/parts/engines/engine_propeller.tscn"),
 	preload("res://scenes/parts/engines/engine_sail.tscn"),

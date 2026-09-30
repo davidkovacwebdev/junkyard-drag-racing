@@ -23,7 +23,10 @@ func _ready() -> void:
 		var player := AudioStreamPlayer.new()
 		add_child(player)
 		_players.append(player)
-	_prerender_task = WorkerThreadPool.add_task(_prerender_all)
+	# Headless runs (tools, probes, time trial workers) are silent, so they
+	# skip the up-front render and only pay for a sound if something asks.
+	if DisplayServer.get_name() != "headless":
+		_prerender_task = WorkerThreadPool.add_task(_prerender_all)
 	get_tree().node_added.connect(_on_node_added)
 
 func _exit_tree() -> void:

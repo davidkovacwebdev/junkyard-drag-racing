@@ -11,8 +11,10 @@ extends CarWheel
 ## collision is a bumper at the knee, for when the car sags onto it.
 ##
 ## The leg's thigh, shin and foot are posed with two-bone IK every frame, knee
-## pointing forward. A car with one leg and one wheel limps and drags; two legs
-## that drift into step start hopping.
+## pointing forward. A car with one leg and one wheel limps and drags. Several
+## legs on one car share one gait: the first one leads and each next leg trails
+## it by `gait_offset` of a step, so they never drift apart and rock a narrow
+## car over.
 
 @export var thigh_length: float = 26.0
 @export var shin_length: float = 28.0
@@ -38,6 +40,8 @@ extends CarWheel
 @export var limp: float = 0.3
 ## World pixels of travel per step on the map.
 @export var map_step_distance: float = 140.0
+## Share of a step each extra leg on the car trails the one before it.
+@export var gait_offset: float = 0.2
 
 var _rng := RandomNumberGenerator.new()
 var _phase: float = 0.0
@@ -50,6 +54,8 @@ var _previous_hip_height: float = 0.0
 var _lift_off_foot: Vector2
 var _foot: Vector2
 var _excluded_bodies: Array[RID] = []
+var _gait_leader: CarProstheticLeg
+var _gait_position: int = 0
 
 @onready var _thigh: Node2D = $Thigh
 @onready var _shin: Node2D = $Shin
@@ -78,11 +84,7 @@ func _integrate_forces(state: PhysicsDirectBodyState2D) -> void:
 
 	var power := absf(target_angular_velocity)
 	var previous_phase := _phase
-	_phase += power * cadence_per_power * _step_rate_multiplier * step
-	if _phase >= 1.0:
-		_phase -= 1.0
-		_step_rate_multiplier = 1.0 + _rng.randf_range(-limp, limp)
-		_step_reach_multiplier = 1.0 + _rng.randf_range(-limp, limp)
+	_advance_phase(power * cadence_per_power * step)
 	var in_stance := _phase < stance_fraction
 	var stance_started := in_stance and (previous_phase >= stance_fraction or previous_phase > _phase)
 
@@ -107,6 +109,36 @@ func _integrate_forces(state: PhysicsDirectBodyState2D) -> void:
 		_foot = _lift_off_foot.lerp(target, swing_progress) + Vector2(0.0, -step_lift * sin(PI * swing_progress))
 	_pose(_foot, drive_direction)
 
+## The gait leader walks at its own limping pace; every other leg on the car
+## follows the leader's phase, trailing it by its place in the gait.
+func _advance_phase(phase_speed: float) -> void:
+	if _gait_leader == null or not is_instance_valid(_gait_leader) or _gait_leader.chassis != chassis:
+		_join_gait()
+	if _gait_leader == self:
+		_phase += phase_speed * _step_rate_multiplier
+		if _phase >= 1.0:
+			_phase -= 1.0
+			_step_rate_multiplier = 1.0 + _rng.randf_range(-limp, limp)
+			_step_reach_multiplier = 1.0 + _rng.randf_range(-limp, limp)
+		return
+	_phase = fposmod(_gait_leader._phase - gait_offset * _gait_position, 1.0)
+	_step_reach_multiplier = _gait_leader._step_reach_multiplier
+
+## Follows the first leg still attached to this car, and trails it by how
+## many legs come before this one.
+func _join_gait() -> void:
+	_gait_leader = null
+	_gait_position = 0
+	for sibling in get_parent().get_children():
+		if sibling == self:
+			break
+		if sibling is CarProstheticLeg and sibling.chassis == chassis:
+			if _gait_leader == null:
+				_gait_leader = sibling
+			_gait_position += 1
+	if _gait_leader == null:
+		_gait_leader = self
+
 func _try_plant(state: PhysicsDirectBodyState2D, hip: Vector2, drive_direction: float) -> void:
 	var reach := thigh_length + shin_length
 	var start := hip + state.transform.basis_xform(Vector2(step_reach * _step_reach_multiplier * drive_direction, 0.0))
@@ -119,7 +151,7 @@ func _try_plant(state: PhysicsDirectBodyState2D, hip: Vector2, drive_direction: 
 	_planted_point_on_body = _planted_body.global_transform.affine_inverse() * hit.position
 	_previous_hip_height = hip.distance_to(hit.position)
 	_is_planted = true
-	RaceCarAudio.play(self, &"prosthetic_clunk", hit.position, -3.0)
+	RaceCarAudio.play(self, part_data.impact_sound, hit.position, -3.0)
 
 func _unplant() -> void:
 	_is_planted = false

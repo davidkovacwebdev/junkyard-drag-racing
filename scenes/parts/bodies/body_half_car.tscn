@@ -1,0 +1,54 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_body.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/body_part_data.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/car/headlight_mount.gd" id="headlight_mount"]
+
+[sub_resource type="Resource" id="Resource_half_car"]
+script = ExtResource("2")
+color = Color(0.78, 0.18, 0.2, 1)
+id = &"body_half_car"
+display_name = "Half a Car"
+max_wheels = 1
+suspension_sag = 8.0
+suspension_travel = 18.0
+suspension_damping_ratio = 0.7
+suspension_wheel_protection = 0.3
+mass = 9.0
+durability = 45.0
+speed = 3.4
+impact_sound = &"metal_scrape"
+
+[node name="BodyHalfCar" type="RigidBody2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_half_car")
+
+[node name="Polygon2D" type="Polygon2D" parent="."]
+color = Color(0.78, 0.18, 0.2, 1)
+polygon = PackedVector2Array(-70, 16, -78, 6, -68, -4, -80, -16, -70, -28, -76, -42, -21, -42, -7, -14, 7, -14, 47, -10, 65, -4, 65, 16)
+
+[node name="Windshield" type="Polygon2D" parent="."]
+color = Color(0.55, 0.75, 0.8, 0.85)
+polygon = PackedVector2Array(-62, -38, -25, -38, -13, -15, -62, -15)
+
+[node name="TornEdge" type="Polygon2D" parent="."]
+color = Color(0.3, 0.1, 0.1, 1)
+polygon = PackedVector2Array(-70, 16, -78, 6, -68, -4, -80, -16, -70, -28, -76, -42, -66, -42, -60, -28, -70, -16, -58, -4, -68, 6, -60, 16)
+
+[node name="Headlight" type="Polygon2D" parent="."]
+position = Vector2(53, -4)
+color = Color(1, 0.9, 0.55, 1)
+polygon = PackedVector2Array(0, -5, 12, -3, 12, 3, 0, 5)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(-72, 16, -72, -42, -21, -42, -7, -14, 7, -14, 47, -10, 65, -4, 65, 16)
+
+[node name="WheelMount0" type="Marker2D" parent="."]
+position = Vector2(30, 16)
+
+[node name="EngineMount" type="Marker2D" parent="."]
+position = Vector2(25, -12)
+
+[node name="HeadlightMount" type="Marker2D" parent="."]
+position = Vector2(65, -4)
+script = ExtResource("headlight_mount")

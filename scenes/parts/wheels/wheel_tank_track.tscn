@@ -1,0 +1,58 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_tank_track.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/wheel_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_tank_track"]
+script = ExtResource("2")
+id = &"wheel_tank_track"
+display_name = "Tank Track"
+mass = 12.0
+durability = 170.0
+speed = 3.5
+material_type = 0
+absorption = 0.4
+impact_sound = &"track_clank"
+
+[node name="WheelTankTrack" type="RigidBody2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_tank_track")
+road_wheel_radius = 17.0
+
+[node name="Belt" type="Polygon2D" parent="."]
+color = Color(0.2, 0.2, 0.21, 1)
+polygon = PackedVector2Array(70.0, -30.0, 83.02, -27.03, 93.45, -18.7, 99.25, -6.68, 99.25, 6.68, 93.45, 18.7, 83.02, 27.03, 70.0, 30.0, -70.0, 30.0, -83.02, 27.03, -93.45, 18.7, -99.25, 6.68, -99.25, -6.68, -93.45, -18.7, -83.02, -27.03, -70.0, -30.0)
+
+[node name="Plate" type="Polygon2D" parent="Belt"]
+color = Color(0.4, 0.44, 0.3, 1)
+polygon = PackedVector2Array(62.0, -21.0, 71.11, -18.92, 78.42, -13.09, 82.47, -4.67, 82.47, 4.67, 78.42, 13.09, 71.11, 18.92, 62.0, 21.0, -62.0, 21.0, -71.11, 18.92, -78.42, 13.09, -82.47, 4.67, -82.47, -4.67, -78.42, -13.09, -71.11, -18.92, -62.0, -21.0)
+
+[node name="RoadWheel0" type="Polygon2D" parent="Belt"]
+position = Vector2(-50, 0)
+color = Color(0.56, 0.57, 0.52, 1)
+polygon = PackedVector2Array(15.71, 6.51, 6.51, 15.71, -6.51, 15.71, -15.71, 6.51, -15.71, -6.51, -6.51, -15.71, 6.51, -15.71, 15.71, -6.51)
+
+[node name="Spoke" type="Polygon2D" parent="Belt/RoadWheel0"]
+color = Color(0.3, 0.31, 0.28, 1)
+polygon = PackedVector2Array(-15, -4, 15, -4, 15, 4, -15, 4)
+
+[node name="RoadWheel1" type="Polygon2D" parent="Belt"]
+position = Vector2(0, 0)
+color = Color(0.56, 0.57, 0.52, 1)
+polygon = PackedVector2Array(15.71, 6.51, 6.51, 15.71, -6.51, 15.71, -15.71, 6.51, -15.71, -6.51, -6.51, -15.71, 6.51, -15.71, 15.71, -6.51)
+
+[node name="Spoke" type="Polygon2D" parent="Belt/RoadWheel1"]
+color = Color(0.3, 0.31, 0.28, 1)
+polygon = PackedVector2Array(-15, -4, 15, -4, 15, 4, -15, 4)
+
+[node name="RoadWheel2" type="Polygon2D" parent="Belt"]
+position = Vector2(50, 0)
+color = Color(0.56, 0.57, 0.52, 1)
+polygon = PackedVector2Array(15.71, 6.51, 6.51, 15.71, -6.51, 15.71, -15.71, 6.51, -15.71, -6.51, -6.51, -15.71, 6.51, -15.71, 15.71, -6.51)
+
+[node name="Spoke" type="Polygon2D" parent="Belt/RoadWheel2"]
+color = Color(0.3, 0.31, 0.28, 1)
+polygon = PackedVector2Array(-15, -4, 15, -4, 15, 4, -15, 4)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(30.0, 0.0, 27.72, 11.48, 21.21, 21.21, 11.48, 27.72, 0.0, 30.0, -11.48, 27.72, -21.21, 21.21, -27.72, 11.48, -30.0, 0.0, -27.72, -11.48, -21.21, -21.21, -11.48, -27.72, -0.0, -30.0, 11.48, -27.72, 21.21, -21.21, 27.72, -11.48)

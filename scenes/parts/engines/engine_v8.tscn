@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_engine.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/engine_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_v8"]
+script = ExtResource("2")
+id = &"engine_v8"
+display_name = "V8 Engine"
+mass = 16.0
+durability = 130.0
+speed = 5.0
+material_type = 0
+power = 5.0
+
+[node name="EngineV8" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_v8")
+
+[node name="Block" type="Polygon2D" parent="."]
+color = Color(0.82, 0.45, 0.16, 1)
+polygon = PackedVector2Array(-40, -40, 40, -40, 36, 0, -36, 0)
+
+[node name="LeftBank" type="Polygon2D" parent="."]
+color = Color(0.22, 0.22, 0.24, 1)
+polygon = PackedVector2Array(-50, -64, -30, -70, -10, -40, -40, -40)
+
+[node name="RightBank" type="Polygon2D" parent="."]
+color = Color(0.22, 0.22, 0.24, 1)
+polygon = PackedVector2Array(50, -64, 30, -70, 10, -40, 40, -40)
+
+[node name="Intake" type="Polygon2D" parent="."]
+color = Color(0.4, 0.4, 0.43, 1)
+polygon = PackedVector2Array(-12, -40, 12, -40, 26, -66, -26, -66)
+
+[node name="AirCleaner" type="Polygon2D" parent="."]
+color = Color(0.78, 0.79, 0.82, 1)
+polygon = PackedVector2Array(-26, -78, 26, -78, 33, -71, 26, -64, -26, -64, -33, -71)

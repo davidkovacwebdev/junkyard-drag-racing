@@ -36,6 +36,12 @@ const NAMES: Array[StringName] = [
 	&"sign_wobble",
 	&"pogo_boing",
 	&"prosthetic_clunk",
+	&"flat_tire_flop",
+	&"giant_tire_boom",
+	&"robot_stomp",
+	&"fuselage_bong",
+	&"bone_clatter",
+	&"track_clank",
 	&"radiator_clang",
 	&"bicycle_rattle",
 	&"tractor_thud",
@@ -88,6 +94,12 @@ const CAR_SOUNDS: Array[StringName] = [
 	&"sign_wobble",
 	&"pogo_boing",
 	&"prosthetic_clunk",
+	&"flat_tire_flop",
+	&"giant_tire_boom",
+	&"robot_stomp",
+	&"fuselage_bong",
+	&"bone_clatter",
+	&"track_clank",
 	&"radiator_clang",
 	&"bicycle_rattle",
 	&"tractor_thud",
@@ -167,6 +179,12 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"sign_wobble": return _sign_wobble(rng)
 		&"pogo_boing": return _pogo_boing(rng)
 		&"prosthetic_clunk": return _prosthetic_clunk(rng)
+		&"flat_tire_flop": return _flat_tire_flop(rng)
+		&"giant_tire_boom": return _giant_tire_boom(rng)
+		&"robot_stomp": return _robot_stomp(rng)
+		&"fuselage_bong": return _fuselage_bong(rng)
+		&"bone_clatter": return _bone_clatter(rng)
+		&"track_clank": return _track_clank(rng)
 		&"radiator_clang": return _radiator_clang(rng)
 		&"bicycle_rattle": return _bicycle_rattle(rng)
 		&"tractor_thud": return _tractor_thud(rng)
@@ -372,6 +390,83 @@ static func _prosthetic_clunk(rng: RandomNumberGenerator) -> PackedFloat32Array:
 		tremolo = [45.0, 0.6],
 	})
 	Synth.mix_into(out, squeak, 0.03, 0.12)
+	return Synth.finish(out)
+
+## A flat tyre slapping down: a dull, floppy rubber whump with the loose
+## sidewall flapping after it.
+static func _flat_tire_flop(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.thump(0.2, 160.0, 0.003, 0.08, rng)
+	var flap := Synth.tones(0.18, [[[0.0, 120.0], [0.18, 80.0]]], {
+		square = 0.35,
+		amp = [[0.0, 0.0], [0.01, 1.0], [0.18, 0.0]],
+		tremolo = [26.0, 0.8],
+	})
+	Synth.mix_into(out, flap, 0.02, 0.45)
+	return Synth.finish(out)
+
+## A monster tyre coming down: a huge, slow rubber boom with a deep wobble
+## as the giant sidewall rings out.
+static func _giant_tire_boom(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.thump(0.5, 80.0, 0.006, 0.28, rng)
+	var wobble := Synth.tones(0.55, [[[0.0, 62.0], [0.12, 44.0], [0.55, 38.0]]], {
+		square = 0.15,
+		amp = [[0.0, 0.0], [0.015, 1.0], [0.55, 0.0]],
+		tremolo = [9.0, 0.6],
+	})
+	Synth.mix_into(out, wobble, 0.0, 0.7)
+	return Synth.finish(out)
+
+## A robot foot stomping down: a servo whirring up, a heavy steel clank and a
+## short hydraulic hiss.
+static func _robot_stomp(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.4)
+	var servo := Synth.tones(0.1, [[[0.0, 700.0], [0.1, 1300.0]]], {
+		square = 0.5,
+		amp = [[0.0, 0.0], [0.02, 1.0], [0.1, 0.2]],
+	})
+	Synth.mix_into(out, servo, 0.0, 0.15)
+	Synth.mix_into(out, Synth.thump(0.25, 260.0, 0.001, 0.08, rng), 0.09, 1.0)
+	Synth.mix_into(out, _metal_ring(0.3, 520.0, 14.0, 0.1, rng), 0.09, 0.5)
+	var hiss := Synth.noise_sweep(0.15, {
+		freq = [[0.0, 5000.0], [0.15, 3500.0]],
+		q = [[0.0, 1.2]],
+		amp = [[0.0, 0.0], [0.01, 1.0], [0.15, 0.0]],
+		highpass = 2500.0,
+	}, rng)
+	Synth.mix_into(out, hiss, 0.12, 0.2)
+	return Synth.finish(out)
+
+## An old airplane fuselage knocked: a hollow aluminium tube going bong.
+static func _fuselage_bong(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.thump(0.25, 400.0, 0.001, 0.06, rng)
+	Synth.mix_into(out, _metal_ring(0.8, 240.0, 30.0, 0.3, rng), 0.0, 0.6)
+	Synth.mix_into(out, _metal_ring(0.6, 610.0, 26.0, 0.2, rng), 0.0, 0.3)
+	return Synth.finish(out)
+
+## A fossil skeleton knocked: a dry thud and a quick clatter of hollow bones
+## knocking into each other, like a xylophone falling down the stairs.
+static func _bone_clatter(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.thump(0.1, 500.0, 0.001, 0.03, rng)
+	var knock_time := 0.015
+	for i in 5:
+		var pitch := rng.randf_range(650.0, 1150.0)
+		var knock := Synth.tones(0.07, [[[0.0, pitch], [0.07, pitch * 0.9]]], {
+			square = 0.1,
+			amp = [[0.0, 0.0], [0.002, 1.0], [0.05, 0.0]],
+		})
+		Synth.mix_into(out, knock, knock_time, 0.5 - 0.06 * i)
+		knock_time += rng.randf_range(0.025, 0.05)
+	return Synth.finish(out)
+
+## A tank track hitting something: a heavy steel thunk and the loose links
+## rattling after it.
+static func _track_clank(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.thump(0.3, 200.0, 0.002, 0.1, rng)
+	Synth.mix_into(out, _metal_ring(0.35, 380.0, 12.0, 0.08, rng), 0.0, 0.5)
+	var link_time := 0.04
+	for i in 4:
+		Synth.mix_into(out, _metal_ring(0.08, rng.randf_range(900.0, 1400.0), 10.0, 0.015, rng), link_time, 0.35)
+		link_time += rng.randf_range(0.03, 0.05)
 	return Synth.finish(out)
 
 ## A wooden paddle blade slapping down: a low hollow shaft-thock, a broad
