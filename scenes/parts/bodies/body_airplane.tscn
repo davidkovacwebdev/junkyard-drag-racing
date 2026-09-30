@@ -1,0 +1,58 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_body.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/body_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_airplane"]
+script = ExtResource("2")
+color = Color(0.9, 0.88, 0.82, 1)
+id = &"body_airplane"
+display_name = "Little Prop Plane"
+suspension_sag = 8.0
+suspension_travel = 18.0
+suspension_damping_ratio = 0.65
+suspension_wheel_protection = 0.4
+mass = 12.0
+durability = 75.0
+speed = 4.2
+impact_sound = &"fuselage_bong"
+
+[node name="BodyAirplane" type="RigidBody2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_airplane")
+
+[node name="TailFin" type="Polygon2D" parent="."]
+color = Color(0.72, 0.2, 0.18, 1)
+polygon = PackedVector2Array(-130, -20, -128, -66, -112, -66, -94, -20)
+
+[node name="Polygon2D" type="Polygon2D" parent="."]
+color = Color(0.9, 0.88, 0.82, 1)
+polygon = PackedVector2Array(-130, -24, -100, -24, 10, -40, 90, -38, 118, -28, 130, -12, 128, 6, 112, 16, -80, 16, -130, -12)
+
+[node name="Belly" type="Polygon2D" parent="."]
+color = Color(0.74, 0.72, 0.66, 1)
+polygon = PackedVector2Array(-92, 8, 129, 8, 128, 6, 112, 16, -80, 16)
+
+[node name="Wing" type="Polygon2D" parent="."]
+color = Color(0.74, 0.72, 0.66, 1)
+polygon = PackedVector2Array(-14, -50, 82, -50, 86, -40, -12, -40)
+
+[node name="Windows" type="Polygon2D" parent="."]
+color = Color(0.55, 0.75, 0.8, 0.85)
+polygon = PackedVector2Array(20, -34, 86, -34, 106, -22, 20, -22)
+
+[node name="Spinner" type="Polygon2D" parent="."]
+color = Color(0.72, 0.2, 0.18, 1)
+polygon = PackedVector2Array(128, -18, 142, -6, 128, 4)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(-130, -66, -112, -66, -96, -26, -14, -50, 82, -50, 118, -28, 142, -6, 128, 6, 112, 16, -80, 16, -130, -12)
+
+[node name="WheelMount0" type="Marker2D" parent="."]
+position = Vector2(-78, 16)
+
+[node name="WheelMount1" type="Marker2D" parent="."]
+position = Vector2(86, 16)
+
+[node name="EngineMount" type="Marker2D" parent="."]
+position = Vector2(-50, -31)

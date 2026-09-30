@@ -22,8 +22,12 @@ func _ready() -> void:
 	_car = get_tree().get_first_node_in_group(PlayerCar.GROUP)
 	_cam = _car.get_node("Camera2D")
 	_cam.set("zoom_speed", 1000.0)
-	_cam.set("_target_zoom", 0.25)
-	_cam.zoom = Vector2(0.25, 0.25)
+	var zoom := 0.25
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--zoom="):
+			zoom = arg.trim_prefix("--zoom=").to_float()
+	_cam.set("_target_zoom", zoom)
+	_cam.zoom = Vector2(zoom, zoom)
 	await get_tree().process_frame
 	await get_tree().process_frame
 	for child in _world.get_children():

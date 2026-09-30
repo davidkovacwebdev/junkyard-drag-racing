@@ -1,0 +1,34 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_wheel.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/wheel_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_giant"]
+script = ExtResource("2")
+id = &"wheel_giant"
+display_name = "Giant Wheel"
+mass = 16.0
+durability = 130.0
+speed = 6.5
+material_type = 4
+absorption = 0.5
+impact_sound = &"giant_tire_boom"
+
+[node name="WheelGiant" type="RigidBody2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_giant")
+
+[node name="Tyre" type="Polygon2D" parent="."]
+color = Color(0.15, 0.15, 0.16, 1)
+polygon = PackedVector2Array(110.0, 0.0, 101.73, 16.11, 104.62, 33.99, 91.77, 46.76, 88.99, 64.66, 72.83, 72.83, 64.66, 88.99, 46.76, 91.77, 33.99, 104.62, 16.11, 101.73, 0.0, 110.0, -16.11, 101.73, -33.99, 104.62, -46.76, 91.77, -64.66, 88.99, -72.83, 72.83, -88.99, 64.66, -91.77, 46.76, -104.62, 33.99, -101.73, 16.11, -110.0, 0.0, -101.73, -16.11, -104.62, -33.99, -91.77, -46.76, -88.99, -64.66, -72.83, -72.83, -64.66, -88.99, -46.76, -91.77, -33.99, -104.62, -16.11, -101.73, -0.0, -110.0, 16.11, -101.73, 33.99, -104.62, 46.76, -91.77, 64.66, -88.99, 72.83, -72.83, 88.99, -64.66, 91.77, -46.76, 104.62, -33.99, 101.73, -16.11)
+
+[node name="Rim" type="Polygon2D" parent="."]
+color = Color(0.72, 0.73, 0.76, 1)
+polygon = PackedVector2Array(51.74, 5.19, 42.21, 30.37, 21.37, 47.4, -5.19, 51.74, -30.37, 42.21, -47.4, 21.37, -51.74, -5.19, -42.21, -30.37, -21.37, -47.4, 5.19, -51.74, 30.37, -42.21, 47.4, -21.37)
+
+[node name="Hub" type="Polygon2D" parent="."]
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(20, 0, 10, 17.32, -10, 17.32, -20, 0, -10, -17.32, 10, -17.32)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(106.0, 0.0, 97.93, 40.56, 74.95, 74.95, 40.56, 97.93, 0.0, 106.0, -40.56, 97.93, -74.95, 74.95, -97.93, 40.56, -106.0, 0.0, -97.93, -40.56, -74.95, -74.95, -40.56, -97.93, 0.0, -106.0, 40.56, -97.93, 74.95, -74.95, 97.93, -40.56)

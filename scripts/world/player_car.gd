@@ -221,8 +221,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		if click.button_index == MOUSE_BUTTON_LEFT and click.pressed:
 			var target := _clicked_interactable(get_global_mouse_position())
 			if target != null:
-				_activate(target)
+				# Before activating: entering a building swaps the scene, which
+				# takes the car out of the tree and leaves no viewport to call.
 				get_viewport().set_input_as_handled()
+				_activate(target)
 
 ## The thing under the cursor, but only if the car is close enough to it to be
 ## showing it in the interaction zone. Hit colliders are walked back up to the

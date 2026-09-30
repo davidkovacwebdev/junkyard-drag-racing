@@ -99,15 +99,18 @@ var _road_network: RoadNetwork = null
 var _skid_marks: SkidMarksLayer = null
 var _rng := RandomNumberGenerator.new()
 
-var _current_road: PackedVector2Array = PackedVector2Array()
-var _current_road_length: float = 0.0
+## One RoadTrack per drivable road, built once from the network's decimated
+## polylines. The full-fidelity ones carry a point every 5 px, and walking
+## those from the start each physics frame cost several ms on a long road.
+var _tracks: Array[RoadTrack] = []
+var _current_road: RoadTrack = null
 ## Arc length along _current_road of the point closest to the truck.
 var _travelled: float = 0.0
 var _forward: bool = true
 ## Where the route continues after _current_road runs out — picked as soon as
 ## the lookahead first spills past its end, so the aim point flows around the
 ## junction instead of pinning to the road's last vertex.
-var _next_road: PackedVector2Array = PackedVector2Array()
+var _next_road: RoadTrack = null
 var _next_forward: bool = true
 
 var _facing_right: bool = true
@@ -130,10 +133,13 @@ func _ready() -> void:
 	_drop_timer = _rng.randf_range(drop_check_interval_min, drop_check_interval_max)
 	if _road_network != null:
 		_road_network.ensure_built()
+		for road in _road_network.get_draw_polylines():
+			if road.size() >= 2:
+				_tracks.append(RoadTrack.new(road))
 		_pick_new_road()
-		if not _current_road.is_empty():
-			_travelled = _rng.randf_range(0.0, _current_road_length)
-			global_position = _sample_along(_current_road, _travelled)[0]
+		if _current_road != null:
+			_travelled = _rng.randf_range(0.0, _current_road.length)
+			global_position = _current_road.sample(_travelled)
 
 func _build_visual() -> void:
 	var body := PartDatabase.load_part_data(
@@ -160,7 +166,7 @@ func _setup_engine_sound() -> void:
 	add_child(engine_sound)
 
 func _physics_process(delta: float) -> void:
-	if _road_network == null or _current_road.is_empty():
+	if _current_road == null:
 		return
 	_advance_along_road(delta)
 
@@ -183,7 +189,7 @@ func _advance_along_road(delta: float) -> void:
 	_in_contact_last_frame = _in_contact_this_frame
 	_in_contact_this_frame = false
 
-	_travelled = _closest_travelled(_current_road, global_position, _travelled, lookahead_distance * 2.0)
+	_travelled = _current_road.closest_travelled(global_position, _travelled, lookahead_distance * 2.0)
 	if _reached_next_road():
 		_switch_to_next_road()
 
@@ -209,27 +215,27 @@ func _advance_along_road(delta: float) -> void:
 		velocity = velocity.slide(collision.get_normal())
 		move_and_collide(collision.get_remainder().slide(collision.get_normal()))
 
-	var off_route := global_position.distance_to(_sample_along(_current_road, _travelled)[0])
+	var off_route := global_position.distance_to(_current_road.sample(_travelled))
 	if off_route > honk_off_route_distance:
 		_try_honk()
 
 ## The point `lookahead_distance` further along the route, spilling onto
 ## _next_road (chosen on demand) once it runs past this road's end.
 func _aim_point() -> Vector2:
-	if _lookahead_spill() > 0.0 and _next_road.is_empty():
+	if _lookahead_spill() > 0.0 and _next_road == null:
 		_choose_next_road()
 	var spill := _lookahead_spill()
 	if spill <= 0.0:
 		var ahead := _travelled + lookahead_distance if _forward else _travelled - lookahead_distance
-		return _sample_along(_current_road, ahead)[0]
-	var next_length := _polyline_length(_next_road)
+		return _current_road.sample(ahead)
+	var next_length := _next_road.length
 	var on_next := clampf(spill if _next_forward else next_length - spill, 0.0, next_length)
-	return _sample_along(_next_road, on_next)[0]
+	return _next_road.sample(on_next)
 
 ## How far the lookahead runs past the end of the current road (≤ 0 while
 ## it's still on it).
 func _lookahead_spill() -> float:
-	var remaining := _current_road_length - _travelled if _forward else _travelled
+	var remaining := _current_road.length - _travelled if _forward else _travelled
 	return lookahead_distance - remaining
 
 ## Prefer another road whose end sits within `hop_radius` of where this one
@@ -239,13 +245,13 @@ func _lookahead_spill() -> float:
 func _choose_next_road() -> void:
 	var end_point := _road_end_point()
 	var candidates: Array[Dictionary] = []
-	for road in _road_network.get_road_polylines():
-		if road == _current_road or road.size() < 2:
+	for track in _tracks:
+		if track == _current_road:
 			continue
-		if road[0].distance_to(end_point) <= hop_radius:
-			candidates.append({"road": road, "forward": true})
-		elif road[road.size() - 1].distance_to(end_point) <= hop_radius:
-			candidates.append({"road": road, "forward": false})
+		if track.first_point().distance_to(end_point) <= hop_radius:
+			candidates.append({"road": track, "forward": true})
+		elif track.last_point().distance_to(end_point) <= hop_radius:
+			candidates.append({"road": track, "forward": false})
 	if candidates.is_empty():
 		_forward = not _forward
 		return
@@ -257,22 +263,21 @@ func _choose_next_road() -> void:
 ## the handover happens once the truck is nearer the next road's entry than
 ## this road's end, not only when it literally reaches the end.
 func _reached_next_road() -> bool:
-	if _next_road.is_empty():
+	if _next_road == null:
 		return false
-	var entry := _next_road[0] if _next_forward else _next_road[_next_road.size() - 1]
-	var remaining := _current_road_length - _travelled if _forward else _travelled
+	var entry := _next_road.first_point() if _next_forward else _next_road.last_point()
+	var remaining := _current_road.length - _travelled if _forward else _travelled
 	return remaining <= 20.0 \
 			or global_position.distance_to(entry) <= global_position.distance_to(_road_end_point())
 
 func _road_end_point() -> Vector2:
-	return _current_road[_current_road.size() - 1] if _forward else _current_road[0]
+	return _current_road.last_point() if _forward else _current_road.first_point()
 
 func _switch_to_next_road() -> void:
 	_current_road = _next_road
-	_current_road_length = _polyline_length(_current_road)
 	_forward = _next_forward
-	_travelled = 0.0 if _forward else _current_road_length
-	_next_road = PackedVector2Array()
+	_travelled = 0.0 if _forward else _current_road.length
+	_next_road = null
 
 ## Called every physics frame the player's car is touching the truck (see
 ## PlayerCar._notify_garbage_truck_contact()). `pressing_velocity` is what the
@@ -303,15 +308,13 @@ func _try_honk() -> void:
 	Sfx.play_at(&"truck_honk", global_position, -6.0)
 
 func _pick_new_road() -> void:
-	var roads := _road_network.get_road_polylines()
-	var usable: Array[PackedVector2Array] = []
-	for road in roads:
-		if _polyline_length(road) > 200.0:
-			usable.append(road)
+	var usable: Array[RoadTrack] = []
+	for track in _tracks:
+		if track.length > 200.0:
+			usable.append(track)
 	if usable.is_empty():
 		return
 	_current_road = usable[_rng.randi_range(0, usable.size() - 1)]
-	_current_road_length = _polyline_length(_current_road)
 	_forward = true
 	_travelled = 0.0
 
@@ -414,50 +417,63 @@ func _spawn_skid_segment(a: Vector2, b: Vector2) -> void:
 	tween.tween_property(line, "modulate:a", 0.0, skid_mark_fade_time)
 	tween.tween_callback(line.queue_free)
 
-static func _polyline_length(points: PackedVector2Array) -> float:
-	var total := 0.0
-	for i in range(points.size() - 1):
-		total += points[i].distance_to(points[i + 1])
-	return total
+## A road polyline with the arc length at each of its points, so sampling
+## and closest-point lookups binary-search to the right segment instead of
+## walking from the road's start.
+class RoadTrack:
+	var points: PackedVector2Array
+	var distances := PackedFloat32Array()
+	var length := 0.0
 
-## Point and unit tangent `distance` along `points`, clamped to the last
-## segment's direction past the end. Same approach as
-## TrashSpawner._sample_along().
-static func _sample_along(points: PackedVector2Array, distance: float) -> Array:
-	var travelled := 0.0
-	for i in range(points.size() - 1):
-		var a := points[i]
-		var b := points[i + 1]
-		var segment := a.distance_to(b)
+	func _init(road_points: PackedVector2Array) -> void:
+		points = road_points
+		distances.resize(points.size())
+		for i in range(1, points.size()):
+			length += points[i - 1].distance_to(points[i])
+			distances[i] = length
+
+	func first_point() -> Vector2:
+		return points[0]
+
+	func last_point() -> Vector2:
+		return points[points.size() - 1]
+
+	## Point `distance` along the road, clamped to its ends.
+	func sample(distance: float) -> Vector2:
+		if distance <= 0.0:
+			return points[0]
+		if distance >= length:
+			return last_point()
+		var i := _segment_at(distance)
+		var segment := distances[i + 1] - distances[i]
 		if segment <= 0.0:
-			continue
-		if travelled + segment >= distance:
-			var t := (distance - travelled) / segment
-			return [a.lerp(b, t), (b - a) / segment]
-		travelled += segment
-	var last := points[points.size() - 1]
-	var previous := points[points.size() - 2]
-	return [last, (last - previous).normalized()]
+			return points[i]
+		return points[i].lerp(points[i + 1], (distance - distances[i]) / segment)
 
-## Arc length of the point on `points` closest to `position`, only looking
-## within `window` of `around` so a road that doubles back past itself can't
-## make the truck's progress jump to the wrong stretch.
-static func _closest_travelled(points: PackedVector2Array, position: Vector2, around: float, window: float) -> float:
-	var best_distance := INF
-	var best_travelled := around
-	var travelled := 0.0
-	for i in range(points.size() - 1):
-		var a := points[i]
-		var b := points[i + 1]
-		var segment := a.distance_to(b)
-		if segment > 0.0 and travelled + segment >= around - window and travelled <= around + window:
+	## Arc length of the point closest to `position`, only looking within
+	## `window` of `around` so a road that doubles back past itself can't make
+	## the truck's progress jump to the wrong stretch.
+	func closest_travelled(position: Vector2, around: float, window: float) -> float:
+		var best_distance := INF
+		var best_travelled := around
+		var first := _segment_at(around - window)
+		var last := _segment_at(around + window)
+		for i in range(first, last + 1):
+			var a := points[i]
+			var b := points[i + 1]
+			var segment := distances[i + 1] - distances[i]
+			if segment <= 0.0:
+				continue
 			var t := clampf((position - a).dot(b - a) / (segment * segment), 0.0, 1.0)
 			var distance := position.distance_squared_to(a.lerp(b, t))
 			if distance < best_distance:
 				best_distance = distance
-				best_travelled = travelled + t * segment
-		travelled += segment
-	return best_travelled
+				best_travelled = distances[i] + t * segment
+		return best_travelled
+
+	## Index of the segment containing arc length `distance`, clamped.
+	func _segment_at(distance: float) -> int:
+		return clampi(distances.bsearch(distance, true) - 1, 0, points.size() - 2)
 
 ## Same resolution convention as PlayerCar/TrashSpawner: the exported path
 ## first, falling back to searching the scene for any RoadNetwork.

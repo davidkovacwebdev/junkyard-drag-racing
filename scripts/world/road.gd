@@ -214,6 +214,29 @@ var _generation_signature: String = ""
 ## Editor polling accumulator — we don't want to hash curves 60× a second.
 var _poll_accum: float = 0.0
 
+## Everything `_rebuild()` derives, kept across map reloads. Every exit from
+## the garage, a race or a shop reloads main.tscn, and deriving the network
+## from scratch cost ~400 ms each time for roads that never change at runtime.
+class BakedNetwork:
+	var signature := ""
+	var roads: Array[PackedVector2Array] = []
+	var draw_roads: Array[PackedVector2Array] = []
+	var roundabouts: Array[Vector2] = []
+	var corner_points: Array[PackedVector2Array] = []
+	var edge_runs: Array[PackedVector2Array] = []
+	var dash_runs: Array[PackedVector2Array] = []
+	var blocking_cells: Dictionary = {}
+	var segment_road: PackedInt32Array = []
+	var segment_from: PackedVector2Array = []
+	var segment_to: PackedVector2Array = []
+	var blocking_cell_size: float = 1.0
+	var query_cells: Dictionary = {}
+	var query_segment_from: PackedVector2Array = []
+	var query_segment_to: PackedVector2Array = []
+	var draw_chunks: Dictionary = {}
+
+static var _runtime_bake: BakedNetwork = null
+
 const POLL_INTERVAL := 0.05
 
 func _ready() -> void:
@@ -289,6 +312,19 @@ func _round_sharp_corners(points: PackedVector2Array, radius: float) -> PackedVe
 	return out
 
 func _rebuild() -> void:
+	var runtime_signature := ""
+	if not Engine.is_editor_hint():
+		runtime_signature = _compute_signature()
+		if _runtime_bake != null and _runtime_bake.signature == runtime_signature:
+			_restore_bake(_runtime_bake)
+			_sync_chunk_canvases()
+			return
+	_derive_network()
+	if not Engine.is_editor_hint():
+		_runtime_bake = _capture_bake(runtime_signature)
+	_sync_chunk_canvases()
+
+func _derive_network() -> void:
 	_roads.clear()
 	_draw_roads.clear()
 	_roundabouts.clear()
@@ -315,7 +351,45 @@ func _rebuild() -> void:
 	_rebuild_query_grid()
 	_build_markings()
 	_build_draw_chunks()
-	_sync_chunk_canvases()
+
+func _capture_bake(signature: String) -> BakedNetwork:
+	var bake := BakedNetwork.new()
+	bake.signature = signature
+	bake.roads = _roads
+	bake.draw_roads = _draw_roads
+	bake.roundabouts = _roundabouts
+	bake.corner_points = _corner_points
+	bake.edge_runs = _edge_runs
+	bake.dash_runs = _dash_runs
+	bake.blocking_cells = _blocking_cells
+	bake.segment_road = _segment_road
+	bake.segment_from = _segment_from
+	bake.segment_to = _segment_to
+	bake.blocking_cell_size = _blocking_cell_size
+	bake.query_cells = _query_cells
+	bake.query_segment_from = _query_segment_from
+	bake.query_segment_to = _query_segment_to
+	bake.draw_chunks = _draw_chunks
+	return bake
+
+## The baked arrays are shared, not copied — nothing mutates them outside a
+## rebuild, and a rebuild with a matching signature never runs.
+func _restore_bake(bake: BakedNetwork) -> void:
+	_roads = bake.roads
+	_draw_roads = bake.draw_roads
+	_roundabouts = bake.roundabouts
+	_corner_points = bake.corner_points
+	_edge_runs = bake.edge_runs
+	_dash_runs = bake.dash_runs
+	_blocking_cells = bake.blocking_cells
+	_segment_road = bake.segment_road
+	_segment_from = bake.segment_from
+	_segment_to = bake.segment_to
+	_blocking_cell_size = bake.blocking_cell_size
+	_query_cells = bake.query_cells
+	_query_segment_from = bake.query_segment_from
+	_query_segment_to = bake.query_segment_to
+	_draw_chunks = bake.draw_chunks
 
 ## Sample the Path2D children, reusing whatever is still cached for any curve
 ## that hasn't been touched since the last rebuild.
