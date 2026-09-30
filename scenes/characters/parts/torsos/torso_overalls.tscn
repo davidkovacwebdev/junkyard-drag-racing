@@ -1,0 +1,59 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_torso_overalls"]
+script = ExtResource("2")
+id = &"torso_overalls"
+display_name = "Plaid Shirt & Overalls"
+slot = 2
+npc_only = true
+
+[node name="OverallsTorso" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_torso_overalls")
+
+[node name="Shirt" type="Polygon2D" parent="."]
+color = Color(0.62, 0.22, 0.2, 1)
+polygon = PackedVector2Array(-28, -172, 28, -172, 30, -96, -30, -96)
+
+[node name="Overalls" type="Polygon2D" parent="."]
+color = Color(0.3, 0.4, 0.55, 1)
+polygon = PackedVector2Array(-24, -172, -16, -172, -16, -142, 16, -142, 16, -172, 24, -172, 24, -142, 22, -140, 26, -120, 32, -64, -32, -64, -26, -120, -22, -140, -24, -142)
+
+[node name="ArmLeft" type="Polygon2D" parent="."]
+color = Color(0.62, 0.22, 0.2, 1)
+polygon = PackedVector2Array(-46, -170, -28, -170, -28, -108, -46, -108)
+
+[node name="ArmRight" type="Polygon2D" parent="."]
+color = Color(0.62, 0.22, 0.2, 1)
+polygon = PackedVector2Array(28, -170, 46, -170, 46, -108, 28, -108)
+
+[node name="PlaidLeft" type="Polygon2D" parent="."]
+color = Color(0.4, 0.13, 0.12, 1)
+polygon = PackedVector2Array(-40, -170, -34, -170, -34, -146, -28, -146, -28, -138, -34, -138, -34, -110, -40, -110, -40, -138, -46, -138, -46, -146, -40, -146)
+
+[node name="PlaidRight" type="Polygon2D" parent="."]
+color = Color(0.4, 0.13, 0.12, 1)
+polygon = PackedVector2Array(34, -170, 40, -170, 40, -146, 46, -146, 46, -138, 40, -138, 40, -120, 34, -120, 34, -138, 28, -138, 28, -146, 34, -146)
+
+[node name="HandLeft" type="Polygon2D" parent="."]
+color = Color(0.85, 0.68, 0.55, 1)
+polygon = PackedVector2Array(-46, -108, -28, -108, -28, -100, -46, -100)
+
+[node name="Bottle" type="Polygon2D" parent="."]
+color = Color(0.42, 0.25, 0.12, 1)
+polygon = PackedVector2Array(30, -126, 34, -132, 34, -150, 42, -150, 42, -132, 46, -126, 47, -84, 29, -84)
+
+[node name="BottleCap" type="Polygon2D" parent="."]
+color = Color(0.8, 0.66, 0.3, 1)
+polygon = PackedVector2Array(33, -156, 43, -156, 43, -150, 33, -150)
+
+[node name="Label" type="Polygon2D" parent="."]
+color = Color(0.9, 0.84, 0.66, 1)
+polygon = PackedVector2Array(29, -124, 47, -124, 47, -111, 29, -111)
+
+[node name="HandRight" type="Polygon2D" parent="."]
+color = Color(0.85, 0.68, 0.55, 1)
+polygon = PackedVector2Array(26, -110, 47, -110, 47, -100, 26, -100)

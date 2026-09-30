@@ -1,13 +1,16 @@
 class_name CharacterDatabase
 extends RefCounted
-## Filesystem helpers for the Character Creator dock: finds every character
-## part scene under res://scenes/characters/parts (grouped by each part's
-## own CharacterPartData.slot, not by folder name) and every saved
-## character under res://characters.
+## Filesystem helpers: finds every character part scene under
+## res://scenes/characters/parts (grouped by each part's own
+## CharacterPartData.slot, not by folder name) and every saved character
+## under res://characters.
 ##
-## Editor-time only on purpose — nothing scans the disk at game runtime.
+## The Character Creator dock uses it in the editor, and the player's
+## character creation screen uses `scan_player_parts()` at runtime. Listing
+## goes through ResourceLoader.list_directory() rather than DirAccess, so it
+## still finds the parts in an exported build, where scenes are remapped.
 ## Saved CharacterData resources hold direct PackedScene references, so
-## runtime code never needs this class.
+## loading a character never needs this class.
 
 const PARTS_ROOT := "res://scenes/characters/parts"
 const CHARACTERS_ROOT := "res://characters"
@@ -32,6 +35,15 @@ static func scan_parts() -> Dictionary:
 		)
 	return by_slot
 
+## Same as scan_parts(), minus the parts reserved for NPCs (`npc_only`).
+static func scan_player_parts() -> Dictionary:
+	var by_slot := scan_parts()
+	for slot in by_slot:
+		by_slot[slot] = (by_slot[slot] as Array).filter(func(entry: Dictionary) -> bool:
+			return not (entry.data as CharacterPartData).npc_only
+		)
+	return by_slot
+
 ## Resource paths of every saved character, ready for ResourceLoader.load().
 static func list_characters() -> PackedStringArray:
 	return _find_files(CHARACTERS_ROOT, ".tres")
@@ -47,9 +59,9 @@ static func _find_files(root: String, suffix: String) -> PackedStringArray:
 	if not DirAccess.dir_exists_absolute(root):
 		return found
 	for dir_path in _all_dirs(root):
-		for file in DirAccess.get_files_at(dir_path):
-			if file.ends_with(suffix):
-				found.append(dir_path.path_join(file))
+		for entry in ResourceLoader.list_directory(dir_path):
+			if entry.ends_with(suffix):
+				found.append(dir_path.path_join(entry))
 	return found
 
 ## Breadth-first walk so nested part folders work without recursion limits.
@@ -59,6 +71,7 @@ static func _all_dirs(root: String) -> PackedStringArray:
 	while index < dirs.size():
 		var current := dirs[index]
 		index += 1
-		for sub in DirAccess.get_directories_at(current):
-			dirs.append(current.path_join(sub))
+		for entry in ResourceLoader.list_directory(current):
+			if entry.ends_with("/"):
+				dirs.append(current.path_join(entry.trim_suffix("/")))
 	return dirs

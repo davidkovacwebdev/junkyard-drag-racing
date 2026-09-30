@@ -24,5 +24,10 @@ enum Slot { LEGS, BOOTS, TORSO, HEAD, HAIR, EYES, ACCESSORY }
 ## behind the torso even though ACCESSORY normally draws last.
 @export var z_offset: int = 0
 
+## Parts made for one specific NPC (Grandpa's wheelchair, beard, ...). The
+## editor dock still offers them; the player's own character creation hides
+## them so nobody can dress up as a named character.
+@export var npc_only: bool = false
+
 static func slot_name(slot: Slot) -> String:
 	return Slot.keys()[slot].capitalize()

@@ -99,8 +99,9 @@ func open(speaker_name: String, character: CharacterData) -> void:
 	_tween.tween_property(_speech_board, "scale", Vector2.ONE, OPEN_TIME).set_delay(OPEN_TIME * 0.2)
 
 ## Replaces the current line and types it out.
+## `{player}` in the line becomes the player's name (see PlayerProfile).
 func say(line: String) -> void:
-	_speech.speak(_line_label, line, _speaker)
+	_speech.speak(_line_label, PlayerProfile.fill(line), _speaker)
 
 ## Small print under the line (a wallet readout, a price list). Empty hides it.
 func set_note(text: String) -> void:

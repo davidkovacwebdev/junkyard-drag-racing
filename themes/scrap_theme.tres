@@ -18,6 +18,15 @@ content_margin_right = 5.0
 content_margin_bottom = 5.0
 bg_color = Color(0.4, 0.29, 0.19, 1)
 
+[sub_resource type="StyleBoxEmpty" id="FieldFocus"]
+
+[sub_resource type="StyleBoxFlat" id="Field"]
+content_margin_left = 12.0
+content_margin_top = 6.0
+content_margin_right = 12.0
+content_margin_bottom = 6.0
+bg_color = Color(0.7, 0.68, 0.63, 1)
+
 [sub_resource type="StyleBoxFlat" id="Tooltip"]
 content_margin_left = 10.0
 content_margin_top = 6.0
@@ -32,6 +41,15 @@ HScrollBar/styles/grabber_highlight = SubResource("GrabberHover")
 HScrollBar/styles/grabber_pressed = SubResource("GrabberPressed")
 HScrollBar/styles/scroll = SubResource("Track")
 HScrollBar/styles/scroll_focus = SubResource("Track")
+LineEdit/colors/caret_color = Color(0.25, 0.16, 0.08, 1)
+LineEdit/colors/font_color = Color(0.25, 0.16, 0.08, 1)
+LineEdit/colors/font_placeholder_color = Color(0.25, 0.16, 0.08, 0.45)
+LineEdit/colors/font_selected_color = Color(0.25, 0.16, 0.08, 1)
+LineEdit/colors/selection_color = Color(0.95, 0.75, 0.1, 0.6)
+LineEdit/constants/caret_width = 4
+LineEdit/styles/focus = SubResource("FieldFocus")
+LineEdit/styles/normal = SubResource("Field")
+LineEdit/styles/read_only = SubResource("Field")
 TooltipLabel/colors/font_color = Color(0.25, 0.16, 0.08, 1)
 TooltipPanel/styles/panel = SubResource("Tooltip")
 VScrollBar/styles/grabber = SubResource("Grabber")
