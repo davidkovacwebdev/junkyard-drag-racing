@@ -8,6 +8,10 @@
 script = ExtResource("2")
 id = &"body_limo"
 display_name = "Stretch Limo"
+suspension_sag = 11.0
+suspension_travel = 20.0
+suspension_damping_ratio = 0.6
+suspension_wheel_protection = 0.5
 mass = 30.0
 durability = 110.0
 speed = 2.8

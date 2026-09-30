@@ -7,6 +7,10 @@
 script = ExtResource("2")
 id = &"body_pipes"
 display_name = "Pipe Network"
+suspension_sag = 2.0
+suspension_travel = 4.0
+suspension_damping_ratio = 0.25
+suspension_wheel_protection = 0.13
 speed = 3.2
 mass = 16.0
 durability = 80.0

@@ -36,6 +36,8 @@ const NAMES: Array[StringName] = [
 	&"paddle_splash",
 	&"rock_clack",
 	&"metal_scrape",
+	&"spike_pop",
+	&"gravel_crunch",
 	&"door_close",
 	&"scrap_pickup",
 	&"part_pickup",
@@ -86,6 +88,8 @@ const CAR_SOUNDS: Array[StringName] = [
 	&"paddle_splash",
 	&"rock_clack",
 	&"metal_scrape",
+	&"spike_pop",
+	&"gravel_crunch",
 ]
 
 const UI_SOUNDS: Array[StringName] = [
@@ -150,6 +154,8 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"paddle_splash": return _paddle_splash(rng)
 		&"rock_clack": return _rock_clack(rng)
 		&"metal_scrape": return _metal_scrape(rng)
+		&"spike_pop": return _spike_pop(rng)
+		&"gravel_crunch": return _gravel_crunch(rng)
 		&"door_close": return _door_close(rng)
 		&"scrap_pickup": return _scrap_pickup()
 		&"part_pickup": return _part_pickup()
@@ -381,6 +387,21 @@ static func _rock_clack(rng: RandomNumberGenerator) -> PackedFloat32Array:
 	Synth.mix_into(out, gravel, 0.02, 0.3)
 	return Synth.finish(out)
 
+## A rally car coming down hard after a crest: a low suspension thud and a
+## spray of loose gravel skittering away.
+static func _gravel_crunch(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.thump(0.16, 220.0, 0.002, 0.07, rng)
+	var spray := Synth.noise_sweep(0.4, {
+		freq = [[0.0, 2600.0], [0.4, 1300.0]],
+		q = [[0.0, 1.6]],
+		amp = [[0.0, 0.0], [0.015, 1.0], [0.12, 0.5], [0.4, 0.0]],
+		highpass = 900.0,
+	}, rng)
+	Synth.mix_into(out, spray, 0.01, 0.5)
+	Synth.mix_into(out, Synth.thump(0.08, 1800.0, 0.001, 0.02, rng), 0.05, 0.3)
+	Synth.mix_into(out, Synth.thump(0.08, 2200.0, 0.001, 0.02, rng), 0.11, 0.2)
+	return Synth.finish(out)
+
 ## Two race cars trading paint: a bodywork thunk, then a grinding screech of
 ## metal on metal that trails off as they bounce apart.
 static func _metal_scrape(rng: RandomNumberGenerator) -> PackedFloat32Array:
@@ -392,6 +413,20 @@ static func _metal_scrape(rng: RandomNumberGenerator) -> PackedFloat32Array:
 	}, rng)
 	Synth.mix_into(out, grind, 0.01, 0.55)
 	Synth.mix_into(out, _metal_ring(0.4, 1150.0, 14.0, 0.2, rng), 0.0, 0.3)
+	return Synth.finish(out)
+
+## Tyres landing on a bed of spikes: a tinny clank, a sharp pop, then the air
+## hissing out of what's left.
+static func _spike_pop(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.thump(0.15, 2500.0, 0.001, 0.04, rng)
+	Synth.mix_into(out, _metal_ring(0.35, 1650.0, 16.0, 0.15, rng), 0.0, 0.35)
+	var hiss := Synth.noise_sweep(1.1, {
+		freq = [[0.0, 4200.0], [1.1, 2600.0]],
+		q = [[0.0, 1.2]],
+		amp = [[0.0, 0.0], [0.03, 1.0], [0.5, 0.55], [1.1, 0.0]],
+		highpass = 1500.0,
+	}, rng)
+	Synth.mix_into(out, hiss, 0.04, 0.45)
 	return Synth.finish(out)
 
 ## A cast-iron radiator whacking something: a deep dull clang through all its

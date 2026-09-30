@@ -32,6 +32,10 @@ const LEAD_WIDTH := 3.0
 const LEAD_SAG_IDLE := 18.0
 const LEAD_SAG_PULLING := 2.0
 
+## Scales how fast the legs cycle for the distance covered. The map car sets
+## this below 1 so the shrunk horse doesn't scurry.
+var gait_rate := 1.0
+
 @onready var _harness: Node2D = $Harness
 @onready var _lead: Polygon2D = $Harness/Lead
 @onready var _horse: Node2D = $Harness/Horse
@@ -95,7 +99,7 @@ func _process(delta: float) -> void:
 	var travelled := _forward_travel()
 	var speed := absf(travelled) / delta
 	_gait_blend = lerpf(_gait_blend, clampf(speed / FULL_GAIT_SPEED, 0.0, 1.0), clampf(6.0 * delta, 0.0, 1.0))
-	_gait_phase = wrapf(_gait_phase + travelled / STRIDE_LENGTH * TAU, 0.0, TAU)
+	_gait_phase = wrapf(_gait_phase + travelled / STRIDE_LENGTH * TAU * gait_rate, 0.0, TAU)
 	_idle_time += delta
 	_animate_legs()
 	_animate_body()

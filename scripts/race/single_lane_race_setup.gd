@@ -202,6 +202,15 @@ const TOUCH_DAMAGE_FRACTION := 0.2
 ## Share of its forward speed a car keeps after splashing into a puddle.
 const PUDDLE_SPEED_KEPT := 0.8
 const SPLASH_COLOR := Color(0.7, 0.85, 0.95, 1.0)
+
+## --- Hill landings (hilly tracks only) -------------------------------------------
+
+## A car falling at least this fast (px/s) that suddenly stops falling by
+## LANDING_SPEED_LOSS has come down off a crest: gravel crunch and a dust burst.
+const LANDING_FALL_SPEED := 260.0
+const LANDING_SPEED_LOSS := 200.0
+const LANDING_COOLDOWN := 0.5
+const DUST_COLOR := Color(0.62, 0.5, 0.36, 1.0)
 ## How far a car's drawn road line can be from a drawn rock's base and still run
 ## over it.
 const ROCK_HIT_TOLERANCE := 30.0
@@ -251,6 +260,8 @@ class LaneState:
 	var hold := 0.0
 	var cooldown := 0.0
 	var in_puddle := false
+	var fall_speed := 0.0
+	var landing_cooldown := 0.0
 	## World x the bump is centred on: wherever the piece being followed is, eased.
 	var centre := 0.0
 
@@ -280,6 +291,9 @@ var _slabs: Array[StaticBody2D] = []
 ## moved, so a lane's own y is its road surface and stays that way.
 var _surface_y: Array[float] = []
 var _wall: CollisionObject2D = null
+## A hilly track (RallyTrack) raises and drops its road along x; null on the
+## flat drag strip.
+var _rally_track: RallyTrack = null
 var _states: Array[LaneState] = []
 var _player_car_name := ""
 var _rocks: Array[TrackHazards.Rock] = []
@@ -328,44 +342,47 @@ func _ready() -> void:
 	RaceProgression.pending_entry_fee = 0
 	RaceProgression.pending_bet_field = []
 
-	# The player's own garage car races in the top lane, so whatever they
-	# assembled in the garage is what they drive here too — unless
-	# DragStripMenu sent us here to spectate a bet, in which case no player
-	# car is registered at all.
-	var lane := 0
-	if include_player:
-		var player_car := Inventory.get_selected_car()
-		if car_index >= 0 and car_index < Inventory.owned_cars.size():
-			player_car = Inventory.owned_cars[car_index]
-		var player_assembled := CarAssembler.assemble_from_car_data(player_car, cars, _spawn_position(lane))
-		if player_assembled != null:
-			_player_car_name = "Player_%s" % player_car.display_name
-			_register_car(_player_car_name, lane, player_assembled, race_controller, camera_targets)
-			if race_controller != null:
-				race_controller.race_ended.connect(_on_race_ended)
-			lane += 1
+	if DebugRace.consume():
+		_add_debug_field(cars, race_controller, camera_targets)
+	else:
+		# The player's own garage car races in the top lane, so whatever they
+		# assembled in the garage is what they drive here too — unless
+		# DragStripMenu sent us here to spectate a bet, in which case no player
+		# car is registered at all.
+		var lane := 0
+		if include_player:
+			var player_car := Inventory.get_selected_car()
+			if car_index >= 0 and car_index < Inventory.owned_cars.size():
+				player_car = Inventory.owned_cars[car_index]
+			var player_assembled := CarAssembler.assemble_from_car_data(player_car, cars, _spawn_position(lane))
+			if player_assembled != null:
+				_player_car_name = "Player_%s" % player_car.display_name
+				_register_car(_player_car_name, lane, player_assembled, race_controller, camera_targets)
+				if race_controller != null:
+					race_controller.race_ended.connect(_on_race_ended)
+				lane += 1
 
-	# A bet race reuses the exact field DragStripMenu already showed the
-	# player and took a bet against, rather than rolling a fresh one, so the
-	# car bet on is the actual car that races.
-	var rivals := bet_field if not bet_field.is_empty() \
-			else (RaceProgression.pick_rivals_for_tier(CAR_COUNT - lane, tier) if tier > 0 \
-			else RaceProgression.pick_rivals(CAR_COUNT - lane))
-	for rival in rivals:
-		var wheel_scenes: Array[PackedScene] = []
-		for wheel_path in rival["wheels"]:
-			wheel_scenes.append(load(wheel_path))
-		var car := CarAssembler.assemble(load(rival["body"]), wheel_scenes, load(rival["engine"]),
-				cars, _spawn_position(lane))
-		var car_name := "Car%d_%s_%s_%s" % [
-			lane,
-			String(rival["body"]).get_file().get_basename(),
-			String(rival["wheels"][0]).get_file().get_basename(),
-			String(rival["engine"]).get_file().get_basename(),
-		]
-		_register_car(car_name, lane, car, race_controller, camera_targets)
-		_field_car_names.append(car_name)
-		lane += 1
+		# A bet race reuses the exact field DragStripMenu already showed the
+		# player and took a bet against, rather than rolling a fresh one, so the
+		# car bet on is the actual car that races.
+		var rivals := bet_field if not bet_field.is_empty() \
+				else (RaceProgression.pick_rivals_for_tier(CAR_COUNT - lane, tier) if tier > 0 \
+				else RaceProgression.pick_rivals(CAR_COUNT - lane))
+		for rival in rivals:
+			var wheel_scenes: Array[PackedScene] = []
+			for wheel_path in rival["wheels"]:
+				wheel_scenes.append(load(wheel_path))
+			var car := CarAssembler.assemble(load(rival["body"]), wheel_scenes, load(rival["engine"]),
+					cars, _spawn_position(lane))
+			var car_name := "Car%d_%s_%s_%s" % [
+				lane,
+				String(rival["body"]).get_file().get_basename(),
+				String(rival["wheels"][0]).get_file().get_basename(),
+				String(rival["engine"]).get_file().get_basename(),
+			]
+			_register_car(car_name, lane, car, race_controller, camera_targets)
+			_field_car_names.append(car_name)
+			lane += 1
 
 	if camera != null:
 		camera.targets = camera_targets
@@ -383,6 +400,8 @@ func _physics_process(delta: float) -> void:
 	for state in _states:
 		_check_puddles(state)
 		_check_rocks(state)
+		if _rally_track != null:
+			_check_landing(state, delta)
 	if not cosmetic_drift_enabled:
 		return
 	for state in _states:
@@ -474,6 +493,7 @@ func _collect_lanes() -> void:
 	if track == null:
 		return
 	_wall = track.get_node_or_null("EndWall") as CollisionObject2D
+	_rally_track = track as RallyTrack
 	var lanes := track.get_node_or_null("Lanes")
 	var slabs := track.get_node_or_null("Slabs")
 	if lanes == null or slabs == null:
@@ -735,17 +755,17 @@ func _add_hazards() -> void:
 	add_child(hazards)
 	var band := Vector2(_surface_y[0] - HAZARD_BAND_MARGIN, _surface_y[CAR_COUNT - 1] + HAZARD_BAND_MARGIN)
 	if Weather.is_raining():
-		_puddles = TrackHazards.add_puddles(hazards, band)
+		_puddles = TrackHazards.add_puddles(hazards, band, _terrain_offset)
 	if randf() < TrackHazards.ROCKY_RACE_CHANCE:
 		var lane_layers: Array[int] = []
 		for slab in _slabs:
 			lane_layers.append(slab.collision_layer)
-		_rocks = TrackHazards.add_rocks(hazards, band, _surface_y.slice(0, CAR_COUNT), lane_layers.slice(0, CAR_COUNT))
+		_rocks = TrackHazards.add_rocks(hazards, band, _surface_y.slice(0, CAR_COUNT), lane_layers.slice(0, CAR_COUNT), _terrain_offset)
 
 ## Where this car's road line is drawn at x: what it runs over, as far as the
 ## player can see.
 func _drawn_road_point(state: LaneState, x: float) -> Vector2:
-	return Vector2(x, _surface_y[state.lane] + state.offset_at(x))
+	return Vector2(x, _surface_y[state.lane] + _terrain_offset(x) + state.offset_at(x))
 
 ## Splashing into a puddle costs the car some speed, once per puddle.
 func _check_puddles(state: LaneState) -> void:
@@ -770,6 +790,19 @@ func _check_rocks(state: LaneState) -> void:
 			continue
 		var road_y := _drawn_road_point(state, rock.position.x).y
 		rock.decide(state.lane, absf(road_y - rock.position.y) <= ROCK_HIT_TOLERANCE)
+
+func _check_landing(state: LaneState, delta: float) -> void:
+	state.landing_cooldown = maxf(state.landing_cooldown - delta, 0.0)
+	if not _is_racing(state):
+		return
+	var fall_speed := state.car.body.linear_velocity.y
+	if state.fall_speed > LANDING_FALL_SPEED and fall_speed < state.fall_speed - LANDING_SPEED_LOSS \
+			and state.landing_cooldown <= 0.0:
+		state.landing_cooldown = LANDING_COOLDOWN
+		var road_point := _drawn_road_point(state, state.car.body.global_position.x)
+		_spawn_sparks(road_point, DUST_COLOR)
+		RaceCarAudio.play(state.car.root, &"gravel_crunch", road_point, -4.0)
+	state.fall_speed = fall_speed
 
 func _front_x(car: CarAssembler.AssembledCar) -> float:
 	var front_x := car.body.global_position.x
@@ -801,8 +834,24 @@ func _spawn_sparks(at: Vector2, color: Color) -> void:
 
 ## On the lane's own road surface. World space, not lane-local: the cars are
 ## not parented to the lanes.
+## Every lane, the player's included, gets a fully random car, and the
+## result isn't recorded (no _on_race_ended), so testing never touches the
+## campaign or money.
+func _add_debug_field(cars: Node2D, race_controller: RaceController, camera_targets: Array[Node2D]) -> void:
+	for lane in CAR_COUNT:
+		var car_data := DebugRace.random_car()
+		var car := CarAssembler.assemble_from_car_data(car_data, cars, _spawn_position(lane))
+		var car_name := "Player_%s" % car_data.display_name if lane == 0 else "Car%d_%s" % [lane, car_data.display_name]
+		if lane == 0:
+			_player_car_name = car_name
+		_register_car(car_name, lane, car, race_controller, camera_targets)
+
 func _spawn_position(lane: int) -> Vector2:
-	return Vector2(SPAWN_X, _surface_y[lane])
+	return Vector2(SPAWN_X, _surface_y[lane] + _terrain_offset(SPAWN_X))
+
+## How far the road has risen or dropped off its flat lane line at x.
+func _terrain_offset(x: float) -> float:
+	return _rally_track.surface_offset_at(x) if _rally_track != null else 0.0
 
 func _on_race_ended(winner_name: String) -> void:
 	var player_won := winner_name == _player_car_name

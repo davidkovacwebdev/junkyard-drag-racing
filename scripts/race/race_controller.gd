@@ -93,6 +93,7 @@ const LOG_INTERVAL := 1.0
 
 func _ready() -> void:
 	DayNightCycle.advance_hours(4.0)
+	add_child(DurabilityOverlay.new())
 	camera = get_node_or_null(camera_path) as CameraFollow
 	_timer_hud = get_node_or_null(timer_hud_path) as RaceTimerHud
 	_results_screen = get_node_or_null(results_screen_path) as ResultsScreen

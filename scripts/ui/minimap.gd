@@ -25,6 +25,9 @@ const BARN_SHADE := Color(0.5, 0.16, 0.13)
 const ANVIL_COLOR := Color(0.26, 0.26, 0.28)
 const ANVIL_SHADE := Color(0.2, 0.2, 0.22)
 const EMBER_COLOR := Color(0.98, 0.62, 0.12)
+const RALLY_HILL := Color(0.45, 0.52, 0.31)
+const RALLY_HILL_SHADE := Color(0.38, 0.44, 0.26)
+const RALLY_PENNANT := Color(0.85, 0.45, 0.12)
 const HOME_ICON_SIZE := 7.0
 const LANDMARK_ICON_SIZE := 6.0
 const PLAYER_ARROW_SIZE := 7.0
@@ -193,6 +196,16 @@ func _draw_landmark(kind: MinimapMarker.Kind, at: Vector2) -> void:
 				at + Vector2(unit * 0.3, 0), at + Vector2(unit * 0.5, unit * 0.7), at + Vector2(unit * 0.15, unit * 0.7), at + Vector2(0, 0),
 			]), ANVIL_SHADE)
 			_draw_square(_icon_layer, at + Vector2(unit * 0.1, -unit * 0.85), unit * 0.2, EMBER_COLOR)
+		MinimapMarker.Kind.RALLY:
+			_icon_layer.draw_colored_polygon(PackedVector2Array([
+				at + Vector2(-unit, unit * 0.7), at + Vector2(-unit * 0.1, -unit * 0.3), at + Vector2(unit, unit * 0.7),
+			]), RALLY_HILL)
+			_icon_layer.draw_colored_polygon(PackedVector2Array([
+				at + Vector2(-unit * 0.1, -unit * 0.3), at + Vector2(unit, unit * 0.7), at + Vector2(unit * 0.4, unit * 0.7),
+			]), RALLY_HILL_SHADE)
+			_icon_layer.draw_colored_polygon(PackedVector2Array([
+				at + Vector2(-unit * 0.2, -unit * 0.3), at + Vector2(-unit * 0.2, -unit), at + Vector2(unit * 0.5, -unit * 0.75),
+			]), RALLY_PENNANT)
 
 func _draw_square(canvas: CanvasItem, at: Vector2, half_size: float, color: Color) -> void:
 	canvas.draw_colored_polygon(PackedVector2Array([

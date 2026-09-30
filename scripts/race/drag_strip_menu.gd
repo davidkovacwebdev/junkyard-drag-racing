@@ -1,11 +1,13 @@
 class_name DragStripMenu
 extends Control
-## The drag strip's front office: pick a tier, then either pay to drive the
+## The front office shared by every race venue (drag strip, rally): pick a tier, then either pay to drive the
 ## race yourself or bet on one car in a simulated field. Reached instead of
-## race_drag_strip.tscn directly (see drag_strip.tscn's Entrance) — this
+## the venue's race scene directly (see drag_strip.tscn's Entrance) — this
 ## screen decides the tier/car/bet, writes it to RaceProgression's pending_*
 ## fields, and change_scene_to_packed()s into the same race scene either
-## way, since a fresh scene has no other way to receive parameters.
+## way, since a fresh scene has no other way to receive parameters. Which race
+## scene that is comes from RaceProgression.menu_race_scene, set by the
+## RegistrationBooth the player walked into.
 ##
 ## Also resolves a bet: DragStripMenu spends the stake and writes
 ## last_bet_amount/last_bet_car_name before sending the player off to watch;
@@ -15,7 +17,6 @@ extends Control
 ## _ready() sees a result waiting and pays it out before the player does
 ## anything else.
 
-const RACE_SCENE := "res://scenes/race/race_drag_strip.tscn"
 const TIERS := [1, 2, 3, 4]
 const TIER_NAMES := { 1: "Scrapper", 2: "Junker", 3: "Hot Rod", 4: "Chop Shop" }
 const BET_AMOUNTS := [20, 50, 100]
@@ -107,7 +108,7 @@ func _show_page(page: Page) -> void:
 	_bet_pick_page.visible = page == Page.BET_PICK
 	match page:
 		Page.TIER:
-			_title_label.text = "Pick a Tier"
+			_title_label.text = "%s — Pick a Tier" % RaceProgression.menu_venue_name
 			for i in TIERS.size():
 				_tier_buttons[i].selected = _tier == TIERS[i]
 		Page.MODE:
@@ -179,7 +180,7 @@ func _on_race_pressed() -> void:
 	RaceProgression.pending_include_player = true
 	RaceProgression.pending_entry_fee = fee
 	RaceProgression.pending_bet_field = []
-	get_tree().change_scene_to_file(RACE_SCENE)
+	get_tree().change_scene_to_file(RaceProgression.menu_race_scene)
 
 func _on_bet_amount_pressed(index: int) -> void:
 	_bet_amount = BET_AMOUNTS[index]
@@ -258,4 +259,4 @@ func _on_bet_confirm_pressed() -> void:
 	RaceProgression.pending_bet_field = _bet_field
 	RaceProgression.last_bet_amount = _bet_amount
 	RaceProgression.last_bet_car_name = _bet_field_names[_bet_pick_index]
-	get_tree().change_scene_to_file(RACE_SCENE)
+	get_tree().change_scene_to_file(RaceProgression.menu_race_scene)

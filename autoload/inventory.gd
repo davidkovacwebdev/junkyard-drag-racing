@@ -193,13 +193,13 @@ func get_selected_car() -> CarModelData:
 		return null
 	return owned_cars[clampi(selected_index, 0, owned_cars.size() - 1)]
 
-## The car a new game starts with. Junk on purpose — tier-1 body, engine and
-## wheels — but picked so it actually finishes a drag race (~68s against a
-## ~20s best), winning roughly half its races at zero wins. RaceProgression's
+## The car a new game starts with. Junk on purpose (tier-1 body and engine on
+## plain standard wheels) but picked so it actually finishes a drag race (~40s),
+## winning roughly half its races at zero wins. RaceProgression's
 ## STARTING_PAR_TIME is tuned against this car, so retune both together.
 const STARTER_BODY := "res://scenes/parts/bodies/body_wrecked_car.tscn"
 const STARTER_ENGINE := "res://scenes/parts/engines/engine_lawn_mower.tscn"
-const STARTER_WHEEL := "res://scenes/parts/wheels/wheel_tv.tscn"
+const STARTER_WHEEL := "res://scenes/parts/wheels/wheel_standard.tscn"
 
 func _build_starter_car() -> CarModelData:
 	var car := CarModelData.new()

@@ -42,3 +42,13 @@ static func build(size: Vector2, radius: float) -> ConvexPolygonShape2D:
 	var shape := ConvexPolygonShape2D.new()
 	shape.points = points
 	return shape
+
+## A solid footprint for a landmark's drawn structure: a static body centred on
+## `rect` (in `parent`'s space) with slightly rounded corners.
+static func add_solid(parent: Node2D, rect: Rect2) -> void:
+	var body := StaticBody2D.new()
+	body.position = rect.get_center()
+	var shape := CollisionShape2D.new()
+	shape.shape = build(rect.size, minf(12.0, rect.size.y * 0.3))
+	body.add_child(shape)
+	parent.add_child(body)

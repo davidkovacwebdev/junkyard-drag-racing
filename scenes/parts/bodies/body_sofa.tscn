@@ -7,6 +7,10 @@
 script = ExtResource("2")
 id = &"body_sofa"
 display_name = "Grandma's Sofa"
+suspension_sag = 12.0
+suspension_travel = 22.0
+suspension_damping_ratio = 0.45
+suspension_wheel_protection = 0.6
 mass = 10.0
 durability = 40.0
 speed = 3.2

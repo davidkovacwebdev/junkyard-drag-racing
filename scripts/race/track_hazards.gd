@@ -11,6 +11,8 @@ const PUDDLE_COUNT_RANGE := Vector2i(6, 12)
 ## Hazards stay clear of the start drop and the finish line.
 const FIRST_HAZARD_X := 700.0
 const LAST_HAZARD_X := 5100.0
+## How far either side of a rock the road is sampled to tilt it to the slope.
+const SLOPE_SAMPLE := 16.0
 
 const ROCK_WIDTH_RANGE := Vector2(22.0, 40.0)
 const ROCK_HEIGHT_RANGE := Vector2(7.0, 14.0)
@@ -56,42 +58,53 @@ class Puddle:
 		return relative.length_squared() <= 1.0
 
 ## Rocks anywhere in `band` (the drawn track's y range) between the start and
-## the finish. `lane_surfaces` and `lane_layers` are each lane's real road height
-## and collision bit, in lane order.
-static func add_rocks(parent: Node, band: Vector2, lane_surfaces: Array[float], lane_layers: Array[int]) -> Array[Rock]:
+## the finish. `lane_surfaces` and `lane_layers` are each lane's flat road height
+## and collision bit, in lane order. `surface_offset(x)` is how far a hilly road
+## has risen or dropped off those flat heights; rocks sit on it, tilted to the
+## slope.
+static func add_rocks(parent: Node, band: Vector2, lane_surfaces: Array[float], lane_layers: Array[int], surface_offset := Callable()) -> Array[Rock]:
 	var rocks: Array[Rock] = []
 	for i in randi_range(ROCK_COUNT_RANGE.x, ROCK_COUNT_RANGE.y):
 		var outline := _rock_outline()
 		var rock := Rock.new()
-		rock.position = Vector2(randf_range(FIRST_HAZARD_X, LAST_HAZARD_X), randf_range(band.x, band.y))
+		var x := randf_range(FIRST_HAZARD_X, LAST_HAZARD_X)
+		var offset := _offset_at(surface_offset, x)
+		var slope := atan((_offset_at(surface_offset, x + SLOPE_SAMPLE) - _offset_at(surface_offset, x - SLOPE_SAMPLE)) / (SLOPE_SAMPLE * 2.0))
+		rock.position = Vector2(x, randf_range(band.x, band.y) + offset)
 		rock.half_width = outline[0].x * -1.0
 		var art := _polygon(outline, ROCK_COLOR)
 		art.name = "Rock"
 		parent.add_child(art)
 		art.global_position = rock.position
+		art.rotation = slope
 		for lane in lane_surfaces.size():
 			var collider := _rock_collider(outline, lane_layers[lane])
 			parent.add_child(collider)
-			collider.global_position = Vector2(rock.position.x, lane_surfaces[lane])
+			collider.global_position = Vector2(x, lane_surfaces[lane] + offset)
+			collider.rotation = slope
 			rock.colliders.append(collider)
 			rock.lane_layers.append(lane_layers[lane])
 			rock.decided.append(false)
 		rocks.append(rock)
 	return rocks
 
-static func add_puddles(parent: Node, band: Vector2) -> Array[Puddle]:
+static func add_puddles(parent: Node, band: Vector2, surface_offset := Callable()) -> Array[Puddle]:
 	var puddles: Array[Puddle] = []
 	for i in randi_range(PUDDLE_COUNT_RANGE.x, PUDDLE_COUNT_RANGE.y):
 		var radius := randf_range(PUDDLE_WIDTH_RANGE.x, PUDDLE_WIDTH_RANGE.y) * 0.5
 		var squish := randf_range(PUDDLE_SQUISH_RANGE.x, PUDDLE_SQUISH_RANGE.y)
 		var puddle := Puddle.new()
-		puddle.center = Vector2(randf_range(FIRST_HAZARD_X, LAST_HAZARD_X), randf_range(band.x, band.y))
+		var x := randf_range(FIRST_HAZARD_X, LAST_HAZARD_X)
+		puddle.center = Vector2(x, randf_range(band.x, band.y) + _offset_at(surface_offset, x))
 		puddle.radii = Vector2(radius, radius * squish)
 		var art := _build_puddle(radius, squish)
 		parent.add_child(art)
 		art.global_position = puddle.center
 		puddles.append(puddle)
 	return puddles
+
+static func _offset_at(surface_offset: Callable, x: float) -> float:
+	return surface_offset.call(x) if surface_offset.is_valid() else 0.0
 
 ## A lumpy half-dome, low enough for any wheel to climb over. Starts left to
 ## right along the base, so outline[0] is the left edge.

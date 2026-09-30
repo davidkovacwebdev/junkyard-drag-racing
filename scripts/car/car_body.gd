@@ -1,7 +1,8 @@
 class_name CarBody
 extends RigidBody2D
-## Physics body for a car's BODY part. Wheels are pinned onto this via
-## PinJoint2D at the body's "WheelMount*" Marker2D children. Normal driving
+## Physics body for a car's BODY part. Wheels hang off this on sprung
+## suspension at the body's "WheelMount*" Marker2D children (see
+## CarAssembler._suspend_wheel). Normal driving
 ## is pushed entirely by its wheels' real ground friction transmitted back
 ## through those joints (see car_wheel.gd) — `boost_force` is a separate,
 ## optional continuous push RaceController applies once a car crosses the

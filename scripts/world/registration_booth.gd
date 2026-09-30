@@ -27,6 +27,8 @@ const CLOSED_MESSAGE := "Closes at 8PM, open at 8AM"
 const CLOSED_COLOR := Color(0.95, 0.2, 0.2, 1)
 const OPEN_COLOR := Color(1, 1, 1, 1)
 
+## The race DragStripMenu (this booth's interior_scene) sends the player into.
+@export_file("*.tscn") var race_scene_path: String = "res://scenes/race/race_drag_strip.tscn"
 @export var wall_color: Color = Color(0.62, 0.24, 0.2, 1)
 @export var roof_color: Color = UiPalette.STEEL_SHADE
 @export var trim_color: Color = UiPalette.TRIM_OFF_WHITE
@@ -71,6 +73,8 @@ func interact(_actor: Node = null) -> void:
 	if not _is_open():
 		return
 	print(display_name)
+	RaceProgression.menu_race_scene = race_scene_path
+	RaceProgression.menu_venue_name = display_name
 	if interior_scene is PackedScene:
 		get_tree().change_scene_to_packed(interior_scene)
 

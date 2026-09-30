@@ -19,7 +19,7 @@ const DID_NOT_FINISH := 999.0
 
 ## Tuned so Inventory's starter car wins ~45% of its first races, ~25% after one
 ## win, and then needs better parts to keep up.
-const STARTING_PAR_TIME := 68.5
+const STARTING_PAR_TIME := 39.9
 const PAR_TIME_PER_WIN := 0.93
 ## Roughly the quickest thing in the roster; par never asks for more.
 const FASTEST_PAR_TIME := 23.0
@@ -76,6 +76,14 @@ var last_ai_race_field_names: Array[String] = []
 ## `last_ai_race_field_names`.
 var last_bet_amount: int = 0
 var last_bet_car_name: String = ""
+
+## Which race the shared pre-race menu (DragStripMenu) sends the player into,
+## and the venue name it shows. Set by the RegistrationBooth they walked into,
+## and kept across the menu <-> race loop so returning from a race stays at
+## the same venue.
+const DEFAULT_RACE_SCENE := "res://scenes/race/race_drag_strip.tscn"
+var menu_race_scene: String = DEFAULT_RACE_SCENE
+var menu_venue_name: String = "Drag Strip"
 
 var races_won: int = 0
 var _roster: Array[Dictionary] = []

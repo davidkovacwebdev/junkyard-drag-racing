@@ -37,7 +37,7 @@ extends CarWheel
 ## Random wobble in each step's length and timing, so it walks with a limp.
 @export var limp: float = 0.3
 ## World pixels of travel per step on the map.
-@export var map_step_distance: float = 70.0
+@export var map_step_distance: float = 140.0
 
 var _rng := RandomNumberGenerator.new()
 var _phase: float = 0.0
