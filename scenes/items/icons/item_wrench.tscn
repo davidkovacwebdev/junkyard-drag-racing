@@ -1,0 +1,16 @@
+[gd_scene format=3]
+
+[node name="WrenchIcon" type="Node2D"]
+rotation = -0.6
+
+[node name="Handle" type="Polygon2D" parent="."]
+color = Color(0.64, 0.68, 0.74, 1)
+polygon = PackedVector2Array(-5, 30, 5, 30, 6, -10, -6, -10)
+
+[node name="Head" type="Polygon2D" parent="."]
+color = Color(0.52, 0.56, 0.63, 1)
+polygon = PackedVector2Array(-14, -8, 14, -8, 16, -30, 7, -32, 5, -18, -5, -18, -7, -32, -16, -30)
+
+[node name="Shade" type="Polygon2D" parent="."]
+color = Color(0.52, 0.56, 0.63, 1)
+polygon = PackedVector2Array(1, 30, 5, 30, 6, -8, 2, -8)

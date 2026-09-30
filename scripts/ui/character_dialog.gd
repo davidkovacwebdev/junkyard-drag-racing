@@ -64,7 +64,10 @@ var _portrait_scale: float = 1.0
 var _tween: Tween = null
 var _closing: bool = false
 
+const GROUP := &"character_dialog"
+
 func _ready() -> void:
+	add_to_group(GROUP)
 	visible = false
 	_speech_board.gui_input.connect(_on_speech_board_input)
 	_speech = SpeechPlayer.new()

@@ -12,7 +12,8 @@ extends Node
 ##             moves on by itself; `{player}` becomes the player's name)
 ##   Misc    — wait, sound
 ##
-## Actors are cleaned up when the cutscene ends. Which one-time scenes have
+## Actors are cleaned up when the cutscene ends. A cutscene's `gives_quest`
+## goes into the quest log once the bars are gone. Which one-time scenes have
 ## played is saved (see `play_once()`, SaveSystem).
 
 signal started
@@ -26,8 +27,10 @@ const CAMERA_FOLLOW_SPEED := 4.0
 ## Same size the junkyard dealer stands at in the world.
 const ACTOR_SCALE := 0.55
 ## Subtitles stay up this long after they finish typing, plus a bit per letter.
-const SUBTITLE_HOLD := 0.9
-const SUBTITLE_HOLD_PER_LETTER := 0.025
+const SUBTITLE_HOLD := 0.75
+const SUBTITLE_HOLD_PER_LETTER := 0.02
+## How fast subtitles type out.
+const SUBTITLE_CHARACTERS_PER_SECOND := 55.0
 ## Advancing a tween this far finishes it outright; used to skip.
 const SKIP_STEP_SECONDS := 1000.0
 
@@ -55,7 +58,7 @@ var _tweens: Array[Tween] = []
 func _ready() -> void:
 	_build_screen()
 	_speech = SpeechPlayer.new()
-	_speech.characters_per_second = 40.0
+	_speech.characters_per_second = SUBTITLE_CHARACTERS_PER_SECOND
 	add_child(_speech)
 
 func is_active() -> bool:
@@ -77,6 +80,8 @@ func play(cutscene: Cutscene) -> void:
 	await _slide_letterbox(true)
 	await cutscene.play()
 	await _end()
+	if cutscene.gives_quest != null:
+		Quests.give(cutscene.gives_quest)
 
 ## Plays `cutscene` unless one with the same `id` already played on this save.
 func play_once(cutscene: Cutscene) -> void:
@@ -170,7 +175,9 @@ func title_card(text: String, seconds: float = 2.0) -> void:
 
 ## A line from `speaker_name`, typed into the bottom bar in their voice.
 ## `actor` (optional) does the talking squash while it types. Moves on by
-## itself once it has been up long enough to read.
+## itself once it has been up long enough to read. The line stays on screen
+## until the next one replaces it (or the cutscene ends), so back-to-back
+## lines flow into each other instead of blinking off in between.
 func subtitle(speaker_name: String, character: CharacterData, line: String, actor: CutsceneActor = null) -> void:
 	if _skipping:
 		return
@@ -185,7 +192,6 @@ func subtitle(speaker_name: String, character: CharacterData, line: String, acto
 	if is_instance_valid(actor):
 		actor.talking = false
 	await wait(SUBTITLE_HOLD + line.length() * SUBTITLE_HOLD_PER_LETTER)
-	_hide_subtitle()
 
 # --- Steps: camera ---------------------------------------------------------------------
 
@@ -344,6 +350,13 @@ func _build_screen() -> void:
 	_subtitle_line.anchor_top = 0.36
 	_subtitle_line.anchor_bottom = 0.95
 	_subtitle_line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	# Left-aligned and laid out in full before it types, so the line reads left
+	# to right in place instead of growing out from the middle, and a word
+	# never jumps to the next row halfway through.
+	_subtitle_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	_subtitle_line.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	_subtitle_line.vertical_alignment = VERTICAL_ALIGNMENT_TOP
+	_subtitle_line.visible_characters_behavior = TextServer.VC_CHARS_AFTER_SHAPING
 	_bottom_bar.add_child(_subtitle_line)
 	_hide_subtitle()
 

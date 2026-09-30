@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="BuildingData" format=3]
+
+[ext_resource type="Script" path="res://scripts/world/building_data.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/walls/wall_plank.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/roofs/roof_corrugated_tin.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/doors/door_plain.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/windows/window_square.tscn" id="5"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/decorations/decoration_crate_stack.tscn" id="6"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Shop"
+wall_scene = ExtResource("2")
+roof_scene = ExtResource("3")
+door_scene = ExtResource("4")
+window_scene = ExtResource("5")
+decoration_scene = ExtResource("6")

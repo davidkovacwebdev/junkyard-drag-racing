@@ -12,6 +12,7 @@ enum Kind {
 	RAMP,
 	FARM,
 	FORGE,
+	SHOP,
 }
 
 @export var kind: Kind = Kind.HOME

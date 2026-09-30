@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="QuestData" format=3 uid="uid://s77v20ufuygf"]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"gather_scraps"
+title = "Scraps! Scraps!"
+giver = "Grandpa"
+description = "Grandpa started tweaking again. It's better if you do what he says.
+
+Drive around the town using WASD, find a good dumpster and loot it using E."
+objective = "Loot the dumpsters and gather 20 scraps"
+scrap_goal = 20
+reward_money = 50
+reminder_line = "SCRAPS! Where are my SCRAPS?! Twenty! I counted!"
+turn_in_line = "Twenty scraps... beautiful. Here, fifty bucks. Don't spend it on beer. That's MY job."

@@ -193,6 +193,17 @@ func _draw_landmark(kind: MinimapMarker.Kind, at: Vector2) -> void:
 				at + Vector2(unit * 0.3, 0), at + Vector2(unit * 0.5, unit * 0.7), at + Vector2(unit * 0.15, unit * 0.7), at + Vector2(0, 0),
 			]), ANVIL_SHADE)
 			_draw_square(_icon_layer, at + Vector2(unit * 0.1, -unit * 0.85), unit * 0.2, EMBER_COLOR)
+		MinimapMarker.Kind.SHOP:
+			# A price tag: pointed end left, string hole in it.
+			_icon_layer.draw_colored_polygon(PackedVector2Array([
+				at + Vector2(-unit, 0), at + Vector2(-unit * 0.4, -unit * 0.7), at + Vector2(unit, -unit * 0.7),
+				at + Vector2(unit, unit * 0.7), at + Vector2(-unit * 0.4, unit * 0.7),
+			]), UiPalette.CARDBOARD_LIGHT)
+			_icon_layer.draw_colored_polygon(PackedVector2Array([
+				at + Vector2(unit * 0.6, -unit * 0.7), at + Vector2(unit, -unit * 0.7),
+				at + Vector2(unit, unit * 0.7), at + Vector2(unit * 0.6, unit * 0.7),
+			]), UiPalette.CARDBOARD_DARK)
+			_draw_square(_icon_layer, at + Vector2(-unit * 0.4, 0), unit * 0.18, UiPalette.VOID)
 
 func _draw_square(canvas: CanvasItem, at: Vector2, half_size: float, color: Color) -> void:
 	canvas.draw_colored_polygon(PackedVector2Array([

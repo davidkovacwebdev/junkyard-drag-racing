@@ -19,3 +19,7 @@ head_scene = ExtResource("5_head")
 hair_scene = ExtResource("6_hair")
 eyes_scene = ExtResource("7_eyes")
 accessory_scene = ExtResource("8_beard")
+voice_pitch_hz = 78.0
+voice_throat = 0.72
+voice_rasp = 1.0
+voice_wobble = 0.7

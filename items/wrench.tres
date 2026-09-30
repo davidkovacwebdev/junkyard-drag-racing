@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/items/icons/item_wrench.tscn" id="2_icon"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"wrench"
+display_name = "Wrench"
+price = 40
+description = "A good honest wrench. Straight, too. Won't bend on the first head you hit with it."
+icon_scene = ExtResource("2_icon")

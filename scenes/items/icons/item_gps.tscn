@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[node name="GpsIcon" type="Node2D"]
+rotation = 0.05
+
+[node name="Antenna" type="Polygon2D" parent="."]
+color = Color(0.15, 0.14, 0.13, 1)
+polygon = PackedVector2Array(8, -22, 15, -22, 15, -34, 8, -34)
+
+[node name="Body" type="Polygon2D" parent="."]
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-18, -24, 18, -24, 20, 28, -20, 28)
+
+[node name="Screen" type="Polygon2D" parent="."]
+color = Color(0.45, 0.62, 0.4, 1)
+polygon = PackedVector2Array(-12, -17, 12, -17, 12, 8, -12, 8)
+
+[node name="Arrow" type="Polygon2D" parent="."]
+color = Color(0.6, 0.15, 0.15, 1)
+polygon = PackedVector2Array(0, -12, 7, 4, 0, 0, -7, 4)
