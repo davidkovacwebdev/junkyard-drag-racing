@@ -35,6 +35,9 @@ var money: int = 0
 ## anything. Keeping them here (rather than only in the catalog) is what makes
 ## "what you grab is what you get" mean something.
 var spare_parts: Array[PartData] = []
+## Tools and gadgets bought at the shop (see ItemData). Owning one is all
+## there is to it: an item is either had or not.
+var owned_items: Array[ItemData] = []
 
 ## Add to the scrap tally. Returns the new total.
 func add_scrap(amount: int) -> int:
@@ -180,7 +183,23 @@ func _ready() -> void:
 ## nothing else — no spare parts, no scrap, no cash. Called on boot and again by
 ## MainMenu's New Game, since SaveSystem's Continue only overwrites these
 ## fields rather than re-running _ready().
+func has_item(id: StringName) -> bool:
+	for item in owned_items:
+		if item.id == id:
+			return true
+	return false
+
+## Pays for `item` and adds it. False (and nothing changes) when it's already
+## owned or the player can't afford it.
+func buy_item(item: ItemData) -> bool:
+	if item == null or has_item(item.id) or money < item.price:
+		return false
+	money -= item.price
+	owned_items.append(item)
+	return true
+
 func reset() -> void:
+	owned_items.clear()
 	owned_cars.clear()
 	selected_index = 0
 	scrap = 0

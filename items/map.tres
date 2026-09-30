@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/items/icons/item_map.tscn" id="2_icon"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"map"
+display_name = "Map"
+price = 25
+description = "Folded map of the whole area. Some roads on it even exist."
+icon_scene = ExtResource("2_icon")

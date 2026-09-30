@@ -175,9 +175,11 @@ func _start() -> void:
 		return
 	Inventory.reset()
 	WorldState.clear()
+	WorldState.remember_player(StoryDirector.OPENING_CAR_SPOT)
 	RaceProgression.reset()
 	DayNightCycle.reset()
 	Cutscenes.clear_seen()
+	Quests.reset()
 	SaveSystem.delete_save()
 	_character.display_name = player_name
 	PlayerProfile.player_name = player_name

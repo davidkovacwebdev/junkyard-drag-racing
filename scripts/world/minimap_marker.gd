@@ -12,6 +12,7 @@ enum Kind {
 	RAMP,
 	FARM,
 	FORGE,
+	SHOP,
 	RALLY,
 }
 

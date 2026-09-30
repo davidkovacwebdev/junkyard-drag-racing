@@ -29,3 +29,12 @@ extends Resource
 @export var player_name: String = ""
 ## The player's own look from character creation. Null on older saves.
 @export var player_character: CharacterData = null
+## The quest log (see Quests): quests in progress, finished ones, and the one
+## on the tracker.
+@export var quests_active: Array[QuestData] = []
+@export var quests_completed: Array[QuestData] = []
+@export var tracked_quest: QuestData = null
+## Ids of quests whose goal is met, waiting to be handed back to the giver.
+@export var quests_ready: Array[StringName] = []
+## Tools and gadgets bought at the shop (see ItemData).
+@export var owned_items: Array[ItemData] = []

@@ -1,0 +1,70 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://scripts/shop/shop.gd" id="1_shop"]
+[ext_resource type="Script" path="res://scripts/garage/workshop_backdrop.gd" id="2_backdrop"]
+[ext_resource type="Script" path="res://scripts/character/character_rig.gd" id="3_rig"]
+[ext_resource type="Resource" path="res://characters/shopkeeper.tres" id="4_keeper"]
+[ext_resource type="PackedScene" path="res://scenes/ui/character_dialog.tscn" id="5_dialog"]
+[ext_resource type="Resource" path="res://items/wrench.tres" id="6_wrench"]
+[ext_resource type="Resource" path="res://items/gps.tres" id="7_gps"]
+[ext_resource type="Resource" path="res://items/binoculars.tres" id="8_binoculars"]
+[ext_resource type="Resource" path="res://items/map.tres" id="9_map"]
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="10_item"]
+
+[node name="Shop" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_shop")
+stock = Array[ExtResource("10_item")]([ExtResource("6_wrench"), ExtResource("7_gps"), ExtResource("8_binoculars"), ExtResource("9_map")])
+
+[node name="Background" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("2_backdrop")
+floor_height = 170.0
+
+[node name="ShelfBoard" type="Polygon2D" parent="."]
+color = Color(0.5, 0.37, 0.24, 1)
+polygon = PackedVector2Array(300, 248, 852, 246, 852, 262, 300, 264)
+
+[node name="ShelfShade" type="Polygon2D" parent="."]
+color = Color(0.4, 0.29, 0.19, 1)
+polygon = PackedVector2Array(300, 264, 852, 262, 852, 270, 300, 272)
+
+[node name="Goods" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Shopkeeper" type="Node2D" parent="."]
+position = Vector2(390, 600)
+scale = Vector2(1.2, 1.2)
+script = ExtResource("3_rig")
+character_data = ExtResource("4_keeper")
+
+[node name="CounterTop" type="Polygon2D" parent="."]
+color = Color(0.55, 0.4, 0.28, 1)
+polygon = PackedVector2Array(180, 428, 640, 424, 646, 444, 176, 446)
+
+[node name="CounterBody" type="Polygon2D" parent="."]
+color = Color(0.46, 0.33, 0.22, 1)
+polygon = PackedVector2Array(186, 446, 640, 444, 640, 648, 186, 648)
+
+[node name="CounterShade" type="Polygon2D" parent="."]
+color = Color(0.4, 0.29, 0.19, 1)
+polygon = PackedVector2Array(610, 444, 640, 444, 640, 648, 610, 648)
+
+[node name="Dialog" parent="." instance=ExtResource("5_dialog")]

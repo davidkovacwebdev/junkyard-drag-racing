@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/items/icons/item_gps.tscn" id="2_icon"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"gps"
+display_name = "GPS"
+price = 400
+description = "Talks to satellites, tells you where you are. Batteries not included. Batteries not available."
+icon_scene = ExtResource("2_icon")

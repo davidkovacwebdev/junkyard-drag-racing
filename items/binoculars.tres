@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/items/icons/item_binoculars.tscn" id="2_icon"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"binoculars"
+display_name = "Binoculars"
+price = 150
+description = "See trouble comin' a mile off. Or see scrap. Mostly scrap."
+icon_scene = ExtResource("2_icon")

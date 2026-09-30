@@ -28,6 +28,9 @@
 [ext_resource type="PackedScene" path="res://scenes/world/rally_stage.tscn" id="24_rally"]
 [ext_resource type="Script" uid="uid://w1y26uy8y6we" path="res://scripts/world/floating_trash_spawner.gd" id="floating_trash_spawner"]
 [ext_resource type="Script" uid="uid://cgja4fmhwax6j" path="res://scripts/world/shark_spawner.gd" id="shark_spawner"]
+[ext_resource type="Resource" path="res://buildings/shop.tres" id="shop_building"]
+[ext_resource type="PackedScene" path="res://scenes/shop/shop.tscn" id="shop_interior"]
+[ext_resource type="Script" uid="uid://bu5uxu5bnirmt" path="res://scripts/world/story_director.gd" id="story_director"]
 
 [sub_resource type="Curve2D" id="Curve2D_688af"]
 _data = {
@@ -269,7 +272,7 @@ position = Vector2(7150, 1650)
 
 [node name="MinimapMarker" type="Node2D" parent="RallyStage" unique_id=1873546020]
 script = ExtResource("21_marker")
-kind = 6
+kind = 7
 
 [node name="Sortables" type="Node2D" parent="." unique_id=58475017]
 y_sort_enabled = true
@@ -291,6 +294,16 @@ scale = Vector2(0.5, 0.5)
 building_data = ExtResource("11")
 display_name = "Garage"
 interior_scene = ExtResource("3")
+
+[node name="Shop" parent="Sortables" unique_id=2001893504 instance=ExtResource("2")]
+position = Vector2(620, 560)
+building_data = ExtResource("shop_building")
+display_name = "Shop"
+interior_scene = ExtResource("shop_interior")
+
+[node name="MinimapMarker" type="Node2D" parent="Sortables/Shop" unique_id=844854616]
+script = ExtResource("21_marker")
+kind = 6
 
 [node name="Trash" type="Node2D" parent="Sortables" unique_id=260557314]
 script = ExtResource("7")
@@ -359,3 +372,6 @@ tree_data = ExtResource("18_hbyw3")
 [node name="Rain" type="Node2D" parent="." unique_id=597439047]
 z_index = 900
 script = ExtResource("20_rain")
+
+[node name="StoryDirector" type="Node" parent="." unique_id=1820218251]
+script = ExtResource("story_director")

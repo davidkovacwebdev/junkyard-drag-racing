@@ -1,0 +1,11 @@
+[gd_scene format=3]
+
+[node name="BentWrench" type="Node2D"]
+
+[node name="Handle" type="Polygon2D" parent="."]
+color = Color(0.64, 0.68, 0.74, 1)
+polygon = PackedVector2Array(-4, 8, 4, 8, 5, -16, 12, -38, 4, -40, -3, -18)
+
+[node name="Head" type="Polygon2D" parent="."]
+color = Color(0.52, 0.56, 0.63, 1)
+polygon = PackedVector2Array(0, -34, 22, -40, 22, -60, 15, -60, 14, -48, 8, -47, 7, -58, 0, -56)

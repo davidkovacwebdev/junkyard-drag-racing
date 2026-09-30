@@ -79,6 +79,7 @@ func _snapshot() -> SaveData:
 	data.scrap = Inventory.scrap
 	data.money = Inventory.money
 	data.spare_parts = Inventory.spare_parts.duplicate()
+	data.owned_items = Inventory.owned_items.duplicate()
 	data.player_position = WorldState.player_position
 	data.has_player_position = WorldState.has_player_position
 	data.looted = WorldState.get_looted_snapshot()
@@ -88,6 +89,10 @@ func _snapshot() -> SaveData:
 	data.seen_cutscenes = Cutscenes.get_seen()
 	data.player_name = PlayerProfile.player_name
 	data.player_character = PlayerProfile.character
+	data.quests_active = Quests.active.duplicate()
+	data.quests_completed = Quests.completed.duplicate()
+	data.tracked_quest = Quests.tracked
+	data.quests_ready = Quests.ready_ids.duplicate()
 	return data
 
 func _write_save(data: SaveData) -> void:
@@ -111,6 +116,7 @@ func load_game() -> bool:
 	Inventory.scrap = data.scrap
 	Inventory.money = data.money
 	Inventory.spare_parts = data.spare_parts
+	Inventory.owned_items = data.owned_items
 	WorldState.player_position = data.player_position
 	WorldState.has_player_position = data.has_player_position
 	WorldState.restore_looted(data.looted)
@@ -120,6 +126,7 @@ func load_game() -> bool:
 	Cutscenes.restore_seen(data.seen_cutscenes)
 	PlayerProfile.player_name = data.player_name
 	PlayerProfile.character = data.player_character
+	Quests.restore(data.quests_active, data.quests_completed, data.quests_ready, data.tracked_quest)
 	return true
 
 ## Called by New Game so starting over doesn't leave a stale save

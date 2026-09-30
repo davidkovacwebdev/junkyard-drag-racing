@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="QuestData" format=3 uid="uid://csbb7fnhpkqq7"]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"better_wrench"
+title = "The Better Wrench"
+giver = "Grandpa"
+description = "Grandpa needs a new wrench. There doesn't seem to be one under the bench. Granpa said that just so he could bust a rhyme.
+
+Go find a new one"
+objective = "Find Grandpa's better wrench ( Try the shop )"

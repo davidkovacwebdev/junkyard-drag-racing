@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="GrandpaIntroCutscene" format=3 uid="uid://cmbulro3s88nc"]
+
+[ext_resource type="Script" uid="uid://hfbh4tpgxvgg" path="res://scripts/cutscenes/grandpa_intro_cutscene.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+lines = ["Ever since that trash bag crushed my legs I can't do SHIT!", "{player}! Go get me the better wrench.", "This one's bent ever since I used it to hit that wench.", "You can find the new one under the bench.", "Or if it's not there... I dunno. Go find it!"]

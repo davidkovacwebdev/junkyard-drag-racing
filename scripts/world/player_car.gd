@@ -617,7 +617,24 @@ func _find_interactables() -> Array[Object]:
 		var target_name = body.get("display_name")
 		if typeof(target_name) == TYPE_STRING and target_name != "":
 			found.append(body)
+	# A target can ask to win over its neighbours with a duck-typed
+	# get_interact_priority() (a person standing by a building's door returns
+	# 1, so E talks to them instead of walking into the building). Everything
+	# else is 0 and keeps its physics order.
+	var ranked := found.map(func(target: Object) -> Array: return [_interact_priority(target), target])
+	for i in ranked.size():
+		ranked[i].append(i)
+	ranked.sort_custom(func(a: Array, b: Array) -> bool:
+		return a[0] > b[0] if a[0] != b[0] else a[2] < b[2])
+	found.clear()
+	for entry in ranked:
+		found.append(entry[1])
 	return found
+
+func _interact_priority(target: Object) -> int:
+	if target.has_method("get_interact_priority"):
+		return int(target.call("get_interact_priority"))
+	return 0
 
 ## Cutscenes play without the HUD in the way. The night tint lives in the
 ## same layer but is part of the world's look, so it stays.

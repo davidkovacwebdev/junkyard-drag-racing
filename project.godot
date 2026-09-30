@@ -36,6 +36,8 @@ RaceProgression="*res://autoload/race_progression.gd"
 DevMenu="*res://scenes/ui/dev_menu.tscn"
 FpsCounter="*res://autoload/fps_counter.gd"
 Cutscenes="*res://autoload/cutscenes.gd"
+Quests="*res://autoload/quests.gd"
+Journal="*res://autoload/journal.gd"
 
 [display]
 

@@ -4,8 +4,8 @@ extends CanvasLayer
 ## tested without digging up half the map first.
 ##
 ## F1 toggles it, from any scene, M adds money, P stocks the spare stash with
-## every part, F2 plays the demo cutscene and F4 shows part durability bars in
-## races (DurabilityOverlay). The rows are the very same `PartSlot` the
+## every part, F2 plays the demo cutscene, F3 replays Grandpa's opening scene and
+## F4 shows part durability bars in races (DurabilityOverlay). The rows are the very same `PartSlot` the
 ## garage uses, so a part looks and reads identically in both places; clicking
 ## one drops that part on the ground as a real `PartPickup` beside the car. A dev
 ## spawn is not special-cased anywhere downstream - it is collected, copied and
@@ -152,6 +152,17 @@ func _unhandled_input(event: InputEvent) -> void:
 		KEY_F4:
 			DurabilityOverlay.shown = not DurabilityOverlay.shown
 			get_viewport().set_input_as_handled()
+		KEY_F3:
+			_replay_opening()
+			get_viewport().set_input_as_handled()
+
+## Needs the open world, where StoryDirector and Grandpa live.
+func _replay_opening() -> void:
+	var director := get_tree().get_first_node_in_group(StoryDirector.GROUP) as StoryDirector
+	if director == null:
+		_set_status("Grandpa's opening only replays in the open world.")
+		return
+	director.replay_opening()
 
 func _add_dev_money() -> void:
 	Inventory.money += _DEV_MONEY_AMOUNT

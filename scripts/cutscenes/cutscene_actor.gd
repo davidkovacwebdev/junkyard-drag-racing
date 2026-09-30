@@ -27,6 +27,11 @@ func setup(character: CharacterData, scale_factor: float) -> void:
 	rig.character_data = character
 	_body.add_child(rig)
 
+## Puts `prop` on the character (a held tool, say). Its position is in
+## character space, so it bobs, flips and tips along with the body.
+func attach(prop: Node2D) -> void:
+	_body.add_child(prop)
+
 func face(right: bool) -> void:
 	_facing = 1.0 if right else -1.0
 

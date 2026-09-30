@@ -14,6 +14,12 @@ const NAMES: Array[StringName] = [
 	&"dialog_open",
 	&"cutscene_whoosh",
 	&"outfit_swap",
+	&"journal_flip",
+	&"quest_added",
+	&"shop_bell",
+	&"quest_complete",
+	&"beer_sip",
+	&"grandpa_twitch",
 	&"ignition_click",
 	&"headlight_click",
 	&"engine_stall",
@@ -98,6 +104,9 @@ const UI_SOUNDS: Array[StringName] = [
 	&"dialog_open",
 	&"cutscene_whoosh",
 	&"outfit_swap",
+	&"journal_flip",
+	&"quest_added",
+	&"quest_complete",
 ]
 
 const AMBIENT_SOUNDS: Array[StringName] = [
@@ -131,6 +140,12 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"dialog_open": return _dialog_open(rng)
 		&"cutscene_whoosh": return _cutscene_whoosh(rng)
 		&"outfit_swap": return _outfit_swap(rng)
+		&"journal_flip": return _journal_flip(rng)
+		&"quest_added": return _quest_added(rng)
+		&"shop_bell": return _shop_bell()
+		&"quest_complete": return _quest_complete()
+		&"beer_sip": return _beer_sip(rng)
+		&"grandpa_twitch": return _grandpa_twitch(rng)
 		&"ignition_click": return _ignition_click(rng)
 		&"headlight_click": return _headlight_click(rng)
 		&"engine_stall": return _engine_stall(rng)
@@ -576,6 +591,89 @@ static func _outfit_swap(rng: RandomNumberGenerator) -> PackedFloat32Array:
 	Synth.mix_into(out, flap.call(1300.0), 0.0, 0.7)
 	Synth.mix_into(out, flap.call(2100.0), 0.07, 1.0)
 	return Synth.finish(out, 0.6)
+
+## A beat-up notebook flipped open: a papery riffle, then a soft cardboard
+## slap as the cover lands.
+static func _journal_flip(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.noise_sweep(0.16, {
+		freq = [[0.0, 3200.0], [0.14, 1600.0]],
+		q = [[0.0, 1.2]],
+		amp = [[0.0, 0.0], [0.02, 0.6], [0.06, 0.25], [0.09, 0.7], [0.16, 0.0]],
+	}, rng)
+	Synth.mix_into(out, Synth.thump(0.12, 380.0, 0.003, 0.06, rng), 0.12, 0.7)
+	return Synth.finish(out, 0.6)
+
+## Something new scribbled in the journal: a pencil scratch and a cheap
+## two-note toy-keyboard "ding-dong", rising.
+static func _quest_added(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.noise_sweep(0.12, {
+		freq = [[0.0, 4200.0], [0.12, 2600.0]],
+		q = [[0.0, 3.0]],
+		amp = [[0.0, 0.0], [0.01, 0.5], [0.05, 0.2], [0.08, 0.5], [0.12, 0.0]],
+	}, rng)
+	var note := func(frequency: float) -> PackedFloat32Array:
+		return Synth.tones(0.22, [[[0.0, frequency]], [[0.0, frequency * 2.0]]], {
+			square = 0.3,
+			amp = [[0.0, 0.0], [0.005, 1.0], [0.08, 0.5], [0.22, 0.0]],
+		})
+	var full := Synth.silence(0.5)
+	Synth.mix_into(full, out, 0.0, 0.5)
+	Synth.mix_into(full, note.call(523.0), 0.1, 0.8)
+	Synth.mix_into(full, note.call(784.0), 0.24, 0.8)
+	return Synth.finish(full, 0.7)
+
+## The little bell over a shop door: two quick tinny dings as the door knocks
+## it, the second softer, ringing out.
+static func _shop_bell() -> PackedFloat32Array:
+	var ding := func(frequency: float) -> PackedFloat32Array:
+		return Synth.tones(0.5, [[[0.0, frequency]], [[0.0, frequency * 2.76]], [[0.0, frequency * 5.4]]], {
+			square = 0.05,
+			amp = [[0.0, 0.0], [0.003, 1.0], [0.06, 0.45], [0.5, 0.0]],
+		})
+	var out := Synth.silence(0.65)
+	Synth.mix_into(out, ding.call(1320.0), 0.0, 0.8)
+	Synth.mix_into(out, ding.call(1250.0), 0.13, 0.5)
+	return Synth.finish(out, 0.6)
+
+## A quest ticked off: three cheap toy-keyboard notes climbing, the last
+## one held.
+static func _quest_complete() -> PackedFloat32Array:
+	var note := func(frequency: float, length: float) -> PackedFloat32Array:
+		return Synth.tones(length, [[[0.0, frequency]], [[0.0, frequency * 2.0]]], {
+			square = 0.3,
+			amp = [[0.0, 0.0], [0.005, 1.0], [length * 0.4, 0.55], [length, 0.0]],
+		})
+	var out := Synth.silence(0.75)
+	Synth.mix_into(out, note.call(523.0, 0.14), 0.0, 0.75)
+	Synth.mix_into(out, note.call(659.0, 0.14), 0.12, 0.75)
+	Synth.mix_into(out, note.call(784.0, 0.45), 0.24, 0.85)
+	return Synth.finish(out, 0.7)
+
+## A long wet slurp off a beer bottle, ending in a little glug.
+static func _beer_sip(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.noise_sweep(0.32, {
+		freq = [[0.0, 900.0], [0.25, 1600.0], [0.32, 700.0]],
+		q = [[0.0, 4.0]],
+		amp = [[0.0, 0.0], [0.04, 0.6], [0.2, 0.8], [0.3, 0.2], [0.32, 0.0]],
+	}, rng)
+	Synth.mix_into(out, Synth.tones(0.08, [[[0.0, 260.0], [0.08, 180.0]]], {
+		amp = [[0.0, 0.0], [0.01, 1.0], [0.08, 0.0]],
+	}), 0.3, 0.5)
+	return Synth.finish(out, 0.6)
+
+## A fit coming on: a jittery, stuttering buzz, like a shorting wire.
+static func _grandpa_twitch(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.6)
+	var t := 0.0
+	while t < 0.55:
+		var length := rng.randf_range(0.02, 0.05)
+		var pitch := rng.randf_range(90.0, 180.0)
+		Synth.mix_into(out, Synth.tones(length, [[[0.0, pitch]]], {
+			square = 0.8,
+			amp = [[0.0, 0.0], [0.003, 1.0], [length, 0.0]],
+		}), t, rng.randf_range(0.5, 1.0))
+		t += length + rng.randf_range(0.005, 0.03)
+	return Synth.finish(out, 0.55)
 
 ## Tiny dull tick as the cursor slides onto a button — a fingernail on tin.
 static func _ui_hover() -> PackedFloat32Array:
