@@ -1,0 +1,54 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/world/crop_field.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/world/farm_prop.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/audio/ambient_call.gd" id="3"]
+
+[node name="CropFields" type="Node2D"]
+y_sort_enabled = true
+
+[node name="Wheat" type="Node2D" parent="."]
+position = Vector2(-460, -300)
+script = ExtResource("1")
+field_size = Vector2(440, 280)
+
+[node name="Cabbage" type="Node2D" parent="."]
+position = Vector2(20, -290)
+script = ExtResource("1")
+crop = 2
+field_size = Vector2(420, 260)
+
+[node name="Plowed" type="Node2D" parent="."]
+position = Vector2(-450, 20)
+script = ExtResource("1")
+crop = 0
+field_size = Vector2(430, 260)
+
+[node name="Wheat2" type="Node2D" parent="."]
+position = Vector2(30, 30)
+script = ExtResource("1")
+field_size = Vector2(400, 250)
+
+[node name="Scarecrow" type="StaticBody2D" parent="."]
+position = Vector2(-240, -150)
+scale = Vector2(1.4, 1.4)
+script = ExtResource("2")
+kind = 6
+
+[node name="HayBale" type="StaticBody2D" parent="."]
+position = Vector2(-10, 10)
+script = ExtResource("2")
+kind = 1
+
+[node name="FenceFront" type="StaticBody2D" parent="."]
+position = Vector2(-470, 320)
+script = ExtResource("2")
+length = 920.0
+
+[node name="Crickets" type="AudioStreamPlayer2D" parent="."]
+max_distance = 900.0
+volume_db = -20.0
+script = ExtResource("3")
+sound_name = &"cricket_chirp"
+interval_range = Vector2(1.5, 4)
+pitch_variation = 0.1

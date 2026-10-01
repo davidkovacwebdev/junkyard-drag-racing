@@ -2,11 +2,11 @@
 class_name FarmProp
 extends StaticBody2D
 ## One piece of the farm landmark: a fence run, a hay bale, a windmill, a water
-## trough, the roadside sign or the dirt yard under it all. Flat polygons only,
+## trough, a scarecrow, the roadside sign or the dirt yard under it all. Flat polygons only,
 ## drawn in _draw(), origin on the ground (like trees) so it Y-sorts against the
 ## car. The collision footprint hugs the ground and is built at runtime.
 
-enum Kind { FENCE, HAY_BALE, WINDMILL, TROUGH, SIGN, YARD }
+enum Kind { FENCE, HAY_BALE, WINDMILL, TROUGH, SIGN, YARD, SCARECROW }
 
 @export var kind: Kind = Kind.FENCE:
 	set(value):
@@ -45,6 +45,7 @@ const WATER := Color(0.35, 0.5, 0.55)
 const DIRT := Color(0.62, 0.5, 0.34)
 const DIRT_DARK := Color(0.56, 0.44, 0.3)
 const VANE_RED := Color(0.62, 0.2, 0.16)
+const SHIRT := Color(0.5, 0.26, 0.2)
 
 const FENCE_POST_SPACING := 40.0
 const FENCE_DEPTH_POST_SPACING := 30.0
@@ -77,6 +78,8 @@ func _build_collision() -> void:
 			footprint = Rect2(-26.0, -14.0, 52.0, 14.0)
 		Kind.TROUGH:
 			footprint = Rect2(-32.0, -12.0, 64.0, 12.0)
+		Kind.SCARECROW:
+			footprint = Rect2(-8.0, -8.0, 16.0, 8.0)
 		_:
 			return
 	var shape := RectangleShape2D.new()
@@ -103,6 +106,8 @@ func _draw() -> void:
 			_draw_sign()
 		Kind.YARD:
 			_draw_yard()
+		Kind.SCARECROW:
+			_draw_scarecrow()
 
 ## Deterministic wobble so posts aren't all the same height.
 func _jitter(index: int, amount: float) -> float:
@@ -193,3 +198,18 @@ func _draw_yard() -> void:
 	]), DIRT)
 	for patch in [Rect2(w * 0.15, h * 0.55, 60.0, 14.0), Rect2(w * 0.6, h * 0.25, 80.0, 12.0), Rect2(w * 0.42, h * 0.8, 50.0, 10.0)]:
 		draw_colored_polygon(FlatProps.octagon(patch.get_center(), patch.size.x / 2.0, patch.size.y / 2.0), DIRT_DARK)
+
+## A scarecrow on its post: a T of an old shirt, a hubcap for a face (its gag)
+## and a floppy hat.
+func _draw_scarecrow() -> void:
+	draw_colored_polygon(FlatProps.octagon(Vector2(4.0, 0.0), 18.0, 5.0), UiPalette.SHADOW)
+	draw_rect(Rect2(-4.0, -70.0, 8.0, 70.0), WOOD_DARK)
+	draw_colored_polygon(PackedVector2Array([
+		Vector2(-40.0, -96.0), Vector2(40.0, -100.0), Vector2(40.0, -86.0), Vector2(16.0, -86.0),
+		Vector2(18.0, -54.0), Vector2(-16.0, -52.0), Vector2(-14.0, -84.0), Vector2(-40.0, -82.0),
+	]), SHIRT)
+	draw_colored_polygon(FlatProps.octagon(Vector2(0.0, -112.0), 14.0, 14.0), UiPalette.STEEL_BASE)
+	draw_colored_polygon(PackedVector2Array([
+		Vector2(-24.0, -122.0), Vector2(-10.0, -128.0), Vector2(-8.0, -144.0), Vector2(10.0, -142.0),
+		Vector2(12.0, -128.0), Vector2(26.0, -120.0),
+	]), STRAW_SHADE)
