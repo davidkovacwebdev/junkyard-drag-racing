@@ -22,4 +22,4 @@ accessory_scene = ExtResource("8")
 voice_pitch_hz = 82.0
 voice_throat = 0.78
 voice_rasp = 0.4
-idle_lines = PackedStringArray("Toss two or three loose parts in the pots. I'll melt 'em down and hammer out somethin' new. No refunds.", "Hot iron, cold beer. That's the job.", "Bring me junk, I'll make you different junk.", "Mind the sparks. Lost an eyebrow last Tuesday. Hammered a new one.")
+idle_lines = PackedStringArray("Toss two or three loose parts in the pots. I\'ll melt \'em down and hammer out somethin\' new. No refunds.", "Hot iron, cold beer. That\'s the job.", "Bring me junk, I\'ll make you different junk.", "Mind the sparks. Lost an eyebrow last Tuesday. Hammered a new one.")

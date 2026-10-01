@@ -21,4 +21,4 @@ voice_pitch_hz = 118.0
 voice_throat = 0.9
 voice_rasp = 0.2
 voice_wobble = 0.35
-idle_lines = PackedStringArray("Howdy! Fine horse here. Pulls a car better'n any motor, and she runs on hay.", "Horse don't need gas, don't need oil. Just apples and a talkin'-to.", "Reckon a horse beats a lawn mower. Reckon it every day.", "She kicked a tractor once. Tractor lost.")
+idle_lines = PackedStringArray("Howdy! Fine horse here. Pulls a car better\'n any motor, and she runs on hay.", "Horse don\'t need gas, don\'t need oil. Just apples and a talkin\'-to.", "Reckon a horse beats a lawn mower. Reckon it every day.", "She kicked a tractor once. Tractor lost.")

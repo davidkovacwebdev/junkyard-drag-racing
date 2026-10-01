@@ -1,6 +1,6 @@
-[gd_resource type="Resource" script_class="CharacterData" format=3]
+[gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://c0g318xkp51k8"]
 
-[ext_resource type="Script" path="res://scripts/character/character_data.gd" id="1_data"]
+[ext_resource type="Script" uid="uid://ckj8s3h32w3wv" path="res://scripts/character/character_data.gd" id="1_data"]
 [ext_resource type="PackedScene" path="res://scenes/characters/parts/legs/legs_standard.tscn" id="2_legs"]
 [ext_resource type="PackedScene" path="res://scenes/characters/parts/boots/boots_work.tscn" id="3_boots"]
 [ext_resource type="PackedScene" path="res://scenes/characters/parts/torsos/torso_bowler.tscn" id="4_torso"]
@@ -23,4 +23,4 @@ voice_pitch_hz = 175.0
 voice_throat = 1.12
 voice_rasp = 0.15
 voice_wobble = 0.1
-idle_lines = PackedStringArray("Welcome, welcome! Everything's for sale. Almost everything works.", "Ah, {player}! My favourite customer. Today.", "No refunds, no returns, no questions. Three no's, that's a good shop.", "Fresh stock! Well. Stock.", "If it rattles, that means it's still got character.")
+idle_lines = PackedStringArray("Welcome, welcome! Everything\'s for sale. Almost everything works.", "Ah, {player}! My favourite customer. Today.", "No refunds, no returns, no questions. Three no\'s, that\'s a good shop.", "Fresh stock! Well. Stock.", "If it rattles, that means it\'s still got character.")
