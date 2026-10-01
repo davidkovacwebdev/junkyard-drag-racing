@@ -13,6 +13,11 @@ const WORLD_SHOTS := [
 	{"name": "forge", "scene": "res://scenes/world/scrap_forge.tscn", "zoom": 1.1},
 	{"name": "drag_strip", "scene": "res://scenes/world/drag_strip.tscn", "zoom": 0.45},
 	{"name": "rally_stage", "scene": "res://scenes/world/rally_stage.tscn", "zoom": 0.45},
+	{"name": "fishing_port", "scene": "res://scenes/world/fishing_port.tscn", "zoom": 0.8},
+	{"name": "lighthouse_point", "scene": "res://scenes/world/lighthouse_point.tscn", "zoom": 1.0},
+	{"name": "oil_field", "scene": "res://scenes/world/oil_field.tscn", "zoom": 0.9},
+	{"name": "crop_fields", "scene": "res://scenes/world/crop_fields.tscn", "zoom": 0.8},
+	{"name": "graveyard", "scene": "res://scenes/world/graveyard.tscn", "zoom": 0.9},
 ]
 
 const PROP_ROW := [

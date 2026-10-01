@@ -76,6 +76,11 @@ const NAMES: Array[StringName] = [
 	&"truck_honk",
 	&"rain_loop",
 	&"furnace_loop",
+	&"gull_cry",
+	&"foghorn",
+	&"crow_caw",
+	&"cricket_chirp",
+	&"pumpjack_creak",
 ]
 
 const LOOPING: Array[StringName] = [
@@ -134,6 +139,11 @@ const AMBIENT_SOUNDS: Array[StringName] = [
 	&"trash_splash",
 	&"rain_loop",
 	&"furnace_loop",
+	&"gull_cry",
+	&"foghorn",
+	&"crow_caw",
+	&"cricket_chirp",
+	&"pumpjack_creak",
 ]
 
 ## The AudioSettings bus a sound plays on, so each volume slider covers it.
@@ -222,6 +232,11 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"crucible_drop": return _crucible_drop(rng)
 		&"rain_loop": return _rain_loop(rng)
 		&"furnace_loop": return _furnace_loop(rng)
+		&"gull_cry": return _gull_cry()
+		&"foghorn": return _foghorn(rng)
+		&"crow_caw": return _crow_caw(rng)
+		&"cricket_chirp": return _cricket_chirp()
+		&"pumpjack_creak": return _pumpjack_creak(rng)
 	push_error("SoundLibrary: unknown sound '%s'" % sound_name)
 	return Synth.silence(0.05)
 
@@ -1120,3 +1135,73 @@ static func _furnace_loop(rng: RandomNumberGenerator) -> PackedFloat32Array:
 		var t := float(i) / Synth.SAMPLE_RATE
 		out[i] += flutter[i] * (0.5 + 0.5 * sin(TAU * 3.0 * t))
 	return Synth.finish(out, 0.6, 0.0)
+
+# --- Landmark ambience ----------------------------------------------------------
+
+## A seagull over the fishing port: two squawky "kyow" cries that slide down.
+static func _gull_cry() -> PackedFloat32Array:
+	var kyow := func(duration: float, top: float) -> PackedFloat32Array:
+		return Synth.tones(duration, [[[0.0, top * 0.8], [duration * 0.2, top], [duration, top * 0.62]],
+				[[0.0, top * 1.6], [duration * 0.2, top * 2.0], [duration, top * 1.24]]], {
+			square = 0.4,
+			amp = [[0.0, 0.0], [0.02, 1.0], [duration * 0.7, 0.7], [duration, 0.0]],
+			tremolo = [28.0, 0.2],
+			peak = 0.6,
+		})
+	return Synth.finish(Synth.concat([kyow.call(0.24, 1500.0), Synth.silence(0.07), kyow.call(0.32, 1350.0)]), 0.6)
+
+## The lighthouse foghorn: a long, low, slightly sour two-tone blast with a
+## breathy edge, swelling in and dying away.
+static func _foghorn(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var duration := 1.9
+	var out := Synth.tones(duration, [[[0.0, 92.0], [0.2, 98.0], [duration, 94.0]], [[0.0, 139.0], [0.2, 147.0], [duration, 141.0]]], {
+		square = 0.55,
+		amp = [[0.0, 0.0], [0.25, 1.0], [1.4, 0.9], [duration, 0.0]],
+		peak = 0.7,
+	})
+	var breath := Synth.noise_sweep(duration, {
+		freq = [[0.0, 400.0]], q = [[0.0, 1.5]],
+		amp = [[0.0, 0.0], [0.25, 1.0], [1.4, 0.8], [duration, 0.0]], peak = 0.3,
+	}, rng)
+	Synth.mix_into(out, breath, 0.0, 0.5)
+	return Synth.finish(out, 0.75)
+
+## A crow in the graveyard: two hoarse, raspy caws.
+static func _crow_caw(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var caw := func(duration: float, pitch: float) -> PackedFloat32Array:
+		var voice := Synth.tones(duration, [[[0.0, pitch], [duration * 0.3, pitch * 1.08], [duration, pitch * 0.8]],
+				[[0.0, pitch * 2.0], [duration * 0.3, pitch * 2.16], [duration, pitch * 1.6]]], {
+			square = 0.8,
+			amp = [[0.0, 0.0], [0.02, 1.0], [duration * 0.6, 0.8], [duration, 0.0]],
+			tremolo = [40.0, 0.5],
+			peak = 0.5,
+		})
+		var rasp := Synth.noise_sweep(duration, {
+			freq = [[0.0, 1300.0], [duration, 900.0]], q = [[0.0, 3.0]],
+			amp = [[0.0, 0.0], [0.02, 1.0], [duration, 0.0]], peak = 0.5,
+		}, rng)
+		return Synth.mix_into(voice, rasp, 0.0, 0.7)
+	return Synth.finish(Synth.concat([caw.call(0.28, 520.0), Synth.silence(0.12), caw.call(0.3, 480.0)]), 0.6)
+
+## A cricket in the fields: three quick high trills.
+static func _cricket_chirp() -> PackedFloat32Array:
+	var trill := Synth.tones(0.07, [[[0.0, 4400.0]]], {
+		amp = [[0.0, 0.0], [0.005, 1.0], [0.07, 0.0]],
+		tremolo = [90.0, 0.9],
+		peak = 0.5,
+	})
+	return Synth.concat([trill, Synth.silence(0.06), trill, Synth.silence(0.06), trill])
+
+## An oil pumpjack turning over the bottom of its stroke: a dull clunk and a
+## dry, groaning creak from the walking beam's bearing.
+static func _pumpjack_creak(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.thump(0.3, 240.0, 0.004, 0.12, rng)
+	var creak := Synth.tones(0.5, [[[0.0, 210.0], [0.25, 260.0], [0.5, 190.0]]], {
+		square = 0.7,
+		amp = [[0.0, 0.0], [0.06, 0.8], [0.35, 0.6], [0.5, 0.0]],
+		tremolo = [34.0, 0.8],
+		peak = 0.5,
+	})
+	Synth.mix_into(out, creak, 0.05, 0.5)
+	Synth.mix_into(out, _metal_ring(0.25, 940.0, 18.0, 0.07, rng), 0.0, 0.25)
+	return Synth.finish(out, 0.6)

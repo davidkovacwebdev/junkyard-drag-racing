@@ -1,0 +1,52 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/world/coast_prop.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/audio/ambient_call.gd" id="2"]
+
+[node name="FishingPort" type="Node2D"]
+y_sort_enabled = true
+
+[node name="Shack" type="StaticBody2D" parent="."]
+position = Vector2(-80, -40)
+script = ExtResource("1")
+kind = 2
+
+[node name="FishCrates" type="StaticBody2D" parent="."]
+position = Vector2(80, 10)
+script = ExtResource("1")
+kind = 3
+
+[node name="FishCrates2" type="StaticBody2D" parent="."]
+position = Vector2(-240, 40)
+script = ExtResource("1")
+kind = 3
+
+[node name="Pier" type="StaticBody2D" parent="."]
+position = Vector2(170, 40)
+script = ExtResource("1")
+length = 560.0
+
+[node name="BoatBehind" type="StaticBody2D" parent="."]
+position = Vector2(620, -50)
+script = ExtResource("1")
+kind = 1
+bob_phase = 2.1
+flipped = true
+
+[node name="Boat" type="StaticBody2D" parent="."]
+position = Vector2(560, 200)
+script = ExtResource("1")
+kind = 1
+
+[node name="Rock" type="StaticBody2D" parent="."]
+position = Vector2(-300, 160)
+script = ExtResource("1")
+kind = 4
+
+[node name="Gulls" type="AudioStreamPlayer2D" parent="."]
+position = Vector2(500, 0)
+max_distance = 1400.0
+volume_db = -12.0
+script = ExtResource("2")
+sound_name = &"gull_cry"
+interval_range = Vector2(6, 15)
