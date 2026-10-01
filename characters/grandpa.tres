@@ -23,3 +23,4 @@ voice_pitch_hz = 78.0
 voice_throat = 0.72
 voice_rasp = 1.0
 voice_wobble = 0.7
+idle_lines = PackedStringArray("Leave me alone, I'm drinkin'.", "Back in my day we raced bathtubs. Uphill. Both ways.", "*hic* Who're you again? ...Oh. Right. {player}. Go away.", "This beer ain't gonna drink itself. Believe me, I've waited.", "Don't touch my wrench.", "Your grandma could out-drive you, and she's been dead twelve years.")

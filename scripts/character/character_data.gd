@@ -36,6 +36,26 @@ extends Resource
 ## Pitch wobble, from steady to a nervous quaver.
 @export_range(0.0, 1.0) var voice_wobble: float = 0.0
 
+@export_group("Dialogue")
+## Small talk for when there's nothing in particular to say: one is picked
+## at random each time the player talks to them (never the same one twice in
+## a row). `{player}` becomes the player's name. Empty: the NPC's own single
+## line is used.
+@export_multiline var idle_lines: PackedStringArray = []
+
+var _last_idle: int = -1
+
+## A random line from `idle_lines`, not the one picked last time; `fallback`
+## when there are none.
+func idle_line(fallback: String = "") -> String:
+	if idle_lines.is_empty():
+		return fallback
+	var pick := randi() % idle_lines.size()
+	if idle_lines.size() > 1 and pick == _last_idle:
+		pick = (pick + 1 + randi() % (idle_lines.size() - 1)) % idle_lines.size()
+	_last_idle = pick
+	return idle_lines[pick]
+
 func get_part(slot: CharacterPartData.Slot) -> PackedScene:
 	match slot:
 		CharacterPartData.Slot.LEGS:

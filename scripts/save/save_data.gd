@@ -38,5 +38,7 @@ extends Resource
 @export var quests_ready: Array[StringName] = []
 ## Quests unlocked but not taken yet (their giver's head is on the map).
 @export var quests_available: Array[QuestData] = []
+## Quest id -> what the player did for it (see Quests.set_note()).
+@export var quest_notes: Dictionary = {}
 ## Tools and gadgets bought at the shop (see ItemData).
 @export var owned_items: Array[ItemData] = []

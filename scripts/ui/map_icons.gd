@@ -30,8 +30,7 @@ const TARGET_GLOW := Color(0.95, 0.75, 0.10, 0.55)
 
 ## The name of the place a marker sits on (its parent's display name).
 static func marker_name(marker: MinimapMarker) -> String:
-	var place := marker.get_parent()
-	return String(place.get("display_name")) if place != null and place.get("display_name") != null else ""
+	return marker.place_name()
 
 static func draw_target_glow(canvas: CanvasItem, at: Vector2, radius: float = TARGET_GLOW_RADIUS) -> void:
 	var pulse := 0.85 + 0.15 * sin(Time.get_ticks_msec() * 0.001 * TARGET_PULSE_SPEED)

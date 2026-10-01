@@ -18,6 +18,9 @@ var _screen: ForgeScreen
 func _ready() -> void:
 	_screen = ForgeScreen.new()
 	_screen.forge_price = forge_price
+	var rig := get_node_or_null("Character") as CharacterRig
+	if rig != null:
+		_screen.character = rig.character_data
 	add_child(_screen)
 	_screen.closed.connect(func() -> void: _actor = null)
 

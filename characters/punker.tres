@@ -21,3 +21,4 @@ voice_pitch_hz = 150.0
 voice_throat = 1.05
 voice_rasp = 0.55
 voice_wobble = 0.1
+idle_lines = PackedStringArray("Buyin' scrap. Or take the crane out back and dig for somethin' better yourself.", "Scrap's scrap, man. I don't ask where it came from.", "Yo, {player}. Crane's out back, cash goes in my pocket.", "Found a whole toilet in the heap yesterday. Still had the seat warm.", "Don't park on the oil stains. They're load-bearing.")

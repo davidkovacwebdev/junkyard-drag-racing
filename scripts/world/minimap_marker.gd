@@ -22,3 +22,17 @@ enum Kind {
 
 func _ready() -> void:
 	add_to_group(GROUP)
+
+## The name quests use for the place this marker sits on (a quest's
+## `objective_place`): the landmark's own `display_name`, or, for a landmark
+## that keeps it on a child (the junkyard's Entrance), that child's.
+func place_name() -> String:
+	var place := get_parent()
+	if place == null:
+		return ""
+	if place.get("display_name") != null:
+		return String(place.get("display_name"))
+	for child in place.get_children():
+		if child != self and child.get("display_name") != null:
+			return String(child.get("display_name"))
+	return ""

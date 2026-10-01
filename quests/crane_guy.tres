@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="QuestData" format=3 uid="uid://b7wxc3p7n6add"]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://quests/crane_fish.tres" id="2_next"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"crane_guy"
+title = "Claw Machine"
+giver = "Grandpa"
+description = "Found Grandpa drunk and crying in his wheelchair. Without his legs he can't feel the thrill of the crane no more.
+
+But he knows a guy at the crane: for 100 quids a go, he'll let you work it like a claw machine and fish for parts. Whatever you pull out, you keep. He slipped you the first hundred himself.
+
+Drive to the junkyard and talk to the Scrap Dealer."
+objective = "Talk to Grandpa's guy at the junkyard crane"
+objective_place = "Junkyard"
+follow_ups = Array[ExtResource("1_script")]([ExtResource("2_next")])
+start_cutscene = "res://cutscenes/grandpa_crane.tres"
+start_money = 100
+return_to_giver = false

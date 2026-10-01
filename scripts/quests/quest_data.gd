@@ -36,6 +36,10 @@ extends Resource
 ## should give this quest (its Gives Quest). Empty: the quest is just given.
 @export_file("*.tres") var start_cutscene: String = ""
 
+## Cash the giver hands over along with the quest (to spend on it), paid
+## when it's given.
+@export var start_money: int = 0
+
 @export_group("Goal")
 ## Finish automatically once the player is holding this much scrap. 0 means
 ## no scrap goal: code finishes the quest with `Quests.complete(id)` instead.
@@ -64,3 +68,7 @@ extends Resource
 @export var reminder_line: String = ""
 ## What the giver says when the player hands the quest in.
 @export var turn_in_line: String = ""
+## Said instead of `turn_in_line` when the goal was met with nothing to show
+## for it (the quest's note is empty: the crane came up empty, say). The
+## giver weeps through it. Empty: `turn_in_line` either way.
+@export var empty_handed_line: String = ""

@@ -27,6 +27,10 @@ extends StaticBody2D
 ## CharacterRig pointed at res://characters/punker.tres, so editing that .tres
 ## in the Character Creator changes this guy too.
 ##
+## The crane is locked until Grandpa's "Claw Machine" quest: he's Grandpa's
+## guy, and he doesn't rent it to strangers. Talking to him with that quest in
+## the log finishes it and opens the crane for good.
+##
 ## The dialog is the standard CharacterDialog (scenes/ui/character_dialog.tscn)
 ## instanced into this scene, so the whole dealer (art, collision, dialog) is
 ## still one `instantiate()` for anyone building a second yard.
@@ -50,6 +54,13 @@ extends StaticBody2D
 @export var empty_line: String = "Nothin' worth sellin', friend."
 @export var sold_line: String = "That's %d scrap - here's $%d."
 @export var greet_line: String = "Buyin' scrap. Or take the crane out back and dig for somethin' better yourself."
+## Said while the crane is still locked (no "Claw Machine" yet).
+@export var locked_line: String = "Buyin' scrap. The crane? Not for rent, pal. Not to strangers."
+## Said when the player turns up with Grandpa's quest: the crane opens.
+@export var grandpa_sent_line: String = "Grandpa sent ya? Ha! That old drunk. Alright: $%d a go, crane's out back. Whatever the claw comes up with, it's yours."
+
+## The quest that opens the crane.
+const CRANE_QUEST := &"crane_guy"
 
 const POPUP_RISE := 54.0
 const POPUP_LIFETIME := 1.4
@@ -97,7 +108,7 @@ func _on_sell_pressed() -> void:
 ## per dig, and the money is no good to the player standing in this yard
 ## anyway.
 func _on_crane_pressed() -> void:
-	if pen_scene.is_empty():
+	if pen_scene.is_empty() or not crane_unlocked():
 		return
 	_close()
 	SaveSystem.save_game()
@@ -111,8 +122,18 @@ func _open() -> void:
 	if _dialog.is_open():
 		return
 	_dialog.open(display_name, _character.character_data)
-	_dialog.say(greet_line)
+	if Quests.has_quest(CRANE_QUEST):
+		Quests.complete(CRANE_QUEST)
+		_dialog.say(grandpa_sent_line % crane_cost)
+	elif crane_unlocked():
+		_dialog.say(PlayerProfile.fill(_character.character_data.idle_line(greet_line)))
+	else:
+		_dialog.say(locked_line)
 	_refresh(true)
+
+## Whether he lets the player at the crane: only once Grandpa vouched.
+static func crane_unlocked() -> bool:
+	return Quests.is_complete(CRANE_QUEST)
 
 ## Hide it and forget the car.
 func _close() -> void:
@@ -127,7 +148,9 @@ func _refresh(animate: bool = false) -> void:
 		CharacterDialog.Option.new("Sell scrap (%d) for $%d" % [
 				Inventory.scrap, Inventory.scrap * money_per_scrap],
 				_on_sell_pressed, Inventory.scrap <= 0),
-		CharacterDialog.Option.new("Take the crane out back ($%d a dig)" % crane_cost, _on_crane_pressed),
+		CharacterDialog.Option.new("Take the crane out back ($%d a dig)" % crane_cost
+				if crane_unlocked() else "The crane (not for rent)",
+				_on_crane_pressed, not crane_unlocked()),
 		CharacterDialog.Option.new("Walk away", _on_leave_pressed),
 	], animate)
 	_dialog.set_note("Scrap %d   $%d   Spare parts %d" % [
