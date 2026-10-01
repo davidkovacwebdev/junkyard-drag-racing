@@ -147,8 +147,8 @@ func _draw_icons() -> void:
 		var offset := (marker.global_position - _player.global_position) * world_to_map_scale
 		if marker.kind == MinimapMarker.Kind.HOME:
 			home_position = center + offset.limit_length(map_radius - HOME_ICON_SIZE - 2.0)
-			home_is_target = home_is_target or (not target.is_empty() and _marker_name(marker) == target)
-		elif not target.is_empty() and _marker_name(marker) == target:
+			home_is_target = home_is_target or (not target.is_empty() and marker.place_name() == target)
+		elif not target.is_empty() and marker.place_name() == target:
 			var at := center + offset.limit_length(map_radius - TARGET_GLOW_RADIUS - 1.0)
 			_draw_target_glow(at)
 			_draw_landmark(marker.kind, at)
@@ -159,11 +159,6 @@ func _draw_icons() -> void:
 		if home_is_target:
 			_draw_target_glow(home_position, HOME_GLOW_RADIUS)
 		_draw_home(home_position)
-
-## The name of the place a marker sits on (its parent's display name).
-static func _marker_name(marker: MinimapMarker) -> String:
-	var place := marker.get_parent()
-	return String(place.get("display_name")) if place != null and place.get("display_name") != null else ""
 
 func _draw_target_glow(at: Vector2, radius: float = TARGET_GLOW_RADIUS) -> void:
 	var pulse := 0.85 + 0.15 * sin(Time.get_ticks_msec() * 0.001 * TARGET_PULSE_SPEED)

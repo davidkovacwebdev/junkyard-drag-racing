@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://scripts/junkyard/junkyard_yard.gd" id="1_yard"]
 [ext_resource type="Script" path="res://scripts/junkyard/junkyard_pile.gd" id="2_pile"]
@@ -6,12 +6,19 @@
 [ext_resource type="PackedScene" path="res://scenes/junkyard/scrap_dealer.tscn" id="4_dealer"]
 [ext_resource type="PackedScene" path="res://scenes/world/player_car.tscn" id="5_car"]
 [ext_resource type="PackedScene" path="res://scenes/ui/back_button.tscn" id="6_back"]
+[ext_resource type="Script" path="res://scripts/junkyard/gate_exit.gd" id="7_gate"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_side"]
 size = Vector2(48, 1300)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_front"]
 size = Vector2(2000, 48)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_front_half"]
+size = Vector2(870, 48)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_gate"]
+size = Vector2(300, 60)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_crane_base"]
 size = Vector2(300, 130)
@@ -39,11 +46,24 @@ position = Vector2(0, -624)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/WallTop"]
 shape = SubResource("RectangleShape2D_front")
 
-[node name="WallBottom" type="StaticBody2D" parent="Walls"]
-position = Vector2(0, 624)
+[node name="WallBottomLeft" type="StaticBody2D" parent="Walls"]
+position = Vector2(-565, 624)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/WallBottom"]
-shape = SubResource("RectangleShape2D_front")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/WallBottomLeft"]
+shape = SubResource("RectangleShape2D_front_half")
+
+[node name="WallBottomRight" type="StaticBody2D" parent="Walls"]
+position = Vector2(565, 624)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/WallBottomRight"]
+shape = SubResource("RectangleShape2D_front_half")
+
+[node name="GateExit" type="Area2D" parent="."]
+position = Vector2(0, 690)
+script = ExtResource("7_gate")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GateExit"]
+shape = SubResource("RectangleShape2D_gate")
 
 [node name="Yard" type="Node2D" parent="."]
 y_sort_enabled = true
@@ -111,6 +131,6 @@ theme_override_colors/font_color = Color(0.95, 0.95, 0.9, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 5
 theme_override_font_sizes/font_size = 20
-text = "Drive up to the dealer and left-click him to talk: sell scrap, or take the crane out back and dig through the heap yourself"
+text = "Drive up to the dealer and left-click him to talk: sell scrap, or (if he trusts you) take the crane out back and dig through the heap yourself. Drive out the gate to leave"
 horizontal_alignment = 1
 vertical_alignment = 1

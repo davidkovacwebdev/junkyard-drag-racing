@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="QuestData" format=3 uid="uid://bumyq68ffcpj4"]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"crane_fish"
+title = "Gone Fishin'"
+giver = "Grandpa"
+description = "Grandpa's guy let you at the crane. Take it out back, fish something out of the heap and show it to Grandpa. Try not to come back empty-handed."
+objective = "Fish something out of the junk heap with the crane"
+objective_place = "Junkyard"
+reminder_line = "Well? Didja fish anything up yet? *hic*"
+turn_in_line = "{part}??? In my time I was able to fish GOLD outta there!"
+empty_handed_line = "N-nothin'?! *sniff* You came back with NOTHIN'?! You're a d-d-disappointment, {player}... a disappointment to me, to this family... t-to the CRANE! *sob*"

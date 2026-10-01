@@ -18,6 +18,9 @@ extends Node
 ## The first quest given while nothing is tracked gets tracked straight away,
 ## so a new player sees what to do without opening the journal.
 
+## In a giver's lines, becomes the quest's note (see `notes`).
+const NOTE_TOKEN := "{part}"
+
 signal quest_added(quest: QuestData)
 ## The goal is met and the player should go back to the giver.
 signal quest_ready(quest: QuestData)
@@ -35,6 +38,10 @@ var ready_ids: Array[StringName] = []
 var available: Array[QuestData] = []
 ## Shown by the on-screen tracker. Null when nothing is tracked.
 var tracked: QuestData = null
+## Quest id -> a word about how its goal was met (the part the crane fished
+## up, say), for the giver's lines: `{part}` in a quest's lines becomes it.
+## Kept after the quest is finished.
+var notes: Dictionary = {}
 
 func _process(_delta: float) -> void:
 	# Iterate a copy: finishing a quest takes it out of `active`.
@@ -76,6 +83,7 @@ func reset() -> void:
 	completed.clear()
 	ready_ids.clear()
 	available.clear()
+	notes.clear()
 	available_changed.emit()
 	tracked = null
 	tracked_changed.emit(null)
@@ -89,6 +97,9 @@ func give(quest: QuestData) -> void:
 		available.erase(_find(available, quest.id))
 		available_changed.emit()
 	active.append(quest)
+	if quest.start_money > 0:
+		Inventory.money += quest.start_money
+		Sfx.play(&"cash_register", -4.0, 0.0)
 	quest_added.emit(quest)
 	if tracked == null:
 		set_tracked(quest)
@@ -185,6 +196,19 @@ static func reward_text(quest: QuestData) -> String:
 		bits.append(part.display_name)
 	return " + ".join(bits)
 
+## Remembers how `id`'s goal was met (see `notes`).
+func set_note(id: StringName, text: String) -> void:
+	notes[id] = text
+
+## Whether `quest`'s goal was met with nothing to show for it, so its giver
+## should say its `empty_handed_line`.
+func empty_handed(quest: QuestData) -> bool:
+	return not quest.empty_handed_line.is_empty() and String(notes.get(quest.id, "")).is_empty()
+
+## `line` with the player's name and `quest`'s note filled in.
+func fill(quest: QuestData, line: String) -> String:
+	return PlayerProfile.fill(line).replace(NOTE_TOKEN, String(notes.get(quest.id, "")))
+
 ## Tracks `quest`, or stops tracking with null.
 func set_tracked(quest: QuestData) -> void:
 	if tracked == quest:
@@ -241,11 +265,23 @@ func tracked_target() -> String:
 ## For SaveSystem: putting a saved log back.
 func restore(saved_active: Array[QuestData], saved_completed: Array[QuestData],
 		saved_ready: Array[StringName], saved_available: Array[QuestData],
-		saved_tracked: QuestData) -> void:
+		saved_tracked: QuestData, saved_notes: Dictionary = {}) -> void:
+	notes = saved_notes.duplicate()
 	active = saved_active.duplicate()
 	completed = saved_completed.duplicate()
 	ready_ids = saved_ready.duplicate()
 	available = saved_available.duplicate()
+	# A chain link added after the save was made: quests a finished quest
+	# unlocks (or follows up with) now, but didn't back then, still reach
+	# the player.
+	for quest in completed:
+		for next in quest.follow_ups:
+			if next != null and not has_quest(next.id) and not is_complete(next.id):
+				active.append(next)
+		for next in quest.unlocks:
+			if next != null and not has_quest(next.id) and not is_complete(next.id) \
+					and _find(available, next.id) == null:
+				available.append(next)
 	available_changed.emit()
 	tracked = _find(active, saved_tracked.id) if saved_tracked != null else null
 	tracked_changed.emit(tracked)

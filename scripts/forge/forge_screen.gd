@@ -28,6 +28,8 @@ const BOARD_SIZE := Vector2(1060, 610)
 @export var forge_hours: float = 2.0
 
 @export_group("Lines")
+## Whose Idle Lines the counter greets with (ForgeSmith sets its smith).
+var character: CharacterData
 @export var greet_line: String = "Toss two or three loose parts in the pots. I'll melt 'em down and hammer out somethin' new. No refunds."
 @export var need_more_line: String = "Need at least two parts in there, pal."
 @export var full_line: String = "Three pots, three parts. That's the rule."
@@ -60,7 +62,7 @@ func open() -> void:
 	_crucible_parts.clear()
 	_clear_stash_rows()
 	_result_slot.visible = false
-	_line_label.text = greet_line
+	_line_label.text = PlayerProfile.fill(character.idle_line(greet_line) if character != null else greet_line)
 	_refresh()
 	visible = true
 

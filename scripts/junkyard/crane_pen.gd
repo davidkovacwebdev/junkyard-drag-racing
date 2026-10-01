@@ -43,6 +43,14 @@ const POPUP_COLOR := Color(0.98, 0.88, 0.5, 1)
 ## stays put over the heap however long the summary turns out to be.
 const POPUP_AT := Vector2(-20.0, -330.0)
 const POPUP_WIDTH := 900.0
+## The garage's part row, shown for each part a dig brings up: its icon,
+## name and stat bars, as the player will see it in the garage.
+const PART_CARD := preload("res://scenes/garage/part_slot.tscn")
+const CARD_WIDTH := 330.0
+const CARD_SECONDS := 5.0
+## Grandpa's "Gone Fishin'": the first dig meets its goal, and he gets told
+## what it brought up (a part's name, or nothing for a miss or plain junk).
+const FISH_QUEST := &"crane_fish"
 
 @onready var _crane: CraneRig = $Yard/Crane
 @onready var _heap: TrashHeap = $Yard/Heap
@@ -54,7 +62,11 @@ const POPUP_WIDTH := 900.0
 ## junk weighed in as. Filled by `dug` as it fires once per piece, read out and
 ## cleared by `_on_dig_finished` — one dig, one summary.
 var _haul: Array[String] = []
+var _haul_parts: Array[PartData] = []
 var _haul_scrap: int = 0
+## The part cards from the last dig, popped up in the middle of the screen.
+var _cards: VBoxContainer
+var _cards_tween: Tween
 
 func _ready() -> void:
 	_crane.dug.connect(_on_dug)
@@ -64,6 +76,10 @@ func _ready() -> void:
 	_hint.text = "A / D  roll the claw over the heap     Space  drop the claw ($%d a go), Space again to shut it     Esc  leave" % _crane.grab_cost
 	_set_line("Roll the claw out over the junk and hit Space to drop it. Hit Space again to shut it - whatever it's holding is yours. $%d a go, as long as your money lasts."
 			% _crane.grab_cost)
+	_cards = VBoxContainer.new()
+	_cards.add_theme_constant_override("separation", 8)
+	_cards.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	$UI.add_child(_cards)
 	_refresh()
 
 # --- What came up --------------------------------------------------------------
@@ -75,6 +91,7 @@ func _on_dug(item: Node2D, part: PartData, scrap: int) -> void:
 	if part != null:
 		Inventory.add_part(part)
 		_haul.append(part.display_name)
+		_haul_parts.append(part)
 	else:
 		Inventory.add_scrap(scrap)
 		_haul_scrap += scrap
@@ -91,8 +108,14 @@ func _on_dig_finished(caught: int) -> void:
 		_set_line(_summarise(caught))
 		_popup(_summarise(caught), POPUP_AT)
 		Sfx.play(&"part_pickup" if not _haul.is_empty() else &"scrap_pickup", -4.0, 0.0)
+	if not _haul_parts.is_empty():
+		_show_cards(_haul_parts)
+	if Quests.has_quest(FISH_QUEST) and not Quests.is_ready(FISH_QUEST):
+		Quests.set_note(FISH_QUEST, _haul_parts[0].display_name if not _haul_parts.is_empty() else "")
+		Quests.goal_met(FISH_QUEST)
 	_refresh()
 	_haul.clear()
+	_haul_parts.clear()
 	_haul_scrap = 0
 	SaveSystem.save_game()
 
@@ -124,6 +147,37 @@ func _summarise(caught: int) -> String:
 
 func _refresh() -> void:
 	_money.text = "$%d        %d pieces left" % [Inventory.money, _heap.count()]
+
+## One garage-style card per part in `parts`, replacing the last dig's,
+## popped up in the middle of the screen and gone again after a few seconds.
+func _show_cards(parts: Array[PartData]) -> void:
+	if _cards_tween != null:
+		_cards_tween.kill()
+	for child in _cards.get_children():
+		child.queue_free()
+	for part in parts:
+		var card: PartSlot = PART_CARD.instantiate()
+		card.custom_minimum_size = Vector2(CARD_WIDTH, 0.0)
+		# Just for looking at: nothing to drag it onto here.
+		card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		card.category = part.category
+		_cards.add_child(card)
+		card.set_part(part)
+	_cards.modulate.a = 0.0
+	# Fit to the new cards and centre them on screen; the pop grows from
+	# their middle.
+	_cards.reset_size()
+	var card_size := _cards.get_combined_minimum_size()
+	_cards.size = card_size
+	_cards.position = (get_viewport().get_visible_rect().size - card_size) * 0.5
+	_cards.pivot_offset = card_size * 0.5
+	_cards.scale = Vector2(0.6, 0.6)
+	_cards_tween = create_tween()
+	_cards_tween.tween_property(_cards, "modulate:a", 1.0, 0.15)
+	_cards_tween.parallel().tween_property(_cards, "scale", Vector2.ONE, 0.3) \
+			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_cards_tween.tween_interval(CARD_SECONDS)
+	_cards_tween.tween_property(_cards, "modulate:a", 0.0, 0.4)
 
 func _set_line(text: String) -> void:
 	_line.text = text

@@ -103,7 +103,8 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _process(_delta: float) -> void:
-	_tracker.visible = Quests.tracked != null and not _open and hud_allowed() and _in_world()
+	_tracker.visible = Quests.tracked != null and not _open and hud_allowed() and _in_world() \
+			and not _dialog_open()
 	if _tracker.visible:
 		_refresh_tracker()
 	if _toast.visible and (not hud_allowed() or _dialog_open()):
@@ -342,7 +343,10 @@ func _build_toast() -> void:
 
 func _on_quest_added(quest: QuestData) -> void:
 	_refresh_tracker()
-	_queue_card("NEW QUEST", quest.title, "Press J to open your journal", &"quest_added", quest.id, true)
+	var hint := "Press J to open your journal"
+	if quest.start_money > 0:
+		hint = "+$%d from %s   Press J for your journal" % [quest.start_money, quest.giver]
+	_queue_card("NEW QUEST", quest.title, hint, &"quest_added", quest.id, true)
 
 func _on_quest_ready(quest: QuestData) -> void:
 	_refresh_tracker()

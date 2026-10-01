@@ -65,7 +65,8 @@ func get_interact_prompt() -> String:
 func interact(actor: Node = null) -> void:
 	if actor != null:
 		_actor = actor as Node2D
-	_line.text = greet_line
+	var farmer := ($Character as CharacterRig).character_data
+	_line.text = PlayerProfile.fill(farmer.idle_line(greet_line) if farmer != null else greet_line)
 	_refresh()
 	_dialog.visible = true
 

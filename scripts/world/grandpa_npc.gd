@@ -17,7 +17,8 @@ extends StaticBody2D
 ## minimap finds him and draws his head.
 ##
 ## He holds still while a cutscene runs, so the scene can call `sip()`,
-## `twitch()` and `bang()` on its own beats instead. The bent wrench only
+## `twitch()`, `bang()`, `sob()`, `hiccup()` and `wink()` on its own beats
+## instead. The bent wrench only
 ## comes out for `bang()`, when he whacks at his busted wheelchair.
 ##
 ## `actor` is a plain CutsceneActor, so cutscenes can hand it to
@@ -47,6 +48,19 @@ const TWITCH_JOLTS_PER_SECOND := 18.0
 const TWITCH_PIXELS := 5.0
 const TWITCH_ANGLE := 0.09
 const GIVER_GROUP := &"quest_giver"
+## A crying jag: his shoulders heave this often, this far, and a tear drops
+## from under each eye in turn (character space).
+const SOB_HEAVES_PER_SECOND := 3.0
+const SOB_PIXELS := 4.0
+const TEAR_FROM := [Vector2(-12.0, -200.0), Vector2(12.0, -200.0)]
+const TEAR_FALL := 46.0
+const TEAR_COLOR := Color(0.56, 0.72, 0.84, 1)
+const TEAR_Z := 11
+## The wink: his left eye's white and pupil hide behind a shut-lid chevron.
+const WINK_EYE_NODES := [^"WhiteLeft", ^"PupilLeft"]
+const WINK_LID := [Vector2(-19.0, -218.0), Vector2(-10.0, -215.0), Vector2(-1.0, -218.0),
+		Vector2(-1.0, -213.0), Vector2(-10.0, -210.0), Vector2(-19.0, -213.0)]
+const WINK_LID_COLOR := Color(0.06, 0.06, 0.08, 1)
 
 ## Which way he's turned. The wrench is in his left hand, so facing left
 ## puts it on his right-hand side of the screen.
@@ -57,6 +71,8 @@ const GIVER_GROUP := &"quest_giver"
 @export var dialog_range: float = 300.0
 
 @export_group("Lines")
+## Said when he has nothing for the player and his character's Idle Lines
+## (characters/grandpa.tres, Dialogue) are empty.
 @export var idle_line: String = "Leave me alone, I'm drinkin'."
 ## Said when a quest has no reminder_line / turn_in_line of its own.
 @export var default_reminder_line: String = "Well? Get to it!"
@@ -133,8 +149,13 @@ func interact(talker: Node = null) -> void:
 	_dialog.open(display_name, CHARACTER)
 	var quest := _ready_quest()
 	if quest != null:
+		var empty_handed := Quests.empty_handed(quest)
 		var reward := Quests.turn_in(quest.id)
-		_dialog.say(PlayerProfile.fill(_line_or(quest.turn_in_line, default_turn_in_line)))
+		if empty_handed:
+			_dialog.say(Quests.fill(quest, quest.empty_handed_line))
+			_weep()
+		else:
+			_dialog.say(Quests.fill(quest, _line_or(quest.turn_in_line, default_turn_in_line)))
 		var note := ""
 		if Quests.hands_over_scrap(quest):
 			Sfx.play(&"scrap_pickup", -6.0, 0.0)
@@ -151,9 +172,9 @@ func interact(talker: Node = null) -> void:
 		_dialog.set_note(note)
 	elif not Quests.quests_from(display_name).is_empty():
 		var current := Quests.quests_from(display_name)[0]
-		_dialog.say(PlayerProfile.fill(_line_or(current.reminder_line, default_reminder_line)))
+		_dialog.say(Quests.fill(current, _line_or(current.reminder_line, default_reminder_line)))
 	else:
-		_dialog.say(PlayerProfile.fill(idle_line))
+		_dialog.say(PlayerProfile.fill(CHARACTER.idle_line(idle_line)))
 	var options := [CharacterDialog.Option.new("Walk away", _dialog.close)]
 	if not Quests.available_from(display_name).is_empty():
 		options.push_front(CharacterDialog.Option.new("Need anything else?", _on_anything_else))
@@ -232,6 +253,83 @@ func bang(volume_db: float = BANG_VOLUME_DB) -> Tween:
 	_swing.tween_interval(0.12)
 	_swing.tween_property(_wrench, "rotation", REST_ANGLE, 0.25).set_ease(Tween.EASE_OUT)
 	return _swing
+
+## A drunken crying jag for `seconds`: his shoulders heave, he blubbers,
+## and tears roll off his cheeks.
+func sob(seconds: float, volume_db: float = -6.0) -> Tween:
+	_restart_move()
+	Sfx.play_at(&"grandpa_sob", global_position, volume_db, 0.06)
+	var heaves := maxi(1, int(seconds * SOB_HEAVES_PER_SECOND))
+	var step := seconds / heaves * 0.5
+	for i in heaves:
+		_move.tween_property(actor, "position:y", SOB_PIXELS, step)
+		_move.tween_property(actor, "position:y", 0.0, step)
+		if i % 2 == 0:
+			_move.parallel().tween_callback(_drop_tear.bind(TEAR_FROM[(i / 2) % TEAR_FROM.size()]))
+	return _move
+
+## Really bawling: a long sob, a hiccup, then another, louder than in the
+## crane scene.
+func _weep() -> void:
+	var first := sob(2.0, -3.0)
+	await first.finished
+	if not is_instance_valid(self) or Cutscenes.is_active():
+		return
+	await hiccup(-4.0).finished
+	sob(2.4, -2.0)
+
+## A drunk "hic!": a little jump in the chair.
+func hiccup(volume_db: float = -6.0) -> Tween:
+	_restart_move()
+	Sfx.play_at(&"grandpa_hiccup", global_position, volume_db, 0.08)
+	_move.tween_property(actor, "position:y", -7.0, 0.06).set_ease(Tween.EASE_OUT)
+	_move.tween_property(actor, "position:y", 0.0, 0.14).set_ease(Tween.EASE_IN)
+	return _move
+
+## Shuts one eye for a beat, with a tip of the head: "I know a guy".
+func wink(volume_db: float = -8.0) -> Tween:
+	var eyes := actor.find_child("EyesPart", true, false) as Node2D
+	var hidden: Array[Node2D] = []
+	var lid: Polygon2D = null
+	if eyes != null:
+		for path in WINK_EYE_NODES:
+			var part := eyes.get_node_or_null(path) as Node2D
+			if part != null and part.visible:
+				part.visible = false
+				hidden.append(part)
+		lid = Polygon2D.new()
+		lid.polygon = PackedVector2Array(WINK_LID)
+		lid.color = WINK_LID_COLOR
+		eyes.add_child(lid)
+		# Under the brow, like the eye it stands in for.
+		eyes.move_child(lid, 0)
+	Sfx.play_at(&"wink_ting", global_position, volume_db, 0.0)
+	_restart_move()
+	var tip := 0.06 * (1.0 if facing_right else -1.0)
+	_move.tween_property(actor, "rotation", tip, 0.12).set_ease(Tween.EASE_OUT)
+	_move.tween_interval(0.6)
+	_move.tween_property(actor, "rotation", 0.0, 0.2).set_ease(Tween.EASE_IN_OUT)
+	_move.tween_callback(func() -> void:
+		for part in hidden:
+			if is_instance_valid(part):
+				part.visible = true
+		if is_instance_valid(lid):
+			lid.queue_free())
+	return _move
+
+## One fat teardrop that rolls down from under an eye and is gone.
+func _drop_tear(from: Vector2) -> void:
+	var tear := Polygon2D.new()
+	tear.polygon = PackedVector2Array([Vector2(0.0, -10.0), Vector2(6.0, 1.0),
+			Vector2(4.0, 7.0), Vector2(-4.0, 7.0), Vector2(-6.0, 1.0)])
+	tear.color = TEAR_COLOR
+	tear.position = from
+	tear.z_index = TEAR_Z
+	actor.attach(tear)
+	var fall := create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	fall.tween_property(tear, "position:y", from.y + TEAR_FALL, 0.5)
+	fall.parallel().tween_property(tear, "modulate:a", 0.0, 0.2).set_delay(0.3)
+	fall.tween_callback(tear.queue_free)
 
 func _restart_move() -> void:
 	if _move != null:

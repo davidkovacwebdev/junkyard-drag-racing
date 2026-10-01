@@ -20,6 +20,10 @@ const NAMES: Array[StringName] = [
 	&"quest_complete",
 	&"beer_sip",
 	&"grandpa_twitch",
+	&"grandpa_sob",
+	&"grandpa_hiccup",
+	&"wink_ting",
+	&"gate_rattle",
 	&"trunk_open",
 	&"trunk_close",
 	&"ignition_click",
@@ -162,6 +166,10 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"quest_complete": return _quest_complete()
 		&"beer_sip": return _beer_sip(rng)
 		&"grandpa_twitch": return _grandpa_twitch(rng)
+		&"grandpa_sob": return _grandpa_sob(rng)
+		&"grandpa_hiccup": return _grandpa_hiccup(rng)
+		&"wink_ting": return _wink_ting()
+		&"gate_rattle": return _gate_rattle(rng)
 		&"trunk_open": return _trunk_open(rng)
 		&"trunk_close": return _trunk_close(rng)
 		&"ignition_click": return _ignition_click(rng)
@@ -775,6 +783,61 @@ static func _grandpa_twitch(rng: RandomNumberGenerator) -> PackedFloat32Array:
 		}), t, rng.randf_range(0.5, 1.0))
 		t += length + rng.randf_range(0.005, 0.03)
 	return Synth.finish(out, 0.55)
+
+## A drunk old man blubbering: a wet sniff in, then three quavering wails
+## that sag in pitch, each one cracking off short.
+static func _grandpa_sob(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(1.3)
+	Synth.mix_into(out, Synth.noise_sweep(0.22, {
+		freq = [[0.0, 1400.0], [0.22, 2600.0]],
+		q = [[0.0, 3.0]],
+		amp = [[0.0, 0.0], [0.08, 0.7], [0.2, 0.5], [0.22, 0.0]],
+	}, rng), 0.0, 0.5)
+	var t := 0.25
+	for i in 3:
+		var length := rng.randf_range(0.22, 0.3)
+		var top := rng.randf_range(300.0, 340.0) - i * 25.0
+		Synth.mix_into(out, Synth.tones(length, [[[0.0, top], [length, top * 0.72]]], {
+			square = 0.35,
+			tremolo = [11.0, 0.6],
+			amp = [[0.0, 0.0], [0.02, 1.0], [length * 0.7, 0.7], [length, 0.0]],
+		}), t, 0.8 - i * 0.12)
+		t += length + rng.randf_range(0.05, 0.1)
+	return Synth.finish(out, 0.55)
+
+## A drunk "hic!": a glottal knock and a quick squeaky upward chirp.
+static func _grandpa_hiccup(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.thump(0.05, 900.0, 0.001, 0.02, rng)
+	Synth.mix_into(out, Synth.tones(0.09, [[[0.0, 380.0], [0.09, 720.0]]], {
+		square = 0.3,
+		amp = [[0.0, 0.0], [0.008, 1.0], [0.09, 0.0]],
+	}), 0.015, 0.7)
+	return Synth.finish(out, 0.55)
+
+## A cartoon wink: one bright little ting off a tin cup.
+static func _wink_ting() -> PackedFloat32Array:
+	return Synth.tones(0.4, [[[0.0, 1760.0]], [[0.0, 2640.0]]], {
+		amp = [[0.0, 0.0], [0.004, 1.0], [0.08, 0.35], [0.4, 0.0]],
+		peak = 0.45,
+	})
+
+## Bumping out through the junkyard gate: a chain-link fence shivering, a
+## few tinny rattles and the hollow clank of the gate post.
+static func _gate_rattle(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.7)
+	Synth.mix_into(out, Synth.thump(0.18, 520.0, 0.002, 0.07, rng), 0.0, 0.8)
+	for i in 6:
+		var at := 0.03 + i * rng.randf_range(0.06, 0.09)
+		Synth.mix_into(out, Synth.noise_sweep(0.05, {
+			freq = [[0.0, rng.randf_range(2200.0, 3400.0)]],
+			q = [[0.0, 6.0]],
+			amp = [[0.0, 0.0], [0.003, 1.0], [0.05, 0.0]],
+		}, rng), at, 0.55 * (1.0 - i * 0.12))
+	Synth.mix_into(out, Synth.tones(0.3, [[[0.0, 410.0]], [[0.0, 1030.0]]], {
+		square = 0.2,
+		amp = [[0.0, 0.0], [0.003, 1.0], [0.3, 0.0]],
+	}), 0.0, 0.35)
+	return Synth.finish(out, 0.6)
 
 ## Popping a rusty trunk: the latch clacks, the hinges groan as the lid
 ## swings up, and it bounces to a stop.

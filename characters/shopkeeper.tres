@@ -23,3 +23,4 @@ voice_pitch_hz = 175.0
 voice_throat = 1.12
 voice_rasp = 0.15
 voice_wobble = 0.1
+idle_lines = PackedStringArray("Welcome, welcome! Everything's for sale. Almost everything works.", "Ah, {player}! My favourite customer. Today.", "No refunds, no returns, no questions. Three no's, that's a good shop.", "Fresh stock! Well. Stock.", "If it rattles, that means it's still got character.")

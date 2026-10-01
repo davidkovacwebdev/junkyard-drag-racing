@@ -58,7 +58,7 @@ func _ready() -> void:
 
 func _greet() -> void:
 	_dialog.open(shopkeeper_name, SHOPKEEPER)
-	_dialog.say(greet_line)
+	_dialog.say(PlayerProfile.fill(SHOPKEEPER.idle_line(greet_line)))
 	_show_stock(true)
 
 ## The goods stand in a row on the shelf, each with its price chalked under
