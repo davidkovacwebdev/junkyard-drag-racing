@@ -1,0 +1,38 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/car/accessories/swing_accessory.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/accessory_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_balloon"]
+script = ExtResource("2")
+id = &"accessory_balloon"
+display_name = "Party Balloon"
+category = 3
+spot = 1
+effect_description = "Lifts a bit of the car's weight in races."
+mass = -2
+speed_multiplier = 1.02
+equip_sound = &"balloon_squeak"
+
+[node name="AccessoryBalloon" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_balloon")
+trail_angle = -0.5
+wobble_angle = 0.1
+wobble_rate = 2.5
+bob_height = 3.0
+race_lift_share = 0.12
+
+[node name="Swing" type="Node2D" parent="."]
+
+[node name="String" type="Polygon2D" parent="Swing"]
+color = Color(0.7, 0.68, 0.63, 1)
+polygon = PackedVector2Array(-2, 0, 2, 0, 2, -44, -2, -44)
+
+[node name="Knot" type="Polygon2D" parent="Swing"]
+color = Color(0.62, 0.22, 0.24, 1)
+polygon = PackedVector2Array(-5, -40, 5, -40, 0, -46)
+
+[node name="Balloon" type="Polygon2D" parent="Swing"]
+color = Color(0.78, 0.3, 0.32, 1)
+polygon = PackedVector2Array(16, -62, 13.86, -52.5, 8, -45.55, 0, -43, -8, -45.55, -13.86, -52.5, -16, -62, -13.86, -71.5, -8, -78.45, -0, -81, 8, -78.45, 13.86, -71.5)

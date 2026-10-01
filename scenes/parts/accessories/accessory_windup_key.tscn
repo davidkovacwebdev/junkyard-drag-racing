@@ -1,0 +1,38 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/car/accessories/windup_key_accessory.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/accessory_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_windup_key"]
+script = ExtResource("2")
+id = &"accessory_windup_key"
+display_name = "Wind-Up Key"
+category = 3
+spot = 2
+effect_description = "Turns faster the faster you go. A little extra pep."
+mass = 1
+speed_multiplier = 1.05
+equip_sound = &"windup_ratchet"
+
+[node name="AccessoryWindupKey" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_windup_key")
+
+[node name="Collar" type="Polygon2D" parent="."]
+color = Color(0.55, 0.42, 0.18, 1)
+polygon = PackedVector2Array(-6, 0, 6, 0, 5, -7, -5, -7)
+
+[node name="Key" type="Node2D" parent="."]
+position = Vector2(0, -5)
+rotation = 0.6
+
+[node name="Stem" type="Polygon2D" parent="Key"]
+color = Color(0.62, 0.48, 0.2, 1)
+polygon = PackedVector2Array(-20, -3, 0, -3, 0, 3, -20, 3)
+
+[node name="Bow" type="Node2D" parent="Key"]
+position = Vector2(-19, 0)
+
+[node name="Wings" type="Polygon2D" parent="Key/Bow"]
+color = Color(0.78, 0.62, 0.28, 1)
+polygon = PackedVector2Array(0, -3, -4, -14, -14, -16, -21, -8, -21, 8, -14, 16, -4, 14, 0, 3)

@@ -26,6 +26,8 @@
 [ext_resource type="PackedScene" path="res://scenes/world/garbage_truck/garbage_truck.tscn" id="22_garbage_truck"]
 [ext_resource type="PackedScene" path="res://scenes/world/scrap_forge.tscn" id="23_forge"]
 [ext_resource type="PackedScene" path="res://scenes/world/rally_stage.tscn" id="24_rally"]
+[ext_resource type="PackedScene" path="res://scenes/world/hill_climb_site.tscn" id="25_hill_climb"]
+[ext_resource type="PackedScene" path="res://scenes/world/derby_pit.tscn" id="26_derby"]
 [ext_resource type="Script" uid="uid://w1y26uy8y6we" path="res://scripts/world/floating_trash_spawner.gd" id="floating_trash_spawner"]
 [ext_resource type="PackedScene" path="res://scenes/world/crop_fields.tscn" id="landmark_fields"]
 [ext_resource type="PackedScene" path="res://scenes/world/graveyard.tscn" id="landmark_graveyard"]
@@ -82,7 +84,7 @@ point_count = 19
 
 [sub_resource type="Curve2D" id="Curve2D_road_ring"]
 _data = {
-"points": PackedVector2Array(-700, 166.7, 700, -166.7, -6600, -4500, -1350, 0, 1350, 0, -3000, -4000, -1500, 166.7, 1500, -166.7, 1500, -4500, -1416.7, 116.7, 1416.7, -116.7, 6000, -5000, -1166.7, -133.3, 1166.7, 133.3, 10000, -5200, -966.7, -483.3, 966.7, 483.3, 13000, -4200, -600, -450, 600, 450, 15800, -2300, 300, -200, -300, 200, 16600, -1500, 966.7, -16.7, -966.7, 16.7, 14000, -1100, 850, -100, -850, 100, 10800, -1400, 383.3, -433.3, -383.3, 433.3, 8900, -500, 66.7, -700, -66.7, 700, 8500, 1200, 283.3, -416.7, -283.3, 416.7, 8500, 3700, 650, -216.7, -650, 216.7, 6800, 3700, 316.7, -683.3, -316.7, 683.3, 4600, 5000, 100, -716.7, -100, 716.7, 4900, 7800, 566.7, -250, -566.7, 250, 4000, 9300, 950, -33.3, -950, 33.3, 1500, 9300, 483.3, 150, -483.3, -150, -1700, 9500, 183.3, 266.7, -183.3, -266.7, -1400, 8400, 466.7, 133.3, -466.7, -133.3, -2800, 7900, 333.3, 400, -333.3, -400, -4200, 7600, 50, 683.3, -50, -683.3, -4800, 5500, 0, 666.7, 0, -666.7, -4500, 3500, 250, 666.7, -250, -666.7, -4800, 1500, 516.7, 216.7, -516.7, -216.7, -6000, -500, 283.3, 166.7, -283.3, -166.7, -7900, 200, -116.7, 533.3, 116.7, -533.3, -7700, -1500, -183.3, 500, 183.3, -500, -7200, -3000, -700, 166.7, 700, -166.7, -6600, -4500)
+"points": PackedVector2Array(-700, 166.7, 700, -166.7, -6600, -4500, -1350, 0, 1350, 0, -3000, -4000, -1500, 166.7, 1500, -166.7, 1500, -4500, -1416.7, 116.7, 1416.7, -116.7, 6000, -5000, -1166.7, -133.3, 1166.7, 133.3, 10000, -5200, -966.7, -483.3, 966.7, 483.3, 13000, -4200, -600, -450, 600, 450, 15800, -2300, 11.264507, -366.33676, -11.264507, 366.33676, 16600, -1500, 966.7, -16.7, -966.7, 16.7, 14000, -1100, 850, -100, -850, 100, 10800, -1400, 383.3, -433.3, -383.3, 433.3, 8900, -500, 66.7, -700, -66.7, 700, 8500, 1200, 283.3, -416.7, -283.3, 416.7, 8500, 3700, 650, -216.7, -650, 216.7, 6800, 3700, 316.7, -683.3, -316.7, 683.3, 4600, 5000, 100, -716.7, -100, 716.7, 4900, 7800, 566.7, -250, -566.7, 250, 4000, 9300, 950, -33.3, -950, 33.3, 1500, 9300, 483.3, 150, -483.3, -150, -1700, 9500, 183.3, 266.7, -183.3, -266.7, -1400, 8400, 466.7, 133.3, -466.7, -133.3, -2800, 7900, 333.3, 400, -333.3, -400, -4200, 7600, 50, 683.3, -50, -683.3, -4800, 5500, 0, 666.7, 0, -666.7, -4500, 3500, 250, 666.7, -250, -666.7, -4800, 1500, 516.7, 216.7, -516.7, -216.7, -6000, -500, 283.3, 166.7, -283.3, -166.7, -7900, 200, -116.7, 533.3, 116.7, -533.3, -7700, -1500, -183.3, 500, 183.3, -500, -7200, -3000, -700, 166.7, 700, -166.7, -6600, -4500)
 }
 point_count = 30
 
@@ -175,14 +177,18 @@ script = ExtResource("15")
 biome = 1
 
 [node name="Swamp" type="Node2D" parent="Terrain" unique_id=2120659533]
-position = Vector2(1900, 2000)
+position = Vector2(872, 4220)
 script = ExtResource("15")
-biome = 4
 
 [node name="Swamp2" type="Node2D" parent="Terrain" unique_id=1173123971]
-position = Vector2(12111, 14531)
+position = Vector2(8807, 14938)
 script = ExtResource("15")
 biome = 1
+
+[node name="Swamp3" type="Node2D" parent="Terrain" unique_id=2052393678]
+position = Vector2(9012, 15067)
+script = ExtResource("15")
+biome = 3
 
 [node name="Mountain" type="Node2D" parent="Terrain" unique_id=1488935585]
 position = Vector2(5502, -589)
@@ -284,6 +290,20 @@ position = Vector2(7150, 1650)
 [node name="MinimapMarker" type="Node2D" parent="RallyStage" unique_id=1873546020]
 script = ExtResource("21_marker")
 kind = 7
+
+[node name="HillClimbSite" parent="." unique_id=1984118041 instance=ExtResource("25_hill_climb")]
+position = Vector2(7606, -3684)
+
+[node name="MinimapMarker" type="Node2D" parent="HillClimbSite" unique_id=1122873594]
+script = ExtResource("21_marker")
+kind = 8
+
+[node name="DerbyPit" parent="." unique_id=948857901 instance=ExtResource("26_derby")]
+position = Vector2(2373, -3973)
+
+[node name="MinimapMarker" type="Node2D" parent="DerbyPit" unique_id=52636212]
+script = ExtResource("21_marker")
+kind = 9
 
 [node name="Sortables" type="Node2D" parent="." unique_id=58475017]
 y_sort_enabled = true

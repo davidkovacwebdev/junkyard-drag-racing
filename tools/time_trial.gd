@@ -1,10 +1,14 @@
 class_name TimeTrial
 extends Node2D
-## Races car specs ({"body", "engine", "wheels"} scene paths) one car per flat
-## floor, CARS_PER_BATCH at a time, over the drag strip's distance. Each spec
-## gets "time" (RaceProgression.DID_NOT_FINISH if it never got there), "distance"
-## (how far it got) and "wrecked" (whether its body broke). Used by the roster
-## builder and the part benchmark.
+## Races car specs ({"body", "engine", "wheels", "accessories"} scene paths,
+## accessories optional) one car per flat floor, CARS_PER_BATCH at a time,
+## over the drag strip's distance. Each spec gets "time"
+## (RaceProgression.DID_NOT_FINISH if it never got there), "distance" (how far
+## it got) and "wrecked" (whether its body broke). Used by the roster builder
+## and the part benchmark.
+##
+## With `on_hill` set, each floor is the hill climb's slope instead, run to
+## its summit finish, and "distance" is the furthest the car got.
 ##
 ## Cars are dealt out over one headless worker process per CPU core. Physics
 ## runs aren't bit-identical anyway (Godot's 2D solver and some parts' random
@@ -17,6 +21,9 @@ const SPAWN_X := 150.0
 ## Same run as the drag strip: start to finish line on race_drag_strip.tscn.
 const FINISH_X := 5400.0
 const TIME_LIMIT := 90.0
+## race_hill_climb.tscn's finish line and time limit.
+const HILL_FINISH_X := 3550.0
+const HILL_TIME_LIMIT := 60.0
 const FLOOR_SPACING := 1500.0
 const WORKER_SCENE := "res://tools/time_trial_worker.tscn"
 const WORKER_DIR := "user://time_trial_workers"
@@ -31,6 +38,11 @@ var _batch_root: Node2D = null
 var _batch_elapsed := 0.0
 var _worker_specs: Array[Array] = []
 var _worker_pids: Array[int] = []
+var on_hill := false
+var _hill_profile := HillClimbTrack.new()
+
+func _exit_tree() -> void:
+	_hill_profile.free()
 
 func run(specs: Array[Dictionary]) -> void:
 	var worker_count := mini(specs.size(), OS.get_processor_count())
@@ -67,13 +79,16 @@ func _process(_delta: float) -> void:
 func _spawn_worker(worker: int, specs: Array) -> int:
 	var car_specs: Array[Dictionary] = []
 	for spec in specs:
-		car_specs.append({"body": spec["body"], "engine": spec["engine"], "wheels": spec["wheels"]})
+		car_specs.append({"body": spec["body"], "engine": spec["engine"], "wheels": spec["wheels"],
+				"accessories": spec.get("accessories", [])})
 	var file := FileAccess.open(worker_specs_path(worker), FileAccess.WRITE)
 	file.store_string(JSON.stringify(car_specs))
 	file.close()
 	var arguments := PackedStringArray([
 		"--headless", "--fixed-fps", "60", "--path", ProjectSettings.globalize_path("res://"),
 		WORKER_SCENE, "--", "--no-save", "--worker=%d" % worker])
+	if on_hill:
+		arguments.append("--hill")
 	# Godot's idle helper threads spin on whatever cores they can reach, so
 	# unpinned workers burn each other's CPU. Pinned, each gets a core to itself.
 	if OS.get_name() == "Linux":
@@ -119,16 +134,17 @@ func _physics_process(delta: float) -> void:
 			spec["time"] = RaceProgression.DID_NOT_FINISH
 			spec["wrecked"] = true
 			car.root.queue_free()
-		elif car.body.global_position.x >= FINISH_X:
+		elif car.body.global_position.x >= finish_x():
 			spec["time"] = snappedf(_batch_elapsed, 0.01)
-			spec["distance"] = FINISH_X - SPAWN_X
+			spec["distance"] = finish_x() - SPAWN_X
 			# Done cars would otherwise keep simulating until the batch's
 			# slowest car gives up.
 			car.root.queue_free()
 		else:
-			spec["distance"] = snappedf(car.body.global_position.x - SPAWN_X, 1.0)
+			var distance := snappedf(car.body.global_position.x - SPAWN_X, 1.0)
+			spec["distance"] = maxf(spec["distance"], distance) if on_hill else distance
 			all_done = false
-	if all_done or _batch_elapsed >= TIME_LIMIT:
+	if all_done or _batch_elapsed >= (HILL_TIME_LIMIT if on_hill else TIME_LIMIT):
 		_finish_batch()
 
 func _start_batch() -> void:
@@ -143,10 +159,7 @@ func _start_batch() -> void:
 		spec["distance"] = 0.0
 		var floor_y := i * FLOOR_SPACING
 		_add_floor(floor_y)
-		var wheel_scenes: Array[PackedScene] = []
-		for wheel_path in spec["wheels"]:
-			wheel_scenes.append(load(wheel_path))
-		var car := CarAssembler.assemble(load(spec["body"]), wheel_scenes, load(spec["engine"]),
+		var car := CarAssembler.assemble_from_car_data(RaceProgression.rival_car_model(spec),
 				_batch_root, Vector2(SPAWN_X, floor_y))
 		_remove_engine_sound(car)
 		_batch_specs.append(spec)
@@ -172,7 +185,16 @@ static func _remove_engine_sound(car: CarAssembler.AssembledCar) -> void:
 		if child is EngineSound:
 			child.free()
 
+func finish_x() -> float:
+	return HILL_FINISH_X if on_hill else FINISH_X
+
 func _add_floor(floor_y: float) -> void:
+	if on_hill:
+		var slope := StaticBody2D.new()
+		slope.position.y = floor_y
+		_batch_root.add_child(slope)
+		_hill_profile.build_slab_collision(slope)
+		return
 	var rectangle := RectangleShape2D.new()
 	rectangle.size = Vector2(8000.0, 60.0)
 	var shape := CollisionShape2D.new()

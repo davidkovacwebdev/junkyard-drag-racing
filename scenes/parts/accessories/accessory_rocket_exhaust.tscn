@@ -1,0 +1,39 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/car/accessories/rocket_exhaust_accessory.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/accessory_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_rocket_exhaust"]
+script = ExtResource("2")
+id = &"accessory_rocket_exhaust"
+display_name = "Rocket Exhaust"
+category = 3
+spot = 2
+effect_description = "A lot more power, but it shakes the car apart."
+mass = 2
+speed_multiplier = 1.1
+durability_multiplier = 0.9
+equip_sound = &"backfire"
+
+[node name="AccessoryRocketExhaust" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_rocket_exhaust")
+
+[node name="Flame" type="Node2D" parent="."]
+position = Vector2(-18, -7)
+
+[node name="Fire" type="Polygon2D" parent="Flame"]
+color = Color(0.95, 0.5, 0.15, 1)
+polygon = PackedVector2Array(0, -8, -18, -5, -32, 0, -18, 5, 0, 8)
+
+[node name="Core" type="Polygon2D" parent="Flame"]
+color = Color(0.95, 0.75, 0.1, 1)
+polygon = PackedVector2Array(0, -4, -16, 0, 0, 4)
+
+[node name="Nozzle" type="Polygon2D" parent="."]
+color = Color(0.52, 0.56, 0.63, 1)
+polygon = PackedVector2Array(2, 0, 2, -14, -18, -18, -18, 4)
+
+[node name="NozzleShade" type="Polygon2D" parent="."]
+color = Color(0.38, 0.41, 0.47, 1)
+polygon = PackedVector2Array(2, 0, 2, -5, -18, -5, -18, 4)

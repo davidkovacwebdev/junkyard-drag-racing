@@ -7,14 +7,16 @@ extends Control
 ## selected car's real part scenes, so what you see here is exactly what
 ## you drive in the world.
 
-@onready var _car_view: CarView = $CarPreview
-@onready var _name_label: Label = $NamePlate/NameLabel
-@onready var _parts_list: GridContainer = $PartsScroll/PartsList
-@onready var _parts_empty_label: Label = $PartsEmptyLabel
-@onready var _body_filter_button: ScrapButton = $BodyFilterButton
-@onready var _engine_filter_button: ScrapButton = $EngineFilterButton
-@onready var _wheel_filter_button: ScrapButton = $WheelFilterButton
-@onready var _car_drop_zone: CarDropZone = $CarDropZone
+@onready var _car_view: CarView = $Content/CarPreview
+@onready var _name_label: Label = $Content/NamePlate/NameLabel
+@onready var _parts_list: GridContainer = $Content/PartsScroll/PartsList
+@onready var _parts_empty_label: Label = $Content/PartsEmptyLabel
+@onready var _body_filter_button: ScrapButton = $Content/BodyFilterButton
+@onready var _engine_filter_button: ScrapButton = $Content/EngineFilterButton
+@onready var _wheel_filter_button: ScrapButton = $Content/WheelFilterButton
+@onready var _accessory_filter_button: ScrapButton = $Content/AccessoryFilterButton
+@onready var _sort_button: SortButton = $Content/SortButton
+@onready var _car_drop_zone: CarDropZone = $Content/CarDropZone
 
 var _index: int = 0
 var _wheel_mount_zones: Array[WheelMountZone] = []
@@ -29,6 +31,7 @@ const _EMPTY_HINTS := {
 	PartData.Category.BODY: "No spare car bodies.\nDig one up at the junkyard.",
 	PartData.Category.ENGINE: "No spare engines.\nDig one up at the junkyard.",
 	PartData.Category.WHEEL: "No spare wheels.\nDig some up at the junkyard.",
+	PartData.Category.ACCESSORY: "No spare accessories.\nDig some up at the junkyard.",
 }
 
 func _ready() -> void:
@@ -47,7 +50,8 @@ func _process(_delta: float) -> void:
 		return
 	var drag: Variant = viewport.gui_get_drag_data()
 	if typeof(drag) == TYPE_DICTIONARY and drag.has("category"):
-		_car_view.set_highlight(int(drag["category"]))
+		var dragged_accessory := drag.get("part") as AccessoryPartData
+		_car_view.set_highlight(int(drag["category"]), dragged_accessory.spot if dragged_accessory != null else -1)
 	else:
 		_car_view.set_highlight(-1)
 
@@ -105,9 +109,10 @@ func equip_part(category: PartData.Category, part: PartData, wheel_index: int = 
 	var car := _selected_car()
 	if car == null or not Inventory.fit_part(car, category, part, wheel_index):
 		return
-	# A wheel swap is a minute's work; a body or an engine is most of a day.
-	DayNightCycle.advance_hours(1.0 if category == PartData.Category.WHEEL else 4.0)
-	Sfx.play(&"wrench_clunk", -4.0)
+	# A wheel or a bolt-on is a minute's work; a body or an engine is most of a day.
+	var quick_job := category == PartData.Category.WHEEL or category == PartData.Category.ACCESSORY
+	DayNightCycle.advance_hours(1.0 if quick_job else 4.0)
+	Sfx.play(part.equip_sound if part is AccessoryPartData else &"wrench_clunk", -4.0)
 	_refresh()
 	_car_view.jiggle()
 	# Ownership changed — a copy moved out of the stash onto the car, or
@@ -155,6 +160,9 @@ func _owned_parts(category: PartData.Category) -> Array[Dictionary]:
 			PartData.Category.WHEEL:
 				for wheel in car.wheels:
 					_tally_owned(owned, counts, wheel)
+			PartData.Category.ACCESSORY:
+				for accessory in car.accessories:
+					_tally_owned(owned, counts, accessory)
 	for part in Inventory.spare_parts:
 		if part != null and part.category == category:
 			_tally_owned(owned, counts, part)
@@ -162,9 +170,7 @@ func _owned_parts(category: PartData.Category) -> Array[Dictionary]:
 	for id in owned:
 		rows.append({"part": owned[id], "count": counts[id]})
 	rows.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
-		var left: PartData = a["part"]
-		var right: PartData = b["part"]
-		return left.display_name < right.display_name
+		return PartSort.comes_before(a["part"], b["part"], _sort_button.key)
 	)
 	return rows
 
@@ -189,6 +195,12 @@ func _on_engine_filter_pressed() -> void:
 func _on_wheel_filter_pressed() -> void:
 	_show_category(PartData.Category.WHEEL)
 
+func _on_accessory_filter_pressed() -> void:
+	_show_category(PartData.Category.ACCESSORY)
+
+func _on_sort_changed(_key: PartSort.Key) -> void:
+	_show_category(_current_category)
+
 func _show_category(category: PartData.Category) -> void:
 	_current_category = category
 	for child in _parts_list.get_children():
@@ -210,3 +222,4 @@ func _show_category(category: PartData.Category) -> void:
 	_body_filter_button.selected = category == PartData.Category.BODY
 	_engine_filter_button.selected = category == PartData.Category.ENGINE
 	_wheel_filter_button.selected = category == PartData.Category.WHEEL
+	_accessory_filter_button.selected = category == PartData.Category.ACCESSORY

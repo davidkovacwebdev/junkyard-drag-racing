@@ -1,0 +1,67 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/race/derby_setup.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/race/track_derby.tscn" id="2"]
+[ext_resource type="Script" uid="uid://4c501krrbwml" path="res://scripts/race/race_controller.gd" id="3"]
+[ext_resource type="Script" uid="uid://daxmnxgvm6578" path="res://scripts/race/camera_follow.gd" id="4"]
+[ext_resource type="Script" path="res://scripts/race/race_timer_hud.gd" id="5"]
+[ext_resource type="PackedScene" path="res://scenes/race/results_screen.tscn" id="6"]
+[ext_resource type="Script" path="res://scripts/ui/scrap_button.gd" id="7"]
+
+[node name="RaceDerby" type="Node2D"]
+script = ExtResource("1")
+race_controller_path = NodePath("RaceController")
+camera_path = NodePath("MainCamera")
+
+[node name="Track" parent="." instance=ExtResource("2")]
+
+[node name="RaceController" type="Node2D" parent="."]
+script = ExtResource("3")
+finish_x = 100000.0
+max_duration = 60.0
+finish_boost_force = 0.0
+check_stalls = false
+uses_finish_line = false
+leader_wins_at_end = true
+camera_path = NodePath("../MainCamera")
+exit_scene_path = "res://scenes/world/main.tscn"
+timer_hud_path = NodePath("../UI/RaceTimerHud")
+results_screen_path = NodePath("../UI/ResultsScreen")
+surrender_button_path = NodePath("../UI/SurrenderButton")
+end_delay = 4.0
+
+[node name="MainCamera" type="Camera2D" parent="."]
+position = Vector2(1400, -150)
+zoom = Vector2(0.42, 0.42)
+script = ExtResource("4")
+pack_view = 1
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="RaceTimerHud" type="Control" parent="UI"]
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -34.0
+offset_top = 16.0
+offset_right = 34.0
+offset_bottom = 51.0
+script = ExtResource("5")
+
+[node name="SurrenderButton" type="BaseButton" parent="UI"]
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -70.0
+offset_top = -64.0
+offset_right = 70.0
+offset_bottom = -24.0
+script = ExtResource("7")
+text = "Surrender"
+font_size = 20
+tilt_degrees = -2.0
+jitter_seed = 55
+
+[node name="ResultsScreen" parent="UI" instance=ExtResource("6")]

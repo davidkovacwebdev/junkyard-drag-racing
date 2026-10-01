@@ -1,0 +1,110 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/race/hill_climb_track.gd" id="1_track"]
+[ext_resource type="Script" path="res://scripts/race/hill_climb_track_art.gd" id="2_art"]
+
+[ext_resource type="Script" path="res://scripts/race/end_wall_art.gd" id="end_wall_art"]
+
+[sub_resource type="RectangleShape2D" id="Shape_wall"]
+size = Vector2(100, 1200)
+
+[node name="TrackHillClimb" type="Node2D"]
+script = ExtResource("1_track")
+right = 5000.0
+
+[node name="TrackArt" type="Node2D" parent="."]
+z_index = -2
+script = ExtResource("2_art")
+finish_x = 3550.0
+
+[node name="EndWall" type="StaticBody2D" parent="."]
+z_index = -1
+position = Vector2(4350, 400)
+collision_layer = 64
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EndWall"]
+shape = SubResource("Shape_wall")
+
+[node name="Art" type="Node2D" parent="EndWall"]
+script = ExtResource("end_wall_art")
+look = 3
+
+[node name="Lanes" type="Node2D" parent="."]
+
+[node name="Lane0" type="Node2D" parent="Lanes"]
+
+[node name="Road" type="Polygon2D" parent="Lanes/Lane0"]
+visible = false
+position = Vector2(3400, 30)
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-3400, -30, 3500, -30, 3500, 30, -3400, 30)
+
+[node name="Lane1" type="Node2D" parent="Lanes"]
+z_index = 1
+position = Vector2(0, 200)
+
+[node name="Road" type="Polygon2D" parent="Lanes/Lane1"]
+visible = false
+position = Vector2(3400, 30)
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-3400, -30, 3500, -30, 3500, 30, -3400, 30)
+
+[node name="Lane2" type="Node2D" parent="Lanes"]
+z_index = 2
+position = Vector2(0, 400)
+
+[node name="Road" type="Polygon2D" parent="Lanes/Lane2"]
+visible = false
+position = Vector2(3400, 30)
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-3400, -30, 3500, -30, 3500, 30, -3400, 30)
+
+[node name="Lane3" type="Node2D" parent="Lanes"]
+z_index = 3
+position = Vector2(0, 600)
+
+[node name="Road" type="Polygon2D" parent="Lanes/Lane3"]
+visible = false
+position = Vector2(3400, 30)
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-3400, -30, 3500, -30, 3500, 30, -3400, 30)
+
+[node name="Lane4" type="Node2D" parent="Lanes"]
+z_index = 4
+position = Vector2(0, 800)
+
+[node name="Road" type="Polygon2D" parent="Lanes/Lane4"]
+visible = false
+position = Vector2(3400, 30)
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-3400, -30, 3500, -30, 3500, 30, -3400, 30)
+
+[node name="Slabs" type="Node2D" parent="."]
+; One collision bit per lane, same as track_multi_test.tscn. RallyTrack builds
+; each slab's hilly collision at startup.
+
+[node name="Slab0" type="StaticBody2D" parent="Slabs"]
+position = Vector2(0, 0)
+collision_layer = 2
+collision_mask = 0
+
+[node name="Slab1" type="StaticBody2D" parent="Slabs"]
+position = Vector2(0, 200)
+collision_layer = 4
+collision_mask = 0
+
+[node name="Slab2" type="StaticBody2D" parent="Slabs"]
+position = Vector2(0, 400)
+collision_layer = 8
+collision_mask = 0
+
+[node name="Slab3" type="StaticBody2D" parent="Slabs"]
+position = Vector2(0, 600)
+collision_layer = 16
+collision_mask = 0
+
+[node name="Slab4" type="StaticBody2D" parent="Slabs"]
+position = Vector2(0, 800)
+collision_layer = 32
+collision_mask = 0

@@ -13,10 +13,14 @@ color = Color(0, 0, 0, 0.6)
 
 [node name="TitleLabel" type="Label" parent="Panel" unique_id=1432270986]
 layout_mode = 0
-offset_left = 426.0
-offset_top = 220.0
-offset_right = 726.0
-offset_bottom = 270.0
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -150.0
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -104.0
+offset_right = 150.0
+offset_bottom = -54.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 36
 text = "PAUSED"
@@ -24,10 +28,14 @@ horizontal_alignment = 1
 
 [node name="ResumeButton" type="Button" parent="Panel" unique_id=555911723]
 layout_mode = 0
-offset_left = 426.0
-offset_top = 290.0
-offset_right = 726.0
-offset_bottom = 336.0
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -150.0
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -34.0
+offset_right = 150.0
+offset_bottom = 12.0
 theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
 theme_override_colors/font_focus_color = Color(0.9, 0.9, 0.9, 1)
 theme_override_colors/font_pressed_color = Color(1, 0.8, 0.2, 1)
@@ -38,10 +46,14 @@ flat = true
 
 [node name="SettingsButton" type="Button" parent="Panel" unique_id=2107659209]
 layout_mode = 0
-offset_left = 426.0
-offset_top = 346.0
-offset_right = 726.0
-offset_bottom = 392.0
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -150.0
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = 22.0
+offset_right = 150.0
+offset_bottom = 68.0
 theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
 theme_override_colors/font_focus_color = Color(0.9, 0.9, 0.9, 1)
 theme_override_colors/font_pressed_color = Color(1, 0.8, 0.2, 1)
@@ -52,10 +64,14 @@ flat = true
 
 [node name="ReturnToMenuButton" type="Button" parent="Panel" unique_id=1175863340]
 layout_mode = 0
-offset_left = 426.0
-offset_top = 402.0
-offset_right = 726.0
-offset_bottom = 448.0
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -150.0
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = 78.0
+offset_right = 150.0
+offset_bottom = 124.0
 theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
 theme_override_colors/font_focus_color = Color(0.9, 0.9, 0.9, 1)
 theme_override_colors/font_pressed_color = Color(1, 0.8, 0.2, 1)
@@ -66,10 +82,14 @@ flat = true
 
 [node name="QuitButton" type="Button" parent="Panel" unique_id=908271311]
 layout_mode = 0
-offset_left = 426.0
-offset_top = 458.0
-offset_right = 726.0
-offset_bottom = 504.0
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -150.0
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = 134.0
+offset_right = 150.0
+offset_bottom = 180.0
 theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
 theme_override_colors/font_focus_color = Color(0.9, 0.9, 0.9, 1)
 theme_override_colors/font_pressed_color = Color(1, 0.8, 0.2, 1)

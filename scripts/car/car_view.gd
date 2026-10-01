@@ -16,9 +16,14 @@ extends Node2D
 @export var max_width: float = 0.0
 ## Passed to a horse engine's `gait_rate`, so the map car's horse trots slower.
 @export var horse_gait_rate: float = 1.0
+## Whether the accessories make their sounds (the map car), or stay quiet (the
+## garage preview).
+@export var audible_accessories: bool = false
 ## Which part category to highlight while dragging: -1 = none, or a
 ## PartData.Category value. Drawn by _draw() in this node's local space.
 var highlight: int = -1
+## With an ACCESSORY highlight, the AccessoryPartData.Spot being dragged.
+var highlight_spot: int = -1
 
 const _HIGHLIGHT_RADIUS := 40.0
 
@@ -26,6 +31,7 @@ var _fit: Node2D
 var _body: CarBody
 var _wheels: Array[Node2D] = []
 var _engine: Node2D
+var _accessories: Array[CarAccessory] = []
 var _mounts_local: Array[Vector2] = []
 var _engine_mount_raw: Vector2 = Vector2.ZERO
 var _engine_mount_local: Vector2 = Vector2.ZERO
@@ -47,10 +53,11 @@ func _process(_delta: float) -> void:
 	if highlight >= 0:
 		queue_redraw()
 
-func set_highlight(category: int) -> void:
-	if highlight == category:
+func set_highlight(category: int, spot: int = -1) -> void:
+	if highlight == category and highlight_spot == spot:
 		return
 	highlight = category
+	highlight_spot = spot
 	queue_redraw()
 
 func build_from(car: CarModelData) -> void:
@@ -90,6 +97,11 @@ func build_from(car: CarModelData) -> void:
 		_body.place_engine(_engine)
 		if _engine is HorseEngine:
 			(_engine as HorseEngine).gait_rate = horse_gait_rate
+
+	_accessories = CarAccessory.instantiate_all(car)
+	for accessory in _accessories:
+		_neutralize_physics(accessory)
+	CarAccessory.mount_all(_body, _accessories, _wheels, audible_accessories, false)
 
 	_apply_fit(raw_positions)
 	queue_redraw()
@@ -143,6 +155,7 @@ func _clear() -> void:
 	_body = null
 	_wheels.clear()
 	_engine = null
+	_accessories.clear()
 	_mounts_local.clear()
 	_has_engine_mount = false
 	_engine_mount_raw = Vector2.ZERO
@@ -190,6 +203,11 @@ func _draw() -> void:
 				_draw_ring(_engine_mount_local)
 		PartData.Category.BODY:
 			_draw_body_glow()
+		PartData.Category.ACCESSORY:
+			if highlight_spot == AccessoryPartData.Spot.SKIN:
+				_draw_body_glow()
+			elif highlight_spot >= 0 and _body != null:
+				_draw_ring(_fit.position + _body.get_accessory_mount(highlight_spot) * _fit.scale)
 
 ## Drop-target highlights are flat, pulsing yellow shapes (no outlines, per the
 ## ui-style skill): an octagon over each mount, a wash over the body.

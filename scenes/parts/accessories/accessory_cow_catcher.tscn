@@ -1,0 +1,39 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_accessory.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/accessory_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_cow_catcher"]
+script = ExtResource("2")
+id = &"accessory_cow_catcher"
+display_name = "Cow Catcher"
+category = 3
+spot = 0
+effect_description = "A steel grille on the nose that shrugs off hits."
+mass = 4
+durability_multiplier = 1.2
+speed_multiplier = 0.97
+
+[node name="AccessoryCowCatcher" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_cow_catcher")
+
+[node name="Wedge" type="Polygon2D" parent="."]
+color = Color(0.55, 0.28, 0.14, 1)
+polygon = PackedVector2Array(0, -8, 8, -8, 34, 16, 0, 16)
+
+[node name="Shade" type="Polygon2D" parent="."]
+color = Color(0.45, 0.22, 0.1, 1)
+polygon = PackedVector2Array(0, 10, 27.5, 10, 34, 16, 0, 16)
+
+[node name="TopBar" type="Polygon2D" parent="."]
+color = Color(0.2, 0.2, 0.22, 1)
+polygon = PackedVector2Array(0, -12, 11, -12, 11, -6, 0, -6)
+
+[node name="SlotA" type="Polygon2D" parent="."]
+color = Color(0.3, 0.16, 0.08, 1)
+polygon = PackedVector2Array(4, -2, 9, -2, 9, 7, 4, 7)
+
+[node name="SlotB" type="Polygon2D" parent="."]
+color = Color(0.3, 0.16, 0.08, 1)
+polygon = PackedVector2Array(13, 2, 18, 6, 18, 7, 13, 7)

@@ -10,11 +10,14 @@ extends RefCounted
 const SLOT_SPARE := -1
 const SLOT_BODY := -2
 const SLOT_ENGINE := -3
+## The accessory spot comes from the part itself, since only an accessory for
+## the same spot can be swapped into it.
+const SLOT_ACCESSORY := -4
 
 ## The part that was taken out of this home.
 var part: PartData
 ## The car it was fitted to, or null when it was loose in the spare stash.
 var car: CarModelData = null
-## Which slot of `car` it occupied: SLOT_BODY, SLOT_ENGINE, or a wheel mount
-## index. SLOT_SPARE whenever `car` is null.
+## Which slot of `car` it occupied: SLOT_BODY, SLOT_ENGINE, SLOT_ACCESSORY,
+## or a wheel mount index. SLOT_SPARE whenever `car` is null.
 var slot: int = SLOT_SPARE

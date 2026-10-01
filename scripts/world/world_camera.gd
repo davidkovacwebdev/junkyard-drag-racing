@@ -7,7 +7,8 @@ extends Camera2D
 ##
 ## Zoom eases toward a target rather than snapping, so spinning the
 ## wheel (or a trackpad gesture) doesn't jolt the view. `zoom` is a
-## multiplier: higher = closer in.
+## multiplier: higher = closer in. Without binoculars you can't zoom out
+## past DEFAULT_ZOOM; with them you can pull way back.
 ##
 ## Look-ahead is deliberately built on Camera2D.offset rather than
 ## position_smoothing: smoothing only ever lags behind the tracked
@@ -16,9 +17,11 @@ extends Camera2D
 ## toward the car's current velocity reveals more of the direction of
 ## travel instead. position_smoothing is left off (see player_car.tscn).
 
+const DEFAULT_ZOOM := 0.8
+const BINOCULARS_MIN_ZOOM := 0.25
+
 @export var zoom_step: float = 1.15
-@export var min_zoom: float = 0.25
-@export var max_zoom: float = 3.0
+@export var max_zoom: float = 2.5
 ## Higher eases faster; 0 would never arrive.
 @export var zoom_speed: float = 10.0
 ## How much each unit of trackpad two-finger-scroll delta affects zoom.
@@ -34,14 +37,14 @@ extends Camera2D
 ## changes — higher settles faster.
 @export var look_ahead_speed: float = 1.2
 
-var _target_zoom: float = 1.0
+var _target_zoom: float = DEFAULT_ZOOM
 var _car: CharacterBody2D
 
 func _ready() -> void:
 	# Pick up the zoom from before the player went into a building.
-	if WorldState.camera_zoom > 0.0:
-		zoom = Vector2.ONE * clampf(WorldState.camera_zoom, min_zoom, max_zoom)
-	_target_zoom = clampf(zoom.x, min_zoom, max_zoom)
+	var start_zoom := WorldState.camera_zoom if WorldState.camera_zoom > 0.0 else DEFAULT_ZOOM
+	_target_zoom = clampf(start_zoom, _min_zoom(), max_zoom)
+	zoom = Vector2.ONE * _target_zoom
 	_car = get_parent() as CharacterBody2D
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -69,14 +72,21 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _zoom_by(factor: float) -> void:
-	_target_zoom = clampf(_target_zoom * factor, min_zoom, max_zoom)
+	var previous_zoom := _target_zoom
+	_target_zoom = clampf(_target_zoom * factor, _min_zoom(), max_zoom)
 	WorldState.camera_zoom = _target_zoom
+	if previous_zoom >= DEFAULT_ZOOM and _target_zoom < DEFAULT_ZOOM:
+		Sfx.play(&"binocular_focus", -10.0, 0.05)
+
+func _min_zoom() -> float:
+	return BINOCULARS_MIN_ZOOM if Inventory.has_item(&"binoculars") else DEFAULT_ZOOM
 
 func _process(delta: float) -> void:
 	_update_zoom(delta)
 	_update_look_ahead(delta)
 
 func _update_zoom(delta: float) -> void:
+	_target_zoom = maxf(_target_zoom, _min_zoom())
 	var current := zoom.x
 	if is_equal_approx(current, _target_zoom):
 		return

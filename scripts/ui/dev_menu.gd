@@ -3,7 +3,7 @@ extends CanvasLayer
 ## pickup - so the loot path (spawn, drive over it, Inventory, garage) can be
 ## tested without digging up half the map first.
 ##
-## F1 toggles it, from any scene, M adds money, P stocks the spare stash with
+## F1 toggles it, from any scene, Ctrl+M adds money, P stocks the spare stash with
 ## every part, F2 plays the demo cutscene, F3 replays Grandpa's opening scene and
 ## F4 shows part durability bars in races (DurabilityOverlay). The rows are the very same `PartSlot` the
 ## garage uses, so a part looks and reads identically in both places; clicking
@@ -18,9 +18,9 @@ extends CanvasLayer
 ## Registered as the `DevMenu` autoload, and switched off outside debug builds -
 ## see `set_enabled()`.
 
-## The four things the menu hands out. Scrap is not a part, so it gets a tab of
+## The five things the menu hands out. Scrap is not a part, so it gets a tab of
 ## its own rather than a fake PartData.
-enum Tab { BODY, ENGINE, WHEEL, SCRAP }
+enum Tab { BODY, ENGINE, WHEEL, ACCESSORY, SCRAP }
 
 ## Cells across the spawn grid, and how far apart they sit. The step is a pickup
 ## radius plus a margin on each axis, so two spawns can never merge into one
@@ -60,7 +60,9 @@ const _PART_SLOT_SCENE := preload("res://scenes/garage/part_slot.tscn")
 @onready var _body_tab: ScrapButton = $Backdrop/Panel/BodyTab
 @onready var _engine_tab: ScrapButton = $Backdrop/Panel/EngineTab
 @onready var _wheel_tab: ScrapButton = $Backdrop/Panel/WheelTab
+@onready var _accessory_tab: ScrapButton = $Backdrop/Panel/AccessoryTab
 @onready var _scrap_tab: ScrapButton = $Backdrop/Panel/ScrapTab
+@onready var _sort_button: SortButton = $Backdrop/Panel/SortButton
 
 ## Off unless this is a debug build (see `set_enabled`).
 var _enabled := false
@@ -88,7 +90,7 @@ func _ready() -> void:
 	_wire_buttons()
 	# WASD still drives the car while the menu is open, and a focused Button
 	# would eat those keys, so nothing in here takes keyboard focus.
-	for button in [_body_tab, _engine_tab, _wheel_tab, _scrap_tab, _clear_button]:
+	for button in [_body_tab, _engine_tab, _wheel_tab, _accessory_tab, _scrap_tab, _clear_button]:
 		button.focus_mode = Control.FOCUS_NONE
 	_build_scrap_buttons()
 	set_enabled(OS.is_debug_build())
@@ -140,7 +142,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		KEY_F1:
 			toggle()
 			get_viewport().set_input_as_handled()
-		KEY_M:
+		KEY_M when event.ctrl_pressed:
 			_add_dev_money()
 			get_viewport().set_input_as_handled()
 		KEY_P:
@@ -174,6 +176,7 @@ func _add_every_part() -> void:
 	catalogue.append_array(PartDatabase.bodies)
 	catalogue.append_array(PartDatabase.engines)
 	catalogue.append_array(PartDatabase.wheels)
+	catalogue.append_array(PartDatabase.accessories)
 	for part in catalogue:
 		for i in _DEV_PART_COPIES:
 			Inventory.add_part(part)
@@ -195,8 +198,10 @@ func _wire_buttons() -> void:
 	_body_tab.pressed.connect(_show_tab.bind(Tab.BODY))
 	_engine_tab.pressed.connect(_show_tab.bind(Tab.ENGINE))
 	_wheel_tab.pressed.connect(_show_tab.bind(Tab.WHEEL))
+	_accessory_tab.pressed.connect(_show_tab.bind(Tab.ACCESSORY))
 	_scrap_tab.pressed.connect(_show_tab.bind(Tab.SCRAP))
 	_clear_button.pressed.connect(_clear_spawned)
+	_sort_button.sort_changed.connect(func(_key: PartSort.Key) -> void: _show_tab(_tab))
 	_backdrop.gui_input.connect(_on_backdrop_input)
 
 ## One button per amount, straight from `_SCRAP_AMOUNTS`, so that list is the
@@ -219,6 +224,7 @@ func _show_tab(tab: int) -> void:
 		child.queue_free()
 	_parts_scroll.visible = tab != Tab.SCRAP
 	_scrap_box.visible = tab == Tab.SCRAP
+	_sort_button.visible = tab != Tab.SCRAP
 	_refresh_tabs()
 	if tab == Tab.SCRAP:
 		_set_status("Pick an amount. The scrap lands on the ground next to the car.")
@@ -231,10 +237,10 @@ func _refresh_tabs() -> void:
 	_body_tab.selected = _tab == Tab.BODY
 	_engine_tab.selected = _tab == Tab.ENGINE
 	_wheel_tab.selected = _tab == Tab.WHEEL
+	_accessory_tab.selected = _tab == Tab.ACCESSORY
 	_scrap_tab.selected = _tab == Tab.SCRAP
 
-## The catalogue a tab shows, in the garage's own order (by name), so the dev
-## menu and the parts list agree on where a part lives.
+## The catalogue a tab shows, in the order the sort button picks.
 func _parts_for(tab: int) -> Array[PartData]:
 	var parts: Array[PartData] = []
 	match tab:
@@ -247,8 +253,11 @@ func _parts_for(tab: int) -> Array[PartData]:
 		Tab.WHEEL:
 			for part in PartDatabase.wheels:
 				parts.append(part)
+		Tab.ACCESSORY:
+			for part in PartDatabase.accessories:
+				parts.append(part)
 	parts.sort_custom(func(a: PartData, b: PartData) -> bool:
-		return a.display_name < b.display_name)
+		return PartSort.comes_before(a, b, _sort_button.key))
 	return parts
 
 ## One clickable row. `PartSlot` has to be in the tree before `set_part()` - its
@@ -262,7 +271,8 @@ func _add_row(part: PartData) -> void:
 	_list.add_child(slot)
 	slot.category = part.category
 	slot.set_part(part)
-	slot.tooltip_text = "Spawn %s" % part.display_name
+	var effect := part.effect_summary()
+	slot.tooltip_text = "Spawn %s" % part.display_name if effect.is_empty() else "Spawn %s\n%s" % [part.display_name, effect]
 	slot.gui_input.connect(_on_row_input.bind(slot))
 
 func _on_row_input(event: InputEvent, slot: PartSlot) -> void:

@@ -86,9 +86,10 @@ enum Kind {
 ## better bet than a street bin, and it's a reason to bother with the big ones.
 @export_range(0.0, 1.0) var container_part_bonus: float = 0.08
 ## Which kind of part turns up when one does. Wheels are common, engines rare —
-## the three shares should add up to 1.
-@export_range(0.0, 1.0) var wheel_share: float = 0.62
-@export_range(0.0, 1.0) var body_share: float = 0.26
+## engines get whatever share is left over.
+@export_range(0.0, 1.0) var wheel_share: float = 0.52
+@export_range(0.0, 1.0) var body_share: float = 0.22
+@export_range(0.0, 1.0) var accessory_share: float = 0.16
 ## How far apart orbs land on the same side of the bin, the apex of their arc,
 ## and how long the toss takes. Short and low: this is junk tumbling out, not a
 ## display.
@@ -297,6 +298,8 @@ func _pick_part_pool(rng: RandomNumberGenerator) -> Array:
 		return _first_filled([PartDatabase.wheels, PartDatabase.bodies, PartDatabase.junk_engines])
 	if roll < wheel_share + body_share:
 		return _first_filled([PartDatabase.bodies, PartDatabase.junk_engines, PartDatabase.wheels])
+	if roll < wheel_share + body_share + accessory_share:
+		return _first_filled([PartDatabase.junk_accessories, PartDatabase.wheels, PartDatabase.bodies])
 	return _first_filled([PartDatabase.junk_engines, PartDatabase.wheels, PartDatabase.bodies])
 
 static func _first_filled(pools: Array) -> Array:

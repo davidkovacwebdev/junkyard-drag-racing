@@ -6,6 +6,8 @@
 [ext_resource type="Script" path="res://scripts/ui/scrap_button.gd" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/world/car_view.tscn" id="5"]
 [ext_resource type="PackedScene" path="res://scenes/ui/back_button.tscn" id="6"]
+[ext_resource type="Script" path="res://scripts/character/character_rig.gd" id="7_rig"]
+[ext_resource type="Resource" path="res://characters/race_clerk.tres" id="8_clerk"]
 
 [node name="DragStripMenu" type="Control"]
 layout_mode = 3
@@ -33,7 +35,111 @@ offset_right = 150.0
 offset_bottom = 60.0
 text = "Leave"
 
-[node name="MoneyPlate" type="Control" parent="."]
+[node name="Content" type="Control" parent="."]
+layout_mode = 1
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -324.0
+offset_bottom = 324.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Poster" type="Node2D" parent="Content"]
+position = Vector2(40, 150)
+rotation = -0.035
+
+[node name="Board" type="Polygon2D" parent="Content/Poster"]
+color = Color(0.68, 0.57, 0.41, 1)
+polygon = PackedVector2Array(0, 0, 112, 2, 110, 168, 2, 166)
+
+[node name="Shade" type="Polygon2D" parent="Content/Poster"]
+color = Color(0.6, 0.49, 0.34, 1)
+polygon = PackedVector2Array(94, 2, 112, 2, 110, 168, 92, 166)
+
+[node name="Car" type="Polygon2D" parent="Content/Poster"]
+color = Color(0.62, 0.22, 0.18, 1)
+polygon = PackedVector2Array(12, 104, 34, 80, 72, 78, 98, 96, 100, 116, 12, 118)
+
+[node name="BackWheel" type="Polygon2D" parent="Content/Poster"]
+color = Color(0.15, 0.14, 0.13, 1)
+polygon = PackedVector2Array(22, 112, 30, 106, 38, 112, 38, 122, 30, 128, 22, 122)
+
+[node name="FrontWheel" type="Polygon2D" parent="Content/Poster"]
+color = Color(0.15, 0.14, 0.13, 1)
+polygon = PackedVector2Array(72, 112, 80, 106, 88, 112, 88, 122, 80, 128, 72, 122)
+
+[node name="Clerk" type="Node2D" parent="Content"]
+position = Vector2(990, 600)
+scale = Vector2(1.7, 1.7)
+script = ExtResource("7_rig")
+character_data = ExtResource("8_clerk")
+
+[node name="CounterTop" type="Polygon2D" parent="Content"]
+z_index = 10
+color = Color(0.55, 0.4, 0.28, 1)
+polygon = PackedVector2Array(792, 442, 1700, 438, 1700, 460, 788, 462)
+
+[node name="CounterBody" type="Polygon2D" parent="Content"]
+z_index = 10
+color = Color(0.46, 0.33, 0.22, 1)
+polygon = PackedVector2Array(796, 462, 1700, 460, 1700, 700, 796, 700)
+
+[node name="CounterShade" type="Polygon2D" parent="Content"]
+z_index = 10
+color = Color(0.4, 0.29, 0.19, 1)
+polygon = PackedVector2Array(796, 462, 1700, 460, 1700, 486, 796, 488)
+
+[node name="Trophy" type="Node2D" parent="Content"]
+z_index = 10
+position = Vector2(1100, 442)
+rotation = 0.05
+
+[node name="Base" type="Polygon2D" parent="Content/Trophy"]
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-22, 0, 22, 0, 18, -16, -18, -16)
+
+[node name="Stem" type="Polygon2D" parent="Content/Trophy"]
+color = Color(0.78, 0.6, 0.12, 1)
+polygon = PackedVector2Array(-5, -16, 5, -16, 5, -34, -5, -34)
+
+[node name="Cup" type="Polygon2D" parent="Content/Trophy"]
+color = Color(0.95, 0.75, 0.1, 1)
+polygon = PackedVector2Array(-26, -76, 26, -76, 18, -46, 6, -34, -6, -34, -18, -46)
+
+[node name="SpeechPlate" type="Control" parent="Content"]
+layout_mode = 0
+offset_left = 760.0
+offset_top = 100.0
+offset_right = 1120.0
+offset_bottom = 178.0
+mouse_filter = 2
+script = ExtResource("3")
+body_color = Color(0.74, 0.63, 0.47, 1)
+shade_color = Color(0.68, 0.57, 0.41, 1)
+skirt_color = Color(0.6, 0.49, 0.34, 1)
+tilt_degrees = 1.0
+jitter_seed = 12
+nails = false
+
+[node name="SpeechLabel" type="Label" parent="Content/SpeechPlate"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 14.0
+offset_top = 6.0
+offset_right = -14.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.25, 0.16, 0.08, 1)
+theme_override_font_sizes/font_size = 18
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="MoneyPlate" type="Control" parent="Content"]
 layout_mode = 0
 offset_left = 970.0
 offset_top = 20.0
@@ -44,7 +150,7 @@ script = ExtResource("3")
 tilt_degrees = -1.0
 jitter_seed = 5
 
-[node name="MoneyLabel" type="Label" parent="MoneyPlate"]
+[node name="MoneyLabel" type="Label" parent="Content/MoneyPlate"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -57,7 +163,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 text = "$0"
 
-[node name="TitlePlate" type="Control" parent="."]
+[node name="TitlePlate" type="Control" parent="Content"]
 layout_mode = 0
 offset_left = 376.0
 offset_top = 24.0
@@ -68,7 +174,7 @@ script = ExtResource("3")
 tilt_degrees = 0.5
 jitter_seed = 6
 
-[node name="TitleLabel" type="Label" parent="TitlePlate"]
+[node name="TitleLabel" type="Label" parent="Content/TitlePlate"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -81,7 +187,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 text = "Pick a Tier"
 
-[node name="InfoPlate" type="Control" parent="."]
+[node name="InfoPlate" type="Control" parent="Content"]
 layout_mode = 0
 offset_left = 326.0
 offset_top = 84.0
@@ -96,7 +202,7 @@ shade_color = Color(0.46, 0.1, 0.1, 1)
 skirt_color = Color(0.35, 0.07, 0.07, 1)
 visible = false
 
-[node name="InfoLabel" type="Label" parent="InfoPlate"]
+[node name="InfoLabel" type="Label" parent="Content/InfoPlate"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -108,7 +214,7 @@ theme_override_font_sizes/font_size = 18
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="TierPage" type="Control" parent="."]
+[node name="TierPage" type="Control" parent="Content"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -117,7 +223,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Tier1Button" type="BaseButton" parent="TierPage"]
+[node name="Tier1Button" type="BaseButton" parent="Content/TierPage"]
 layout_mode = 0
 offset_left = 176.0
 offset_top = 240.0
@@ -129,7 +235,7 @@ font_size = 20
 tilt_degrees = -2.0
 jitter_seed = 51
 
-[node name="Tier2Button" type="BaseButton" parent="TierPage"]
+[node name="Tier2Button" type="BaseButton" parent="Content/TierPage"]
 layout_mode = 0
 offset_left = 456.0
 offset_top = 240.0
@@ -141,7 +247,7 @@ font_size = 20
 tilt_degrees = 1.5
 jitter_seed = 52
 
-[node name="Tier3Button" type="BaseButton" parent="TierPage"]
+[node name="Tier3Button" type="BaseButton" parent="Content/TierPage"]
 layout_mode = 0
 offset_left = 176.0
 offset_top = 340.0
@@ -153,7 +259,7 @@ font_size = 20
 tilt_degrees = 2.0
 jitter_seed = 53
 
-[node name="Tier4Button" type="BaseButton" parent="TierPage"]
+[node name="Tier4Button" type="BaseButton" parent="Content/TierPage"]
 layout_mode = 0
 offset_left = 456.0
 offset_top = 340.0
@@ -165,7 +271,7 @@ font_size = 20
 tilt_degrees = -1.5
 jitter_seed = 54
 
-[node name="ModePage" type="Control" parent="."]
+[node name="ModePage" type="Control" parent="Content"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -175,7 +281,7 @@ grow_vertical = 2
 mouse_filter = 2
 visible = false
 
-[node name="DriveButton" type="BaseButton" parent="ModePage"]
+[node name="DriveButton" type="BaseButton" parent="Content/ModePage"]
 layout_mode = 0
 offset_left = 216.0
 offset_top = 280.0
@@ -187,7 +293,7 @@ font_size = 22
 tilt_degrees = -2.0
 jitter_seed = 61
 
-[node name="BetButton" type="BaseButton" parent="ModePage"]
+[node name="BetButton" type="BaseButton" parent="Content/ModePage"]
 layout_mode = 0
 offset_left = 496.0
 offset_top = 280.0
@@ -199,7 +305,7 @@ font_size = 22
 tilt_degrees = 2.0
 jitter_seed = 62
 
-[node name="BackButton" type="BaseButton" parent="ModePage"]
+[node name="BackButton" type="BaseButton" parent="Content/ModePage"]
 layout_mode = 0
 offset_left = 30.0
 offset_top = 560.0
@@ -211,7 +317,7 @@ font_size = 18
 tilt_degrees = -1.0
 jitter_seed = 63
 
-[node name="DrivePage" type="Control" parent="."]
+[node name="DrivePage" type="Control" parent="Content"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -221,23 +327,23 @@ grow_vertical = 2
 mouse_filter = 2
 visible = false
 
-[node name="CarPreview" parent="DrivePage" instance=ExtResource("5")]
-position = Vector2(576, 320)
+[node name="CarPreview" parent="Content/DrivePage" instance=ExtResource("5")]
+position = Vector2(426, 320)
 scale = Vector2(1.4, 1.4)
 max_width = 300.0
 
-[node name="NamePlate" type="Control" parent="DrivePage"]
+[node name="NamePlate" type="Control" parent="Content/DrivePage"]
 layout_mode = 0
-offset_left = 426.0
+offset_left = 276.0
 offset_top = 470.0
-offset_right = 726.0
+offset_right = 576.0
 offset_bottom = 526.0
 mouse_filter = 2
 script = ExtResource("3")
 tilt_degrees = -1.0
 jitter_seed = 71
 
-[node name="NameLabel" type="Label" parent="DrivePage/NamePlate"]
+[node name="NameLabel" type="Label" parent="Content/DrivePage/NamePlate"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -252,11 +358,11 @@ horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
 
-[node name="PrevButton" type="BaseButton" parent="DrivePage"]
+[node name="PrevButton" type="BaseButton" parent="Content/DrivePage"]
 layout_mode = 0
-offset_left = 362.0
+offset_left = 212.0
 offset_top = 480.0
-offset_right = 412.0
+offset_right = 262.0
 offset_bottom = 528.0
 script = ExtResource("4")
 text = "<"
@@ -264,11 +370,11 @@ font_size = 24
 tilt_degrees = 2.0
 jitter_seed = 72
 
-[node name="NextButton" type="BaseButton" parent="DrivePage"]
+[node name="NextButton" type="BaseButton" parent="Content/DrivePage"]
 layout_mode = 0
-offset_left = 740.0
+offset_left = 590.0
 offset_top = 480.0
-offset_right = 790.0
+offset_right = 640.0
 offset_bottom = 528.0
 script = ExtResource("4")
 text = ">"
@@ -276,11 +382,11 @@ font_size = 24
 tilt_degrees = -2.0
 jitter_seed = 73
 
-[node name="RaceButton" type="BaseButton" parent="DrivePage"]
+[node name="RaceButton" type="BaseButton" parent="Content/DrivePage"]
 layout_mode = 0
-offset_left = 466.0
+offset_left = 316.0
 offset_top = 560.0
-offset_right = 686.0
+offset_right = 536.0
 offset_bottom = 608.0
 script = ExtResource("4")
 text = "Race!"
@@ -288,7 +394,7 @@ font_size = 22
 tilt_degrees = -1.5
 jitter_seed = 74
 
-[node name="BackButton" type="BaseButton" parent="DrivePage"]
+[node name="BackButton" type="BaseButton" parent="Content/DrivePage"]
 layout_mode = 0
 offset_left = 30.0
 offset_top = 560.0
@@ -300,7 +406,7 @@ font_size = 18
 tilt_degrees = -1.0
 jitter_seed = 75
 
-[node name="BetAmountPage" type="Control" parent="."]
+[node name="BetAmountPage" type="Control" parent="Content"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -310,11 +416,11 @@ grow_vertical = 2
 mouse_filter = 2
 visible = false
 
-[node name="Bet20Button" type="BaseButton" parent="BetAmountPage"]
+[node name="Bet20Button" type="BaseButton" parent="Content/BetAmountPage"]
 layout_mode = 0
-offset_left = 236.0
+offset_left = 116.0
 offset_top = 280.0
-offset_right = 416.0
+offset_right = 296.0
 offset_bottom = 350.0
 script = ExtResource("4")
 text = "$20"
@@ -322,11 +428,11 @@ font_size = 22
 tilt_degrees = -2.0
 jitter_seed = 81
 
-[node name="Bet50Button" type="BaseButton" parent="BetAmountPage"]
+[node name="Bet50Button" type="BaseButton" parent="Content/BetAmountPage"]
 layout_mode = 0
-offset_left = 456.0
+offset_left = 336.0
 offset_top = 280.0
-offset_right = 636.0
+offset_right = 516.0
 offset_bottom = 350.0
 script = ExtResource("4")
 text = "$50"
@@ -334,11 +440,11 @@ font_size = 22
 tilt_degrees = 1.5
 jitter_seed = 82
 
-[node name="Bet100Button" type="BaseButton" parent="BetAmountPage"]
+[node name="Bet100Button" type="BaseButton" parent="Content/BetAmountPage"]
 layout_mode = 0
-offset_left = 676.0
+offset_left = 556.0
 offset_top = 280.0
-offset_right = 856.0
+offset_right = 736.0
 offset_bottom = 350.0
 script = ExtResource("4")
 text = "$100"
@@ -346,11 +452,11 @@ font_size = 22
 tilt_degrees = -1.0
 jitter_seed = 83
 
-[node name="NextButton" type="BaseButton" parent="BetAmountPage"]
+[node name="NextButton" type="BaseButton" parent="Content/BetAmountPage"]
 layout_mode = 0
-offset_left = 466.0
+offset_left = 316.0
 offset_top = 400.0
-offset_right = 686.0
+offset_right = 536.0
 offset_bottom = 448.0
 script = ExtResource("4")
 text = "Next >"
@@ -358,7 +464,7 @@ font_size = 22
 tilt_degrees = -1.5
 jitter_seed = 84
 
-[node name="BackButton" type="BaseButton" parent="BetAmountPage"]
+[node name="BackButton" type="BaseButton" parent="Content/BetAmountPage"]
 layout_mode = 0
 offset_left = 30.0
 offset_top = 560.0
@@ -370,7 +476,7 @@ font_size = 18
 tilt_degrees = -1.0
 jitter_seed = 85
 
-[node name="BetPickPage" type="Control" parent="."]
+[node name="BetPickPage" type="Control" parent="Content"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -380,19 +486,19 @@ grow_vertical = 2
 mouse_filter = 2
 visible = false
 
-[node name="FieldList" type="HBoxContainer" parent="BetPickPage"]
+[node name="FieldList" type="HBoxContainer" parent="Content/BetPickPage"]
 layout_mode = 0
-offset_left = 116.0
+offset_left = 30.0
 offset_top = 220.0
-offset_right = 1036.0
+offset_right = 778.0
 offset_bottom = 400.0
-theme_override_constants/separation = 30
+theme_override_constants/separation = 12
 
-[node name="ConfirmButton" type="BaseButton" parent="BetPickPage"]
+[node name="ConfirmButton" type="BaseButton" parent="Content/BetPickPage"]
 layout_mode = 0
-offset_left = 466.0
+offset_left = 294.0
 offset_top = 460.0
-offset_right = 686.0
+offset_right = 514.0
 offset_bottom = 508.0
 script = ExtResource("4")
 text = "Place Bet"
@@ -401,7 +507,7 @@ tilt_degrees = 1.5
 jitter_seed = 91
 disabled = true
 
-[node name="BackButton" type="BaseButton" parent="BetPickPage"]
+[node name="BackButton" type="BaseButton" parent="Content/BetPickPage"]
 layout_mode = 0
 offset_left = 30.0
 offset_top = 560.0
@@ -413,21 +519,21 @@ font_size = 18
 tilt_degrees = -1.0
 jitter_seed = 92
 
-[connection signal="pressed" from="TierPage/Tier1Button" to="." method="_on_tier_pressed" binds= [0]]
-[connection signal="pressed" from="TierPage/Tier2Button" to="." method="_on_tier_pressed" binds= [1]]
-[connection signal="pressed" from="TierPage/Tier3Button" to="." method="_on_tier_pressed" binds= [2]]
-[connection signal="pressed" from="TierPage/Tier4Button" to="." method="_on_tier_pressed" binds= [3]]
-[connection signal="pressed" from="ModePage/DriveButton" to="." method="_on_drive_pressed"]
-[connection signal="pressed" from="ModePage/BetButton" to="." method="_on_bet_pressed"]
-[connection signal="pressed" from="ModePage/BackButton" to="." method="_on_mode_back_pressed"]
-[connection signal="pressed" from="DrivePage/PrevButton" to="." method="_on_drive_prev_pressed"]
-[connection signal="pressed" from="DrivePage/NextButton" to="." method="_on_drive_next_pressed"]
-[connection signal="pressed" from="DrivePage/RaceButton" to="." method="_on_race_pressed"]
-[connection signal="pressed" from="DrivePage/BackButton" to="." method="_on_drive_back_pressed"]
-[connection signal="pressed" from="BetAmountPage/Bet20Button" to="." method="_on_bet_amount_pressed" binds= [0]]
-[connection signal="pressed" from="BetAmountPage/Bet50Button" to="." method="_on_bet_amount_pressed" binds= [1]]
-[connection signal="pressed" from="BetAmountPage/Bet100Button" to="." method="_on_bet_amount_pressed" binds= [2]]
-[connection signal="pressed" from="BetAmountPage/NextButton" to="." method="_on_bet_amount_next_pressed"]
-[connection signal="pressed" from="BetAmountPage/BackButton" to="." method="_on_bet_amount_back_pressed"]
-[connection signal="pressed" from="BetPickPage/ConfirmButton" to="." method="_on_bet_confirm_pressed"]
-[connection signal="pressed" from="BetPickPage/BackButton" to="." method="_on_bet_pick_back_pressed"]
+[connection signal="pressed" from="Content/TierPage/Tier1Button" to="." method="_on_tier_pressed" binds= [0]]
+[connection signal="pressed" from="Content/TierPage/Tier2Button" to="." method="_on_tier_pressed" binds= [1]]
+[connection signal="pressed" from="Content/TierPage/Tier3Button" to="." method="_on_tier_pressed" binds= [2]]
+[connection signal="pressed" from="Content/TierPage/Tier4Button" to="." method="_on_tier_pressed" binds= [3]]
+[connection signal="pressed" from="Content/ModePage/DriveButton" to="." method="_on_drive_pressed"]
+[connection signal="pressed" from="Content/ModePage/BetButton" to="." method="_on_bet_pressed"]
+[connection signal="pressed" from="Content/ModePage/BackButton" to="." method="_on_mode_back_pressed"]
+[connection signal="pressed" from="Content/DrivePage/PrevButton" to="." method="_on_drive_prev_pressed"]
+[connection signal="pressed" from="Content/DrivePage/NextButton" to="." method="_on_drive_next_pressed"]
+[connection signal="pressed" from="Content/DrivePage/RaceButton" to="." method="_on_race_pressed"]
+[connection signal="pressed" from="Content/DrivePage/BackButton" to="." method="_on_drive_back_pressed"]
+[connection signal="pressed" from="Content/BetAmountPage/Bet20Button" to="." method="_on_bet_amount_pressed" binds= [0]]
+[connection signal="pressed" from="Content/BetAmountPage/Bet50Button" to="." method="_on_bet_amount_pressed" binds= [1]]
+[connection signal="pressed" from="Content/BetAmountPage/Bet100Button" to="." method="_on_bet_amount_pressed" binds= [2]]
+[connection signal="pressed" from="Content/BetAmountPage/NextButton" to="." method="_on_bet_amount_next_pressed"]
+[connection signal="pressed" from="Content/BetAmountPage/BackButton" to="." method="_on_bet_amount_back_pressed"]
+[connection signal="pressed" from="Content/BetPickPage/ConfirmButton" to="." method="_on_bet_confirm_pressed"]
+[connection signal="pressed" from="Content/BetPickPage/BackButton" to="." method="_on_bet_pick_back_pressed"]

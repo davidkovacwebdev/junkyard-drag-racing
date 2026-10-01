@@ -42,6 +42,7 @@ var _rng := RandomNumberGenerator.new()
 var _line_label: Label
 var _stash_list: VBoxContainer
 var _stash_empty_label: Label
+var _stash_sort_button: SortButton
 var _crucibles: Array[CrucibleSlot] = []
 var _odds_label: Label
 var _stats_label: Label
@@ -188,7 +189,7 @@ func _refresh_stash() -> void:
 			_stash_rows[id].visible = false
 	var ids := loose_by_id.keys()
 	ids.sort_custom(func(a: StringName, b: StringName) -> bool:
-		return loose_by_id[a][0].display_name < loose_by_id[b][0].display_name)
+		return PartSort.comes_before(loose_by_id[a][0], loose_by_id[b][0], _stash_sort_button.key))
 	for id in ids:
 		var copies: Array = loose_by_id[id]
 		var slot: PartSlot = _stash_rows.get(id)
@@ -215,7 +216,8 @@ func _clear_stash_rows() -> void:
 func _loose_by_id() -> Dictionary:
 	var grouped := {}
 	for part in Inventory.spare_parts:
-		if part == null or _crucible_parts.has(part):
+		# Bolt-ons don't melt into a car part: their stats mean something else.
+		if part == null or part is AccessoryPartData or _crucible_parts.has(part):
 			continue
 		if not grouped.has(part.id):
 			grouped[part.id] = []
@@ -277,9 +279,17 @@ func _build() -> void:
 	_line_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	board.add_child(_line_label)
 
-	var stash_title := _label("YOUR LOOSE PARTS  (click to toss in)", 16, UiPalette.TEXT_LIGHT)
+	var stash_title := _label("LOOSE PARTS (click to toss in)", 16, UiPalette.TEXT_LIGHT)
 	stash_title.position = Vector2(28, 88)
 	board.add_child(stash_title)
+	_stash_sort_button = SortButton.new()
+	_stash_sort_button.font_size = 15
+	_stash_sort_button.tilt_degrees = 1.0
+	_stash_sort_button.jitter_seed = 75
+	_stash_sort_button.position = Vector2(336, 76)
+	_stash_sort_button.size = Vector2(170, 34)
+	_stash_sort_button.sort_changed.connect(func(_key: PartSort.Key) -> void: _refresh_stash())
+	board.add_child(_stash_sort_button)
 	var scroll := ScrollContainer.new()
 	scroll.position = Vector2(26, 116)
 	scroll.size = Vector2(480, BOARD_SIZE.y - 150)

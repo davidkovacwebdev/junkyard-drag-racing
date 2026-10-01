@@ -211,6 +211,7 @@ func _spawn_random_part(rng: RandomNumberGenerator) -> void:
 	pool.append_array(PartDatabase.bodies)
 	pool.append_array(PartDatabase.wheels)
 	pool.append_array(PartDatabase.junk_engines)
+	pool.append_array(PartDatabase.junk_accessories)
 	if pool.is_empty():
 		return
 	var part: PartData = pool[rng.randi() % pool.size()]

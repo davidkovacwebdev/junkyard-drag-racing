@@ -12,7 +12,8 @@ func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
 	if typeof(data) != TYPE_DICTIONARY:
 		return false
 	var category = data.get("category")
-	return category == PartData.Category.BODY or category == PartData.Category.ENGINE
+	return category == PartData.Category.BODY or category == PartData.Category.ENGINE \
+			or category == PartData.Category.ACCESSORY
 
 func _drop_data(_at_position: Vector2, data: Variant) -> void:
 	if garage != null:

@@ -39,6 +39,8 @@ func _apply_tint() -> void:
 			orb_color = Color(0.46, 0.62, 0.79, 1.0)
 		PartData.Category.ENGINE:
 			orb_color = Color(0.83, 0.6, 0.33, 1.0)
+		PartData.Category.ACCESSORY:
+			orb_color = Color(0.7, 0.52, 0.72, 1.0)
 	queue_redraw()
 
 func grant() -> void:

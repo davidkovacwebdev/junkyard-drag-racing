@@ -1,0 +1,38 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/car/accessories/gps_arrow_accessory.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/accessory_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_gps_arrow"]
+script = ExtResource("2")
+id = &"accessory_gps_arrow"
+display_name = "GPS Arrow"
+category = 3
+spot = 1
+effect_description = "Points at the quest you're tracking.
+Bloops at you when you drive the wrong way."
+mass = 1
+equip_sound = &"gps_bloop"
+
+[node name="AccessoryGpsArrow" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_gps_arrow")
+
+[node name="Base" type="Polygon2D" parent="."]
+color = Color(0.2, 0.2, 0.22, 1)
+polygon = PackedVector2Array(-12, 0, 12, 0, 10, -8, -10, -8)
+
+[node name="Screen" type="Polygon2D" parent="."]
+color = Color(0.4, 0.5, 0.52, 1)
+polygon = PackedVector2Array(-7, -2, 7, -2, 6, -6, -6, -6)
+
+[node name="Pointer" type="Node2D" parent="."]
+position = Vector2(0, -36)
+
+[node name="Arrow" type="Polygon2D" parent="Pointer"]
+color = Color(0.95, 0.75, 0.1, 1)
+polygon = PackedVector2Array(-14, -6, 2, -6, 2, -13, 18, 0, 2, 13, 2, 6, -14, 6)
+
+[node name="ArrowShade" type="Polygon2D" parent="Pointer"]
+color = Color(0.8, 0.6, 0.08, 1)
+polygon = PackedVector2Array(-14, 0, 18, 0, 2, 13, 2, 6, -14, 6)

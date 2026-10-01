@@ -1,0 +1,22 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/hill_climb_site.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/world/registration_booth.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/race/drag_strip_menu.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/race/race_hill_climb.tscn" id="race"]
+
+[node name="HillClimbSite" type="Node2D"]
+
+[node name="Visual" type="Node2D" parent="."]
+script = ExtResource("1")
+
+[node name="Entrance" parent="." instance=ExtResource("2")]
+position = Vector2(-1000, 420)
+display_name = "Hill Climb"
+interior_scene = ExtResource("3")
+debug_race_scene = ExtResource("race")
+collision_height_fraction = 1.0
+race_scene_path = "res://scenes/race/race_hill_climb.tscn"
+course = 1
+rules_line = "Highest up the hill wins. Weak heaps roll back down."
+wall_color = Color(0.36, 0.38, 0.45, 1)

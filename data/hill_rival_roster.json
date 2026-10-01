@@ -1,0 +1,4203 @@
+[
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_classic.tscn",
+		"engine": "res://scenes/parts/engines/engine_jet.tscn",
+		"time": 10.54,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_standard.tscn",
+			"res://scenes/parts/wheels/wheel_washer_door.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_pipes.tscn",
+		"engine": "res://scenes/parts/engines/engine_firework_rocket.tscn",
+		"time": 14.75,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_dartboard.tscn",
+			"res://scenes/parts/wheels/wheel_triangle.tscn",
+			"res://scenes/parts/wheels/wheel_pizza_tray.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_boat.tscn",
+		"engine": "res://scenes/parts/engines/engine_propeller.tscn",
+		"time": 14.83,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_office_chair.tscn",
+			"res://scenes/parts/wheels/wheel_paddle.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_siren.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_plank.tscn",
+		"engine": "res://scenes/parts/engines/engine_v8.tscn",
+		"time": 16.48,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_pizza_tray.tscn",
+			"res://scenes/parts/wheels/wheel_stop_sign.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_sofa.tscn",
+		"engine": "res://scenes/parts/engines/engine_rc_car_motor.tscn",
+		"time": 17.97,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_dartboard.tscn",
+			"res://scenes/parts/wheels/wheel_tractor.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_pipes.tscn",
+		"engine": "res://scenes/parts/engines/engine_firework_rocket.tscn",
+		"time": 18.32,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_stop_sign.tscn",
+			"res://scenes/parts/wheels/wheel_tractor_seat.tscn",
+			"res://scenes/parts/wheels/wheel_traffic_cone.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_siren.tscn",
+			"res://scenes/parts/accessories/accessory_spoiler.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_trex_fossil.tscn",
+		"engine": "res://scenes/parts/engines/engine_angle_grinder.tscn",
+		"time": 19.42,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_dartboard.tscn",
+			"res://scenes/parts/wheels/wheel_metal_barrel.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_rocket_exhaust.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_bicycle.tscn",
+		"engine": "res://scenes/parts/engines/engine_fire_extinguisher.tscn",
+		"time": 20.2,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_bicycle.tscn",
+			"res://scenes/parts/wheels/wheel_wood_barrel.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_soda_bottle.tscn",
+		"time": 20.27,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_trash_lid.tscn",
+			"res://scenes/parts/wheels/wheel_pizza_tray.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_boat.tscn",
+		"engine": "res://scenes/parts/engines/engine_rc_car_motor.tscn",
+		"time": 20.41,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_dartboard.tscn",
+			"res://scenes/parts/wheels/wheel_saw_blade.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_mattress.tscn",
+		"engine": "res://scenes/parts/engines/engine_rc_car_motor.tscn",
+		"time": 20.9,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_saw_blade.tscn",
+			"res://scenes/parts/wheels/wheel_office_chair.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_boxing_glove.tscn",
+			"res://scenes/parts/accessories/accessory_balloon.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_mattress.tscn",
+		"engine": "res://scenes/parts/engines/engine_rc_car_motor.tscn",
+		"time": 21.6,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tank_track.tscn",
+			"res://scenes/parts/wheels/wheel_tank_track.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_tin_cans.tscn",
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_mattress.tscn",
+		"engine": "res://scenes/parts/engines/engine_chainsaw_motor.tscn",
+		"time": 25.56,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tank_track.tscn",
+			"res://scenes/parts/wheels/wheel_paddle.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_limo.tscn",
+		"engine": "res://scenes/parts/engines/engine_soda_bottle.tscn",
+		"time": 25.56,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_standard.tscn",
+			"res://scenes/parts/wheels/wheel_standard.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_tin_cans.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_co2_tank.tscn",
+		"time": 26.31,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_bicycle.tscn",
+			"res://scenes/parts/wheels/wheel_flat.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_pipes.tscn",
+		"engine": "res://scenes/parts/engines/engine_go_kart.tscn",
+		"time": 27.29,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_metal_bucket.tscn",
+			"res://scenes/parts/wheels/wheel_tractor.tscn",
+			"res://scenes/parts/wheels/wheel_washer_door.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_deer_antlers.tscn",
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_wrecked_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_blowtorch.tscn",
+		"time": 28.55,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_bicycle.tscn",
+			"res://scenes/parts/wheels/wheel_bicycle.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_rocket_exhaust.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_plank.tscn",
+		"engine": "res://scenes/parts/engines/engine_electric_scooter_motor.tscn",
+		"time": 28.75,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_dartboard.tscn",
+			"res://scenes/parts/wheels/wheel_tank_track.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_siren.tscn",
+			"res://scenes/parts/accessories/accessory_rocket_exhaust.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_classic.tscn",
+		"engine": "res://scenes/parts/engines/engine_jet.tscn",
+		"time": 30.49,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_flat.tscn",
+			"res://scenes/parts/wheels/wheel_prosthetic_leg.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_mattress.tscn",
+		"engine": "res://scenes/parts/engines/engine_blowtorch.tscn",
+		"time": 31.62,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_office_chair.tscn",
+			"res://scenes/parts/wheels/wheel_tank_track.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_plank.tscn",
+		"engine": "res://scenes/parts/engines/engine_paint_sprayer.tscn",
+		"time": 33.22,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_office_chair.tscn",
+			"res://scenes/parts/wheels/wheel_pizza_tray.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_spoiler.tscn",
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_limo.tscn",
+		"engine": "res://scenes/parts/engines/engine_soda_keg.tscn",
+		"time": 35.02,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_washer_door.tscn",
+			"res://scenes/parts/wheels/wheel_tank_track.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_plank.tscn",
+		"engine": "res://scenes/parts/engines/engine_air_tank.tscn",
+		"time": 36.52,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_flat.tscn",
+			"res://scenes/parts/wheels/wheel_pizza_tray.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_limo.tscn",
+		"engine": "res://scenes/parts/engines/engine_v6.tscn",
+		"time": 37.44,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_bbq_grill.tscn",
+			"res://scenes/parts/wheels/wheel_washer_door.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_axe.tscn",
+			"res://scenes/parts/accessories/accessory_rocket_exhaust.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_blowtorch.tscn",
+		"time": 38.42,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_metal_barrel.tscn",
+			"res://scenes/parts/wheels/wheel_tank_track.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_boxing_glove.tscn",
+			"res://scenes/parts/accessories/accessory_anchor.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_limo.tscn",
+		"engine": "res://scenes/parts/engines/engine_leaf_blower.tscn",
+		"time": 39.21,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_wood_barrel.tscn",
+			"res://scenes/parts/wheels/wheel_bicycle.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_boxing_glove.tscn",
+			"res://scenes/parts/accessories/accessory_siren.tscn",
+			"res://scenes/parts/accessories/accessory_spoiler.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_pipes.tscn",
+		"engine": "res://scenes/parts/engines/engine_generator.tscn",
+		"time": 39.43,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_bicycle.tscn",
+			"res://scenes/parts/wheels/wheel_trash_lid.tscn",
+			"res://scenes/parts/wheels/wheel_stop_sign.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_bicycle.tscn",
+		"engine": "res://scenes/parts/engines/engine_air_horn.tscn",
+		"time": 39.9,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_office_chair.tscn",
+			"res://scenes/parts/wheels/wheel_trash_lid.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_deer_antlers.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_soda_bottle.tscn",
+		"time": 39.99,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_flat.tscn",
+			"res://scenes/parts/wheels/wheel_pizza_tray.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_sofa.tscn",
+		"engine": "res://scenes/parts/engines/engine_air_horn.tscn",
+		"time": 48.32,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_office_chair.tscn",
+			"res://scenes/parts/wheels/wheel_flat.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_rocket_exhaust.tscn",
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_sofa.tscn",
+		"engine": "res://scenes/parts/engines/engine_industrial_mixer.tscn",
+		"time": 51.27,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_office_chair.tscn",
+			"res://scenes/parts/wheels/wheel_frying_pan.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_limo.tscn",
+		"engine": "res://scenes/parts/engines/engine_paint_sprayer.tscn",
+		"time": 52.92,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_standard.tscn",
+			"res://scenes/parts/wheels/wheel_bbq_grill.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_deer_antlers.tscn",
+			"res://scenes/parts/accessories/accessory_anchor.tscn",
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_air_tank.tscn",
+		"time": 53.62,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_saw_blade.tscn",
+			"res://scenes/parts/wheels/wheel_flat.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_siren.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_classic.tscn",
+		"engine": "res://scenes/parts/engines/engine_soda_keg.tscn",
+		"time": 54.83,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_wood_barrel.tscn",
+			"res://scenes/parts/wheels/wheel_shopping_cart.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_deer_antlers.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_sofa.tscn",
+		"engine": "res://scenes/parts/engines/engine_washing_machine_motor.tscn",
+		"time": 61.3,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_flat.tscn",
+			"res://scenes/parts/wheels/wheel_saw_blade.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_sewing_machine.tscn",
+		"time": 65.62,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_pizza_tray.tscn",
+			"res://scenes/parts/wheels/wheel_prosthetic_leg.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_axe.tscn",
+			"res://scenes/parts/accessories/accessory_windup_key.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_limo.tscn",
+		"engine": "res://scenes/parts/engines/engine_air_horn.tscn",
+		"time": 66.78,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tank_track.tscn",
+			"res://scenes/parts/wheels/wheel_standard.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_pipes.tscn",
+		"engine": "res://scenes/parts/engines/engine_generator.tscn",
+		"time": 67.33,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_satellite_dish.tscn",
+			"res://scenes/parts/wheels/wheel_pizza_tray.tscn",
+			"res://scenes/parts/wheels/wheel_flat.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_meat_grinder.tscn",
+		"time": 69.18,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_metal_barrel.tscn",
+			"res://scenes/parts/wheels/wheel_tractor_seat.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_mattress.tscn",
+		"engine": "res://scenes/parts/engines/engine_horse.tscn",
+		"time": 69.32,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_frying_pan.tscn",
+			"res://scenes/parts/wheels/wheel_office_chair.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_sofa.tscn",
+		"engine": "res://scenes/parts/engines/engine_air_horn.tscn",
+		"time": 69.86,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_stop_sign.tscn",
+			"res://scenes/parts/wheels/wheel_triangle.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_pipes.tscn",
+		"engine": "res://scenes/parts/engines/engine_meat_grinder.tscn",
+		"time": 70.3,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_trash_lid.tscn",
+			"res://scenes/parts/wheels/wheel_metal_bucket.tscn",
+			"res://scenes/parts/wheels/wheel_triangle.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_gps_arrow.tscn",
+			"res://scenes/parts/accessories/accessory_windup_key.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_pipes.tscn",
+		"engine": "res://scenes/parts/engines/engine_pressure_washer.tscn",
+		"time": 70.64,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_alarm_clock.tscn",
+			"res://scenes/parts/wheels/wheel_prosthetic_leg.tscn",
+			"res://scenes/parts/wheels/wheel_hamster.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_mattress.tscn",
+		"engine": "res://scenes/parts/engines/engine_industrial_mixer.tscn",
+		"time": 71.25,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_dartboard.tscn",
+			"res://scenes/parts/wheels/wheel_dartboard.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_upside_down_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_soda_keg.tscn",
+		"time": 71.35,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_saw_blade.tscn",
+			"res://scenes/parts/wheels/wheel_dartboard.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_bicycle.tscn",
+		"engine": "res://scenes/parts/engines/engine_shop_vacuum.tscn",
+		"time": 72.03,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_washer_door.tscn",
+			"res://scenes/parts/wheels/wheel_trash_lid.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_classic.tscn",
+		"engine": "res://scenes/parts/engines/engine_horse.tscn",
+		"time": 72.68,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_flat.tscn",
+			"res://scenes/parts/wheels/wheel_hamster.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_classic.tscn",
+		"engine": "res://scenes/parts/engines/engine_outboard_motor.tscn",
+		"time": 73.01,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_hamster.tscn",
+			"res://scenes/parts/wheels/wheel_metal_barrel.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_cow_catcher.tscn",
+			"res://scenes/parts/accessories/accessory_siren.tscn",
+			"res://scenes/parts/accessories/accessory_windup_key.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_upside_down_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_sewing_machine.tscn",
+		"time": 73.33,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_trash_lid.tscn",
+			"res://scenes/parts/wheels/wheel_tractor_seat.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_pipes.tscn",
+		"engine": "res://scenes/parts/engines/engine_rc_car_motor.tscn",
+		"time": 73.46,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_hamster.tscn",
+			"res://scenes/parts/wheels/wheel_metal_barrel.tscn",
+			"res://scenes/parts/wheels/wheel_hamster.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_fridge.tscn",
+		"engine": "res://scenes/parts/engines/engine_rc_car_motor.tscn",
+		"time": 73.51,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_hamster.tscn",
+			"res://scenes/parts/wheels/wheel_tank_track.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_cow_catcher.tscn",
+			"res://scenes/parts/accessories/accessory_gps_arrow.tscn",
+			"res://scenes/parts/accessories/accessory_windup_key.tscn",
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_upside_down_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_treadmill_motor.tscn",
+		"time": 73.62,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_office_chair.tscn",
+			"res://scenes/parts/wheels/wheel_flat.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_limo.tscn",
+		"engine": "res://scenes/parts/engines/engine_hair_dryer.tscn",
+		"time": 73.7,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_standard.tscn",
+			"res://scenes/parts/wheels/wheel_bicycle.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_spoiler.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_upside_down_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_paint_sprayer.tscn",
+		"time": 73.91,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_trash_lid.tscn",
+			"res://scenes/parts/wheels/wheel_flat.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_axe.tscn",
+			"res://scenes/parts/accessories/accessory_windup_key.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_plank.tscn",
+		"engine": "res://scenes/parts/engines/engine_air_tank.tscn",
+		"time": 73.99,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_metal_bucket.tscn",
+			"res://scenes/parts/wheels/wheel_robot_leg.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_balloon.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_upside_down_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_firework_rocket.tscn",
+		"time": 74.05,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_frying_pan.tscn",
+			"res://scenes/parts/wheels/wheel_flat.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_boxing_glove.tscn",
+			"res://scenes/parts/accessories/accessory_gps_arrow.tscn",
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_sofa.tscn",
+		"engine": "res://scenes/parts/engines/engine_washing_machine_motor.tscn",
+		"time": 74.13,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_flat.tscn",
+			"res://scenes/parts/wheels/wheel_tv.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_fridge.tscn",
+		"engine": "res://scenes/parts/engines/engine_pneumatic_jack.tscn",
+		"time": 74.24,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_dartboard.tscn",
+			"res://scenes/parts/wheels/wheel_wood_barrel.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_wrecked_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_go_kart.tscn",
+		"time": 74.32,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_flat.tscn",
+			"res://scenes/parts/wheels/wheel_triangle.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_upside_down_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_washing_machine_motor.tscn",
+		"time": 74.43,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_satellite_dish.tscn",
+			"res://scenes/parts/wheels/wheel_tractor_seat.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_limo.tscn",
+		"engine": "res://scenes/parts/engines/engine_angle_grinder.tscn",
+		"time": 74.45,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tractor.tscn",
+			"res://scenes/parts/wheels/wheel_robot_leg.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_bicycle.tscn",
+		"engine": "res://scenes/parts/engines/engine_angle_grinder.tscn",
+		"time": 74.45,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_metal_barrel.tscn",
+			"res://scenes/parts/wheels/wheel_tractor.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_sofa.tscn",
+		"engine": "res://scenes/parts/engines/engine_air_horn.tscn",
+		"time": 75.33,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_flat.tscn",
+			"res://scenes/parts/wheels/wheel_dartboard.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_boxing_glove.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_trex_fossil.tscn",
+		"engine": "res://scenes/parts/engines/engine_air_compressor.tscn",
+		"time": 75.7,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_flat.tscn",
+			"res://scenes/parts/wheels/wheel_wood_barrel.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_cow_catcher.tscn",
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_classic.tscn",
+		"engine": "res://scenes/parts/engines/engine_washing_machine_motor.tscn",
+		"time": 75.78,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_saw_blade.tscn",
+			"res://scenes/parts/wheels/wheel_bbq_grill.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_spoiler.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_trex_fossil.tscn",
+		"engine": "res://scenes/parts/engines/engine_fire_extinguisher.tscn",
+		"time": 76.29,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tractor_seat.tscn",
+			"res://scenes/parts/wheels/wheel_metal_barrel.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_classic.tscn",
+		"engine": "res://scenes/parts/engines/engine_chainsaw_motor.tscn",
+		"time": 76.55,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_square.tscn",
+			"res://scenes/parts/wheels/wheel_pizza_tray.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_cow_catcher.tscn",
+			"res://scenes/parts/accessories/accessory_gps_arrow.tscn",
+			"res://scenes/parts/accessories/accessory_spoiler.tscn",
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_bicycle.tscn",
+		"engine": "res://scenes/parts/engines/engine_chainsaw_motor.tscn",
+		"time": 76.58,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tractor_seat.tscn",
+			"res://scenes/parts/wheels/wheel_standard.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_wrecked_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_electric_drill.tscn",
+		"time": 76.89,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_office_chair.tscn",
+			"res://scenes/parts/wheels/wheel_traffic_cone.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_limo.tscn",
+		"engine": "res://scenes/parts/engines/engine_sewing_machine.tscn",
+		"time": 77.98,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_washer_door.tscn",
+			"res://scenes/parts/wheels/wheel_pizza_tray.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_boat.tscn",
+		"engine": "res://scenes/parts/engines/engine_pressure_washer.tscn",
+		"time": 78.28,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_trash_lid.tscn",
+			"res://scenes/parts/wheels/wheel_bbq_grill.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_upside_down_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_paint_sprayer.tscn",
+		"time": 79.56,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_standard.tscn",
+			"res://scenes/parts/wheels/wheel_shopping_cart.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_cow_catcher.tscn",
+			"res://scenes/parts/accessories/accessory_siren.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_bicycle.tscn",
+		"engine": "res://scenes/parts/engines/engine_hair_dryer.tscn",
+		"time": 79.63,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_flat.tscn",
+			"res://scenes/parts/wheels/wheel_dartboard.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_siren.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_sewing_machine.tscn",
+		"time": 80.47,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_flat.tscn",
+			"res://scenes/parts/wheels/wheel_toilet.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_fridge.tscn",
+		"engine": "res://scenes/parts/engines/engine_industrial_mixer.tscn",
+		"time": 80.63,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_dartboard.tscn",
+			"res://scenes/parts/wheels/wheel_flat.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_axe.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_sewing_machine.tscn",
+		"time": 81.6,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_frying_pan.tscn",
+			"res://scenes/parts/wheels/wheel_traffic_cone.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_bicycle.tscn",
+		"engine": "res://scenes/parts/engines/engine_industrial_fan.tscn",
+		"time": 81.63,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_pizza_tray.tscn",
+			"res://scenes/parts/wheels/wheel_pizza_tray.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_classic.tscn",
+		"engine": "res://scenes/parts/engines/engine_fire_extinguisher.tscn",
+		"time": 81.83,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_hamster.tscn",
+			"res://scenes/parts/wheels/wheel_alarm_clock.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_bicycle.tscn",
+		"engine": "res://scenes/parts/engines/engine_electric_drill.tscn",
+		"time": 81.99,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_office_chair.tscn",
+			"res://scenes/parts/wheels/wheel_bbq_grill.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_wrecked_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_soda_bottle.tscn",
+		"time": 82.36,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tank_track.tscn",
+			"res://scenes/parts/wheels/wheel_giant.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_fridge.tscn",
+		"engine": "res://scenes/parts/engines/engine_industrial_fan.tscn",
+		"time": 82.99,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_standard.tscn",
+			"res://scenes/parts/wheels/wheel_flat.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_balloon.tscn",
+			"res://scenes/parts/accessories/accessory_anchor.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_upside_down_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_shop_vacuum.tscn",
+		"time": 83.27,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_saw_blade.tscn",
+			"res://scenes/parts/wheels/wheel_trash_lid.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_wrecked_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_generator.tscn",
+		"time": 83.64,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_triangle.tscn",
+			"res://scenes/parts/wheels/wheel_bbq_grill.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_siren.tscn",
+			"res://scenes/parts/accessories/accessory_windup_key.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_classic.tscn",
+		"engine": "res://scenes/parts/engines/engine_washing_machine_motor.tscn",
+		"time": 83.81,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_ceiling_fan.tscn",
+			"res://scenes/parts/wheels/wheel_robot_leg.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_pipes.tscn",
+		"engine": "res://scenes/parts/engines/engine_blowtorch.tscn",
+		"time": 84.58,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_traffic_cone.tscn",
+			"res://scenes/parts/wheels/wheel_washer_door.tscn",
+			"res://scenes/parts/wheels/wheel_flat.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_gps_arrow.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_leaf_blower.tscn",
+		"time": 84.79,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_alarm_clock.tscn",
+			"res://scenes/parts/wheels/wheel_saw_blade.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_sofa.tscn",
+		"engine": "res://scenes/parts/engines/engine_paint_sprayer.tscn",
+		"time": 84.89,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_toilet.tscn",
+			"res://scenes/parts/wheels/wheel_wood_barrel.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_siren.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_pipes.tscn",
+		"engine": "res://scenes/parts/engines/engine_paint_sprayer.tscn",
+		"time": 85.25,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_shopping_cart.tscn",
+			"res://scenes/parts/wheels/wheel_frying_pan.tscn",
+			"res://scenes/parts/wheels/wheel_shopping_cart.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_wrecked_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_generator.tscn",
+		"time": 85.39,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_metal_barrel.tscn",
+			"res://scenes/parts/wheels/wheel_paddle.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_cow_catcher.tscn",
+			"res://scenes/parts/accessories/accessory_rocket_exhaust.tscn",
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_limo.tscn",
+		"engine": "res://scenes/parts/engines/engine_air_horn.tscn",
+		"time": 85.39,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tank_track.tscn",
+			"res://scenes/parts/wheels/wheel_square.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_hair_dryer.tscn",
+		"time": 85.89,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_metal_bucket.tscn",
+			"res://scenes/parts/wheels/wheel_trash_lid.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_windup_key.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_mattress.tscn",
+		"engine": "res://scenes/parts/engines/engine_meat_grinder.tscn",
+		"time": 86.11,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_metal_barrel.tscn",
+			"res://scenes/parts/wheels/wheel_standard.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_cow_catcher.tscn",
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_wrecked_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_shop_vacuum.tscn",
+		"time": 86.22,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_metal_bucket.tscn",
+			"res://scenes/parts/wheels/wheel_saw_blade.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_boat.tscn",
+		"engine": "res://scenes/parts/engines/engine_generator.tscn",
+		"time": 86.44,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tractor.tscn",
+			"res://scenes/parts/wheels/wheel_prosthetic_leg.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_bathtub.tscn",
+		"engine": "res://scenes/parts/engines/engine_paint_sprayer.tscn",
+		"time": 86.62,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tank_track.tscn",
+			"res://scenes/parts/wheels/wheel_flat.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_sofa.tscn",
+		"engine": "res://scenes/parts/engines/engine_shop_vacuum.tscn",
+		"time": 86.77,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_frying_pan.tscn",
+			"res://scenes/parts/wheels/wheel_toilet.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_mattress.tscn",
+		"engine": "res://scenes/parts/engines/engine_sail.tscn",
+		"time": 86.85,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_pizza_tray.tscn",
+			"res://scenes/parts/wheels/wheel_washer_door.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_angle_grinder.tscn",
+		"time": 86.88,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_ceiling_fan.tscn",
+			"res://scenes/parts/wheels/wheel_shopping_cart.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_radiator.tscn",
+		"engine": "res://scenes/parts/engines/engine_jet.tscn",
+		"time": 86.92,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_paddle.tscn",
+			"res://scenes/parts/wheels/wheel_washer_door.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_cow_catcher.tscn",
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_outboard_motor.tscn",
+		"time": 87.55,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_triangle.tscn",
+			"res://scenes/parts/wheels/wheel_saw_blade.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_windup_key.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_bicycle.tscn",
+		"engine": "res://scenes/parts/engines/engine_pneumatic_jack.tscn",
+		"time": 87.74,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_washer_door.tscn",
+			"res://scenes/parts/wheels/wheel_toilet.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_bicycle.tscn",
+		"engine": "res://scenes/parts/engines/engine_sewing_machine.tscn",
+		"time": 88.01,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_office_chair.tscn",
+			"res://scenes/parts/wheels/wheel_dartboard.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_pipes.tscn",
+		"engine": "res://scenes/parts/engines/engine_horse.tscn",
+		"time": 88.89,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_hamster.tscn",
+			"res://scenes/parts/wheels/wheel_satellite_dish.tscn",
+			"res://scenes/parts/wheels/wheel_toilet.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_tin_cans.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_trex_fossil.tscn",
+		"engine": "res://scenes/parts/engines/engine_chainsaw.tscn",
+		"time": 89.59,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_wood_barrel.tscn",
+			"res://scenes/parts/wheels/wheel_stop_sign.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_boat.tscn",
+		"engine": "res://scenes/parts/engines/engine_firework_rocket.tscn",
+		"time": 90.07,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_square.tscn",
+			"res://scenes/parts/wheels/wheel_office_chair.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_air_horn.tscn",
+		"time": 90.15,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_triangle.tscn",
+			"res://scenes/parts/wheels/wheel_tv.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_cow_catcher.tscn",
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_trex_fossil.tscn",
+		"engine": "res://scenes/parts/engines/engine_horse.tscn",
+		"time": 91.19,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_paddle.tscn",
+			"res://scenes/parts/wheels/wheel_ceiling_fan.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_trex_fossil.tscn",
+		"engine": "res://scenes/parts/engines/engine_horse.tscn",
+		"time": 91.44,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tractor.tscn",
+			"res://scenes/parts/wheels/wheel_tank_track.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_windup_key.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_mattress.tscn",
+		"engine": "res://scenes/parts/engines/engine_food_processor.tscn",
+		"time": 91.56,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tank_track.tscn",
+			"res://scenes/parts/wheels/wheel_bicycle.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_limo.tscn",
+		"engine": "res://scenes/parts/engines/engine_pneumatic_jack.tscn",
+		"time": 91.81,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_office_chair.tscn",
+			"res://scenes/parts/wheels/wheel_pogo.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_cow_catcher.tscn",
+			"res://scenes/parts/accessories/accessory_balloon.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_leaf_blower.tscn",
+		"time": 91.89,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_traffic_cone.tscn",
+			"res://scenes/parts/wheels/wheel_frying_pan.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_boxing_glove.tscn",
+			"res://scenes/parts/accessories/accessory_siren.tscn",
+			"res://scenes/parts/accessories/accessory_spoiler.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_pipes.tscn",
+		"engine": "res://scenes/parts/engines/engine_jet.tscn",
+		"time": 92.27,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_square.tscn",
+			"res://scenes/parts/wheels/wheel_stop_sign.tscn",
+			"res://scenes/parts/wheels/wheel_satellite_dish.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_axe.tscn",
+			"res://scenes/parts/accessories/accessory_tin_cans.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_trex_fossil.tscn",
+		"engine": "res://scenes/parts/engines/engine_v8.tscn",
+		"time": 92.35,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_hamster.tscn",
+			"res://scenes/parts/wheels/wheel_frying_pan.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_mattress.tscn",
+		"engine": "res://scenes/parts/engines/engine_industrial_mixer.tscn",
+		"time": 93.07,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_bbq_grill.tscn",
+			"res://scenes/parts/wheels/wheel_tractor.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_fridge.tscn",
+		"engine": "res://scenes/parts/engines/engine_paint_sprayer.tscn",
+		"time": 93.11,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_trash_lid.tscn",
+			"res://scenes/parts/wheels/wheel_flat.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_boat.tscn",
+		"engine": "res://scenes/parts/engines/engine_boiler.tscn",
+		"time": 93.15,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tank_track.tscn",
+			"res://scenes/parts/wheels/wheel_ceiling_fan.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_boxing_glove.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_pipes.tscn",
+		"engine": "res://scenes/parts/engines/engine_fire_extinguisher.tscn",
+		"time": 94.01,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_ceiling_fan.tscn",
+			"res://scenes/parts/wheels/wheel_ceiling_fan.tscn",
+			"res://scenes/parts/wheels/wheel_shopping_cart.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_radiator.tscn",
+		"engine": "res://scenes/parts/engines/engine_treadmill_motor.tscn",
+		"time": 94.18,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_frying_pan.tscn",
+			"res://scenes/parts/wheels/wheel_metal_barrel.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_soda_keg.tscn",
+		"time": 94.75,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_alarm_clock.tscn",
+			"res://scenes/parts/wheels/wheel_robot_leg.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_pipes.tscn",
+		"engine": "res://scenes/parts/engines/engine_industrial_fan.tscn",
+		"time": 95.06,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_paddle.tscn",
+			"res://scenes/parts/wheels/wheel_dartboard.tscn",
+			"res://scenes/parts/wheels/wheel_toilet.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_wrecked_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_propeller.tscn",
+		"time": 95.55,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_traffic_cone.tscn",
+			"res://scenes/parts/wheels/wheel_paddle.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_balloon.tscn",
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_boat.tscn",
+		"engine": "res://scenes/parts/engines/engine_propeller.tscn",
+		"time": 96.23,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_shopping_cart.tscn",
+			"res://scenes/parts/wheels/wheel_triangle.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_anchor.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_pipes.tscn",
+		"engine": "res://scenes/parts/engines/engine_sewing_machine.tscn",
+		"time": 96.32,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tank_track.tscn",
+			"res://scenes/parts/wheels/wheel_ceiling_fan.tscn",
+			"res://scenes/parts/wheels/wheel_satellite_dish.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_trex_fossil.tscn",
+		"engine": "res://scenes/parts/engines/engine_horse.tscn",
+		"time": 96.41,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_standard.tscn",
+			"res://scenes/parts/wheels/wheel_metal_bucket.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_wrecked_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_meat_grinder.tscn",
+		"time": 96.59,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_shopping_cart.tscn",
+			"res://scenes/parts/wheels/wheel_shopping_cart.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_pipes.tscn",
+		"engine": "res://scenes/parts/engines/engine_vacuum_cleaner.tscn",
+		"time": 96.59,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_saw_blade.tscn",
+			"res://scenes/parts/wheels/wheel_standard.tscn",
+			"res://scenes/parts/wheels/wheel_pogo.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_tin_cans.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_trex_fossil.tscn",
+		"engine": "res://scenes/parts/engines/engine_rc_car_motor.tscn",
+		"time": 96.59,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_standard.tscn",
+			"res://scenes/parts/wheels/wheel_dartboard.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_boxing_glove.tscn",
+			"res://scenes/parts/accessories/accessory_windup_key.tscn",
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_trex_fossil.tscn",
+		"engine": "res://scenes/parts/engines/engine_air_horn.tscn",
+		"time": 97.42,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tank_track.tscn",
+			"res://scenes/parts/wheels/wheel_metal_bucket.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_upside_down_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_toy_car_motor.tscn",
+		"time": 97.61,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_standard.tscn",
+			"res://scenes/parts/wheels/wheel_alarm_clock.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_trex_fossil.tscn",
+		"engine": "res://scenes/parts/engines/engine_pneumatic_jack.tscn",
+		"time": 97.65,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_flat.tscn",
+			"res://scenes/parts/wheels/wheel_pogo.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_cow_catcher.tscn",
+			"res://scenes/parts/accessories/accessory_axe.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_mattress.tscn",
+		"engine": "res://scenes/parts/engines/engine_soda_keg.tscn",
+		"time": 97.75,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_paddle.tscn",
+			"res://scenes/parts/wheels/wheel_hamster.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_deer_antlers.tscn",
+			"res://scenes/parts/accessories/accessory_anchor.tscn",
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_classic.tscn",
+		"engine": "res://scenes/parts/engines/engine_pressure_washer.tscn",
+		"time": 97.75,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_metal_bucket.tscn",
+			"res://scenes/parts/wheels/wheel_square.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_trex_fossil.tscn",
+		"engine": "res://scenes/parts/engines/engine_lawn_mower.tscn",
+		"time": 98.55,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_satellite_dish.tscn",
+			"res://scenes/parts/wheels/wheel_toilet.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_fridge.tscn",
+		"engine": "res://scenes/parts/engines/engine_air_compressor.tscn",
+		"time": 98.6,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_saw_blade.tscn",
+			"res://scenes/parts/wheels/wheel_paddle.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_classic.tscn",
+		"engine": "res://scenes/parts/engines/engine_chainsaw.tscn",
+		"time": 98.65,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_pogo.tscn",
+			"res://scenes/parts/wheels/wheel_tractor_seat.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_pipes.tscn",
+		"engine": "res://scenes/parts/engines/engine_chainsaw_motor.tscn",
+		"time": 100.29,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_paddle.tscn",
+			"res://scenes/parts/wheels/wheel_ceiling_fan.tscn",
+			"res://scenes/parts/wheels/wheel_shopping_cart.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_trex_fossil.tscn",
+		"engine": "res://scenes/parts/engines/engine_lawn_mower.tscn",
+		"time": 100.59,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_hamster.tscn",
+			"res://scenes/parts/wheels/wheel_robot_leg.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_trex_fossil.tscn",
+		"engine": "res://scenes/parts/engines/engine_industrial_mixer.tscn",
+		"time": 100.99,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_hamster.tscn",
+			"res://scenes/parts/wheels/wheel_tractor.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_siren.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_classic.tscn",
+		"engine": "res://scenes/parts/engines/engine_treadmill_motor.tscn",
+		"time": 102.1,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_satellite_dish.tscn",
+			"res://scenes/parts/wheels/wheel_wood_barrel.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_bathtub.tscn",
+		"engine": "res://scenes/parts/engines/engine_vacuum_cleaner.tscn",
+		"time": 102.72,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_washer_door.tscn",
+			"res://scenes/parts/wheels/wheel_hamster.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_upside_down_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_v6.tscn",
+		"time": 103.19,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_pogo.tscn",
+			"res://scenes/parts/wheels/wheel_standard.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_windup_key.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_trex_fossil.tscn",
+		"engine": "res://scenes/parts/engines/engine_air_tank.tscn",
+		"time": 103.87,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_stop_sign.tscn",
+			"res://scenes/parts/wheels/wheel_standard.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_meat_grinder.tscn",
+		"time": 103.92,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_alarm_clock.tscn",
+			"res://scenes/parts/wheels/wheel_flat.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_deer_antlers.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_trex_fossil.tscn",
+		"engine": "res://scenes/parts/engines/engine_meat_grinder.tscn",
+		"time": 103.98,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_standard.tscn",
+			"res://scenes/parts/wheels/wheel_hamster.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_balloon.tscn",
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_sewing_machine.tscn",
+		"time": 104.03,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_hamster.tscn",
+			"res://scenes/parts/wheels/wheel_frying_pan.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_radiator.tscn",
+		"engine": "res://scenes/parts/engines/engine_fire_extinguisher.tscn",
+		"time": 104.45,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_washer_door.tscn",
+			"res://scenes/parts/wheels/wheel_shopping_cart.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_trex_fossil.tscn",
+		"engine": "res://scenes/parts/engines/engine_fire_extinguisher.tscn",
+		"time": 105.75,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_bicycle.tscn",
+			"res://scenes/parts/wheels/wheel_prosthetic_leg.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_axe.tscn",
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_sofa.tscn",
+		"engine": "res://scenes/parts/engines/engine_firework_rocket.tscn",
+		"time": 106.25,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tank_track.tscn",
+			"res://scenes/parts/wheels/wheel_prosthetic_leg.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_plank.tscn",
+		"engine": "res://scenes/parts/engines/engine_meat_grinder.tscn",
+		"time": 108.17,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_pogo.tscn",
+			"res://scenes/parts/wheels/wheel_saw_blade.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_siren.tscn",
+			"res://scenes/parts/accessories/accessory_windup_key.tscn",
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_trex_fossil.tscn",
+		"engine": "res://scenes/parts/engines/engine_air_tank.tscn",
+		"time": 108.34,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_hamster.tscn",
+			"res://scenes/parts/wheels/wheel_square.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_boat.tscn",
+		"engine": "res://scenes/parts/engines/engine_generator.tscn",
+		"time": 108.4,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_paddle.tscn",
+			"res://scenes/parts/wheels/wheel_shopping_cart.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_boat.tscn",
+		"engine": "res://scenes/parts/engines/engine_hair_dryer.tscn",
+		"time": 108.8,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_bbq_grill.tscn",
+			"res://scenes/parts/wheels/wheel_paddle.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_deer_antlers.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_classic.tscn",
+		"engine": "res://scenes/parts/engines/engine_boiler.tscn",
+		"time": 108.86,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_pogo.tscn",
+			"res://scenes/parts/wheels/wheel_wood_barrel.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_cow_catcher.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_pipes.tscn",
+		"engine": "res://scenes/parts/engines/engine_paint_sprayer.tscn",
+		"time": 109.21,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_square.tscn",
+			"res://scenes/parts/wheels/wheel_toilet.tscn",
+			"res://scenes/parts/wheels/wheel_ceiling_fan.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_cow_catcher.tscn",
+			"res://scenes/parts/accessories/accessory_balloon.tscn",
+			"res://scenes/parts/accessories/accessory_anchor.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_radiator.tscn",
+		"engine": "res://scenes/parts/engines/engine_go_kart.tscn",
+		"time": 109.21,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_metal_barrel.tscn",
+			"res://scenes/parts/wheels/wheel_hamster.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_upside_down_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_v8.tscn",
+		"time": 109.85,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_standard.tscn",
+			"res://scenes/parts/wheels/wheel_triangle.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_boxing_glove.tscn",
+			"res://scenes/parts/accessories/accessory_tin_cans.tscn",
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_wrecked_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_paint_sprayer.tscn",
+		"time": 110.93,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_pogo.tscn",
+			"res://scenes/parts/wheels/wheel_trash_lid.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_boat.tscn",
+		"engine": "res://scenes/parts/engines/engine_boiler.tscn",
+		"time": 112.03,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_paddle.tscn",
+			"res://scenes/parts/wheels/wheel_paddle.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_mattress.tscn",
+		"engine": "res://scenes/parts/engines/engine_co2_tank.tscn",
+		"time": 112.09,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_frying_pan.tscn",
+			"res://scenes/parts/wheels/wheel_shopping_cart.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_spoiler.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_sail.tscn",
+		"time": 112.21,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_trash_lid.tscn",
+			"res://scenes/parts/wheels/wheel_metal_bucket.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_pipes.tscn",
+		"engine": "res://scenes/parts/engines/engine_paint_sprayer.tscn",
+		"time": 113.78,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_toilet.tscn",
+			"res://scenes/parts/wheels/wheel_metal_bucket.tscn",
+			"res://scenes/parts/wheels/wheel_standard.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_siren.tscn",
+			"res://scenes/parts/accessories/accessory_anchor.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_limo.tscn",
+		"engine": "res://scenes/parts/engines/engine_electric_drill.tscn",
+		"time": 114.03,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_triangle.tscn",
+			"res://scenes/parts/wheels/wheel_tv.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_fridge.tscn",
+		"engine": "res://scenes/parts/engines/engine_blowtorch.tscn",
+		"time": 114.09,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_stop_sign.tscn",
+			"res://scenes/parts/wheels/wheel_stop_sign.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_balloon.tscn",
+			"res://scenes/parts/accessories/accessory_spoiler.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_fridge.tscn",
+		"engine": "res://scenes/parts/engines/engine_soda_keg.tscn",
+		"time": 115.12,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_frying_pan.tscn",
+			"res://scenes/parts/wheels/wheel_washer_door.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_wrecked_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_shop_vacuum.tscn",
+		"time": 116.7,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_metal_bucket.tscn",
+			"res://scenes/parts/wheels/wheel_pogo.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_bathtub.tscn",
+		"engine": "res://scenes/parts/engines/engine_ceiling_fan_motor.tscn",
+		"time": 116.7,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_pogo.tscn",
+			"res://scenes/parts/wheels/wheel_tractor_seat.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_boxing_glove.tscn",
+			"res://scenes/parts/accessories/accessory_rocket_exhaust.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_classic.tscn",
+		"engine": "res://scenes/parts/engines/engine_washing_machine_motor.tscn",
+		"time": 117.31,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_satellite_dish.tscn",
+			"res://scenes/parts/wheels/wheel_tv.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_vertical_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_generator.tscn",
+		"time": 117.31,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_trash_lid.tscn",
+			"res://scenes/parts/wheels/wheel_wood_barrel.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_boxing_glove.tscn",
+			"res://scenes/parts/accessories/accessory_gps_arrow.tscn",
+			"res://scenes/parts/accessories/accessory_tin_cans.tscn",
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_mattress.tscn",
+		"engine": "res://scenes/parts/engines/engine_v6.tscn",
+		"time": 117.78,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_traffic_cone.tscn",
+			"res://scenes/parts/wheels/wheel_frying_pan.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_boxing_glove.tscn",
+			"res://scenes/parts/accessories/accessory_tin_cans.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_bathtub.tscn",
+		"engine": "res://scenes/parts/engines/engine_rc_car_motor.tscn",
+		"time": 118.19,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_ceiling_fan.tscn",
+			"res://scenes/parts/wheels/wheel_wood_barrel.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_balloon.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_trex_fossil.tscn",
+		"engine": "res://scenes/parts/engines/engine_lawn_mower.tscn",
+		"time": 118.26,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_frying_pan.tscn",
+			"res://scenes/parts/wheels/wheel_bicycle.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_sofa.tscn",
+		"engine": "res://scenes/parts/engines/engine_pneumatic_jack.tscn",
+		"time": 119.93,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_ceiling_fan.tscn",
+			"res://scenes/parts/wheels/wheel_ceiling_fan.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_trex_fossil.tscn",
+		"engine": "res://scenes/parts/engines/engine_outboard_motor.tscn",
+		"time": 120.21,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_toilet.tscn",
+			"res://scenes/parts/wheels/wheel_pizza_tray.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_gps_arrow.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_pipes.tscn",
+		"engine": "res://scenes/parts/engines/engine_food_processor.tscn",
+		"time": 120.5,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_giant.tscn",
+			"res://scenes/parts/wheels/wheel_standard.tscn",
+			"res://scenes/parts/wheels/wheel_washer_door.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_sofa.tscn",
+		"engine": "res://scenes/parts/engines/engine_propeller.tscn",
+		"time": 121.36,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_traffic_cone.tscn",
+			"res://scenes/parts/wheels/wheel_alarm_clock.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_shop_vacuum.tscn",
+		"time": 121.43,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_paddle.tscn",
+			"res://scenes/parts/wheels/wheel_satellite_dish.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_rocket_exhaust.tscn",
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_bicycle.tscn",
+		"engine": "res://scenes/parts/engines/engine_air_tank.tscn",
+		"time": 121.86,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_trash_lid.tscn",
+			"res://scenes/parts/wheels/wheel_square.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_pipes.tscn",
+		"engine": "res://scenes/parts/engines/engine_horse.tscn",
+		"time": 122.82,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_satellite_dish.tscn",
+			"res://scenes/parts/wheels/wheel_trash_lid.tscn",
+			"res://scenes/parts/wheels/wheel_giant.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_wrecked_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_lawn_mower.tscn",
+		"time": 123.04,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_square.tscn",
+			"res://scenes/parts/wheels/wheel_shopping_cart.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_pipes.tscn",
+		"engine": "res://scenes/parts/engines/engine_electric_drill.tscn",
+		"time": 123.34,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_giant.tscn",
+			"res://scenes/parts/wheels/wheel_tractor.tscn",
+			"res://scenes/parts/wheels/wheel_office_chair.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_wrecked_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_soda_bottle.tscn",
+		"time": 124.77,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_paddle.tscn",
+			"res://scenes/parts/wheels/wheel_bicycle.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_radiator.tscn",
+		"engine": "res://scenes/parts/engines/engine_ceiling_fan_motor.tscn",
+		"time": 124.92,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_saw_blade.tscn",
+			"res://scenes/parts/wheels/wheel_metal_bucket.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_pipes.tscn",
+		"engine": "res://scenes/parts/engines/engine_lawn_mower.tscn",
+		"time": 125.46,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_satellite_dish.tscn",
+			"res://scenes/parts/wheels/wheel_wood_barrel.tscn",
+			"res://scenes/parts/wheels/wheel_alarm_clock.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_bicycle.tscn",
+		"engine": "res://scenes/parts/engines/engine_rc_car_motor.tscn",
+		"time": 127.82,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tv.tscn",
+			"res://scenes/parts/wheels/wheel_metal_barrel.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_boxing_glove.tscn",
+			"res://scenes/parts/accessories/accessory_axe.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_pipes.tscn",
+		"engine": "res://scenes/parts/engines/engine_toy_car_motor.tscn",
+		"time": 128.38,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tractor.tscn",
+			"res://scenes/parts/wheels/wheel_shopping_cart.tscn",
+			"res://scenes/parts/wheels/wheel_tractor_seat.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_bathtub.tscn",
+		"engine": "res://scenes/parts/engines/engine_hair_dryer.tscn",
+		"time": 128.54,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_metal_barrel.tscn",
+			"res://scenes/parts/wheels/wheel_prosthetic_leg.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_trex_fossil.tscn",
+		"engine": "res://scenes/parts/engines/engine_pneumatic_jack.tscn",
+		"time": 128.87,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_ceiling_fan.tscn",
+			"res://scenes/parts/wheels/wheel_robot_leg.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_balloon.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_classic.tscn",
+		"engine": "res://scenes/parts/engines/engine_shop_vacuum.tscn",
+		"time": 131.7,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_pogo.tscn",
+			"res://scenes/parts/wheels/wheel_dartboard.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_windup_key.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_wrecked_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_outboard_motor.tscn",
+		"time": 131.78,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_traffic_cone.tscn",
+			"res://scenes/parts/wheels/wheel_tv.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_boxing_glove.tscn",
+			"res://scenes/parts/accessories/accessory_axe.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_bicycle.tscn",
+		"engine": "res://scenes/parts/engines/engine_blender.tscn",
+		"time": 131.87,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_office_chair.tscn",
+			"res://scenes/parts/wheels/wheel_square.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_tin_cans.tscn",
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_bicycle.tscn",
+		"engine": "res://scenes/parts/engines/engine_angle_grinder.tscn",
+		"time": 132.3,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_satellite_dish.tscn",
+			"res://scenes/parts/wheels/wheel_prosthetic_leg.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_mattress.tscn",
+		"engine": "res://scenes/parts/engines/engine_co2_tank.tscn",
+		"time": 132.38,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_dartboard.tscn",
+			"res://scenes/parts/wheels/wheel_traffic_cone.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_axe.tscn",
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_bathtub.tscn",
+		"engine": "res://scenes/parts/engines/engine_meat_grinder.tscn",
+		"time": 133.51,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_standard.tscn",
+			"res://scenes/parts/wheels/wheel_paddle.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_fridge.tscn",
+		"engine": "res://scenes/parts/engines/engine_soda_keg.tscn",
+		"time": 133.77,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_flat.tscn",
+			"res://scenes/parts/wheels/wheel_bicycle.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_siren.tscn",
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_generator.tscn",
+		"time": 135.55,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_traffic_cone.tscn",
+			"res://scenes/parts/wheels/wheel_pizza_tray.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_plank.tscn",
+		"engine": "res://scenes/parts/engines/engine_industrial_mixer.tscn",
+		"time": 135.82,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_prosthetic_leg.tscn",
+			"res://scenes/parts/wheels/wheel_alarm_clock.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_siren.tscn",
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_bicycle.tscn",
+		"engine": "res://scenes/parts/engines/engine_firework_rocket.tscn",
+		"time": 138.96,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tv.tscn",
+			"res://scenes/parts/wheels/wheel_metal_barrel.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_windup_key.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_wrecked_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_go_kart.tscn",
+		"time": 138.96,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_satellite_dish.tscn",
+			"res://scenes/parts/wheels/wheel_frying_pan.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_vertical_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_angle_grinder.tscn",
+		"time": 139.25,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_trash_lid.tscn",
+			"res://scenes/parts/wheels/wheel_trash_lid.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_radiator.tscn",
+		"engine": "res://scenes/parts/engines/engine_washing_machine_motor.tscn",
+		"time": 141.57,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_wood_barrel.tscn",
+			"res://scenes/parts/wheels/wheel_traffic_cone.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_gps_arrow.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_limo.tscn",
+		"engine": "res://scenes/parts/engines/engine_shop_vacuum.tscn",
+		"time": 143.56,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_hamster.tscn",
+			"res://scenes/parts/wheels/wheel_prosthetic_leg.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_windup_key.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_pipes.tscn",
+		"engine": "res://scenes/parts/engines/engine_v8.tscn",
+		"time": 143.56,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_triangle.tscn",
+			"res://scenes/parts/wheels/wheel_traffic_cone.tscn",
+			"res://scenes/parts/wheels/wheel_pogo.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_plank.tscn",
+		"engine": "res://scenes/parts/engines/engine_go_kart.tscn",
+		"time": 144.89,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_prosthetic_leg.tscn",
+			"res://scenes/parts/wheels/wheel_square.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_vertical_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_jet.tscn",
+		"time": 146.03,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_pogo.tscn",
+			"res://scenes/parts/wheels/wheel_standard.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_wrecked_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_angle_grinder.tscn",
+		"time": 146.24,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_robot_leg.tscn",
+			"res://scenes/parts/wheels/wheel_bicycle.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_gps_arrow.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_radiator.tscn",
+		"engine": "res://scenes/parts/engines/engine_blender.tscn",
+		"time": 146.45,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_bicycle.tscn",
+			"res://scenes/parts/wheels/wheel_tv.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_bicycle.tscn",
+		"engine": "res://scenes/parts/engines/engine_lawn_mower.tscn",
+		"time": 148.47,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_pogo.tscn",
+			"res://scenes/parts/wheels/wheel_alarm_clock.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_upside_down_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_ceiling_fan_motor.tscn",
+		"time": 150.22,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_pogo.tscn",
+			"res://scenes/parts/wheels/wheel_alarm_clock.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_radiator.tscn",
+		"engine": "res://scenes/parts/engines/engine_soda_bottle.tscn",
+		"time": 150.44,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_dartboard.tscn",
+			"res://scenes/parts/wheels/wheel_pogo.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_spoiler.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_outboard_motor.tscn",
+		"time": 150.89,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_satellite_dish.tscn",
+			"res://scenes/parts/wheels/wheel_tv.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_shop_vacuum.tscn",
+		"time": 151.56,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_bbq_grill.tscn",
+			"res://scenes/parts/wheels/wheel_traffic_cone.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_gps_arrow.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_classic.tscn",
+		"engine": "res://scenes/parts/engines/engine_firework_rocket.tscn",
+		"time": 152.24,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_shopping_cart.tscn",
+			"res://scenes/parts/wheels/wheel_tractor.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_bicycle.tscn",
+		"engine": "res://scenes/parts/engines/engine_lawn_mower.tscn",
+		"time": 152.47,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tv.tscn",
+			"res://scenes/parts/wheels/wheel_wood_barrel.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_plank.tscn",
+		"engine": "res://scenes/parts/engines/engine_jet.tscn",
+		"time": 153.15,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_ceiling_fan.tscn",
+			"res://scenes/parts/wheels/wheel_prosthetic_leg.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_axe.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_half_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_electric_scooter_motor.tscn",
+		"time": 153.38,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_metal_barrel.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_v8.tscn",
+		"time": 154.2,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_satellite_dish.tscn",
+			"res://scenes/parts/wheels/wheel_saw_blade.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_cow_catcher.tscn",
+			"res://scenes/parts/accessories/accessory_axe.tscn",
+			"res://scenes/parts/accessories/accessory_tin_cans.tscn",
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_bathtub.tscn",
+		"engine": "res://scenes/parts/engines/engine_sail.tscn",
+		"time": 154.66,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_paddle.tscn",
+			"res://scenes/parts/wheels/wheel_saw_blade.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_axe.tscn",
+			"res://scenes/parts/accessories/accessory_spoiler.tscn",
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_limo.tscn",
+		"engine": "res://scenes/parts/engines/engine_treadmill_motor.tscn",
+		"time": 157.04,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tv.tscn",
+			"res://scenes/parts/wheels/wheel_tractor_seat.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_boxing_glove.tscn",
+			"res://scenes/parts/accessories/accessory_gps_arrow.tscn",
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_fridge.tscn",
+		"engine": "res://scenes/parts/engines/engine_blender.tscn",
+		"time": 157.16,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_frying_pan.tscn",
+			"res://scenes/parts/wheels/wheel_alarm_clock.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_deer_antlers.tscn",
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_half_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_fire_extinguisher.tscn",
+		"time": 158.26,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_square.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_boxing_glove.tscn",
+			"res://scenes/parts/accessories/accessory_balloon.tscn",
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_bicycle.tscn",
+		"engine": "res://scenes/parts/engines/engine_v8.tscn",
+		"time": 158.26,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_satellite_dish.tscn",
+			"res://scenes/parts/wheels/wheel_washer_door.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_cow_catcher.tscn",
+			"res://scenes/parts/accessories/accessory_windup_key.tscn",
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_bathtub.tscn",
+		"engine": "res://scenes/parts/engines/engine_v6.tscn",
+		"time": 159.62,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tractor_seat.tscn",
+			"res://scenes/parts/wheels/wheel_ceiling_fan.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_anchor.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_plank.tscn",
+		"engine": "res://scenes/parts/engines/engine_soda_keg.tscn",
+		"time": 159.75,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_giant.tscn",
+			"res://scenes/parts/wheels/wheel_frying_pan.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_cow_catcher.tscn",
+			"res://scenes/parts/accessories/accessory_spoiler.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_half_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_electric_scooter_motor.tscn",
+		"time": 160.13,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_alarm_clock.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_axe.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_pipes.tscn",
+		"engine": "res://scenes/parts/engines/engine_air_horn.tscn",
+		"time": 161.52,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_hamster.tscn",
+			"res://scenes/parts/wheels/wheel_tank_track.tscn",
+			"res://scenes/parts/wheels/wheel_pogo.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_half_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_air_horn.tscn",
+		"time": 162.29,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tank_track.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_vertical_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_food_processor.tscn",
+		"time": 163.07,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_office_chair.tscn",
+			"res://scenes/parts/wheels/wheel_washer_door.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_fridge.tscn",
+		"engine": "res://scenes/parts/engines/engine_v8.tscn",
+		"time": 163.2,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_hamster.tscn",
+			"res://scenes/parts/wheels/wheel_pizza_tray.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_trex_fossil.tscn",
+		"engine": "res://scenes/parts/engines/engine_pressure_washer.tscn",
+		"time": 165.45,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_ceiling_fan.tscn",
+			"res://scenes/parts/wheels/wheel_saw_blade.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_windup_key.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_vertical_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_outboard_motor.tscn",
+		"time": 165.58,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_office_chair.tscn",
+			"res://scenes/parts/wheels/wheel_metal_bucket.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_pipes.tscn",
+		"engine": "res://scenes/parts/engines/engine_industrial_fan.tscn",
+		"time": 166.12,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_robot_leg.tscn",
+			"res://scenes/parts/wheels/wheel_shopping_cart.tscn",
+			"res://scenes/parts/wheels/wheel_stop_sign.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_fridge.tscn",
+		"engine": "res://scenes/parts/engines/engine_outboard_motor.tscn",
+		"time": 166.67,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_shopping_cart.tscn",
+			"res://scenes/parts/wheels/wheel_hamster.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_spoiler.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_boat.tscn",
+		"engine": "res://scenes/parts/engines/engine_pressure_washer.tscn",
+		"time": 166.94,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_shopping_cart.tscn",
+			"res://scenes/parts/wheels/wheel_trash_lid.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_boxing_glove.tscn",
+			"res://scenes/parts/accessories/accessory_anchor.tscn",
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_jet.tscn",
+		"time": 168.04,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tractor.tscn",
+			"res://scenes/parts/wheels/wheel_robot_leg.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_cow_catcher.tscn",
+			"res://scenes/parts/accessories/accessory_windup_key.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_trex_fossil.tscn",
+		"engine": "res://scenes/parts/engines/engine_firework_rocket.tscn",
+		"time": 169.72,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_alarm_clock.tscn",
+			"res://scenes/parts/wheels/wheel_pizza_tray.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_pipes.tscn",
+		"engine": "res://scenes/parts/engines/engine_toy_car_motor.tscn",
+		"time": 170.0,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_traffic_cone.tscn",
+			"res://scenes/parts/wheels/wheel_standard.tscn",
+			"res://scenes/parts/wheels/wheel_office_chair.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_vertical_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_leaf_blower.tscn",
+		"time": 170.28,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_frying_pan.tscn",
+			"res://scenes/parts/wheels/wheel_trash_lid.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_pipes.tscn",
+		"engine": "res://scenes/parts/engines/engine_air_compressor.tscn",
+		"time": 172.3,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_metal_barrel.tscn",
+			"res://scenes/parts/wheels/wheel_robot_leg.tscn",
+			"res://scenes/parts/wheels/wheel_satellite_dish.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_mattress.tscn",
+		"engine": "res://scenes/parts/engines/engine_firework_rocket.tscn",
+		"time": 173.17,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tractor.tscn",
+			"res://scenes/parts/wheels/wheel_standard.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_radiator.tscn",
+		"engine": "res://scenes/parts/engines/engine_jet.tscn",
+		"time": 176.17,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_ceiling_fan.tscn",
+			"res://scenes/parts/wheels/wheel_trash_lid.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_cow_catcher.tscn",
+			"res://scenes/parts/accessories/accessory_deer_antlers.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_limo.tscn",
+		"engine": "res://scenes/parts/engines/engine_food_processor.tscn",
+		"time": 176.62,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_square.tscn",
+			"res://scenes/parts/wheels/wheel_toilet.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_deer_antlers.tscn",
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_half_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_firework_rocket.tscn",
+		"time": 177.08,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_office_chair.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_gps_arrow.tscn",
+			"res://scenes/parts/accessories/accessory_spoiler.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_fridge.tscn",
+		"engine": "res://scenes/parts/engines/engine_firework_rocket.tscn",
+		"time": 179.1,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_standard.tscn",
+			"res://scenes/parts/wheels/wheel_shopping_cart.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_limo.tscn",
+		"engine": "res://scenes/parts/engines/engine_paint_sprayer.tscn",
+		"time": 179.1,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_square.tscn",
+			"res://scenes/parts/wheels/wheel_paddle.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_balloon.tscn",
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_upside_down_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_firework_rocket.tscn",
+		"time": 179.89,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_flat.tscn",
+			"res://scenes/parts/wheels/wheel_satellite_dish.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_balloon.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_hair_dryer.tscn",
+		"time": 181.17,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_toilet.tscn",
+			"res://scenes/parts/wheels/wheel_triangle.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_classic.tscn",
+		"engine": "res://scenes/parts/engines/engine_ceiling_fan_motor.tscn",
+		"time": 182.96,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_alarm_clock.tscn",
+			"res://scenes/parts/wheels/wheel_shopping_cart.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_v6.tscn",
+		"time": 183.29,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_giant.tscn",
+			"res://scenes/parts/wheels/wheel_prosthetic_leg.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_vertical_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_meat_grinder.tscn",
+		"time": 183.95,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_frying_pan.tscn",
+			"res://scenes/parts/wheels/wheel_tv.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_siren.tscn",
+			"res://scenes/parts/accessories/accessory_rocket_exhaust.tscn",
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_bicycle.tscn",
+		"engine": "res://scenes/parts/engines/engine_electric_drill.tscn",
+		"time": 184.12,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_saw_blade.tscn",
+			"res://scenes/parts/wheels/wheel_pogo.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_balloon.tscn",
+			"res://scenes/parts/accessories/accessory_anchor.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_upside_down_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_lawn_mower.tscn",
+		"time": 184.28,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_robot_leg.tscn",
+			"res://scenes/parts/wheels/wheel_hamster.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_spoiler.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_limo.tscn",
+		"engine": "res://scenes/parts/engines/engine_boiler.tscn",
+		"time": 186.47,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_robot_leg.tscn",
+			"res://scenes/parts/wheels/wheel_wood_barrel.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_cow_catcher.tscn",
+			"res://scenes/parts/accessories/accessory_anchor.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_trex_fossil.tscn",
+		"engine": "res://scenes/parts/engines/engine_air_compressor.tscn",
+		"time": 186.47,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_prosthetic_leg.tscn",
+			"res://scenes/parts/wheels/wheel_frying_pan.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_boxing_glove.tscn",
+			"res://scenes/parts/accessories/accessory_tin_cans.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_bicycle.tscn",
+		"engine": "res://scenes/parts/engines/engine_fire_extinguisher.tscn",
+		"time": 187.5,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_satellite_dish.tscn",
+			"res://scenes/parts/wheels/wheel_metal_bucket.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_vertical_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_rc_car_motor.tscn",
+		"time": 187.85,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_toilet.tscn",
+			"res://scenes/parts/wheels/wheel_tractor.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_windup_key.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_boat.tscn",
+		"engine": "res://scenes/parts/engines/engine_boiler.tscn",
+		"time": 188.02,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_metal_bucket.tscn",
+			"res://scenes/parts/wheels/wheel_shopping_cart.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_radiator.tscn",
+		"engine": "res://scenes/parts/engines/engine_chainsaw.tscn",
+		"time": 189.06,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_prosthetic_leg.tscn",
+			"res://scenes/parts/wheels/wheel_bicycle.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_half_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_jet.tscn",
+		"time": 190.3,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_flat.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_jet.tscn",
+		"time": 191.37,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_satellite_dish.tscn",
+			"res://scenes/parts/wheels/wheel_satellite_dish.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_mattress.tscn",
+		"engine": "res://scenes/parts/engines/engine_washing_machine_motor.tscn",
+		"time": 194.1,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_triangle.tscn",
+			"res://scenes/parts/wheels/wheel_shopping_cart.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_mattress.tscn",
+		"engine": "res://scenes/parts/engines/engine_industrial_mixer.tscn",
+		"time": 195.78,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_pogo.tscn",
+			"res://scenes/parts/wheels/wheel_traffic_cone.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_anchor.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_vertical_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_sewing_machine.tscn",
+		"time": 195.78,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_trash_lid.tscn",
+			"res://scenes/parts/wheels/wheel_standard.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_half_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_air_compressor.tscn",
+		"time": 198.64,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tractor_seat.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_boxing_glove.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_half_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_v8.tscn",
+		"time": 199.61,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_standard.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_half_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_angle_grinder.tscn",
+		"time": 199.61,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_dartboard.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_vertical_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_blender.tscn",
+		"time": 199.61,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_frying_pan.tscn",
+			"res://scenes/parts/wheels/wheel_hamster.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_cow_catcher.tscn",
+			"res://scenes/parts/accessories/accessory_axe.tscn",
+			"res://scenes/parts/accessories/accessory_windup_key.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_radiator.tscn",
+		"engine": "res://scenes/parts/engines/engine_v6.tscn",
+		"time": 199.8,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_flat.tscn",
+			"res://scenes/parts/wheels/wheel_robot_leg.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_gps_arrow.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_half_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_vacuum_cleaner.tscn",
+		"time": 201.18,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_washer_door.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_mattress.tscn",
+		"engine": "res://scenes/parts/engines/engine_lawn_mower.tscn",
+		"time": 204.2,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_square.tscn",
+			"res://scenes/parts/wheels/wheel_stop_sign.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_vertical_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_industrial_fan.tscn",
+		"time": 205.85,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_office_chair.tscn",
+			"res://scenes/parts/wheels/wheel_ceiling_fan.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_pipes.tscn",
+		"engine": "res://scenes/parts/engines/engine_electric_scooter_motor.tscn",
+		"time": 208.8,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_satellite_dish.tscn",
+			"res://scenes/parts/wheels/wheel_stop_sign.tscn",
+			"res://scenes/parts/wheels/wheel_giant.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_sofa.tscn",
+		"engine": "res://scenes/parts/engines/engine_pressure_washer.tscn",
+		"time": 209.23,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_prosthetic_leg.tscn",
+			"res://scenes/parts/wheels/wheel_hamster.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_upside_down_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_fire_extinguisher.tscn",
+		"time": 209.88,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_bicycle.tscn",
+			"res://scenes/parts/wheels/wheel_shopping_cart.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_half_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_go_kart.tscn",
+		"time": 209.88,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_prosthetic_leg.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_boxing_glove.tscn",
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_toy_car_motor.tscn",
+		"time": 212.28,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_bbq_grill.tscn",
+			"res://scenes/parts/wheels/wheel_paddle.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_rocket_exhaust.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_boat.tscn",
+		"engine": "res://scenes/parts/engines/engine_soda_keg.tscn",
+		"time": 213.61,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tv.tscn",
+			"res://scenes/parts/wheels/wheel_standard.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_rocket_exhaust.tscn",
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_half_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_chainsaw_motor.tscn",
+		"time": 214.96,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_stop_sign.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_axe.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_pipes.tscn",
+		"engine": "res://scenes/parts/engines/engine_ceiling_fan_motor.tscn",
+		"time": 216.79,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tv.tscn",
+			"res://scenes/parts/wheels/wheel_toilet.tscn",
+			"res://scenes/parts/wheels/wheel_tractor.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_pipes.tscn",
+		"engine": "res://scenes/parts/engines/engine_sail.tscn",
+		"time": 219.12,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_bicycle.tscn",
+			"res://scenes/parts/wheels/wheel_pizza_tray.tscn",
+			"res://scenes/parts/wheels/wheel_bbq_grill.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_radiator.tscn",
+		"engine": "res://scenes/parts/engines/engine_outboard_motor.tscn",
+		"time": 223.19,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_robot_leg.tscn",
+			"res://scenes/parts/wheels/wheel_pizza_tray.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_wrecked_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_sail.tscn",
+		"time": 223.68,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_bicycle.tscn",
+			"res://scenes/parts/wheels/wheel_robot_leg.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_boat.tscn",
+		"engine": "res://scenes/parts/engines/engine_washing_machine_motor.tscn",
+		"time": 228.44,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_triangle.tscn",
+			"res://scenes/parts/wheels/wheel_office_chair.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_boat.tscn",
+		"engine": "res://scenes/parts/engines/engine_horse.tscn",
+		"time": 229.47,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_square.tscn",
+			"res://scenes/parts/wheels/wheel_toilet.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_half_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_meat_grinder.tscn",
+		"time": 229.47,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_bicycle.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_cow_catcher.tscn",
+			"res://scenes/parts/accessories/accessory_anchor.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_vertical_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_pneumatic_jack.tscn",
+		"time": 229.99,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_frying_pan.tscn",
+			"res://scenes/parts/wheels/wheel_tractor.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_trex_fossil.tscn",
+		"engine": "res://scenes/parts/engines/engine_food_processor.tscn",
+		"time": 231.03,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tv.tscn",
+			"res://scenes/parts/wheels/wheel_toilet.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_boxing_glove.tscn",
+			"res://scenes/parts/accessories/accessory_balloon.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_wrecked_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_ceiling_fan_motor.tscn",
+		"time": 235.29,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_prosthetic_leg.tscn",
+			"res://scenes/parts/wheels/wheel_toilet.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_balloon.tscn",
+			"res://scenes/parts/accessories/accessory_windup_key.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_half_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_food_processor.tscn",
+		"time": 236.93,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_satellite_dish.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_bathtub.tscn",
+		"engine": "res://scenes/parts/engines/engine_treadmill_motor.tscn",
+		"time": 236.93,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_alarm_clock.tscn",
+			"res://scenes/parts/wheels/wheel_trash_lid.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_rocket_exhaust.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_electric_drill.tscn",
+		"time": 237.21,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_metal_bucket.tscn",
+			"res://scenes/parts/wheels/wheel_bicycle.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_limo.tscn",
+		"engine": "res://scenes/parts/engines/engine_firework_rocket.tscn",
+		"time": 243.44,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_pogo.tscn",
+			"res://scenes/parts/wheels/wheel_bbq_grill.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_classic.tscn",
+		"engine": "res://scenes/parts/engines/engine_angle_grinder.tscn",
+		"time": 244.9,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_prosthetic_leg.tscn",
+			"res://scenes/parts/wheels/wheel_satellite_dish.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_vertical_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_soda_keg.tscn",
+		"time": 252.16,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_robot_leg.tscn",
+			"res://scenes/parts/wheels/wheel_shopping_cart.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_tin_cans.tscn",
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_mattress.tscn",
+		"engine": "res://scenes/parts/engines/engine_pneumatic_jack.tscn",
+		"time": 258.56,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_square.tscn",
+			"res://scenes/parts/wheels/wheel_metal_bucket.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_sofa.tscn",
+		"engine": "res://scenes/parts/engines/engine_outboard_motor.tscn",
+		"time": 260.2,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_office_chair.tscn",
+			"res://scenes/parts/wheels/wheel_toilet.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_radiator.tscn",
+		"engine": "res://scenes/parts/engines/engine_firework_rocket.tscn",
+		"time": 260.87,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_toilet.tscn",
+			"res://scenes/parts/wheels/wheel_shopping_cart.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_tin_cans.tscn",
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_classic.tscn",
+		"engine": "res://scenes/parts/engines/engine_meat_grinder.tscn",
+		"time": 268.42,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_toilet.tscn",
+			"res://scenes/parts/wheels/wheel_tv.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_cow_catcher.tscn",
+			"res://scenes/parts/accessories/accessory_rocket_exhaust.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_bicycle.tscn",
+		"engine": "res://scenes/parts/engines/engine_meat_grinder.tscn",
+		"time": 271.28,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_bbq_grill.tscn",
+			"res://scenes/parts/wheels/wheel_bicycle.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_fridge.tscn",
+		"engine": "res://scenes/parts/engines/engine_fire_extinguisher.tscn",
+		"time": 274.19,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_square.tscn",
+			"res://scenes/parts/wheels/wheel_alarm_clock.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_bicycle.tscn",
+		"engine": "res://scenes/parts/engines/engine_toy_car_motor.tscn",
+		"time": 280.22,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_square.tscn",
+			"res://scenes/parts/wheels/wheel_tv.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_propeller.tscn",
+		"time": 280.22,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_frying_pan.tscn",
+			"res://scenes/parts/wheels/wheel_toilet.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_cow_catcher.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_wrecked_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_washing_machine_motor.tscn",
+		"time": 280.22,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_toilet.tscn",
+			"res://scenes/parts/wheels/wheel_square.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_bathtub.tscn",
+		"engine": "res://scenes/parts/engines/engine_pressure_washer.tscn",
+		"time": 280.61,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_ceiling_fan.tscn",
+			"res://scenes/parts/wheels/wheel_hamster.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_radiator.tscn",
+		"engine": "res://scenes/parts/engines/engine_chainsaw.tscn",
+		"time": 282.16,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tv.tscn",
+			"res://scenes/parts/wheels/wheel_flat.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_limo.tscn",
+		"engine": "res://scenes/parts/engines/engine_blender.tscn",
+		"time": 291.85,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_toilet.tscn",
+			"res://scenes/parts/wheels/wheel_dartboard.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_bathtub.tscn",
+		"engine": "res://scenes/parts/engines/engine_blowtorch.tscn",
+		"time": 293.1,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_shopping_cart.tscn",
+			"res://scenes/parts/wheels/wheel_bbq_grill.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_half_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_treadmill_motor.tscn",
+		"time": 293.95,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_traffic_cone.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_gps_arrow.tscn",
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_half_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_blender.tscn",
+		"time": 294.8,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_flat.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_vertical_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_horse.tscn",
+		"time": 296.08,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_square.tscn",
+			"res://scenes/parts/wheels/wheel_prosthetic_leg.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_cow_catcher.tscn",
+			"res://scenes/parts/accessories/accessory_axe.tscn",
+			"res://scenes/parts/accessories/accessory_rocket_exhaust.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_vertical_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_soda_bottle.tscn",
+		"time": 301.78,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_satellite_dish.tscn",
+			"res://scenes/parts/wheels/wheel_hamster.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_cow_catcher.tscn",
+			"res://scenes/parts/accessories/accessory_siren.tscn",
+			"res://scenes/parts/accessories/accessory_rocket_exhaust.tscn",
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_pipes.tscn",
+		"engine": "res://scenes/parts/engines/engine_sail.tscn",
+		"time": 302.22,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_stop_sign.tscn",
+			"res://scenes/parts/wheels/wheel_tv.tscn",
+			"res://scenes/parts/wheels/wheel_bbq_grill.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_half_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_sewing_machine.tscn",
+		"time": 302.67,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_shopping_cart.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_boxing_glove.tscn",
+			"res://scenes/parts/accessories/accessory_balloon.tscn",
+			"res://scenes/parts/accessories/accessory_spoiler.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_toy_car_motor.tscn",
+		"time": 304.48,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_giant.tscn",
+			"res://scenes/parts/wheels/wheel_pizza_tray.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_gps_arrow.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_bathtub.tscn",
+		"engine": "res://scenes/parts/engines/engine_v6.tscn",
+		"time": 305.85,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_pogo.tscn",
+			"res://scenes/parts/wheels/wheel_traffic_cone.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_pipes.tscn",
+		"engine": "res://scenes/parts/engines/engine_toy_car_motor.tscn",
+		"time": 307.23,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_square.tscn",
+			"res://scenes/parts/wheels/wheel_metal_barrel.tscn",
+			"res://scenes/parts/wheels/wheel_stop_sign.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_cow_catcher.tscn",
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_half_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_electric_drill.tscn",
+		"time": 307.69,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_toilet.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_limo.tscn",
+		"engine": "res://scenes/parts/engines/engine_electric_scooter_motor.tscn",
+		"time": 310.5,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_office_chair.tscn",
+			"res://scenes/parts/wheels/wheel_toilet.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_vertical_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_propeller.tscn",
+		"time": 316.77,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_metal_bucket.tscn",
+			"res://scenes/parts/wheels/wheel_bicycle.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_chainsaw.tscn",
+		"time": 317.26,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_pogo.tscn",
+			"res://scenes/parts/wheels/wheel_toilet.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_fridge.tscn",
+		"engine": "res://scenes/parts/engines/engine_generator.tscn",
+		"time": 319.25,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_metal_bucket.tscn",
+			"res://scenes/parts/wheels/wheel_alarm_clock.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_wrecked_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_air_tank.tscn",
+		"time": 327.97,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tv.tscn",
+			"res://scenes/parts/wheels/wheel_giant.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_half_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_sail.tscn",
+		"time": 331.17,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_washer_door.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_cow_catcher.tscn",
+			"res://scenes/parts/accessories/accessory_windup_key.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_boat.tscn",
+		"engine": "res://scenes/parts/engines/engine_toy_car_motor.tscn",
+		"time": 331.17,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_alarm_clock.tscn",
+			"res://scenes/parts/wheels/wheel_pizza_tray.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_spoiler.tscn",
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_mattress.tscn",
+		"engine": "res://scenes/parts/engines/engine_firework_rocket.tscn",
+		"time": 332.25,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_metal_barrel.tscn",
+			"res://scenes/parts/wheels/wheel_dartboard.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_fridge.tscn",
+		"engine": "res://scenes/parts/engines/engine_horse.tscn",
+		"time": 345.76,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_satellite_dish.tscn",
+			"res://scenes/parts/wheels/wheel_robot_leg.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_boxing_glove.tscn",
+			"res://scenes/parts/accessories/accessory_windup_key.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_limo.tscn",
+		"engine": "res://scenes/parts/engines/engine_propeller.tscn",
+		"time": 345.76,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_flat.tscn",
+			"res://scenes/parts/wheels/wheel_tv.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_outboard_motor.tscn",
+		"time": 348.12,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_giant.tscn",
+			"res://scenes/parts/wheels/wheel_pizza_tray.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_axe.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_classic.tscn",
+		"engine": "res://scenes/parts/engines/engine_lawn_mower.tscn",
+		"time": 359.79,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_giant.tscn",
+			"res://scenes/parts/wheels/wheel_ceiling_fan.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_fridge.tscn",
+		"engine": "res://scenes/parts/engines/engine_pneumatic_jack.tscn",
+		"time": 361.7,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_triangle.tscn",
+			"res://scenes/parts/wheels/wheel_metal_bucket.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_fire_extinguisher.tscn",
+		"time": 362.34,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_toilet.tscn",
+			"res://scenes/parts/wheels/wheel_robot_leg.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_horse.tscn",
+		"time": 365.59,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_metal_barrel.tscn",
+			"res://scenes/parts/wheels/wheel_tv.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_anchor.tscn",
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_fridge.tscn",
+		"engine": "res://scenes/parts/engines/engine_treadmill_motor.tscn",
+		"time": 372.26,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_metal_bucket.tscn",
+			"res://scenes/parts/wheels/wheel_robot_leg.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_deer_antlers.tscn",
+			"res://scenes/parts/accessories/accessory_rocket_exhaust.tscn",
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_half_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_toy_car_motor.tscn",
+		"time": 378.48,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_standard.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_half_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_sail.tscn",
+		"time": 380.6,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_trash_lid.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_siren.tscn",
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_radiator.tscn",
+		"engine": "res://scenes/parts/engines/engine_jet.tscn",
+		"time": 384.91,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_giant.tscn",
+			"res://scenes/parts/wheels/wheel_frying_pan.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_wrecked_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_sail.tscn",
+		"time": 388.57,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_square.tscn",
+			"res://scenes/parts/wheels/wheel_dartboard.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_vertical_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_hair_dryer.tscn",
+		"time": 392.31,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_ceiling_fan.tscn",
+			"res://scenes/parts/wheels/wheel_pizza_tray.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_plank.tscn",
+		"engine": "res://scenes/parts/engines/engine_electric_scooter_motor.tscn",
+		"time": 400.0,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_triangle.tscn",
+			"res://scenes/parts/wheels/wheel_tv.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_bicycle.tscn",
+		"engine": "res://scenes/parts/engines/engine_air_tank.tscn",
+		"time": 411.29,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tank_track.tscn",
+			"res://scenes/parts/wheels/wheel_hamster.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_rocket_exhaust.tscn",
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_radiator.tscn",
+		"engine": "res://scenes/parts/engines/engine_washing_machine_motor.tscn",
+		"time": 415.48,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_toilet.tscn",
+			"res://scenes/parts/wheels/wheel_robot_leg.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_tin_cans.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_airplane.tscn",
+		"engine": "res://scenes/parts/engines/engine_rc_car_motor.tscn",
+		"time": 420.62,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_prosthetic_leg.tscn",
+			"res://scenes/parts/wheels/wheel_toilet.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_cow_catcher.tscn",
+			"res://scenes/parts/accessories/accessory_axe.tscn",
+			"res://scenes/parts/accessories/accessory_anchor.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_half_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_hair_dryer.tscn",
+		"time": 440.6,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_dartboard.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_half_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_treadmill_motor.tscn",
+		"time": 443.48,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_robot_leg.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_boxing_glove.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_boat.tscn",
+		"engine": "res://scenes/parts/engines/engine_soda_keg.tscn",
+		"time": 475.52,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tv.tscn",
+			"res://scenes/parts/wheels/wheel_robot_leg.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_bathtub.tscn",
+		"engine": "res://scenes/parts/engines/engine_vacuum_cleaner.tscn",
+		"time": 478.87,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_traffic_cone.tscn",
+			"res://scenes/parts/wheels/wheel_robot_leg.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_spoiler.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_upside_down_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_air_compressor.tscn",
+		"time": 482.27,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_metal_barrel.tscn",
+			"res://scenes/parts/wheels/wheel_tv.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_rocket_exhaust.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_bicycle.tscn",
+		"engine": "res://scenes/parts/engines/engine_vacuum_cleaner.tscn",
+		"time": 839.51,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_frying_pan.tscn",
+			"res://scenes/parts/wheels/wheel_tv.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_rocket_exhaust.tscn",
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_limo.tscn",
+		"engine": "res://scenes/parts/engines/engine_sail.tscn",
+		"time": 999.0,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_traffic_cone.tscn",
+			"res://scenes/parts/wheels/wheel_giant.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_vertical_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_chainsaw_motor.tscn",
+		"time": 999.0,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_metal_barrel.tscn",
+			"res://scenes/parts/wheels/wheel_giant.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_trex_fossil.tscn",
+		"engine": "res://scenes/parts/engines/engine_go_kart.tscn",
+		"time": 999.0,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tractor.tscn",
+			"res://scenes/parts/wheels/wheel_giant.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_gps_arrow.tscn",
+			"res://scenes/parts/accessories/accessory_spoiler.tscn",
+			"res://scenes/parts/accessories/accessory_bubble_wrap.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_radiator.tscn",
+		"engine": "res://scenes/parts/engines/engine_boiler.tscn",
+		"time": 999.0,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_satellite_dish.tscn",
+			"res://scenes/parts/wheels/wheel_traffic_cone.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_mattress.tscn",
+		"engine": "res://scenes/parts/engines/engine_blowtorch.tscn",
+		"time": 999.0,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_saw_blade.tscn",
+			"res://scenes/parts/wheels/wheel_giant.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_balloon.tscn",
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_fridge.tscn",
+		"engine": "res://scenes/parts/engines/engine_propeller.tscn",
+		"time": 999.0,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_giant.tscn",
+			"res://scenes/parts/wheels/wheel_satellite_dish.tscn"
+		]
+	},
+	{
+		"accessories": [],
+		"body": "res://scenes/parts/bodies/body_fridge.tscn",
+		"engine": "res://scenes/parts/engines/engine_air_compressor.tscn",
+		"time": 999.0,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_stop_sign.tscn",
+			"res://scenes/parts/wheels/wheel_giant.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+			"res://scenes/parts/accessories/accessory_axe.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_bathtub.tscn",
+		"engine": "res://scenes/parts/engines/engine_industrial_mixer.tscn",
+		"time": 999.0,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_square.tscn",
+			"res://scenes/parts/wheels/wheel_tractor_seat.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_deer_antlers.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_trex_fossil.tscn",
+		"engine": "res://scenes/parts/engines/engine_fire_extinguisher.tscn",
+		"time": 999.0,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_giant.tscn",
+			"res://scenes/parts/wheels/wheel_trash_lid.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_balloon.tscn",
+			"res://scenes/parts/accessories/accessory_windup_key.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_vertical_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_air_compressor.tscn",
+		"time": 999.0,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_giant.tscn",
+			"res://scenes/parts/wheels/wheel_frying_pan.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_bull_horns.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_half_car.tscn",
+		"engine": "res://scenes/parts/engines/engine_sail.tscn",
+		"time": 999.0,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_square.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_tin_cans.tscn",
+			"res://scenes/parts/accessories/accessory_turtle_shell.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_bathtub.tscn",
+		"engine": "res://scenes/parts/engines/engine_industrial_fan.tscn",
+		"time": 999.0,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_traffic_cone.tscn",
+			"res://scenes/parts/wheels/wheel_tractor_seat.tscn"
+		]
+	},
+	{
+		"accessories": [
+			"res://scenes/parts/accessories/accessory_boxing_glove.tscn",
+			"res://scenes/parts/accessories/accessory_siren.tscn",
+			"res://scenes/parts/accessories/accessory_spoiler.tscn",
+			"res://scenes/parts/accessories/accessory_duct_tape.tscn"
+		],
+		"body": "res://scenes/parts/bodies/body_bicycle.tscn",
+		"engine": "res://scenes/parts/engines/engine_rc_car_motor.tscn",
+		"time": 999.0,
+		"wheels": [
+			"res://scenes/parts/wheels/wheel_tv.tscn",
+			"res://scenes/parts/wheels/wheel_satellite_dish.tscn"
+		]
+	}
+]

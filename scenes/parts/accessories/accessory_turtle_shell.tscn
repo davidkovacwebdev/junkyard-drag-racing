@@ -1,0 +1,46 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/car/accessories/skin_accessory.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/accessory_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_turtle_shell"]
+script = ExtResource("2")
+id = &"accessory_turtle_shell"
+display_name = "Turtle Shell"
+category = 3
+spot = 3
+effect_description = "Covers the whole car in shell plates.
+Every part gets much tougher. Knocks hollow on bumps."
+mass = 5
+durability_multiplier = 1.4
+speed_multiplier = 0.92
+body_impact_sound = &"shell_knock"
+equip_sound = &"shell_knock"
+
+[node name="AccessoryTurtleShell" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_turtle_shell")
+pattern = 0
+paint_color = Color(0.3, 0.33, 0.18, 1)
+pattern_color = Color(0.52, 0.5, 0.28, 1)
+wheel_tint = Color(0.78, 0.86, 0.62, 1)
+
+[node name="Dome" type="Polygon2D" parent="."]
+color = Color(0.3, 0.33, 0.18, 1)
+polygon = PackedVector2Array(-42, 0, -37, -18, -20, -31, 20, -31, 37, -18, 42, 0)
+
+[node name="LeftPlate" type="Polygon2D" parent="."]
+color = Color(0.52, 0.5, 0.28, 1)
+polygon = PackedVector2Array(-34, -4, -17, -4, -14, -20, -24, -25, -31, -17)
+
+[node name="MiddlePlate" type="Polygon2D" parent="."]
+color = Color(0.52, 0.5, 0.28, 1)
+polygon = PackedVector2Array(11, -15, 5.5, -5.47, -5.5, -5.47, -11, -15, -5.5, -24.53, 5.5, -24.53)
+
+[node name="RightPlate" type="Polygon2D" parent="."]
+color = Color(0.52, 0.5, 0.28, 1)
+polygon = PackedVector2Array(34, -4, 17, -4, 14, -20, 24, -25, 31, -17)
+
+[node name="Rim" type="Polygon2D" parent="."]
+color = Color(0.24, 0.27, 0.14, 1)
+polygon = PackedVector2Array(-46, 0, 46, 0, 43, 7, -43, 7)

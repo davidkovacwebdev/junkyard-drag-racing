@@ -60,10 +60,11 @@ pile_seed = 3
 [node name="Post" type="Control" parent="."]
 layout_mode = 1
 anchor_left = 0.5
+anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = -16.0
-offset_top = 216.0
+offset_top = -108.0
 offset_right = 16.0
 offset_bottom = 12.0
 grow_horizontal = 2
@@ -76,7 +77,18 @@ tilt_degrees = 1.0
 jitter_seed = 5
 nails = false
 
-[node name="TitleBoard" type="Control" parent="."]
+[node name="Content" type="Control" parent="."]
+layout_mode = 1
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -324.0
+offset_bottom = 324.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="TitleBoard" type="Control" parent="Content"]
 layout_mode = 1
 anchor_left = 0.5
 anchor_right = 0.5
@@ -90,7 +102,7 @@ script = ExtResource("4")
 tilt_degrees = -1.5
 jitter_seed = 17
 
-[node name="TitleLabel" type="Label" parent="TitleBoard"]
+[node name="TitleLabel" type="Label" parent="Content/TitleBoard"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -104,7 +116,7 @@ text = "JUNKYARD DRAG RACING"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="TitleStripe" type="Control" parent="."]
+[node name="TitleStripe" type="Control" parent="Content"]
 layout_mode = 1
 anchor_left = 0.5
 anchor_right = 0.5
@@ -116,7 +128,7 @@ grow_horizontal = 2
 mouse_filter = 2
 script = ExtResource("6")
 
-[node name="Buttons" type="VBoxContainer" parent="."]
+[node name="Buttons" type="VBoxContainer" parent="Content"]
 layout_mode = 1
 anchor_left = 0.5
 anchor_right = 0.5
@@ -127,24 +139,15 @@ offset_bottom = 580.0
 grow_horizontal = 2
 theme_override_constants/separation = 18
 
-[node name="NewGameButton" type="BaseButton" parent="Buttons"]
+[node name="PlayButton" type="BaseButton" parent="Content/Buttons"]
 custom_minimum_size = Vector2(0, 52)
 layout_mode = 2
 script = ExtResource("5")
-text = "New Game"
+text = "Play"
 tilt_degrees = -2.0
 jitter_seed = 11
 
-[node name="ContinueButton" type="BaseButton" parent="Buttons"]
-custom_minimum_size = Vector2(0, 52)
-layout_mode = 2
-disabled = true
-script = ExtResource("5")
-text = "Continue"
-tilt_degrees = 1.5
-jitter_seed = 23
-
-[node name="SettingsButton" type="BaseButton" parent="Buttons"]
+[node name="SettingsButton" type="BaseButton" parent="Content/Buttons"]
 custom_minimum_size = Vector2(0, 52)
 layout_mode = 2
 script = ExtResource("5")
@@ -152,7 +155,7 @@ text = "Settings"
 tilt_degrees = -1.0
 jitter_seed = 37
 
-[node name="CreditsButton" type="BaseButton" parent="Buttons"]
+[node name="CreditsButton" type="BaseButton" parent="Content/Buttons"]
 custom_minimum_size = Vector2(0, 52)
 layout_mode = 2
 script = ExtResource("5")
@@ -160,7 +163,7 @@ text = "Credits"
 tilt_degrees = 2.0
 jitter_seed = 41
 
-[node name="QuitButton" type="BaseButton" parent="Buttons"]
+[node name="QuitButton" type="BaseButton" parent="Content/Buttons"]
 custom_minimum_size = Vector2(0, 52)
 layout_mode = 2
 script = ExtResource("5")
@@ -168,8 +171,7 @@ text = "Quit"
 tilt_degrees = -1.5
 jitter_seed = 53
 
-[connection signal="pressed" from="Buttons/NewGameButton" to="." method="_on_new_game_pressed"]
-[connection signal="pressed" from="Buttons/ContinueButton" to="." method="_on_continue_pressed"]
-[connection signal="pressed" from="Buttons/SettingsButton" to="." method="_on_settings_pressed"]
-[connection signal="pressed" from="Buttons/CreditsButton" to="." method="_on_credits_pressed"]
-[connection signal="pressed" from="Buttons/QuitButton" to="." method="_on_quit_pressed"]
+[connection signal="pressed" from="Content/Buttons/PlayButton" to="." method="_on_play_pressed"]
+[connection signal="pressed" from="Content/Buttons/SettingsButton" to="." method="_on_settings_pressed"]
+[connection signal="pressed" from="Content/Buttons/CreditsButton" to="." method="_on_credits_pressed"]
+[connection signal="pressed" from="Content/Buttons/QuitButton" to="." method="_on_quit_pressed"]

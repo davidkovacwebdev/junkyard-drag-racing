@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/dev_menu.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/ui/scrap_panel.gd" id="2"]
 [ext_resource type="Script" path="res://scripts/ui/scrap_button.gd" id="3"]
+[ext_resource type="Script" path="res://scripts/ui/sort_button.gd" id="sort_button"]
 
 [node name="DevMenu" type="CanvasLayer"]
 layer = 10
@@ -112,11 +113,34 @@ font_size = 19
 tilt_degrees = -1.0
 jitter_seed = 73
 
-[node name="ScrapTab" type="BaseButton" parent="Backdrop/Panel"]
+[node name="AccessoryTab" type="BaseButton" parent="Backdrop/Panel"]
 layout_mode = 0
 offset_left = 510.0
 offset_top = 70.0
 offset_right = 660.0
+offset_bottom = 112.0
+script = ExtResource("3")
+text = "Extras"
+font_size = 19
+tilt_degrees = 1.0
+jitter_seed = 75
+
+[node name="SortButton" type="BaseButton" parent="Backdrop/Panel"]
+layout_mode = 0
+offset_left = 856.0
+offset_top = 70.0
+offset_right = 1046.0
+offset_bottom = 112.0
+script = ExtResource("sort_button")
+font_size = 17
+tilt_degrees = -1.5
+jitter_seed = 76
+
+[node name="ScrapTab" type="BaseButton" parent="Backdrop/Panel"]
+layout_mode = 0
+offset_left = 672.0
+offset_top = 70.0
+offset_right = 822.0
 offset_bottom = 112.0
 script = ExtResource("3")
 text = "Scrap"

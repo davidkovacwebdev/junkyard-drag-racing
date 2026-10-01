@@ -69,6 +69,9 @@ static func _part_fitted(scene_path: String) -> bool:
 		for wheel in car.wheels:
 			if wheel != null and wheel.scene_path == scene_path:
 				return true
+		for accessory in car.accessories:
+			if accessory != null and accessory.scene_path == scene_path:
+				return true
 	return false
 
 func reset() -> void:
@@ -168,7 +171,7 @@ func available_from(giver_name: String) -> Array[QuestData]:
 static func reward_part_data(quest: QuestData) -> PartData:
 	if quest == null or quest.reward_part.is_empty():
 		return null
-	for list: Array in [PartDatabase.bodies, PartDatabase.engines, PartDatabase.wheels]:
+	for list: Array in [PartDatabase.bodies, PartDatabase.engines, PartDatabase.wheels, PartDatabase.accessories]:
 		for part: PartData in list:
 			if part.scene_path == quest.reward_part:
 				return part
@@ -237,6 +240,20 @@ func tracked_target() -> String:
 	if is_ready(tracked.id):
 		return tracked.giver if tracked.return_to_giver else ""
 	return tracked.objective_place
+
+## Where `tracked_target()` stands in the world, or Vector2.INF when there's
+## nothing to point at (or it isn't in this scene).
+func tracked_target_position() -> Vector2:
+	var target := tracked_target()
+	if target.is_empty():
+		return Vector2.INF
+	for marker: MinimapMarker in get_tree().get_nodes_in_group(MinimapMarker.GROUP):
+		if MapIcons.marker_name(marker) == target:
+			return marker.global_position
+	for giver in get_tree().get_nodes_in_group(Minimap.GIVER_GROUP):
+		if String(giver.get("display_name")) == target:
+			return (giver as Node2D).global_position
+	return Vector2.INF
 
 ## For SaveSystem: putting a saved log back.
 func restore(saved_active: Array[QuestData], saved_completed: Array[QuestData],

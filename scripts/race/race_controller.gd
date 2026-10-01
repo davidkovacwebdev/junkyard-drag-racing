@@ -67,6 +67,21 @@ signal race_ended(winner_name: String)
 ## no point offering an out before the player's even seen how this run's
 ## parts drive.
 @export var surrender_delay: float = 5.0
+## Played whenever a car crosses the line, on top of its backfire.
+@export var finish_sound: StringName = &""
+## Off for an arena with no line to cross (the demolition derby): its own
+## setup decides who's out (knock_out) and who won (crown), and ranks the
+## cars still running with set_progress.
+@export var uses_finish_line: bool = true
+## When nobody crossed the line by the end, the car ranked first still wins
+## (the hill climb's highest climber, the derby's healthiest survivor).
+@export var leader_wins_at_end: bool = false
+## Above 0, a car that hasn't got any further along for this many seconds has
+## given up and stops holding the race open (the hill climb, where a car that
+## can't make the slope just rolls back and tries again forever).
+@export var give_up_after: float = 0.0
+## How much further than its best a car has to get to count as progress.
+const GIVE_UP_PROGRESS := 40.0
 ## Where Escape (and the end-of-race handoff) goes when `exit_scene_path`
 ## isn't set. Escape always has to get you out of a race, so there's a hard
 ## fallback rather than a dead key on the standalone test scenes.
@@ -86,6 +101,7 @@ var _surrender_button: ScrapButton = null
 ## 3rd place is exactly this order, separate from `_entries`' registration
 ## order.
 var _finish_order: Array[Dictionary] = []
+var _knockout_count := 0
 ## Set the moment we start leaving, so Escape and the end-of-race handoff
 ## can both fire without queueing two scene changes.
 var _exiting := false
@@ -122,9 +138,15 @@ func register_car(car_name: String, car: CarAssembler.AssembledCar) -> void:
 		# opposed to "finished" which also covers being destroyed or the
 		# race ending under it. Standings need to tell those apart.
 		"crossed": false,
-		# Last known x while the body was still valid, for ranking cars
-		# that never cross the line (destroyed, or the clock just ran out).
-		"last_x": 0.0,
+		# Ranks cars that never crossed the line: on a track, the furthest x
+		# reached while the body was still valid; in an arena, whatever its
+		# setup reports through set_progress().
+		"progress": -INF,
+		# Where the car last made GIVE_UP_PROGRESS of headway, and when.
+		"progress_mark": -INF,
+		"last_progress_time": 0.0,
+		# Order knocked out of an arena (0 first), or -1 while still in it.
+		"knockout_order": -1,
 		"body_part_data": body_part_data,
 	})
 
@@ -172,9 +194,19 @@ func _physics_process(delta: float) -> void:
 			# Body shattered before crossing the line — car's out of the race.
 			entry["finished"] = true
 			continue
-		entry["last_x"] = car.body.global_position.x
-		if car.body.global_position.x >= finish_x:
+		if not uses_finish_line:
+			all_finished = false
+			continue
+		var x := car.body.global_position.x
+		if x > entry["progress_mark"] + GIVE_UP_PROGRESS:
+			entry["progress_mark"] = x
+			entry["last_progress_time"] = _elapsed
+		entry["progress"] = maxf(entry["progress"], x)
+		if x >= finish_x:
 			_finish_car(entry)
+		elif give_up_after > 0.0 and _elapsed - entry["last_progress_time"] > give_up_after:
+			entry["finished"] = true
+			print("    %s gives up at x=%.0f" % [entry["name"], entry["progress"]])
 		else:
 			all_finished = false
 
@@ -220,15 +252,47 @@ func _finish_car(entry: Dictionary) -> void:
 	entry["crossed"] = true
 	_finish_order.append(entry)
 	var car: CarAssembler.AssembledCar = entry["car"]
-	car.body.boost_force = finish_boost_force
-	RaceCarAudio.play(self, &"backfire", car.body.global_position, -2.0)
+	if is_instance_valid(car.body) and finish_boost_force > 0.0:
+		car.body.boost_force = finish_boost_force
+		RaceCarAudio.play(self, &"backfire", car.body.global_position, -2.0)
+	if is_instance_valid(car.body) and finish_sound != &"" and uses_finish_line:
+		Sfx.play(finish_sound, -6.0, 0.04)
 	if _winner_name.is_empty():
 		_winner_name = entry["name"]
 		print(">>> WINNER: %s at t=%.2fs" % [_winner_name, _elapsed])
-		if camera != null:
+		if camera != null and uses_finish_line:
 			camera.lock_on(Vector2(finish_x, camera_focus_y))
 	else:
 		print("    %s crosses at t=%.2fs" % [entry["name"], _elapsed])
+
+## Arena races: `car_name` is out. Knocked-out cars rank below every car
+## still running, the last one out highest.
+func knock_out(car_name: String) -> void:
+	var entry := _entry_named(car_name)
+	if entry.is_empty() or entry["knockout_order"] >= 0 or entry["crossed"]:
+		return
+	entry["finished"] = true
+	entry["knockout_order"] = _knockout_count
+	_knockout_count += 1
+	print("    %s knocked out at t=%.2fs" % [car_name, _elapsed])
+
+## Arena races: `car_name` won outright, as if it crossed the line.
+func crown(car_name: String) -> void:
+	var entry := _entry_named(car_name)
+	if not entry.is_empty() and not entry["crossed"]:
+		_finish_car(entry)
+
+## Arena races: how well a still-running car is doing, higher is better.
+func set_progress(car_name: String, progress: float) -> void:
+	var entry := _entry_named(car_name)
+	if not entry.is_empty():
+		entry["progress"] = progress
+
+func _entry_named(car_name: String) -> Dictionary:
+	for entry in _entries:
+		if entry["name"] == car_name:
+			return entry
+	return {}
 
 func _log_status() -> void:
 	for entry in _entries:
@@ -253,7 +317,8 @@ func surrender() -> void:
 	_end_race("SURRENDER")
 
 ## Cars that actually crossed the line, in crossing order, then everyone
-## else (still racing or destroyed) ranked by how far they got — so a race
+## else (still racing or destroyed) ranked by how far they got, then any
+## knocked out of an arena, the last one out first — so a race
 ## that ends by TIMEOUT or STALLED before anyone finishes still produces a
 ## sensible podium instead of an empty one. `force_player_last` is for
 ## surrender(): the player's own entry gets moved to the very end
@@ -261,11 +326,18 @@ func surrender() -> void:
 func _compute_standings(force_player_last: bool = false) -> Array[Dictionary]:
 	var standings: Array[Dictionary] = _finish_order.duplicate()
 	var rest: Array[Dictionary] = []
+	var knocked_out: Array[Dictionary] = []
 	for entry in _entries:
-		if not entry["crossed"]:
+		if entry["crossed"]:
+			continue
+		if entry["knockout_order"] >= 0:
+			knocked_out.append(entry)
+		else:
 			rest.append(entry)
-	rest.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["last_x"] > b["last_x"])
+	rest.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["progress"] > b["progress"])
+	knocked_out.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["knockout_order"] > b["knockout_order"])
 	standings.append_array(rest)
+	standings.append_array(knocked_out)
 	if force_player_last:
 		for i in standings.size():
 			if (standings[i]["name"] as String).begins_with("Player_"):
@@ -304,8 +376,12 @@ func _end_race(reason: String) -> void:
 		Sfx.play(&"race_stalled", -6.0, 0.0)
 	else:
 		Sfx.play(&"results_fanfare", -4.0, 0.0)
+	var standings := _compute_standings(reason == "SURRENDER")
+	if _winner_name.is_empty() and leader_wins_at_end and not standings.is_empty():
+		_winner_name = standings[0]["name"]
+		print(">>> WINNER (furthest): %s" % _winner_name)
 	if _results_screen != null:
-		_results_screen.show_results(_build_results_data(_compute_standings(reason == "SURRENDER")))
+		_results_screen.show_results(_build_results_data(standings))
 	for entry in _entries:
 		var car: CarAssembler.AssembledCar = entry["car"]
 		if not is_instance_valid(car.body):

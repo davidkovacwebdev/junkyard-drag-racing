@@ -2,6 +2,8 @@
 
 [ext_resource type="Script" path="res://scripts/race/drag_track_art.gd" id="1_art"]
 
+[ext_resource type="Script" path="res://scripts/race/end_wall_art.gd" id="end_wall_art"]
+
 [sub_resource type="RectangleShape2D" id="Shape_ground"]
 size = Vector2(8400, 60)
 
@@ -23,13 +25,9 @@ collision_mask = 0
 [node name="CollisionShape2D" type="CollisionShape2D" parent="EndWall"]
 shape = SubResource("Shape_wall")
 
-[node name="Polygon2D" type="Polygon2D" parent="EndWall"]
-color = Color(0.7, 0.1, 0.1, 1)
-polygon = PackedVector2Array(-50, -600, 50, -600, 50, 600, -50, 600)
-
-[node name="Stripe" type="Polygon2D" parent="EndWall"]
-color = Color(0.95, 0.8, 0.1, 1)
-polygon = PackedVector2Array(-5, -600, 5, -600, 5, 600, -5, 600)
+[node name="Art" type="Node2D" parent="EndWall"]
+script = ExtResource("end_wall_art")
+look = 0
 
 [node name="Lanes" type="Node2D" parent="."]
 ; The drift's own road art, hidden. A lane's Road is a band the harness bends up

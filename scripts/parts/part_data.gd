@@ -1,9 +1,9 @@
 class_name PartData
 extends Resource
-## Base data shared by every junk part (body/wheel/engine).
+## Base data shared by every junk part (body/wheel/engine/accessory).
 ## Concrete parts extend this with category-specific fields.
 
-enum Category { BODY, WHEEL, ENGINE }
+enum Category { BODY, WHEEL, ENGINE, ACCESSORY }
 
 ## Cosmetic label only right now; not read by any gameplay system yet.
 ## Named MaterialType, not Material, because Material is a native Godot class.
@@ -82,6 +82,21 @@ func performance_score() -> float:
 ## `id`, but per-part assets (engine sound profiles) belong to its base part.
 func catalog_id() -> StringName:
 	return forge.base_part_id if forge != null else id
+
+## 0..1 positions on the garage's stat bars.
+func durability_rating_fraction() -> float:
+	return _normalize(durability, DURABILITY_RANGE)
+
+func speed_rating_fraction() -> float:
+	return _normalize(speed, SPEED_RANGE)
+
+func mass_rating_fraction() -> float:
+	return _normalize(mass, MASS_RANGE)
+
+## What the part does beyond its stat bars, for the garage's effect badge
+## tooltip. Empty for parts that only have stats.
+func effect_summary() -> String:
+	return ""
 
 static func tier_color(tier_value: int) -> Color:
 	return TIER_COLORS[clampi(tier_value, 1, TIER_COUNT) - 1]

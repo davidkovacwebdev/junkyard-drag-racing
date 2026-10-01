@@ -47,36 +47,25 @@ func _draw() -> void:
 	var track := get_parent() as RallyTrack
 	if track == null:
 		return
-	var xs := track.sample_xs()
 	var top := top_lane_y - lane_height * 0.5 - apron
 	var bottom := top_lane_y + lane_height * float(lane_count - 1) + lane_height * 0.5 + apron
 	var rng := RandomNumberGenerator.new()
 	rng.seed = art_seed
 	_art.clear()
-	_art.draw_colored_polygon(_ribbon(track, xs, top - VERGE_DEPTH, top), VERGE)
-	_art.draw_colored_polygon(_ribbon(track, xs, top, bottom), DIRT)
+	_art.draw_colored_polygon(track.surface_band(top - VERGE_DEPTH, top), VERGE)
+	_art.draw_colored_polygon(track.surface_band(top, bottom), DIRT)
 	_draw_gravel_patches(track, rng, top, bottom)
 	for i in range(1, lane_count):
 		var y := top_lane_y - lane_height * 0.5 + lane_height * float(i)
-		_art.draw_colored_polygon(_ribbon(track, xs, y - RUT_WIDTH * 0.5, y + RUT_WIDTH * 0.5), RUT)
-	_art.draw_colored_polygon(_ribbon(track, xs, bottom, bottom + HILLSIDE_SHADE_DEPTH), HILLSIDE_SHADE)
-	_art.draw_colored_polygon(_ribbon(track, xs, bottom + HILLSIDE_SHADE_DEPTH, bottom + HILLSIDE_DEPTH), HILLSIDE)
+		_art.draw_colored_polygon(track.surface_band(y - RUT_WIDTH * 0.5, y + RUT_WIDTH * 0.5), RUT)
+	_art.draw_colored_polygon(track.surface_band(bottom, bottom + HILLSIDE_SHADE_DEPTH), HILLSIDE_SHADE)
+	_art.draw_colored_polygon(track.surface_band(bottom + HILLSIDE_SHADE_DEPTH, bottom + HILLSIDE_DEPTH), HILLSIDE)
 	_art.draw_rect(Rect2(start_x - MARKING_WIDTH * 0.5, top, MARKING_WIDTH, bottom - top), MARKING)
 	_draw_finish(top, bottom)
 	_draw_flags(track, top - VERGE_DEPTH * 0.5)
 	_draw_bales(track, bottom + 6.0)
 	_art.commit(self)
 	_art.clear()
-
-## A band between two flat y's, bent onto the hills: its top edge left to right,
-## then its bottom edge back.
-func _ribbon(track: RallyTrack, xs: PackedFloat32Array, band_top: float, band_bottom: float) -> PackedVector2Array:
-	var points := PackedVector2Array()
-	for x in xs:
-		points.append(Vector2(x, band_top + track.surface_offset_at(x)))
-	for i in range(xs.size() - 1, -1, -1):
-		points.append(Vector2(xs[i], band_bottom + track.surface_offset_at(xs[i])))
-	return points
 
 ## The finish sits on the flat run-out, so its cells are plain squares.
 func _draw_finish(top: float, bottom: float) -> void:

@@ -29,6 +29,10 @@ const OPEN_COLOR := Color(1, 1, 1, 1)
 
 ## The race DragStripMenu (this booth's interior_scene) sends the player into.
 @export_file("*.tscn") var race_scene_path: String = "res://scenes/race/race_drag_strip.tscn"
+## Which rival roster the venue's bet fields come from.
+@export var course: RaceProgression.Course = RaceProgression.Course.DRAG
+## What the clerk says the race is about; empty tells the par time instead.
+@export var rules_line: String = ""
 @export var wall_color: Color = Color(0.62, 0.24, 0.2, 1)
 @export var roof_color: Color = UiPalette.STEEL_SHADE
 @export var trim_color: Color = UiPalette.TRIM_OFF_WHITE
@@ -75,6 +79,8 @@ func interact(_actor: Node = null) -> void:
 	print(display_name)
 	RaceProgression.menu_race_scene = race_scene_path
 	RaceProgression.menu_venue_name = display_name
+	RaceProgression.menu_course = course
+	RaceProgression.menu_venue_rules = rules_line
 	if interior_scene is PackedScene:
 		get_tree().change_scene_to_packed(interior_scene)
 

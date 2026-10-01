@@ -5,8 +5,8 @@ extends Control
 ## whole outfit. Parts marked `npc_only` (Grandpa's wheelchair, beard, ...)
 ## never show up here.
 ##
-## Nothing is wiped until "Hit the Road": backing out to the main menu leaves
-## an existing save alone. Starting resets the world for a fresh game, stores
+## Nothing is wiped until "Hit the Road": backing out to the save slots leaves
+## the chosen slot alone. Starting resets the world for a fresh game, stores
 ## the name and look in PlayerProfile and drives into the open world.
 
 const WORLD_SCENE := "res://scenes/world/main.tscn"
@@ -31,12 +31,12 @@ const ROW_HEIGHT := 38.0
 const ARROW_WIDTH := 46.0
 const POP_SCALE := 1.08
 
-@onready var _rows: VBoxContainer = $Board/Rows
-@onready var _name_edit: LineEdit = $Board/Rows/NameRow/NameEdit
-@onready var _preview: Node2D = $PreviewBoard/Character
-@onready var _name_label: Label = $PreviewBoard/NameLabel
-@onready var _start_button: ScrapButton = $StartButton
-@onready var _randomize_button: ScrapButton = $RandomizeButton
+@onready var _rows: VBoxContainer = $Content/Board/Rows
+@onready var _name_edit: LineEdit = $Content/Board/Rows/NameRow/NameEdit
+@onready var _preview: Node2D = $Content/PreviewBoard/Character
+@onready var _name_label: Label = $Content/PreviewBoard/NameLabel
+@onready var _start_button: ScrapButton = $Content/StartButton
+@onready var _randomize_button: ScrapButton = $Content/RandomizeButton
 
 ## Slot -> the scenes the player can pick, with null first for optional slots.
 var _choices: Dictionary = {}

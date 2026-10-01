@@ -246,6 +246,7 @@ func _part_pool() -> Array[PartData]:
 	pool.append_array(PartDatabase.bodies)
 	pool.append_array(PartDatabase.wheels)
 	pool.append_array(PartDatabase.junk_engines)
+	pool.append_array(PartDatabase.junk_accessories)
 	return pool
 
 ## A part's real scene, or null when the catalog entry has no scene or its

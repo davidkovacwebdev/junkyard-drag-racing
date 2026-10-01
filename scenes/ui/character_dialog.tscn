@@ -16,7 +16,18 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0.45)
 
-[node name="PortraitBoard" type="Control" parent="."]
+[node name="Frame" type="Control" parent="."]
+layout_mode = 1
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -324.0
+offset_bottom = 324.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="PortraitBoard" type="Control" parent="Frame"]
 layout_mode = 3
 anchor_left = 0.64
 anchor_top = 0.1
@@ -28,7 +39,7 @@ script = ExtResource("2_panel")
 tilt_degrees = 1.5
 jitter_seed = 7
 
-[node name="PortraitClip" type="Control" parent="PortraitBoard"]
+[node name="PortraitClip" type="Control" parent="Frame/PortraitBoard"]
 clip_contents = true
 layout_mode = 1
 anchors_preset = 15
@@ -40,9 +51,9 @@ offset_right = -30.0
 offset_bottom = -40.0
 mouse_filter = 2
 
-[node name="Holder" type="Node2D" parent="PortraitBoard/PortraitClip"]
+[node name="Holder" type="Node2D" parent="Frame/PortraitBoard/PortraitClip"]
 
-[node name="NamePlate" type="Control" parent="PortraitBoard"]
+[node name="NamePlate" type="Control" parent="Frame/PortraitBoard"]
 layout_mode = 1
 offset_left = -26.0
 offset_top = -24.0
@@ -57,7 +68,7 @@ tilt_degrees = -3.0
 jitter_seed = 12
 nails = false
 
-[node name="NameLabel" type="Label" parent="PortraitBoard/NamePlate"]
+[node name="NameLabel" type="Label" parent="Frame/PortraitBoard/NamePlate"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -69,7 +80,7 @@ text = "NAME"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="SpeechBoard" type="Control" parent="."]
+[node name="SpeechBoard" type="Control" parent="Frame"]
 layout_mode = 3
 anchor_left = 0.04
 anchor_top = 0.08
@@ -82,7 +93,7 @@ skirt_color = Color(0.53, 0.43, 0.3, 1)
 tilt_degrees = -1.0
 jitter_seed = 3
 
-[node name="LineLabel" type="Label" parent="SpeechBoard"]
+[node name="LineLabel" type="Label" parent="Frame/SpeechBoard"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -96,7 +107,7 @@ theme_override_font_sizes/font_size = 24
 text = "..."
 autowrap_mode = 3
 
-[node name="NoteLabel" type="Label" parent="SpeechBoard"]
+[node name="NoteLabel" type="Label" parent="Frame/SpeechBoard"]
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
@@ -110,7 +121,7 @@ theme_override_colors/font_color = Color(0.4, 0.3, 0.19, 1)
 theme_override_font_sizes/font_size = 18
 vertical_alignment = 1
 
-[node name="Options" type="Control" parent="."]
+[node name="Options" type="Control" parent="Frame"]
 layout_mode = 3
 anchor_left = 0.04
 anchor_top = 0.5

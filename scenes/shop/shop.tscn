@@ -32,15 +32,26 @@ mouse_filter = 2
 script = ExtResource("2_backdrop")
 floor_height = 170.0
 
-[node name="ShelfBoard" type="Polygon2D" parent="."]
+[node name="Content" type="Control" parent="."]
+layout_mode = 1
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -324.0
+offset_bottom = 324.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ShelfBoard" type="Polygon2D" parent="Content"]
 color = Color(0.5, 0.37, 0.24, 1)
 polygon = PackedVector2Array(300, 248, 852, 246, 852, 262, 300, 264)
 
-[node name="ShelfShade" type="Polygon2D" parent="."]
+[node name="ShelfShade" type="Polygon2D" parent="Content"]
 color = Color(0.4, 0.29, 0.19, 1)
 polygon = PackedVector2Array(300, 264, 852, 262, 852, 270, 300, 272)
 
-[node name="Goods" type="Control" parent="."]
+[node name="Goods" type="Control" parent="Content"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -49,21 +60,21 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Shopkeeper" type="Node2D" parent="."]
+[node name="Shopkeeper" type="Node2D" parent="Content"]
 position = Vector2(390, 600)
 scale = Vector2(1.2, 1.2)
 script = ExtResource("3_rig")
 character_data = ExtResource("4_keeper")
 
-[node name="CounterTop" type="Polygon2D" parent="."]
+[node name="CounterTop" type="Polygon2D" parent="Content"]
 color = Color(0.55, 0.4, 0.28, 1)
 polygon = PackedVector2Array(180, 428, 640, 424, 646, 444, 176, 446)
 
-[node name="CounterBody" type="Polygon2D" parent="."]
+[node name="CounterBody" type="Polygon2D" parent="Content"]
 color = Color(0.46, 0.33, 0.22, 1)
 polygon = PackedVector2Array(186, 446, 640, 444, 640, 648, 186, 648)
 
-[node name="CounterShade" type="Polygon2D" parent="."]
+[node name="CounterShade" type="Polygon2D" parent="Content"]
 color = Color(0.4, 0.29, 0.19, 1)
 polygon = PackedVector2Array(610, 444, 640, 444, 640, 648, 610, 648)
 

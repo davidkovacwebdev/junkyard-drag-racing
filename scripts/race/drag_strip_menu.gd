@@ -26,34 +26,38 @@ const BET_WIN_MULTIPLIER := 3
 enum Page { TIER, MODE, DRIVE, BET_AMOUNT, BET_PICK }
 
 @onready var _backdrop: WorkshopBackdrop = $Background
-@onready var _money_label: Label = $MoneyPlate/MoneyLabel
-@onready var _title_label: Label = $TitlePlate/TitleLabel
-@onready var _info_label: Label = $InfoPlate/InfoLabel
+@onready var _clerk: CharacterRig = $Content/Clerk
+@onready var _clerk_speech_label: Label = $Content/SpeechPlate/SpeechLabel
+@onready var _money_label: Label = $Content/MoneyPlate/MoneyLabel
+@onready var _title_label: Label = $Content/TitlePlate/TitleLabel
+@onready var _info_label: Label = $Content/InfoPlate/InfoLabel
 
-@onready var _tier_page: Control = $TierPage
+@onready var _tier_page: Control = $Content/TierPage
 @onready var _tier_buttons: Array[ScrapButton] = [
-	$TierPage/Tier1Button, $TierPage/Tier2Button, $TierPage/Tier3Button, $TierPage/Tier4Button,
+	$Content/TierPage/Tier1Button, $Content/TierPage/Tier2Button, $Content/TierPage/Tier3Button, $Content/TierPage/Tier4Button,
 ]
 
-@onready var _mode_page: Control = $ModePage
-@onready var _drive_button: ScrapButton = $ModePage/DriveButton
-@onready var _bet_button: ScrapButton = $ModePage/BetButton
+@onready var _mode_page: Control = $Content/ModePage
+@onready var _drive_button: ScrapButton = $Content/ModePage/DriveButton
+@onready var _bet_button: ScrapButton = $Content/ModePage/BetButton
 
-@onready var _drive_page: Control = $DrivePage
-@onready var _drive_car_view: CarView = $DrivePage/CarPreview
-@onready var _drive_name_label: Label = $DrivePage/NamePlate/NameLabel
-@onready var _drive_race_button: ScrapButton = $DrivePage/RaceButton
+@onready var _drive_page: Control = $Content/DrivePage
+@onready var _drive_car_view: CarView = $Content/DrivePage/CarPreview
+@onready var _drive_name_label: Label = $Content/DrivePage/NamePlate/NameLabel
+@onready var _drive_race_button: ScrapButton = $Content/DrivePage/RaceButton
 
-@onready var _bet_amount_page: Control = $BetAmountPage
+@onready var _bet_amount_page: Control = $Content/BetAmountPage
 @onready var _bet_amount_buttons: Array[ScrapButton] = [
-	$BetAmountPage/Bet20Button, $BetAmountPage/Bet50Button, $BetAmountPage/Bet100Button,
+	$Content/BetAmountPage/Bet20Button, $Content/BetAmountPage/Bet50Button, $Content/BetAmountPage/Bet100Button,
 ]
 
-@onready var _bet_pick_page: Control = $BetPickPage
-@onready var _bet_field_list: HBoxContainer = $BetPickPage/FieldList
-@onready var _bet_confirm_button: ScrapButton = $BetPickPage/ConfirmButton
+@onready var _bet_pick_page: Control = $Content/BetPickPage
+@onready var _bet_field_list: HBoxContainer = $Content/BetPickPage/FieldList
+@onready var _bet_confirm_button: ScrapButton = $Content/BetPickPage/ConfirmButton
 
 const _BET_CARD_SCENE := preload("res://scenes/race/drag_strip_bet_card.tscn")
+const CLERK_IDLE_BOB_PIXELS := 2.0
+const CLERK_TALK_SQUASH := 0.03
 
 var _tier: int = 1
 var _car_index: int = 0
@@ -62,13 +66,31 @@ var _bet_field: Array[Dictionary] = []
 var _bet_field_names: Array[String] = []
 var _bet_pick_index: int = -1
 var _bet_cards: Array[Node] = []
+var _clerk_speech := SpeechPlayer.new()
+var _clerk_rest := Vector2.ZERO
+var _clerk_scale := Vector2.ONE
+var _time := 0.0
 
 func _ready() -> void:
-	if _resolve_pending_bet():
-		SaveSystem.save_game()
+	add_child(_clerk_speech)
+	_clerk_rest = _clerk.position
+	_clerk_scale = _clerk.scale
 	_car_index = clampi(Inventory.selected_index, 0, maxi(Inventory.owned_cars.size() - 1, 0))
 	_refresh_money()
 	_show_page(Page.TIER)
+	if _resolve_pending_bet():
+		_refresh_money()
+		SaveSystem.save_game()
+
+## The clerk bobs behind the counter, and squashes while talking.
+func _process(delta: float) -> void:
+	_time += delta
+	var squash := sin(_time * TAU * 6.0) * CLERK_TALK_SQUASH if _clerk_speech.is_typing() else 0.0
+	_clerk.position.y = _clerk_rest.y + sin(_time * TAU * 0.6) * CLERK_IDLE_BOB_PIXELS
+	_clerk.scale = Vector2(_clerk_scale.x * (1.0 - squash), _clerk_scale.y * (1.0 + squash))
+
+func _clerk_says(line: String) -> void:
+	_clerk_speech.speak(_clerk_speech_label, line, _clerk.character_data)
 
 ## If we're returning from a spectator bet race, RaceProgression's
 ## last_ai_race_winner is non-empty and there's a bet to settle — otherwise
@@ -84,9 +106,11 @@ func _resolve_pending_bet() -> bool:
 		Inventory.money += payout
 		Sfx.play(&"cash_register", -4.0)
 		_flash_info("Your car won! +$%d" % payout)
+		_clerk_says("Well I'll be. Your pick came in. Here's yer $%d." % payout)
 	else:
 		Sfx.play(&"denied", -6.0)
 		_flash_info("Your car lost the bet.")
+		_clerk_says("Tough luck. House keeps the stake.")
 	RaceProgression.last_ai_race_winner = ""
 	RaceProgression.last_ai_race_field_names = []
 	RaceProgression.last_bet_amount = 0
@@ -111,17 +135,28 @@ func _show_page(page: Page) -> void:
 			_title_label.text = "%s — Pick a Tier" % RaceProgression.menu_venue_name
 			for i in TIERS.size():
 				_tier_buttons[i].selected = _tier == TIERS[i]
+			_clerk_says("Signin' up? Pick a class. Bigger fee, meaner junk.")
 		Page.MODE:
 			_title_label.text = "%s Tier — Drive or Bet?" % TIER_NAMES[_tier]
+			var fee := RaceProgression.entry_fee_for_tier(_tier)
+			var rules := RaceProgression.menu_venue_rules
+			if rules.is_empty():
+				rules = "Rivals do it in about %d seconds." % roundi(RaceProgression.par_time_for_tier(_tier))
+			_clerk_says("%s. $%d to enter, a win pays $%d. %s" % [
+					TIER_NAMES[_tier], fee, fee * RaceProgression.ENTRY_WIN_MULTIPLIER, rules])
 		Page.DRIVE:
 			_title_label.text = "Choose Your Car"
 			_refresh_drive_car()
+			_clerk_says("No car? Can't race a shopping list." if Inventory.owned_cars.is_empty()
+					else "Roll yer heap up to the line.")
 		Page.BET_AMOUNT:
 			_title_label.text = "Place Your Bet"
 			for i in BET_AMOUNTS.size():
 				_bet_amount_buttons[i].selected = _bet_amount == BET_AMOUNTS[i]
+			_clerk_says("How much ya puttin' down? Pays %dx." % BET_WIN_MULTIPLIER)
 		Page.BET_PICK:
 			_title_label.text = "Back a Car to Win"
+			_clerk_says("Pick a winner. No refunds.")
 
 func _on_tier_pressed(index: int) -> void:
 	_tier = TIERS[index]
@@ -172,6 +207,7 @@ func _on_race_pressed() -> void:
 	var fee := RaceProgression.entry_fee_for_tier(_tier)
 	if not Inventory.spend_money(fee):
 		Sfx.play(&"denied", -6.0)
+		_clerk_says("That ain't enough cash, pal.")
 		return
 	Sfx.play(&"cash_register", -4.0)
 	SaveSystem.save_game()
@@ -193,12 +229,13 @@ func _on_bet_amount_back_pressed() -> void:
 func _on_bet_amount_next_pressed() -> void:
 	if _bet_amount <= 0 or not Inventory.can_afford(_bet_amount):
 		Sfx.play(&"denied", -6.0)
+		_clerk_says("Pick an amount first." if _bet_amount <= 0 else "Ya can't cover that, pal.")
 		return
 	_roll_bet_field()
 	_show_page(Page.BET_PICK)
 
 func _roll_bet_field() -> void:
-	_bet_field = RaceProgression.pick_rivals_for_tier(BET_FIELD_SIZE, _tier)
+	_bet_field = RaceProgression.pick_rivals_for_tier(BET_FIELD_SIZE, _tier, RaceProgression.menu_course)
 	_bet_field_names.clear()
 	for card in _bet_cards:
 		card.queue_free()
@@ -208,32 +245,12 @@ func _roll_bet_field() -> void:
 	_bet_confirm_button.disabled = true
 	for i in _bet_field.size():
 		var rival: Dictionary = _bet_field[i]
-		var car_name := "Car%d_%s_%s_%s" % [
-			i,
-			String(rival["body"]).get_file().get_basename(),
-			String(rival["wheels"][0]).get_file().get_basename(),
-			String(rival["engine"]).get_file().get_basename(),
-		]
-		_bet_field_names.append(car_name)
+		_bet_field_names.append(RaceSignup.rival_car_name(i, rival))
 		var card := _BET_CARD_SCENE.instantiate()
 		_bet_field_list.add_child(card)
-		card.setup(names[i], _rival_car_model(rival))
+		card.setup(names[i], RaceProgression.rival_car_model(rival))
 		card.pressed.connect(_on_bet_card_pressed.bind(i))
 		_bet_cards.append(card)
-
-## Rival specs only carry scene paths (see RaceProgression.pick_rivals), so
-## the full car shown on the bet card is assembled from throwaway PartData
-## loads of those paths — the same fields PartFactory would read off a live
-## car, just fetched without racing the car first.
-static func _rival_car_model(rival: Dictionary) -> CarModelData:
-	var model := CarModelData.new()
-	model.body = PartDatabase.load_part_data(rival["body"]) as BodyPartData
-	model.engine = PartDatabase.load_part_data(rival["engine"]) as EnginePartData
-	var wheels: Array[WheelPartData] = []
-	for wheel_path in rival["wheels"]:
-		wheels.append(PartDatabase.load_part_data(wheel_path) as WheelPartData)
-	model.wheels = wheels
-	return model
 
 func _on_bet_card_pressed(index: int) -> void:
 	_bet_pick_index = index

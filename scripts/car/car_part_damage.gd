@@ -29,6 +29,10 @@ var absorption: float = 0.0
 ## 0..1 extra share soaked up only when the hit came from the ground, not
 ## from another car. Needs contact_monitor on the target to tell them apart.
 var ground_absorption: float = 0.0
+## Scales the part's own durability (a turtle shell toughens every part).
+var durability_multiplier: float = 1.0
+## Replaces the part's own knock when set.
+var impact_sound: StringName = &""
 ## Other parts whose contacts also count when telling a ground hit from a car
 ## hit (the body lands through its wheels, so it checks them too).
 var linked_contact_parts: Array = []
@@ -42,7 +46,7 @@ var _impact_sound_cooldown := 0.0
 func _ready() -> void:
 	add_to_group(GROUP)
 	if part_data != null:
-		max_durability = part_data.durability
+		max_durability = part_data.durability * durability_multiplier
 	current_durability = max_durability
 
 ## The tracker on `part`, or null if it has none.
@@ -82,8 +86,10 @@ func _physics_process(delta: float) -> void:
 	if not is_broken and _impact_sound_cooldown <= 0.0:
 		_impact_sound_cooldown = IMPACT_SOUND_COOLDOWN
 		var loudness := clampf(delta_v / LOUDEST_IMPACT_VELOCITY, 0.25, 1.0)
-		var impact_sound := part_data.impact_sound if part_data != null else &"bump"
-		RaceCarAudio.play(self, impact_sound, target.global_position, linear_to_db(loudness))
+		var knock := impact_sound
+		if knock == &"":
+			knock = part_data.impact_sound if part_data != null else &"bump"
+		RaceCarAudio.play(self, knock, target.global_position, linear_to_db(loudness))
 
 func _is_ground_hit() -> bool:
 	for part in [target] + linked_contact_parts:

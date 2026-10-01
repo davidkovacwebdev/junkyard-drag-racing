@@ -13,6 +13,14 @@ extends Node
 var _noise := FastNoiseLite.new()
 var _t := 0.0
 
+## Side-view races steer nothing up or down, so they switch it off.
+static func switch_off(car_body: Node) -> void:
+	if not is_instance_valid(car_body):
+		return
+	for child in car_body.get_children():
+		if child is CarAutosteer:
+			child.set_physics_process(false)
+
 func _ready() -> void:
 	_noise.seed = randi()
 	_noise.frequency = 1.0

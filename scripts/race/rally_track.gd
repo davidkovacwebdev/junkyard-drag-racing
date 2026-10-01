@@ -38,7 +38,7 @@ func _ready() -> void:
 		return
 	for slab in slabs.get_children():
 		if slab is StaticBody2D:
-			_build_slab_collision(slab)
+			build_slab_collision(slab)
 
 ## How far the road surface sits below (positive) or above (negative) its flat
 ## lane line at track x.
@@ -58,9 +58,20 @@ func sample_xs() -> PackedFloat32Array:
 		xs.append(lerpf(left, right, float(i) / float(columns)))
 	return xs
 
+## A band between two flat y's, bent onto the road: its top edge left to right,
+## then its bottom edge back. What the track art paints with.
+func surface_band(band_top: float, band_bottom: float) -> PackedVector2Array:
+	var xs := sample_xs()
+	var points := PackedVector2Array()
+	for x in xs:
+		points.append(Vector2(x, band_top + surface_offset_at(x)))
+	for i in range(xs.size() - 1, -1, -1):
+		points.append(Vector2(xs[i], band_bottom + surface_offset_at(xs[i])))
+	return points
+
 ## A band SLAB_DEPTH thick whose top edge is the road surface, in the slab's
 ## own space. Slabs are authored at x = 0 on their lane's flat road line.
-func _build_slab_collision(slab: StaticBody2D) -> void:
+func build_slab_collision(slab: StaticBody2D) -> void:
 	var surface := PackedVector2Array()
 	var underside := PackedVector2Array()
 	for x in sample_xs():

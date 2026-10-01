@@ -45,7 +45,7 @@ var _preview_layer: CanvasLayer
 var _preview: Node2D = null
 
 @onready var _dialog: CharacterDialog = $Dialog
-@onready var _goods: Control = $Goods
+@onready var _goods: Control = $Content/Goods
 
 func _ready() -> void:
 	_stock_shelves()

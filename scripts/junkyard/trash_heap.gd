@@ -278,6 +278,7 @@ func _random_part(rng: RandomNumberGenerator, tier: int) -> PartData:
 	pool.append_array(PartDatabase.bodies)
 	pool.append_array(PartDatabase.wheels)
 	pool.append_array(PartDatabase.junk_engines)
+	pool.append_array(PartDatabase.junk_accessories)
 	var matching := pool.filter(func(part: PartData) -> bool: return part.tier == tier)
 	if not matching.is_empty():
 		pool.assign(matching)

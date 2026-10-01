@@ -1,6 +1,6 @@
 extends Node
 ## Part registry (autoload singleton "PartDatabase"). Loads every body/
-## wheel/engine scene under scenes/parts/ once at boot and keeps just
+## wheel/engine/accessory scene under scenes/parts/ once at boot and keeps just
 ## their PartData — the garage's part browser reads from here, not from
 ## any specific car's installed parts.
 
@@ -9,6 +9,9 @@ var wheels: Array[WheelPartData] = []
 var engines: Array[EnginePartData] = []
 ## The engines that turn up as loot in bins and junk heaps.
 var junk_engines: Array[EnginePartData] = []
+var accessories: Array[AccessoryPartData] = []
+## The accessories that turn up as loot in bins and junk heaps.
+var junk_accessories: Array[AccessoryPartData] = []
 
 const _BODY_SCENES := [
 	"res://scenes/parts/bodies/body_classic.tscn",
@@ -110,6 +113,25 @@ const _ENGINE_SCENES := [
 	"res://scenes/parts/engines/engine_horse.tscn",
 ]
 
+const _ACCESSORY_SCENES := [
+	"res://scenes/parts/accessories/accessory_gps_arrow.tscn",
+	"res://scenes/parts/accessories/accessory_deer_antlers.tscn",
+	"res://scenes/parts/accessories/accessory_bull_horns.tscn",
+	"res://scenes/parts/accessories/accessory_spoiler.tscn",
+	"res://scenes/parts/accessories/accessory_axe.tscn",
+	"res://scenes/parts/accessories/accessory_turtle_shell.tscn",
+	"res://scenes/parts/accessories/accessory_siren.tscn",
+	"res://scenes/parts/accessories/accessory_balloon.tscn",
+	"res://scenes/parts/accessories/accessory_boxing_glove.tscn",
+	"res://scenes/parts/accessories/accessory_cow_catcher.tscn",
+	"res://scenes/parts/accessories/accessory_windup_key.tscn",
+	"res://scenes/parts/accessories/accessory_tin_cans.tscn",
+	"res://scenes/parts/accessories/accessory_rocket_exhaust.tscn",
+	"res://scenes/parts/accessories/accessory_anchor.tscn",
+	"res://scenes/parts/accessories/accessory_bubble_wrap.tscn",
+	"res://scenes/parts/accessories/accessory_duct_tape.tscn",
+]
+
 func _ready() -> void:
 	for path in _BODY_SCENES:
 		bodies.append(load_part_data(path) as BodyPartData)
@@ -117,10 +139,14 @@ func _ready() -> void:
 		wheels.append(load_part_data(path) as WheelPartData)
 	for path in _ENGINE_SCENES:
 		engines.append(load_part_data(path) as EnginePartData)
+	for path in _ACCESSORY_SCENES:
+		accessories.append(load_part_data(path) as AccessoryPartData)
 	_assign_tiers(bodies)
 	_assign_tiers(wheels)
 	_assign_tiers(engines)
+	_assign_tiers(accessories)
 	junk_engines.assign(engines.filter(func(engine: EnginePartData) -> bool: return engine.found_in_junk))
+	junk_accessories.assign(accessories.filter(func(accessory: AccessoryPartData) -> bool: return accessory.found_in_junk))
 
 ## Ranks a category's parts by performance_score() and splits them into
 ## PartData.TIER_COUNT roughly-even groups — a tier is a quartile within
@@ -150,6 +176,8 @@ func tier_for(part: PartData) -> int:
 			catalog = wheels
 		PartData.Category.ENGINE:
 			catalog = engines
+		PartData.Category.ACCESSORY:
+			catalog = accessories
 	if catalog.is_empty():
 		return PartData.TIER_COUNT
 	var score := part.performance_score()

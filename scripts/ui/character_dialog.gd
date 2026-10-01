@@ -45,14 +45,14 @@ const IDLE_BOB_PIXELS := 3.0
 const TALK_SQUASH := 0.025
 
 @onready var _overlay: ColorRect = $Overlay
-@onready var _portrait_board: Control = $PortraitBoard
-@onready var _portrait_clip: Control = $PortraitBoard/PortraitClip
-@onready var _portrait_holder: Node2D = $PortraitBoard/PortraitClip/Holder
-@onready var _name_label: Label = $PortraitBoard/NamePlate/NameLabel
-@onready var _speech_board: Control = $SpeechBoard
-@onready var _line_label: Label = $SpeechBoard/LineLabel
-@onready var _note_label: Label = $SpeechBoard/NoteLabel
-@onready var _options_box: Control = $Options
+@onready var _portrait_board: Control = $Frame/PortraitBoard
+@onready var _portrait_clip: Control = $Frame/PortraitBoard/PortraitClip
+@onready var _portrait_holder: Node2D = $Frame/PortraitBoard/PortraitClip/Holder
+@onready var _name_label: Label = $Frame/PortraitBoard/NamePlate/NameLabel
+@onready var _speech_board: Control = $Frame/SpeechBoard
+@onready var _line_label: Label = $Frame/SpeechBoard/LineLabel
+@onready var _note_label: Label = $Frame/SpeechBoard/NoteLabel
+@onready var _options_box: Control = $Frame/Options
 
 var _option_buttons: Array[ScrapButton] = []
 var _options: Array = []

@@ -1,5 +1,7 @@
 [gd_scene load_steps=4 format=3]
 
+[ext_resource type="Script" path="res://scripts/race/end_wall_art.gd" id="end_wall_art"]
+
 [sub_resource type="RectangleShape2D" id="Shape_start"]
 size = Vector2(800, 60)
 
@@ -111,10 +113,7 @@ position = Vector2(8489.92, 2498.05)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="EndWall"]
 shape = SubResource("Shape_wall")
 
-[node name="Polygon2D" type="Polygon2D" parent="EndWall"]
-color = Color(0.7, 0.1, 0.1, 1)
-polygon = PackedVector2Array(-40, -250, 40, -250, 40, 250, -40, 250)
+[node name="Art" type="Node2D" parent="EndWall"]
+script = ExtResource("end_wall_art")
+look = 2
 
-[node name="Stripe" type="Polygon2D" parent="EndWall"]
-color = Color(0.95, 0.8, 0.1, 1)
-polygon = PackedVector2Array(-12, -250, 12, -250, 12, 250, -12, 250)

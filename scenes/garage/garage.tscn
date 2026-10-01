@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/garage/garage.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/world/car_view.tscn" id="2"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://scripts/garage/workshop_backdrop.gd" id="6"]
 [ext_resource type="Script" path="res://scripts/ui/scrap_panel.gd" id="7"]
 [ext_resource type="Script" path="res://scripts/ui/scrap_button.gd" id="8"]
+[ext_resource type="Script" path="res://scripts/ui/sort_button.gd" id="9"]
 
 [node name="Garage" type="Control"]
 layout_mode = 3
@@ -27,7 +28,18 @@ grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("6")
 
-[node name="Lift" type="Control" parent="."]
+[node name="Content" type="Control" parent="."]
+layout_mode = 1
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -324.0
+offset_bottom = 324.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Lift" type="Control" parent="Content"]
 layout_mode = 0
 offset_left = 70.0
 offset_top = 352.0
@@ -41,7 +53,7 @@ skirt_color = Color(0.38, 0.41, 0.47, 1)
 tilt_degrees = 0.5
 jitter_seed = 4
 
-[node name="CarDropZone" type="Control" parent="."]
+[node name="CarDropZone" type="Control" parent="Content"]
 anchors_preset = 0
 offset_right = 440.0
 offset_bottom = 648.0
@@ -53,12 +65,12 @@ offset_top = 20.0
 offset_right = 150.0
 offset_bottom = 60.0
 
-[node name="CarPreview" parent="." instance=ExtResource("2")]
+[node name="CarPreview" parent="Content" instance=ExtResource("2")]
 position = Vector2(220, 260)
 scale = Vector2(1.5, 1.5)
 max_width = 260.0
 
-[node name="NamePlate" type="Control" parent="."]
+[node name="NamePlate" type="Control" parent="Content"]
 layout_mode = 0
 offset_left = 110.0
 offset_top = 430.0
@@ -69,7 +81,7 @@ script = ExtResource("7")
 tilt_degrees = -1.0
 jitter_seed = 12
 
-[node name="NameLabel" type="Label" parent="NamePlate"]
+[node name="NameLabel" type="Label" parent="Content/NamePlate"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -85,7 +97,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
 
-[node name="PrevButton" type="BaseButton" parent="."]
+[node name="PrevButton" type="BaseButton" parent="Content"]
 layout_mode = 0
 offset_left = 46.0
 offset_top = 432.0
@@ -97,7 +109,7 @@ font_size = 24
 tilt_degrees = 2.0
 jitter_seed = 31
 
-[node name="NextButton" type="BaseButton" parent="."]
+[node name="NextButton" type="BaseButton" parent="Content"]
 layout_mode = 0
 offset_left = 344.0
 offset_top = 432.0
@@ -109,7 +121,7 @@ font_size = 24
 tilt_degrees = -2.0
 jitter_seed = 32
 
-[node name="PartsBoard" type="Control" parent="."]
+[node name="PartsBoard" type="Control" parent="Content"]
 layout_mode = 0
 offset_left = 450.0
 offset_top = 76.0
@@ -120,7 +132,7 @@ script = ExtResource("7")
 tilt_degrees = -0.5
 jitter_seed = 27
 
-[node name="BodyFilterButton" type="BaseButton" parent="."]
+[node name="BodyFilterButton" type="BaseButton" parent="Content"]
 layout_mode = 0
 offset_left = 470.0
 offset_top = 28.0
@@ -133,7 +145,7 @@ tilt_degrees = -2.0
 jitter_seed = 41
 selected = true
 
-[node name="EngineFilterButton" type="BaseButton" parent="."]
+[node name="EngineFilterButton" type="BaseButton" parent="Content"]
 layout_mode = 0
 offset_left = 632.0
 offset_top = 28.0
@@ -145,7 +157,7 @@ font_size = 20
 tilt_degrees = 1.5
 jitter_seed = 42
 
-[node name="WheelFilterButton" type="BaseButton" parent="."]
+[node name="WheelFilterButton" type="BaseButton" parent="Content"]
 layout_mode = 0
 offset_left = 794.0
 offset_top = 28.0
@@ -157,34 +169,59 @@ font_size = 20
 tilt_degrees = -1.0
 jitter_seed = 43
 
-[node name="PartsScroll" type="ScrollContainer" parent="."]
+[node name="AccessoryFilterButton" type="BaseButton" parent="Content"]
+layout_mode = 0
+offset_left = 956.0
+offset_top = 28.0
+offset_right = 1106.0
+offset_bottom = 72.0
+script = ExtResource("8")
+text = "Extras"
+font_size = 20
+tilt_degrees = 2.0
+jitter_seed = 44
+
+[node name="SortButton" type="BaseButton" parent="Content"]
 layout_mode = 0
 offset_left = 470.0
-offset_top = 96.0
+offset_top = 84.0
+offset_right = 680.0
+offset_bottom = 120.0
+script = ExtResource("9")
+font_size = 17
+tilt_degrees = -1.0
+jitter_seed = 45
+
+[node name="PartsScroll" type="ScrollContainer" parent="Content"]
+layout_mode = 0
+offset_left = 470.0
+offset_top = 132.0
 offset_right = 1112.0
 offset_bottom = 588.0
 horizontal_scroll_mode = 0
 
-[node name="PartsList" type="GridContainer" parent="PartsScroll"]
+[node name="PartsList" type="GridContainer" parent="Content/PartsScroll"]
 layout_mode = 2
 theme_override_constants/h_separation = 16
 theme_override_constants/v_separation = 16
 columns = 2
 
-[node name="PartsEmptyLabel" type="Label" parent="."]
+[node name="PartsEmptyLabel" type="Label" parent="Content"]
 layout_mode = 0
 offset_left = 470.0
-offset_top = 120.0
+offset_top = 150.0
 offset_right = 1110.0
-offset_bottom = 200.0
+offset_bottom = 230.0
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.25, 0.16, 0.08, 1)
 theme_override_font_sizes/font_size = 18
 text = "No spare parts — everything you own is on a car."
 horizontal_alignment = 1
 
-[connection signal="pressed" from="PrevButton" to="." method="_on_prev_pressed"]
-[connection signal="pressed" from="NextButton" to="." method="_on_next_pressed"]
-[connection signal="pressed" from="BodyFilterButton" to="." method="_on_body_filter_pressed"]
-[connection signal="pressed" from="EngineFilterButton" to="." method="_on_engine_filter_pressed"]
-[connection signal="pressed" from="WheelFilterButton" to="." method="_on_wheel_filter_pressed"]
+[connection signal="pressed" from="Content/PrevButton" to="." method="_on_prev_pressed"]
+[connection signal="pressed" from="Content/NextButton" to="." method="_on_next_pressed"]
+[connection signal="pressed" from="Content/BodyFilterButton" to="." method="_on_body_filter_pressed"]
+[connection signal="pressed" from="Content/EngineFilterButton" to="." method="_on_engine_filter_pressed"]
+[connection signal="pressed" from="Content/WheelFilterButton" to="." method="_on_wheel_filter_pressed"]
+[connection signal="pressed" from="Content/AccessoryFilterButton" to="." method="_on_accessory_filter_pressed"]
+[connection signal="sort_changed" from="Content/SortButton" to="." method="_on_sort_changed"]

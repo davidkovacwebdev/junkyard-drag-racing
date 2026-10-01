@@ -1,8 +1,9 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/garage/part_slot.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/garage/part_icon.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/garage/stat_bar.tscn" id="3"]
+[ext_resource type="Script" path="res://scripts/ui/effect_badge.gd" id="4"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_1"]
 content_margin_left = 14.0
@@ -29,11 +30,22 @@ size_flags_horizontal = 3
 size_flags_vertical = 4
 theme_override_constants/separation = 5
 
-[node name="TitleLabel" type="Label" parent="Row/Info"]
+[node name="TitleRow" type="HBoxContainer" parent="Row/Info"]
 mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="TitleLabel" type="Label" parent="Row/Info/TitleRow"]
+mouse_filter = 2
+size_flags_horizontal = 3
 text_overrun_behavior = 3
 theme_override_font_sizes/font_size = 17
 theme_override_colors/font_color = Color(0.25, 0.16, 0.08, 1)
+
+[node name="EffectBadge" type="Control" parent="Row/Info/TitleRow"]
+visible = false
+custom_minimum_size = Vector2(26, 26)
+mouse_filter = 2
+script = ExtResource("4")
 
 [node name="DurabilityRow" type="HBoxContainer" parent="Row/Info"]
 mouse_filter = 2

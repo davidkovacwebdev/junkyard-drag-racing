@@ -11,10 +11,12 @@ const LOOSE_WHEEL_DAMP := 1.5
 ## Each wheel motor's stall torque per point of engine power.
 const STALL_TORQUE_PER_POWER := 300000.0
 ## Global buff on every engine's power, so all cars get faster together.
-const ENGINE_POWER_MULTIPLIER := 1.5625
+const ENGINE_POWER_MULTIPLIER := 2.0
 ## Gap left under a car's lowest point at spawn: enough to not start inside
 ## the ground, small enough that it settles instead of dropping.
 const SPAWN_GAP := 1.0
+## A balloon makes a car lighter, never weightless.
+const MIN_BODY_MASS := 1.0
 
 class AssembledCar:
 	var root: Node2D
@@ -37,7 +39,7 @@ static func assemble(body_scene: PackedScene, wheel_scenes: Array[PackedScene], 
 ## how a forged part gets onto a track with its mashed art and its own stats.
 ## Takes ownership of every instance passed in; wheels beyond the body's mount
 ## count are freed.
-static func assemble_parts(body_instance: CarBody, wheel_instances: Array[CarWheel], engine_instance: Node2D, parent: Node, spawn_position: Vector2) -> AssembledCar:
+static func assemble_parts(body_instance: CarBody, wheel_instances: Array[CarWheel], engine_instance: Node2D, parent: Node, spawn_position: Vector2, accessory_instances: Array[CarAccessory] = []) -> AssembledCar:
 	var root := Node2D.new()
 	root.name = "Car"
 	root.position = spawn_position
@@ -59,6 +61,22 @@ static func assemble_parts(body_instance: CarBody, wheel_instances: Array[CarWhe
 		wheel_instance.global_position = mount.global_position
 		wheel_instance.chassis = body_instance
 		wheels.append(wheel_instance)
+
+	# Before the springs are hung: they're tuned to the body's weight, which the
+	# accessories add to.
+	var durability_multiplier := 1.0
+	var speed_multiplier := 1.0
+	var body_impact_sound := &""
+	for accessory in accessory_instances:
+		var accessory_data := accessory.part_data
+		if accessory_data == null:
+			continue
+		durability_multiplier *= accessory_data.durability_multiplier
+		speed_multiplier *= accessory_data.speed_multiplier
+		body_instance.mass = maxf(body_instance.mass + accessory_data.mass, MIN_BODY_MASS)
+		if accessory_data.body_impact_sound != &"":
+			body_impact_sound = accessory_data.body_impact_sound
+	CarAccessory.mount_all(body_instance, accessory_instances, wheels, true, true)
 
 	# Placed by its lowest point, not its body origin:
 	# wheels hang below the body by different amounts, and a wheel spawned
@@ -87,7 +105,7 @@ static func assemble_parts(body_instance: CarBody, wheel_instances: Array[CarWhe
 		body_instance.place_engine(engine_instance)
 		engine_data = engine_instance.get("part_data")
 		if engine_data != null:
-			engine_power = engine_data.power * ENGINE_POWER_MULTIPLIER
+			engine_power = engine_data.power * ENGINE_POWER_MULTIPLIER * speed_multiplier
 
 	var autosteer := CarAutosteer.new()
 	autosteer.body = body_instance
@@ -120,6 +138,7 @@ static func assemble_parts(body_instance: CarBody, wheel_instances: Array[CarWhe
 		var wheel_damage := CarPartDamage.new()
 		wheel_damage.target = wheel
 		wheel_damage.part_data = wheel.part_data
+		wheel_damage.durability_multiplier = durability_multiplier
 		wheel_damage.absorption = wheel.part_data.absorption if wheel.part_data != null else 0.0
 		wheel_damage.ground_absorption = suspension_wheel_protection
 		wheel.contact_monitor = true
@@ -139,6 +158,8 @@ static func assemble_parts(body_instance: CarBody, wheel_instances: Array[CarWhe
 	var body_damage := CarPartDamage.new()
 	body_damage.target = body_instance
 	body_damage.part_data = body_instance.part_data
+	body_damage.durability_multiplier = durability_multiplier
+	body_damage.impact_sound = body_impact_sound
 	body_damage.absorption = _average_absorption(wheels)
 	body_damage.ground_absorption = suspension_wheel_protection
 	body_damage.linked_contact_parts = wheels
@@ -186,7 +207,8 @@ static func assemble_from_car_data(car_data: CarModelData, parent: Node, spawn_p
 		if wheel != null and not wheel.scene_path.is_empty():
 			wheel_instances.append(PartFactory.instantiate(wheel) as CarWheel)
 	return assemble_parts(PartFactory.instantiate(car_data.body) as CarBody, wheel_instances,
-			PartFactory.instantiate(car_data.engine), parent, spawn_position)
+			PartFactory.instantiate(car_data.engine), parent, spawn_position,
+			CarAccessory.instantiate_all(car_data))
 
 ## Hangs `wheel` off the body on a sprung, damped slide along the body's own
 ## up/down axis: a groove keeps the axle in line under its mount, and a spring

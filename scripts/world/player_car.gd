@@ -169,6 +169,7 @@ func _ready() -> void:
 	_puddles = _resolve_puddles()
 	var car := Inventory.get_selected_car()
 	if car != null:
+		_visual.audible_accessories = true
 		_visual.build_from(car)
 		_car_mass = _compute_car_mass(car)
 	_setup_sounds(car)
@@ -411,6 +412,7 @@ func _compute_car_mass(car: CarModelData) -> float:
 	for wheel in car.wheels:
 		if wheel != null:
 			total += wheel.mass
+	total += car.accessory_mass()
 	return maxf(total, 1.0)
 
 func _is_touching_shore() -> bool:
@@ -424,7 +426,7 @@ func _is_touching_shore() -> bool:
 ## camera. The engine voice comes from whatever engine is bolted on.
 func _setup_sounds(car: CarModelData) -> void:
 	if car != null and car.body != null:
-		_bump_sound = car.body.impact_sound
+		_bump_sound = car.accessory_sound(&"body_impact_sound", car.body.impact_sound)
 	if car != null and car.engine != null:
 		_boost_sound = car.engine.boost_sound
 	var profile := EngineSoundProfile.for_engine(car.engine if car != null else null)
@@ -437,7 +439,8 @@ func _setup_sounds(car: CarModelData) -> void:
 			Sfx.play(car.engine.start_sound, -6.0, 0.0)
 			_engine_sound.start_up(0.35)
 	_engine_started_this_session = true
-	_horn = _add_sustained_sound(&"horn_loop", horn_volume_db)
+	var horn_sound := car.accessory_sound(&"horn_sound", &"horn_loop") if car != null else &"horn_loop"
+	_horn = _add_sustained_sound(horn_sound, horn_volume_db)
 	_horn.min_on_time = 0.18
 	_horn.restart_on_start = true
 	_tire_screech = _add_sustained_sound(&"tire_screech_loop", tire_screech_volume_db)

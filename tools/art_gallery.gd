@@ -1,6 +1,6 @@
 extends Node2D
 ## Renders art sheets to PNG so the art can be reviewed side by side:
-##   godot res://tools/art_gallery.tscn -- <out_dir> [parts|world|race|ramp|screens|all]
+##   godot res://tools/art_gallery.tscn -- <out_dir> [parts|world|race|ramp|venues|screens|all]
 ## Parts go in a labelled grid; world set pieces get one shot each.
 
 const CELL := Vector2(260, 220)
@@ -13,6 +13,8 @@ const WORLD_SHOTS := [
 	{"name": "forge", "scene": "res://scenes/world/scrap_forge.tscn", "zoom": 1.1},
 	{"name": "drag_strip", "scene": "res://scenes/world/drag_strip.tscn", "zoom": 0.45},
 	{"name": "rally_stage", "scene": "res://scenes/world/rally_stage.tscn", "zoom": 0.45},
+	{"name": "hill_climb_site", "scene": "res://scenes/world/hill_climb_site.tscn", "zoom": 0.45},
+	{"name": "derby_pit", "scene": "res://scenes/world/derby_pit.tscn", "zoom": 0.5},
 	{"name": "fishing_port", "scene": "res://scenes/world/fishing_port.tscn", "zoom": 0.8},
 	{"name": "lighthouse_point", "scene": "res://scenes/world/lighthouse_point.tscn", "zoom": 1.0},
 	{"name": "oil_field", "scene": "res://scenes/world/oil_field.tscn", "zoom": 0.9},
@@ -38,6 +40,20 @@ const SCREEN_SHOTS := [
 	["crane_pen", "res://scenes/junkyard/crane_pen.tscn"],
 	["settings", "res://scenes/menu/settings_screen.tscn"],
 	["credits", "res://scenes/menu/credits_screen.tscn"],
+	["save_slots", "res://scenes/menu/save_slots_screen.tscn"],
+]
+
+## Each race venue's finish end, where the cars pile into the wall.
+const END_WALL_SHOTS := [
+	["end_wall_drag", "res://scenes/race/race_drag_strip.tscn"],
+	["end_wall_rally", "res://scenes/race/race_rally.tscn"],
+	["end_wall_ramp", "res://scenes/race/race_ramp.tscn"],
+	["end_wall_hill_climb", "res://scenes/race/race_hill_climb.tscn"],
+]
+## Races left running for a few seconds, the camera doing its own thing.
+const RACE_SHOTS := [
+	["hill_climb_race", "res://scenes/race/race_hill_climb.tscn", 22.0],
+	["derby_race", "res://scenes/race/race_derby.tscn", 6.0],
 ]
 
 var _out_dir: String
@@ -60,6 +76,12 @@ func _ready() -> void:
 		await _shoot_screen("race_rally", "res://scenes/race/race_rally.tscn")
 	if _mode in ["ramp", "all"]:
 		await _shoot_ramp_run()
+	if _mode in ["venues", "all"]:
+		await _shoot_screen("drag_strip_menu", "res://scenes/race/drag_strip_menu.tscn")
+		for venue in END_WALL_SHOTS:
+			await _shoot_end_wall(venue[0], venue[1])
+		for shot in RACE_SHOTS:
+			await _shoot_race(shot[0], shot[1], shot[2])
 	if _mode in ["screens", "all"]:
 		for shot in SCREEN_SHOTS:
 			await _shoot_screen(shot[0], shot[1])
@@ -72,7 +94,8 @@ func _ready() -> void:
 	get_tree().quit()
 
 func _shoot_parts() -> void:
-	var groups := {"bodies": PartDatabase.bodies, "wheels": PartDatabase.wheels, "engines": PartDatabase.engines}
+	var groups := {"bodies": PartDatabase.bodies, "wheels": PartDatabase.wheels, "engines": PartDatabase.engines,
+			"accessories": PartDatabase.accessories}
 	for group_name in groups:
 		var parts: Array = groups[group_name]
 		var holder := _frozen_holder()
@@ -94,6 +117,42 @@ func _shoot_parts() -> void:
 			sheet.add_child(label)
 		var rows := ceili(parts.size() / float(COLUMNS))
 		await _capture(holder, Vector2(COLUMNS * CELL.x, rows * CELL.y), "parts_" + group_name)
+	await _shoot_fitted_accessories()
+
+## Every body wearing a different mix of accessories (one per spot, a skin on
+## every other one), to check where each body's spots land.
+func _shoot_fitted_accessories() -> void:
+	var by_spot := {}
+	for accessory in PartDatabase.accessories:
+		if not by_spot.has(accessory.spot):
+			by_spot[accessory.spot] = []
+		by_spot[accessory.spot].append(accessory)
+	var holder := _frozen_holder()
+	var bodies := PartDatabase.bodies
+	for i in bodies.size():
+		var car := CarModelData.new()
+		car.body = bodies[i].duplicate()
+		car.engine = PartDatabase.engines[i % PartDatabase.engines.size()].duplicate()
+		for mount in PartDatabase.wheel_mount_count(car.body):
+			car.wheels.append(PartDatabase.wheels[0].duplicate())
+		for spot in by_spot:
+			var options: Array = by_spot[spot]
+			if spot == AccessoryPartData.Spot.SKIN and i % 2 != 0:
+				continue
+			car.accessories.append((options[(i / 2 if spot == AccessoryPartData.Spot.SKIN else i) % options.size()] as AccessoryPartData).duplicate())
+		var view := CarView.new()
+		view.max_width = PART_FIT.x
+		holder.add_child(view)
+		view.build_from(car)
+		var cell_origin := Vector2(i % COLUMNS, i / COLUMNS) * CELL
+		view.position = cell_origin + Vector2(CELL.x * 0.5, 105)
+		var label := Label.new()
+		label.text = car.body.display_name
+		label.position = cell_origin + Vector2(8, CELL.y - 30)
+		label.add_theme_color_override("font_color", Color(0.15, 0.14, 0.13))
+		holder.add_child(label)
+	var rows := ceili(bodies.size() / float(COLUMNS))
+	await _capture(holder, Vector2(COLUMNS * CELL.x, rows * CELL.y), "parts_fitted_accessories")
 
 func _shoot_scene(shot_name: String, scene: PackedScene, zoom: float) -> void:
 	var holder := _frozen_holder()
@@ -151,6 +210,33 @@ func _shoot_ramp_run() -> void:
 		await RenderingServer.frame_post_draw
 	get_viewport().get_texture().get_image().save_png(_out_dir.path_join("ramp_landing.png"))
 	print("saved ramp shots")
+	screen.queue_free()
+	await get_tree().process_frame
+
+func _shoot_end_wall(shot_name: String, scene_path: String) -> void:
+	get_window().size = Vector2i(1600, 900)
+	var screen: Node = load(scene_path).instantiate()
+	get_tree().root.add_child(screen)
+	await get_tree().create_timer(0.5).timeout
+	var wall := screen.find_child("EndWall", true, false) as Node2D
+	var camera := screen.get_node("MainCamera") as CameraFollow
+	camera.targets = []
+	camera.lock_on(wall.global_position + Vector2(-500.0, 0.0))
+	await get_tree().create_timer(2.5).timeout
+	await RenderingServer.frame_post_draw
+	get_viewport().get_texture().get_image().save_png(_out_dir.path_join(shot_name + ".png"))
+	print("saved ", shot_name)
+	screen.queue_free()
+	await get_tree().process_frame
+
+func _shoot_race(shot_name: String, scene_path: String, seconds: float) -> void:
+	get_window().size = Vector2i(1600, 900)
+	var screen: Node = load(scene_path).instantiate()
+	get_tree().root.add_child(screen)
+	await get_tree().create_timer(seconds).timeout
+	await RenderingServer.frame_post_draw
+	get_viewport().get_texture().get_image().save_png(_out_dir.path_join(shot_name + ".png"))
+	print("saved ", shot_name)
 	screen.queue_free()
 	await get_tree().process_frame
 

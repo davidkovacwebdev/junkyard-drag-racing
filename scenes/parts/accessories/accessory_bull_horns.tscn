@@ -1,0 +1,35 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_accessory.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/accessory_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_bull_horns"]
+script = ExtResource("2")
+id = &"accessory_bull_horns"
+display_name = "Bull Horns"
+category = 3
+spot = 0
+effect_description = "Horns on the nose that take the hits first."
+mass = 3
+durability_multiplier = 1.1
+speed_multiplier = 0.98
+
+[node name="AccessoryBullHorns" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_bull_horns")
+
+[node name="BackHorn" type="Polygon2D" parent="."]
+color = Color(0.7, 0.66, 0.55, 1)
+polygon = PackedVector2Array(2, -11, 18, -13, 32, -17, 44, -27, 50, -37, 48, -23, 38, -9, 22, -1, 2, -1)
+
+[node name="FrontHorn" type="Polygon2D" parent="."]
+color = Color(0.86, 0.82, 0.7, 1)
+polygon = PackedVector2Array(4, -6, 20, -8, 34, -12, 46, -22, 52, -32, 50, -18, 40, -4, 24, 4, 4, 4)
+
+[node name="Tip" type="Polygon2D" parent="."]
+color = Color(0.3, 0.28, 0.25, 1)
+polygon = PackedVector2Array(46, -22, 52, -32, 50, -18)
+
+[node name="Plate" type="Polygon2D" parent="."]
+color = Color(0.38, 0.41, 0.47, 1)
+polygon = PackedVector2Array(0, -12, 7, -12, 7, 8, 0, 8)

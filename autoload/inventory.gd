@@ -144,6 +144,10 @@ func give_part(home: PartHome, part: PartData) -> void:
 				if part is EnginePartData:
 					home.car.engine = part as EnginePartData
 					return
+			PartHome.SLOT_ACCESSORY:
+				if part is AccessoryPartData:
+					home.car.set_accessory(part as AccessoryPartData)
+					return
 			_:
 				if part is WheelPartData and home.slot >= 0 \
 						and home.slot < home.car.wheels.size():
@@ -279,6 +283,8 @@ func fit_part(car: CarModelData, category: PartData.Category, part: PartData,
 			return _fit_engine(car, part)
 		PartData.Category.WHEEL:
 			return _fit_wheel(car, part, wheel_index)
+		PartData.Category.ACCESSORY:
+			return _fit_accessory(car, part as AccessoryPartData)
 	return false
 
 ## Put `body_part` on `car`. The car can never end up bodiless: the displaced
@@ -314,6 +320,18 @@ func _fit_engine(car: CarModelData, engine_part: PartData) -> bool:
 		return false
 	give_part(home, displaced)
 	car.engine = home.part as EnginePartData
+	return true
+
+## Bolt `accessory` into its spot on `car`, swapping out whatever was there.
+func _fit_accessory(car: CarModelData, accessory: AccessoryPartData) -> bool:
+	if accessory == null:
+		return false
+	var displaced: PartData = car.accessory_in(accessory.spot)
+	var home := detach_part(accessory)
+	if home == null:
+		return false
+	give_part(home, displaced)
+	car.set_accessory(home.part as AccessoryPartData)
 	return true
 
 ## Bolt `wheel_part` onto `car`. `mount` >= 0 is the mount a wheel was dropped
@@ -412,6 +430,9 @@ func _fitted_count(car: CarModelData, part: PartData) -> int:
 	for wheel in car.wheels:
 		if wheel != null and wheel.id == part.id:
 			count += 1
+	for accessory in car.accessories:
+		if accessory != null and accessory.id == part.id:
+			count += 1
 	return count
 
 ## Take one copy of `part` out of `car`'s fitted slots, clearing whichever slot
@@ -432,6 +453,10 @@ func _detach_fitted(car: CarModelData, part: PartData) -> PartHome:
 		if wheel != null and wheel.id == part.id:
 			car.wheels[i] = null
 			return _home(wheel, car, i)
+	for accessory in car.accessories:
+		if accessory != null and accessory.id == part.id:
+			car.remove_accessory(accessory.spot)
+			return _home(accessory, car, PartHome.SLOT_ACCESSORY)
 	return null
 
 static func _home(part: PartData, car: CarModelData, slot: int) -> PartHome:

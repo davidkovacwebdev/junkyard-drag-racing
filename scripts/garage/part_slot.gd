@@ -9,15 +9,17 @@ extends PanelContainer
 ## it lands on. A wheel dropped here has no mount to aim at, so it takes
 ## the first mount not already wearing it, one drop per mount.
 ##
-## Layout: icon on the left, title + Durability/Speed/Mass stat bars
-## on the right.
+## Layout: icon on the left, title (with an effect badge for parts that do
+## something special, explained in the card's tooltip) + Durability/Speed/Mass
+## stat bars on the right.
 
 var category: PartData.Category
 var part: PartData
 var garage: Garage
 
 @onready var _icon: PartIcon = $Row/Icon
-@onready var _title_label: Label = $Row/Info/TitleLabel
+@onready var _title_label: Label = $Row/Info/TitleRow/TitleLabel
+@onready var _effect_badge: EffectBadge = $Row/Info/TitleRow/EffectBadge
 @onready var _durability_bar: StatBar = $Row/Info/DurabilityRow/DurabilityBar
 @onready var _speed_bar: StatBar = $Row/Info/SpeedRow/SpeedBar
 @onready var _mass_bar: StatBar = $Row/Info/MassRow/MassBar
@@ -49,9 +51,12 @@ func set_part(new_part: PartData, count: int = 1) -> void:
 	part = new_part
 	_icon.show_part(part)
 	_title_label.text = _title_for(part, count)
-	_durability_bar.set_rating(_rating(part.durability, PartData.DURABILITY_RANGE) if part != null else 0)
-	_speed_bar.set_rating(_rating(part.speed, PartData.SPEED_RANGE) if part != null else 0)
-	_mass_bar.set_rating(_rating(part.mass, PartData.MASS_RANGE) if part != null else 0)
+	var effect := part.effect_summary() if part != null else ""
+	_effect_badge.visible = not effect.is_empty()
+	tooltip_text = effect
+	_durability_bar.set_rating(_rating(part.durability_rating_fraction()) if part != null else 0)
+	_speed_bar.set_rating(_rating(part.speed_rating_fraction()) if part != null else 0)
+	_mass_bar.set_rating(_rating(part.mass_rating_fraction()) if part != null else 0)
 	queue_redraw()
 
 ## Update just the copy count in the title, without re-rendering the icon.
@@ -69,9 +74,8 @@ static func _title_for(shown: PartData, show_count: int) -> String:
 		return shown.display_name
 	return "%s x%d" % [shown.display_name, show_count]
 
-static func _rating(value: float, stat_range: Vector2) -> int:
-	var t := clampf((value - stat_range.x) / (stat_range.y - stat_range.x), 0.0, 1.0)
-	return clampi(int(round(t * 4.0)) + 1, 1, 5)
+static func _rating(fraction: float) -> int:
+	return clampi(int(round(fraction * 4.0)) + 1, 1, 5)
 
 func _draw() -> void:
 	var seed := hash(part.id) if part != null else 0

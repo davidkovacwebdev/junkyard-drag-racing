@@ -1,0 +1,40 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_accessory.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/accessory_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_spoiler"]
+script = ExtResource("2")
+id = &"accessory_spoiler"
+display_name = "Spoiler"
+category = 3
+spot = 2
+effect_description = "Presses the car down harder the faster it goes.
+Helps keep the wheels on the strip."
+mass = 2
+speed_multiplier = 1.06
+
+[node name="AccessorySpoiler" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_spoiler")
+race_downforce_share = 0.35
+
+[node name="FrontStrut" type="Polygon2D" parent="."]
+color = Color(0.38, 0.41, 0.47, 1)
+polygon = PackedVector2Array(-9, 0, -4, 0, -4, -24, -9, -24)
+
+[node name="BackStrut" type="Polygon2D" parent="."]
+color = Color(0.38, 0.41, 0.47, 1)
+polygon = PackedVector2Array(-29, 0, -24, 0, -24, -24, -29, -24)
+
+[node name="Wing" type="Polygon2D" parent="."]
+color = Color(0.6, 0.15, 0.15, 1)
+polygon = PackedVector2Array(-48, -34, 2, -30, 2, -22, -46, -22)
+
+[node name="WingShade" type="Polygon2D" parent="."]
+color = Color(0.48, 0.12, 0.12, 1)
+polygon = PackedVector2Array(-46, -26, 2, -26, 2, -22, -46, -22)
+
+[node name="Endplate" type="Polygon2D" parent="."]
+color = Color(0.2, 0.2, 0.22, 1)
+polygon = PackedVector2Array(-52, -40, -44, -40, -44, -18, -52, -18)

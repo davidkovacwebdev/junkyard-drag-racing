@@ -65,6 +65,7 @@ func _load() -> void:
 
 func _save() -> void:
 	var config := ConfigFile.new()
+	config.load(SETTINGS_PATH)
 	for bus_name in BUS_NAMES:
 		config.set_value(SECTION, "%s_volume" % bus_name, get_volume(bus_name))
 		config.set_value(SECTION, "%s_muted" % bus_name, is_muted(bus_name))

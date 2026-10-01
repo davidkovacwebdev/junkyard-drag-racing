@@ -37,16 +37,11 @@ func _ready() -> void:
 	_race_controller.register_car(_player_car.root.name, _player_car)
 	if camera != null:
 		camera.targets = [_player_car.body]
-	_neutralize_autosteer(_player_car)
+	CarAutosteer.switch_off(_player_car.body)
 
 ## CarAssembler bolts a CarAutosteer onto every body so drag racers drift
 ## between lanes. This track has one lane, so it's switched off, the same way
 ## single_lane_race_setup.gd does it.
-func _neutralize_autosteer(car: CarAssembler.AssembledCar) -> void:
-	for child in car.body.get_children():
-		if child is CarAutosteer:
-			child.set_physics_process(false)
-
 func _on_spike_sensor_body_entered(body: Node2D) -> void:
 	if _spiked or _player_car == null:
 		return

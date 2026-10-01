@@ -1,0 +1,45 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/car/accessories/skin_accessory.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/accessory_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_bubble_wrap"]
+script = ExtResource("2")
+id = &"accessory_bubble_wrap"
+display_name = "Bubble Wrap"
+category = 3
+spot = 3
+effect_description = "Wraps the car in bubbles. Every part gets tougher.
+Pops on bumps."
+mass = 0.5
+durability_multiplier = 1.25
+body_impact_sound = &"bubble_pop"
+equip_sound = &"bubble_pop"
+
+[node name="AccessoryBubbleWrap" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_bubble_wrap")
+pattern = 1
+paint_color = Color(0.74, 0.8, 0.82, 1)
+pattern_color = Color(0.88, 0.92, 0.93, 1)
+wheel_tint = Color(0.9, 0.95, 1, 1)
+
+[node name="Sheet" type="Polygon2D" parent="."]
+color = Color(0.74, 0.8, 0.82, 1)
+polygon = PackedVector2Array(-30, -22, 28, -26, 30, 22, -28, 24)
+
+[node name="Bubble0" type="Polygon2D" parent="."]
+color = Color(0.88, 0.92, 0.93, 1)
+polygon = PackedVector2Array(-5.69, -6.56, -10.56, -1.69, -17.44, -1.69, -22.31, -6.56, -22.31, -13.44, -17.44, -18.31, -10.56, -18.31, -5.69, -13.44)
+
+[node name="Bubble1" type="Polygon2D" parent="."]
+color = Color(0.88, 0.92, 0.93, 1)
+polygon = PackedVector2Array(20.31, -8.56, 15.44, -3.69, 8.56, -3.69, 3.69, -8.56, 3.69, -15.44, 8.56, -20.31, 15.44, -20.31, 20.31, -15.44)
+
+[node name="Bubble2" type="Polygon2D" parent="."]
+color = Color(0.88, 0.92, 0.93, 1)
+polygon = PackedVector2Array(-3.69, 13.44, -8.56, 18.31, -15.44, 18.31, -20.31, 13.44, -20.31, 6.56, -15.44, 1.69, -8.56, 1.69, -3.69, 6.56)
+
+[node name="Bubble3" type="Polygon2D" parent="."]
+color = Color(0.88, 0.92, 0.93, 1)
+polygon = PackedVector2Array(22.31, 11.44, 17.44, 16.31, 10.56, 16.31, 5.69, 11.44, 5.69, 4.56, 10.56, -0.31, 17.44, -0.31, 22.31, 4.56)

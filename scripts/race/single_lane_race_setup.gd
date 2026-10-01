@@ -135,6 +135,8 @@ extends Node2D
 @export var track_path: NodePath = ^"Track"
 ## Off = plain drag race: lanes stay put, no touches and no sparks faked.
 @export var cosmetic_drift_enabled := true
+## Which roster the rivals come from.
+@export var course: RaceProgression.Course = RaceProgression.Course.DRAG
 
 const CAR_COUNT := 5
 ## Where the cars start: all lined up on the same x, each on its own lane's
@@ -295,18 +297,10 @@ var _wall: CollisionObject2D = null
 ## flat drag strip.
 var _rally_track: RallyTrack = null
 var _states: Array[LaneState] = []
-var _player_car_name := ""
 var _rocks: Array[TrackHazards.Rock] = []
 var _puddles: Array[TrackHazards.Puddle] = []
-## Copied out of RaceProgression.pending_entry_fee at _ready() (see that
-## field): captured once so a later reset of the pending field can't change
-## what a win pays out.
-var _entry_fee := 0
-## True only for DragStripMenu's spectator-only bet races, where lane 0
-## isn't the player. Left false for every other entrance into this scene
-## (direct T-key test, the old menu-less path) so nothing about them changes.
-var _bet_only := false
-var _field_car_names: Array[String] = []
+## What DragStripMenu signed up for; null on a debug race.
+var _signup: RaceSignup = null
 
 func _ready() -> void:
 	var race_controller := get_node_or_null(race_controller_path) as RaceController
@@ -326,75 +320,34 @@ func _ready() -> void:
 
 	var camera_targets: Array[Node2D] = []
 
-	# DragStripMenu writes these just before switching into this scene; a
-	# fresh scene has no other way to receive parameters. Read and clear them
-	# immediately so anything that reaches this scene directly (the old
-	# T-key test entrance) falls back to the untouched defaults below.
-	var tier := RaceProgression.pending_tier
-	var car_index := RaceProgression.pending_car_index
-	var include_player := RaceProgression.pending_include_player
-	var bet_field := RaceProgression.pending_bet_field
-	_entry_fee = RaceProgression.pending_entry_fee
-	_bet_only = not include_player
-	RaceProgression.pending_tier = -1
-	RaceProgression.pending_car_index = -1
-	RaceProgression.pending_include_player = true
-	RaceProgression.pending_entry_fee = 0
-	RaceProgression.pending_bet_field = []
-
 	if DebugRace.consume():
 		_add_debug_field(cars, race_controller, camera_targets)
 	else:
+		_signup = RaceSignup.take_pending()
 		# The player's own garage car races in the top lane, so whatever they
-		# assembled in the garage is what they drive here too — unless
-		# DragStripMenu sent us here to spectate a bet, in which case no player
-		# car is registered at all.
+		# assembled in the garage is what they drive here too, unless this is a
+		# bet race, which has no player car at all.
 		var lane := 0
-		if include_player:
-			var player_car := Inventory.get_selected_car()
-			if car_index >= 0 and car_index < Inventory.owned_cars.size():
-				player_car = Inventory.owned_cars[car_index]
+		var player_car := _signup.player_car()
+		if player_car != null:
 			var player_assembled := CarAssembler.assemble_from_car_data(player_car, cars, _spawn_position(lane))
 			if player_assembled != null:
-				_player_car_name = "Player_%s" % player_car.display_name
-				_register_car(_player_car_name, lane, player_assembled, race_controller, camera_targets)
-				if race_controller != null:
-					race_controller.race_ended.connect(_on_race_ended)
+				_signup.player_car_name = "Player_%s" % player_car.display_name
+				_register_car(_signup.player_car_name, lane, player_assembled, race_controller, camera_targets)
 				lane += 1
-
-		# A bet race reuses the exact field DragStripMenu already showed the
-		# player and took a bet against, rather than rolling a fresh one, so the
-		# car bet on is the actual car that races.
-		var rivals := bet_field if not bet_field.is_empty() \
-				else (RaceProgression.pick_rivals_for_tier(CAR_COUNT - lane, tier) if tier > 0 \
-				else RaceProgression.pick_rivals(CAR_COUNT - lane))
-		for rival in rivals:
-			var wheel_scenes: Array[PackedScene] = []
-			for wheel_path in rival["wheels"]:
-				wheel_scenes.append(load(wheel_path))
-			var car := CarAssembler.assemble(load(rival["body"]), wheel_scenes, load(rival["engine"]),
+		for rival in _signup.rival_specs(CAR_COUNT - lane, course):
+			var car := CarAssembler.assemble_from_car_data(RaceProgression.rival_car_model(rival),
 					cars, _spawn_position(lane))
-			var car_name := "Car%d_%s_%s_%s" % [
-				lane,
-				String(rival["body"]).get_file().get_basename(),
-				String(rival["wheels"][0]).get_file().get_basename(),
-				String(rival["engine"]).get_file().get_basename(),
-			]
+			var car_name := RaceSignup.rival_car_name(lane, rival)
 			_register_car(car_name, lane, car, race_controller, camera_targets)
-			_field_car_names.append(car_name)
+			_signup.field_car_names.append(car_name)
 			lane += 1
+		_signup.hook_up(race_controller)
 
 	if camera != null:
 		camera.targets = camera_targets
-
-	if _bet_only and race_controller != null:
-		race_controller.race_ended.connect(_on_bet_race_ended)
-
-	# Came in through DragStripMenu (tier > 0 covers both the paid-entry and
-	# the spectator bet path) — send the player back to it instead of the
-	# open world once the race ends, so betting/tier-picking is a loop.
-	if tier > 0 and race_controller != null:
-		race_controller.exit_scene_path = "res://scenes/race/drag_strip_menu.tscn"
+	if race_controller != null:
+		race_controller.camera_focus_y += _terrain_offset(race_controller.finish_x)
 
 func _physics_process(delta: float) -> void:
 	for state in _states:
@@ -436,7 +389,7 @@ func _register_car(car_name: String, lane: int, car: CarAssembler.AssembledCar, 
 	# Fake depth, for free: the car draws in its lane's layer, the same one that
 	# lane's road art draws at, so the bottom lane's car reads as nearest.
 	car.root.z_index = _lanes[lane].z_index
-	_neutralize_autosteer(car)
+	CarAutosteer.switch_off(car.body)
 	_apply_lane_collision(car, _slabs[lane])
 
 	var state := LaneState.new()
@@ -453,18 +406,6 @@ func _register_car(car_name: String, lane: int, car: CarAssembler.AssembledCar, 
 
 	if race_controller != null:
 		race_controller.register_car(car_name, car)
-
-## CarAssembler bolts a CarAutosteer onto every car body, and that thing
-## applies a real vertical force (fast noise, hundreds of newtons) — exactly
-## the up/down shove this harness fakes cosmetically instead. Left on it would
-## fight the drift and shove cars into lanes they are not allowed to touch, so
-## it is switched off here: nothing about a car's up/down motion is simulated.
-func _neutralize_autosteer(car: CarAssembler.AssembledCar) -> void:
-	if not is_instance_valid(car.body):
-		return
-	for child in car.body.get_children():
-		if child is CarAutosteer:
-			child.set_physics_process(false)
 
 ## Layers are authored on the track's per-lane ground slabs
 ## (Slabs/SlabN in track_multi_test.tscn): one collision bit per lane, plus the
@@ -842,8 +783,6 @@ func _add_debug_field(cars: Node2D, race_controller: RaceController, camera_targ
 		var car_data := DebugRace.random_car()
 		var car := CarAssembler.assemble_from_car_data(car_data, cars, _spawn_position(lane))
 		var car_name := "Player_%s" % car_data.display_name if lane == 0 else "Car%d_%s" % [lane, car_data.display_name]
-		if lane == 0:
-			_player_car_name = car_name
 		_register_car(car_name, lane, car, race_controller, camera_targets)
 
 func _spawn_position(lane: int) -> Vector2:
@@ -852,18 +791,3 @@ func _spawn_position(lane: int) -> Vector2:
 ## How far the road has risen or dropped off its flat lane line at x.
 func _terrain_offset(x: float) -> float:
 	return _rally_track.surface_offset_at(x) if _rally_track != null else 0.0
-
-func _on_race_ended(winner_name: String) -> void:
-	var player_won := winner_name == _player_car_name
-	RaceProgression.record_race(player_won)
-	if player_won and _entry_fee > 0:
-		Inventory.money += _entry_fee * RaceProgression.ENTRY_WIN_MULTIPLIER
-		Sfx.play(&"cash_register", -4.0)
-	SaveSystem.save_game()
-
-## Spectator-only bet race: no player car, so RaceProgression's win-tracking
-## and money don't apply here — DragStripMenu resolves the bet itself once it
-## reads these back after the scene returns to it.
-func _on_bet_race_ended(winner_name: String) -> void:
-	RaceProgression.last_ai_race_winner = winner_name
-	RaceProgression.last_ai_race_field_names = _field_car_names

@@ -1,0 +1,30 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_accessory.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/accessory_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_deer_antlers"]
+script = ExtResource("2")
+id = &"accessory_deer_antlers"
+display_name = "Deer Antlers"
+category = 3
+spot = 1
+effect_description = "A rack of antlers that soaks up a few knocks."
+mass = 2
+durability_multiplier = 1.15
+
+[node name="AccessoryDeerAntlers" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_deer_antlers")
+
+[node name="BackAntler" type="Polygon2D" parent="."]
+color = Color(0.58, 0.49, 0.34, 1)
+polygon = PackedVector2Array(-4, -1, -5, -13, 3, -21, 6, -32, 1, -31, -2, -23, -7, -19, -8, -29, -10, -39, -15, -37, -13, -27, -13, -19, -21, -25, -24, -21, -15, -12, -10, -1)
+
+[node name="FrontAntler" type="Polygon2D" parent="."]
+color = Color(0.72, 0.62, 0.45, 1)
+polygon = PackedVector2Array(10, 0, 9, -12, 17, -20, 20, -31, 15, -30, 12, -22, 7, -18, 6, -28, 4, -38, -1, -36, 1, -26, 1, -18, -7, -24, -10, -20, -1, -11, 4, 0)
+
+[node name="Pad" type="Polygon2D" parent="."]
+color = Color(0.45, 0.33, 0.22, 1)
+polygon = PackedVector2Array(-14, 2, 16, 2, 13, -5, -11, -5)
