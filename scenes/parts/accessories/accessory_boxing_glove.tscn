@@ -10,7 +10,7 @@ display_name = "Boxing Glove"
 category = 3
 spot = 0
 effect_description = "Punches out on a spring every couple of seconds.
-No use until the arena."
+Knocks back and dents any car it lands on."
 mass = 2
 durability_multiplier = 1.05
 speed_multiplier = 0.99
@@ -41,6 +41,9 @@ polygon = PackedVector2Array(2, -9, 7, -14, 19, -14, 25, -8, 25, 8, 19, 14, 7, 1
 [node name="Thumb" type="Polygon2D" parent="Glove"]
 color = Color(0.56, 0.12, 0.12, 1)
 polygon = PackedVector2Array(6, -13, 10, -19, 17, -19, 19, -13)
+
+[node name="Knuckles" type="Marker2D" parent="Glove"]
+position = Vector2(16, 0)
 
 [node name="Plate" type="Polygon2D" parent="."]
 color = Color(0.38, 0.41, 0.47, 1)

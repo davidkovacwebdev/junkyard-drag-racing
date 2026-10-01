@@ -10,7 +10,7 @@ display_name = "Axe"
 category = 3
 spot = 1
 effect_description = "Keeps chopping at whatever's in front of the car.
-No use until the arena."
+Chops a chunk out of any car it lands on."
 mass = 3
 speed_multiplier = 0.98
 equip_sound = &"axe_whoosh"
@@ -38,3 +38,6 @@ polygon = PackedVector2Array(3, -80, 16, -84, 22, -96, 18, -110, 3, -100)
 [node name="Poll" type="Polygon2D" parent="Arm"]
 color = Color(0.38, 0.41, 0.47, 1)
 polygon = PackedVector2Array(-8, -86, -3, -86, -3, -98, -8, -96)
+
+[node name="BladeEdge" type="Marker2D" parent="Arm"]
+position = Vector2(14, -95)

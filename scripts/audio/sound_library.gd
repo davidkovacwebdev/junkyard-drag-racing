@@ -94,6 +94,8 @@ const NAMES: Array[StringName] = [
 	&"can_rattle_loop",
 	&"can_clatter",
 	&"glove_boing",
+	&"glove_punch",
+	&"axe_chop",
 	&"balloon_squeak",
 	&"tape_rip",
 	&"windup_ratchet",
@@ -147,6 +149,8 @@ const CAR_SOUNDS: Array[StringName] = [
 	&"can_rattle_loop",
 	&"anchor_drag_loop",
 	&"glove_boing",
+	&"glove_punch",
+	&"axe_chop",
 ]
 
 const UI_SOUNDS: Array[StringName] = [
@@ -280,6 +284,8 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"anchor_drag_loop": return _anchor_drag_loop(rng)
 		&"can_clatter": return _can_clatter(rng)
 		&"glove_boing": return _glove_boing(rng)
+		&"glove_punch": return _glove_punch(rng)
+		&"axe_chop": return _axe_chop(rng)
 		&"balloon_squeak": return _balloon_squeak()
 		&"tape_rip": return _tape_rip(rng)
 		&"windup_ratchet": return _windup_ratchet(rng)
@@ -1398,6 +1404,24 @@ static func _glove_boing(rng: RandomNumberGenerator) -> PackedFloat32Array:
 		out[i] = Synth.softclip(sin(TAU * phase), 1.2) * exp(-t * 9.0) * minf(1.0, t / 0.004)
 	Synth.mix_into(out, Synth.thump(0.08, 350.0, 0.002, 0.04, rng), 0.06, 0.6)
 	return Synth.finish(out, 0.7)
+
+## A boxing glove landing on sheet metal: a fat leather smack and a dull dent.
+static func _glove_punch(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.thump(0.18, 280.0, 0.001, 0.06, rng)
+	Synth.mix_into(out, Synth.noise_sweep(0.05, {
+		freq = [[0.0, 1400.0], [0.05, 700.0]],
+		q = [[0.0, 1.5]],
+		amp = [[0.0, 1.0], [0.05, 0.0]],
+	}, rng), 0.0, 0.5)
+	Synth.mix_into(out, _metal_ring(0.16, 260.0, 6.0, 0.05, rng), 0.005, 0.35)
+	return Synth.finish(out, 0.85)
+
+## The axe biting into a car: a heavy thunk and a tinny clang off the blade.
+static func _axe_chop(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.thump(0.2, 450.0, 0.001, 0.05, rng)
+	Synth.mix_into(out, _metal_ring(0.3, 1150.0, 14.0, 0.09, rng), 0.0, 0.6)
+	Synth.mix_into(out, _metal_ring(0.22, 1730.0, 12.0, 0.05, rng), 0.0, 0.3)
+	return Synth.finish(out, 0.85)
 
 ## A balloon rubbed: a wobbly rubber squeak.
 static func _balloon_squeak() -> PackedFloat32Array:

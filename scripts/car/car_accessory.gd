@@ -76,6 +76,35 @@ func attach_to_body(_body: CarBody) -> void:
 func paint_wheel(_wheel: Node2D) -> void:
 	pass
 
+## Hits every part of another race car within `radius` of `at`: takes
+## `damage_share` of each part's durability and shoves it along `push`
+## (an impulse per unit of mass). Returns whether anything was hit. Only
+## parts that could physically touch this car count, so a car in the next
+## drag lane is never hit.
+func strike(at: Vector2, radius: float, damage_share: float, push: Vector2) -> bool:
+	var own_body := race_body()
+	if own_body == null:
+		return false
+	var circle := CircleShape2D.new()
+	circle.radius = radius
+	var query := PhysicsShapeQueryParameters2D.new()
+	query.shape = circle
+	query.transform = Transform2D(0.0, at)
+	query.collision_mask = own_body.collision_mask
+	var own_car := own_body.get_parent()
+	var hit_anything := false
+	for result in get_world_2d().direct_space_state.intersect_shape(query, 16):
+		var part := result["collider"] as RigidBody2D
+		if part == null or part.get_parent() == own_car:
+			continue
+		var tracker := CarPartDamage.of(part)
+		if tracker == null:
+			continue
+		tracker.apply_damage(tracker.max_durability * damage_share)
+		part.apply_central_impulse(push * part.mass)
+		hit_anything = true
+	return hit_anything
+
 func play_sound(sound_name: StringName, volume_db: float) -> void:
 	if not audible:
 		return
