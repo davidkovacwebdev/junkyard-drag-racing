@@ -27,6 +27,7 @@ var body_scenes: Array[PackedScene] = [
 	preload("res://scenes/parts/bodies/body_airplane.tscn"),
 	preload("res://scenes/parts/bodies/body_vertical_car.tscn"),
 	preload("res://scenes/parts/bodies/body_trex_fossil.tscn"),
+	preload("res://scenes/parts/bodies/body_cardboard_box.tscn"),
 ]
 
 var wheel_scenes: Array[PackedScene] = [

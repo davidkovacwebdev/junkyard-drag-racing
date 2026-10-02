@@ -219,7 +219,13 @@ func _spawn_random_part(rng: RandomNumberGenerator) -> void:
 	if instance == null:
 		return
 	if instance is RigidBody2D:
+		# Scenery, not physics: parts are scattered blind and can land
+		# overlapping, and two live bodies shoved apart from inside each other
+		# can blow up to NaN (a ceiling fan wheel did), which then poisons the
+		# player's car on contact. Frozen, they still block the car.
 		instance.gravity_scale = 0.0
+		instance.freeze_mode = RigidBody2D.FREEZE_MODE_STATIC
+		instance.freeze = true
 	_art.add_child(instance)
 	instance.position = _random_point_in_pile(rng)
 	instance.rotation = rng.randf_range(0.0, TAU)

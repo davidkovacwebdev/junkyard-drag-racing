@@ -22,17 +22,28 @@ enum Kind {
 
 func _ready() -> void:
 	add_to_group(GROUP)
+	# A venue whose booth stands off to one side (the drag strip, say) is
+	# marked where the player actually drives up to talk, not mid-track.
+	var entrance := _named_node()
+	if entrance != get_parent() and entrance is Node2D:
+		global_position = (entrance as Node2D).global_position
 
 ## The name quests use for the place this marker sits on (a quest's
 ## `objective_place`): the landmark's own `display_name`, or, for a landmark
-## that keeps it on a child (the junkyard's Entrance), that child's.
+## that keeps it on a child (a venue's Entrance booth), that child's.
 func place_name() -> String:
+	var named := _named_node()
+	return String(named.get("display_name")) if named != null else ""
+
+## The node carrying the place's `display_name`: the landmark itself, or its
+## first child that has one. Null if neither does.
+func _named_node() -> Node:
 	var place := get_parent()
 	if place == null:
-		return ""
+		return null
 	if place.get("display_name") != null:
-		return String(place.get("display_name"))
+		return place
 	for child in place.get_children():
 		if child != self and child.get("display_name") != null:
-			return String(child.get("display_name"))
-	return ""
+			return child
+	return null

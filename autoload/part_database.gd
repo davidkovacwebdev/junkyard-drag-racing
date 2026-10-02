@@ -31,6 +31,7 @@ const _BODY_SCENES := [
 	"res://scenes/parts/bodies/body_airplane.tscn",
 	"res://scenes/parts/bodies/body_vertical_car.tscn",
 	"res://scenes/parts/bodies/body_trex_fossil.tscn",
+	"res://scenes/parts/bodies/body_cardboard_box.tscn",
 ]
 const _WHEEL_SCENES := [
 	"res://scenes/parts/wheels/wheel_standard.tscn",

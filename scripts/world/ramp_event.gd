@@ -9,6 +9,10 @@ extends Obstacle
 ## Extends Obstacle for the `display_name` / `interior_scene` interaction and
 ## the footprint collision; the scene ships no ColorRect, the art is drawn here.
 ## @tool so it's visible in the 2D editor.
+##
+## Locked until Grandpa tells the player about it ("Downhill Billie", handed
+## out when "Talk Shop" is handed in): until then the prompt says so in red
+## and E does nothing.
 
 const DECK_BACK := Vector2(12.0, -34.0)
 const LAUNCH_START_X := -140.0
@@ -21,6 +25,32 @@ const FRAME := Color(0.4, 0.29, 0.19)
 const FRAME_LIGHT := Color(0.5, 0.37, 0.24)
 const UNDERSIDE := Color(0.13, 0.11, 0.09)
 const PENNANT := Color(0.85, 0.45, 0.12)
+
+## The quest that opens the ramp: it's open once that's been given.
+const UNLOCK_QUEST := &"ramp_check"
+const LOCKED_MESSAGE := "Ramp: Nobody's told you about this one yet"
+const LOCKED_COLOR := Color(0.95, 0.2, 0.2, 1)
+
+## Whether the player may take a run at it.
+static func unlocked() -> bool:
+	return Quests.has_quest(UNLOCK_QUEST) or Quests.is_complete(UNLOCK_QUEST)
+
+## Overrides PlayerCar's default prompt while locked; empty falls back to the
+## usual "Ramp: Press E to enter".
+func get_interact_prompt() -> String:
+	return "" if unlocked() else LOCKED_MESSAGE
+
+func get_interact_prompt_color() -> Color:
+	return Color(1, 1, 1, 1) if unlocked() else LOCKED_COLOR
+
+## PlayerCar's place behaviour (door, then the jump scene), only once it's open.
+func interact(_actor: Node = null) -> void:
+	if not unlocked():
+		Sfx.play(&"denied", -6.0, 0.0)
+		return
+	if interior_scene is PackedScene:
+		Sfx.play(&"door_close", -4.0)
+		get_tree().change_scene_to_packed(interior_scene)
 
 func _draw() -> void:
 	var ground_y := size.y / 2.0

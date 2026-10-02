@@ -48,9 +48,10 @@ const POPUP_WIDTH := 900.0
 const PART_CARD := preload("res://scenes/garage/part_slot.tscn")
 const CARD_WIDTH := 330.0
 const CARD_SECONDS := 5.0
-## Grandpa's "Gone Fishin'": the first dig meets its goal, and he gets told
-## what it brought up (a part's name, or nothing for a miss or plain junk).
-const FISH_QUEST := &"crane_fish"
+## Grandpa's crane quests ("Gone Fishin'", then "Back to the Claw" after
+## "Talk Shop"): the first dig meets the goal, and he gets told what it
+## brought up (a part's name, or nothing for a miss or plain junk).
+const FISH_QUESTS: Array[StringName] = [&"crane_fish", &"crane_fish_again"]
 
 @onready var _crane: CraneRig = $Yard/Crane
 @onready var _heap: TrashHeap = $Yard/Heap
@@ -110,9 +111,10 @@ func _on_dig_finished(caught: int) -> void:
 		Sfx.play(&"part_pickup" if not _haul.is_empty() else &"scrap_pickup", -4.0, 0.0)
 	if not _haul_parts.is_empty():
 		_show_cards(_haul_parts)
-	if Quests.has_quest(FISH_QUEST) and not Quests.is_ready(FISH_QUEST):
-		Quests.set_note(FISH_QUEST, _haul_parts[0].display_name if not _haul_parts.is_empty() else "")
-		Quests.goal_met(FISH_QUEST)
+	for fish_quest in FISH_QUESTS:
+		if Quests.has_quest(fish_quest) and not Quests.is_ready(fish_quest):
+			Quests.set_note(fish_quest, _haul_parts[0].display_name if not _haul_parts.is_empty() else "")
+			Quests.goal_met(fish_quest)
 	_refresh()
 	_haul.clear()
 	_haul_parts.clear()

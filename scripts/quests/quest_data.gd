@@ -44,6 +44,9 @@ extends Resource
 ## Finish automatically once the player is holding this much scrap. 0 means
 ## no scrap goal: code finishes the quest with `Quests.complete(id)` instead.
 @export var scrap_goal: int = 0
+## Ready while the player has at least this much cash. 0: no money goal.
+## The giver never takes it; it only has to be there when handing in.
+@export var money_goal: int = 0
 ## The giver takes the `scrap_goal` scrap off the player when the quest is
 ## handed in. The quest only counts as ready while the player still holds it.
 @export var hand_over_scrap: bool = true
@@ -52,6 +55,9 @@ extends Resource
 ## Ready once this car part (its part scene) is fitted to one of the
 ## player's cars in the garage.
 @export_file("*.tscn") var fit_part_goal: String = ""
+## Ready once the player has driven a race (won or lost) at the venue with
+## this display name ("Drag Strip"). The quest's note becomes "won" or "lost".
+@export var race_goal_venue: String = ""
 ## The giver takes the `item_goal` out of the trunk when it's handed in.
 @export var hand_over_item: bool = true
 

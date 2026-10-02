@@ -41,6 +41,7 @@ const NAMES: Array[StringName] = [
 	&"bump",
 	&"collision",
 	&"mattress_squish",
+	&"cardboard_crumple",
 	&"sign_wobble",
 	&"pogo_boing",
 	&"prosthetic_clunk",
@@ -122,6 +123,7 @@ const CAR_SOUNDS: Array[StringName] = [
 	&"bump",
 	&"collision",
 	&"mattress_squish",
+	&"cardboard_crumple",
 	&"sign_wobble",
 	&"pogo_boing",
 	&"prosthetic_clunk",
@@ -231,6 +233,7 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"bump": return _bump(rng)
 		&"collision": return _collision(rng)
 		&"mattress_squish": return _mattress_squish(rng)
+		&"cardboard_crumple": return _cardboard_crumple(rng)
 		&"sign_wobble": return _sign_wobble(rng)
 		&"pogo_boing": return _pogo_boing(rng)
 		&"prosthetic_clunk": return _prosthetic_clunk(rng)
@@ -434,6 +437,23 @@ static func _collision(rng: RandomNumberGenerator) -> PackedFloat32Array:
 
 ## Soft body landing on something: a padded whump, a puff of fabric and a
 ## rusty spring boinging around inside.
+## A cardboard box taking a hit: a hollow papery bonk and a dry crinkle as
+## the corner caves in.
+static func _cardboard_crumple(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.thump(0.16, 380.0, 0.003, 0.06, rng)
+	Synth.mix_into(out, Synth.tones(0.12, [[[0.0, 210.0], [0.12, 150.0]]], {
+		amp = [[0.0, 0.0], [0.004, 1.0], [0.12, 0.0]],
+	}), 0.0, 0.4)
+	var t := 0.02
+	for i in 5:
+		Synth.mix_into(out, Synth.noise_sweep(0.04, {
+			freq = [[0.0, rng.randf_range(1500.0, 3200.0)]],
+			q = [[0.0, 1.5]],
+			amp = [[0.0, 0.0], [0.004, 1.0], [0.04, 0.0]],
+		}, rng), t, 0.5 - i * 0.07)
+		t += rng.randf_range(0.025, 0.05)
+	return Synth.finish(out, 0.7)
+
 static func _mattress_squish(rng: RandomNumberGenerator) -> PackedFloat32Array:
 	var out := Synth.thump(0.35, 150.0, 0.02, 0.22, rng)
 	var fabric := Synth.noise_sweep(0.18, {

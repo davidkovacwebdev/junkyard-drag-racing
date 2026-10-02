@@ -46,17 +46,21 @@ var notes: Dictionary = {}
 func _process(_delta: float) -> void:
 	# Iterate a copy: finishing a quest takes it out of `active`.
 	for quest: QuestData in active.duplicate():
-		if quest.scrap_goal <= 0 and quest.item_goal == null and quest.fit_part_goal.is_empty():
+		if quest.scrap_goal <= 0 and quest.money_goal <= 0 and quest.item_goal == null \
+				and quest.fit_part_goal.is_empty():
 			continue
 		var met := _goal_reached(quest)
 		if met and not is_ready(quest.id):
 			goal_met(quest.id)
-		elif not met and is_ready(quest.id) and (hands_over_scrap(quest) or hands_over_item(quest)):
+		elif not met and is_ready(quest.id) and (hands_over_scrap(quest) or hands_over_item(quest) \
+				or quest.money_goal > 0):
 			# Sold, spent or lost it before handing it in: back to the goal.
 			ready_ids.erase(quest.id)
 
 func _goal_reached(quest: QuestData) -> bool:
 	if quest.scrap_goal > 0 and Inventory.scrap < quest.scrap_goal:
+		return false
+	if quest.money_goal > 0 and Inventory.money < quest.money_goal:
 		return false
 	if quest.item_goal != null and not Inventory.has_item(quest.item_goal.id):
 		return false
@@ -199,6 +203,14 @@ static func reward_text(quest: QuestData) -> String:
 		bits.append(part.display_name)
 	return " + ".join(bits)
 
+## The player finished a race they drove at `venue`: meets the goal of any
+## active quest waiting on a race there.
+func race_finished(venue: String, won: bool) -> void:
+	for quest: QuestData in active.duplicate():
+		if quest.race_goal_venue == venue and not is_ready(quest.id):
+			set_note(quest.id, "won" if won else "lost")
+			goal_met(quest.id)
+
 ## Remembers how `id`'s goal was met (see `notes`).
 func set_note(id: StringName, text: String) -> void:
 	notes[id] = text
@@ -251,8 +263,15 @@ func objective_text(quest: QuestData) -> String:
 			return "Bring the %s back to %s" % [quest.item_goal.display_name, quest.giver]
 		return "Go back to %s" % quest.giver
 	var text := PlayerProfile.fill(quest.objective)
+	var counts: PackedStringArray = []
+	if quest.money_goal > 0:
+		counts.append("$%d / $%d" % [mini(Inventory.money, quest.money_goal), quest.money_goal])
 	if quest.scrap_goal > 0:
-		text += " (%d / %d)" % [mini(Inventory.scrap, quest.scrap_goal), quest.scrap_goal]
+		# Alone it's just "12 / 20"; next to cash it says what it counts.
+		var scrap := "%d / %d" % [mini(Inventory.scrap, quest.scrap_goal), quest.scrap_goal]
+		counts.append(scrap + " scrap" if quest.money_goal > 0 else scrap)
+	if not counts.is_empty():
+		text += " (%s)" % ", ".join(counts)
 	return text
 
 ## The name of whatever the tracked quest sends the player to right now,

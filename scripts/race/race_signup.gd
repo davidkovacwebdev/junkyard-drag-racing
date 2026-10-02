@@ -81,6 +81,7 @@ func _on_race_ended(winner_name: String) -> void:
 		return
 	var player_won := winner_name == player_car_name
 	RaceProgression.record_race(player_won)
+	Quests.race_finished(RaceProgression.menu_venue_name, player_won)
 	if player_won and entry_fee > 0:
 		Inventory.money += entry_fee * RaceProgression.ENTRY_WIN_MULTIPLIER
 		Sfx.play(&"cash_register", -4.0)

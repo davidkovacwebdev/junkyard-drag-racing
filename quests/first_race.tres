@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="QuestData" format=3 uid="uid://c8ndemt2vanmq"]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://quests/talk_shop.tres" id="2_next"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"first_race"
+title = "Make Me Proud"
+giver = "Grandpa"
+description = "With tears in his eyes, Grandpa says you're ready for your first drag race. He gave you the $40 entry fee.
+
+Bolt the parts you've gathered onto your car in the garage, then sign up at the Drag Strip's booth for a $40 race. Make him proud."
+objective = "Race your first drag race at the Drag Strip"
+objective_place = "Drag Strip"
+unlocks = Array[ExtResource("1_script")]([ExtResource("2_next")])
+start_cutscene = "res://cutscenes/grandpa_race.tres"
+start_money = 40
+race_goal_venue = "Drag Strip"
+return_to_giver = false

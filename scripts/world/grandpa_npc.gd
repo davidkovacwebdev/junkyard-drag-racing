@@ -278,6 +278,15 @@ func _weep() -> void:
 	await hiccup(-4.0).finished
 	sob(2.4, -2.0)
 
+## Teary-eyed but holding it together: a tear rolls from each eye in turn,
+## `count` in all, no sobbing.
+func tear_up(count: int = 2) -> void:
+	for i in count:
+		_drop_tear(TEAR_FROM[i % TEAR_FROM.size()])
+		await get_tree().create_timer(0.45).timeout
+		if not is_instance_valid(self):
+			return
+
 ## A drunk "hic!": a little jump in the chair.
 func hiccup(volume_db: float = -6.0) -> Tween:
 	_restart_move()

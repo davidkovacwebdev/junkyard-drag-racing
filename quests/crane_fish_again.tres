@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://quests/ramp_check.tres" id="2_next"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"crane_fish_again"
+title = "Back to the Claw"
+giver = "Grandpa"
+description = "Grandpa saw the cash and the scrap and liked it. Now he wants you to spend some of it at the crane: $100 a go, fish yourself some real parts.
+
+After that, he says, go check out the downhill billie ramp."
+objective = "Fish for parts with the junkyard crane"
+objective_place = "Junkyard"
+follow_ups = Array[ExtResource("1_script")]([ExtResource("2_next")])
+return_to_giver = false

@@ -54,7 +54,9 @@ func close() -> void:
 	_root.visible = false
 	get_tree().paused = false
 
-## Every QuestData .tres under res://quests (subfolders too), by title.
+## Every QuestData .tres under res://quests (subfolders too), latest in the
+## story first: ordered by how far down the chain (`unlocks` / `follow_ups`)
+## each sits, then by title. Quests nothing leads to count as step 0.
 func _load_quests() -> Array[QuestData]:
 	var found: Array[QuestData] = []
 	var dirs := PackedStringArray([QUESTS_ROOT])
@@ -69,8 +71,30 @@ func _load_quests() -> Array[QuestData]:
 				var quest := load(dir.path_join(entry)) as QuestData
 				if quest != null:
 					found.append(quest)
-	found.sort_custom(func(a: QuestData, b: QuestData) -> bool: return a.title < b.title)
+	var step := _chain_steps(found)
+	found.sort_custom(func(a: QuestData, b: QuestData) -> bool:
+		if step[a.id] != step[b.id]:
+			return step[a.id] > step[b.id]
+		return a.title < b.title)
 	return found
+
+## Quest id -> how many quests come before it in the chain (the longest way
+## in, so a quest two chains feed sits after both).
+static func _chain_steps(quests: Array[QuestData]) -> Dictionary:
+	var step := {}
+	for quest in quests:
+		step[quest.id] = 0
+	# Relax until nothing moves; capped so a looping chain can't hang it.
+	for pass_index in quests.size():
+		var moved := false
+		for quest in quests:
+			for next: QuestData in quest.unlocks + quest.follow_ups:
+				if next != null and step.has(next.id) and step[next.id] < step[quest.id] + 1:
+					step[next.id] = step[quest.id] + 1
+					moved = true
+		if not moved:
+			break
+	return step
 
 func _state_of(quest: QuestData) -> String:
 	if Quests.is_complete(quest.id):

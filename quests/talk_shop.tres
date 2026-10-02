@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="QuestData" format=3 uid="uid://c4sr77nrpmhfo"]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://quests/crane_fish_again.tres" id="2_next"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"talk_shop"
+title = "Talk Shop"
+giver = "Grandpa"
+description = "Grandpa wants you to grind some money and scraps. Once you've got 200 of each, go back to him and you can talk shop.
+
+Loot dumpsters for scrap, and race (or sell scrap at the junkyard) for cash. Just don't sell the scrap you need."
+objective = "Gather $200 and 200 scraps"
+follow_ups = Array[ExtResource("1_script")]([ExtResource("2_next")])
+start_cutscene = "res://cutscenes/grandpa_race_result.tres"
+scrap_goal = 200
+money_goal = 200
+hand_over_scrap = false
+reminder_line = "200 of each, {player}. Money AND scraps. I can count, y'know. Mostly."
+turn_in_line = "200 of each! Now we're talkin'. Go spend some of that at the crane, fish yourself some real parts. THEN check out the downhill billie ramp some cripple built. Shit rolls good on it, I hear."
