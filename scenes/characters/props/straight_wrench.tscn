@@ -1,0 +1,11 @@
+[gd_scene format=3]
+
+[node name="StraightWrench" type="Node2D"]
+
+[node name="Handle" type="Polygon2D" parent="."]
+color = Color(0.64, 0.68, 0.74, 1)
+polygon = PackedVector2Array(-4, 8, 4, 8, 5, -38, -4, -38)
+
+[node name="Head" type="Polygon2D" parent="."]
+color = Color(0.52, 0.56, 0.63, 1)
+polygon = PackedVector2Array(-11, -34, 11, -34, 12, -58, 5, -59, 4, -46, -4, -46, -5, -59, -12, -58)

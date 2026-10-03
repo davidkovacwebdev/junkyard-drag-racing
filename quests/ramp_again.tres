@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://quests/beer_run.tres" id="2_next"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"ramp_again"
+title = "Downhill Billie (Again)"
+giver = "Grandpa"
+description = "You came back from the ramp bruised and bloody, and Grandpa laughed himself sick. Then he whacked your car with his new wrench. \"Try it now, it should work.\"
+
+Drive back to the Ramp and take another run at it."
+objective = "Take another run at the Ramp"
+objective_place = "Ramp"
+unlocks = Array[ExtResource("1_script")]([ExtResource("2_next")])
+start_cutscene = "res://cutscenes/grandpa_ramp_laugh.tres"
+return_to_giver = false

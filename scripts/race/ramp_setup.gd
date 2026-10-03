@@ -34,8 +34,10 @@ func _ready() -> void:
 	if _player_car == null:
 		return
 	_player_car.root.name = "Player_%s" % car_data.display_name
-	# Grandpa's "Downhill Billie" only asks the player to give it a go.
-	Quests.goal_met(RampEvent.UNLOCK_QUEST)
+	# Grandpa's "Downhill Billie" (and its rerun) only ask the player to give
+	# it a go.
+	for quest_id in RampEvent.RUN_QUESTS:
+		Quests.goal_met(quest_id)
 	_race_controller.register_car(_player_car.root.name, _player_car)
 	if camera != null:
 		camera.targets = [_player_car.body]

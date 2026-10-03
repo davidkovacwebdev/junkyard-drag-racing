@@ -17,9 +17,10 @@ extends StaticBody2D
 ## minimap finds him and draws his head.
 ##
 ## He holds still while a cutscene runs, so the scene can call `sip()`,
-## `twitch()`, `bang()`, `sob()`, `hiccup()` and `wink()` on its own beats
-## instead. The bent wrench only
-## comes out for `bang()`, when he whacks at his busted wheelchair.
+## `twitch()`, `bang()`, `sob()`, `hiccup()`, `wink()` and `laugh()` on its
+## own beats instead. The bent wrench only comes out for `bang()`, when he
+## whacks at his busted wheelchair; `bang(..., true)` swings the straight new
+## one the player brought him instead.
 ##
 ## `actor` is a plain CutsceneActor, so cutscenes can hand it to
 ## Cutscenes.subtitle() for the talking squash like any spawned actor.
@@ -29,6 +30,7 @@ const DIALOG_SCENE := preload("res://scenes/ui/character_dialog.tscn")
 ## The wheelchair's footprint on the ground, which the car bumps into.
 const BODY_SIZE := Vector2(80.0, 40.0)
 const WRENCH := preload("res://scenes/characters/props/bent_wrench.tscn")
+const NEW_WRENCH := preload("res://scenes/characters/props/straight_wrench.tscn")
 ## Same size as every other character standing in the world.
 const ACTOR_SCALE := 0.55
 ## His left hand, in character space. The beer stays in his right.
@@ -61,6 +63,10 @@ const WINK_EYE_NODES := [^"WhiteLeft", ^"PupilLeft"]
 const WINK_LID := [Vector2(-19.0, -218.0), Vector2(-10.0, -215.0), Vector2(-1.0, -218.0),
 		Vector2(-1.0, -213.0), Vector2(-10.0, -210.0), Vector2(-19.0, -213.0)]
 const WINK_LID_COLOR := Color(0.06, 0.06, 0.08, 1)
+## A belly laugh: he rocks back this far and his shoulders bounce this often.
+const LAUGH_LEAN := 0.12
+const LAUGH_BOUNCES_PER_SECOND := 7.0
+const LAUGH_PIXELS := 5.0
 
 ## Which way he's turned. The wrench is in his left hand, so facing left
 ## puts it on his right-hand side of the screen.
@@ -83,6 +89,7 @@ var actor: CutsceneActor
 var character_data: CharacterData = CHARACTER
 
 var _wrench: Node2D
+var _new_wrench: Node2D
 var _next_sip: float = 2.0
 var _swing: Tween
 var _move: Tween
@@ -103,6 +110,12 @@ func _ready() -> void:
 	_wrench.z_index = WRENCH_Z
 	_wrench.visible = false
 	actor.attach(_wrench)
+	_new_wrench = NEW_WRENCH.instantiate()
+	_new_wrench.position = HAND
+	_new_wrench.rotation = REST_ANGLE
+	_new_wrench.z_index = WRENCH_Z
+	_new_wrench.visible = false
+	actor.attach(_new_wrench)
 	var shape := RectangleShape2D.new()
 	shape.size = BODY_SIZE
 	var collision := CollisionShape2D.new()
@@ -157,6 +170,8 @@ func interact(talker: Node = null) -> void:
 		else:
 			_dialog.say(Quests.fill(quest, _line_or(quest.turn_in_line, default_turn_in_line)))
 		var note := ""
+		if not quest.turn_in_sound.is_empty():
+			Sfx.play_at(quest.turn_in_sound, global_position, -4.0, 0.05)
 		if Quests.hands_over_scrap(quest):
 			Sfx.play(&"scrap_pickup", -6.0, 0.0)
 			note = "-%d scrap   " % quest.scrap_goal
@@ -213,6 +228,7 @@ static func _line_or(line: String, fallback: String) -> String:
 
 func show_wrench(visible_now: bool) -> void:
 	_wrench.visible = visible_now
+	_new_wrench.visible = false
 
 ## Leans back in the chair for a slurp of beer, and settles again.
 func sip(volume_db: float = SIP_VOLUME_DB) -> Tween:
@@ -240,18 +256,21 @@ func twitch(seconds: float, volume_db: float = -6.0) -> Tween:
 	return _move
 
 ## Winds the wrench back, slams it down with a clang, and lets it settle.
-func bang(volume_db: float = BANG_VOLUME_DB) -> Tween:
-	_wrench.visible = true
+## `new_wrench` swings the straight one instead of the bent one.
+func bang(volume_db: float = BANG_VOLUME_DB, new_wrench: bool = false) -> Tween:
+	var wrench := _new_wrench if new_wrench else _wrench
+	_wrench.visible = not new_wrench
+	_new_wrench.visible = new_wrench
 	if _swing != null:
 		_swing.kill()
 	_swing = create_tween().set_trans(Tween.TRANS_QUAD)
-	_swing.tween_property(_wrench, "rotation", WINDUP_ANGLE, 0.14).set_ease(Tween.EASE_OUT)
-	_swing.tween_property(_wrench, "rotation", STRIKE_ANGLE, 0.07).set_ease(Tween.EASE_IN)
+	_swing.tween_property(wrench, "rotation", WINDUP_ANGLE, 0.14).set_ease(Tween.EASE_OUT)
+	_swing.tween_property(wrench, "rotation", STRIKE_ANGLE, 0.07).set_ease(Tween.EASE_IN)
 	_swing.tween_callback(func() -> void:
 		Sfx.play_at(&"wrench_clunk", global_position, volume_db, 0.12))
 	# Rests on the tyre a beat, so the hit reads before it lifts.
 	_swing.tween_interval(0.12)
-	_swing.tween_property(_wrench, "rotation", REST_ANGLE, 0.25).set_ease(Tween.EASE_OUT)
+	_swing.tween_property(wrench, "rotation", REST_ANGLE, 0.25).set_ease(Tween.EASE_OUT)
 	return _swing
 
 ## A drunken crying jag for `seconds`: his shoulders heave, he blubbers,
@@ -286,6 +305,45 @@ func tear_up(count: int = 2) -> void:
 		await get_tree().create_timer(0.45).timeout
 		if not is_instance_valid(self):
 			return
+
+## A belly laugh for `seconds`: he rocks back in the chair, shoulders
+## bouncing, and settles again. `sound` is `grandpa_laugh` or the wheezier
+## `grandpa_cackle`; with `tears`, he's laughing so hard they roll.
+func laugh(seconds: float, volume_db: float = -4.0, sound: StringName = &"grandpa_laugh",
+		tears: bool = false) -> Tween:
+	_restart_move()
+	Sfx.play_at(sound, global_position, volume_db, 0.04)
+	var lean := LAUGH_LEAN * (1.0 if facing_right else -1.0)
+	_move.tween_property(actor, "rotation", -lean, 0.18).set_ease(Tween.EASE_OUT)
+	var bounces := maxi(1, int(seconds * LAUGH_BOUNCES_PER_SECOND))
+	var step := seconds / bounces * 0.5
+	for i in bounces:
+		_move.tween_property(actor, "position:y", -LAUGH_PIXELS, step)
+		_move.tween_property(actor, "position:y", 0.0, step)
+		if tears and i % 3 == 0:
+			_move.parallel().tween_callback(_drop_tear.bind(TEAR_FROM[(i / 3) % TEAR_FROM.size()]))
+	_move.tween_property(actor, "rotation", 0.0, 0.3).set_ease(Tween.EASE_IN_OUT)
+	return _move
+
+## Wheels himself (the drawn chair and all; his body stays put) `offset`
+## away from his spot, or back with Vector2.ZERO, squeaking as he goes.
+## Back home he turns the usual way again (see `face_wrench_toward()`).
+func roll_to(offset: Vector2, seconds: float = 0.8) -> Tween:
+	if _move != null:
+		_move.kill()
+	actor.rotation = 0.0
+	Sfx.play_at(&"wheelchair_squeak", global_position + actor.position, -6.0, 0.08)
+	_move = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_move.tween_property(actor, "position", offset, seconds)
+	if offset == Vector2.ZERO:
+		_move.tween_callback(actor.face.bind(facing_right))
+	return _move
+
+## Turns so the wrench hand (and so `bang()`'s strike) is on the side of
+## `world_point`. The wrench is in his left hand: facing right puts it on
+## the left of the screen.
+func face_wrench_toward(world_point: Vector2) -> void:
+	actor.face(world_point.x < actor.global_position.x)
 
 ## A drunk "hic!": a little jump in the chair.
 func hiccup(volume_db: float = -6.0) -> Tween:

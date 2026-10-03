@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="QuestData" format=3 uid="uid://5dm1ho2imneu"]
 
 [ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://quests/ramp_again.tres" id="2_next"]
 
 [resource]
 script = ExtResource("1_script")
@@ -12,4 +13,5 @@ description = "Parts fished. Now for the other thing Grandpa said: \"Some crippl
 Drive to the Ramp and take a run at it."
 objective = "Check out the Ramp"
 objective_place = "Ramp"
+unlocks = Array[ExtResource("1_script")]([ExtResource("2_next")])
 return_to_giver = false

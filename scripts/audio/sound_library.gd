@@ -23,6 +23,11 @@ const NAMES: Array[StringName] = [
 	&"grandpa_twitch",
 	&"grandpa_sob",
 	&"grandpa_hiccup",
+	&"grandpa_laugh",
+	&"grandpa_cackle",
+	&"car_whack",
+	&"wheelchair_squeak",
+	&"beer_crack",
 	&"wink_ting",
 	&"gate_rattle",
 	&"trunk_open",
@@ -213,6 +218,11 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"grandpa_twitch": return _grandpa_twitch(rng)
 		&"grandpa_sob": return _grandpa_sob(rng)
 		&"grandpa_hiccup": return _grandpa_hiccup(rng)
+		&"grandpa_laugh": return _grandpa_laugh(rng)
+		&"grandpa_cackle": return _grandpa_cackle(rng)
+		&"car_whack": return _car_whack(rng)
+		&"wheelchair_squeak": return _wheelchair_squeak(rng)
+		&"beer_crack": return _beer_crack(rng)
 		&"wink_ting": return _wink_ting()
 		&"gate_rattle": return _gate_rattle(rng)
 		&"trunk_open": return _trunk_open(rng)
@@ -929,6 +939,88 @@ static func _grandpa_hiccup(rng: RandomNumberGenerator) -> PackedFloat32Array:
 		square = 0.3,
 		amp = [[0.0, 0.0], [0.008, 1.0], [0.09, 0.0]],
 	}), 0.015, 0.7)
+	return Synth.finish(out, 0.55)
+
+## An old drunk's belly laugh: a raspy "HAW" with a breathy rush on it,
+## repeated `count` times, sagging and slowing as he runs out of air.
+static func _haws(rng: RandomNumberGenerator, count: int, top: float, gap: float) -> PackedFloat32Array:
+	var out := Synth.silence(count * (0.2 + gap) + 0.3)
+	var t := 0.0
+	for i in count:
+		var length := rng.randf_range(0.14, 0.2) + i * 0.01
+		var pitch := top * (1.0 - i * 0.035) * rng.randf_range(0.95, 1.05)
+		out = Synth.mix_into(out, Synth.tones(length, [[[0.0, pitch], [length, pitch * 0.8]]], {
+			square = 0.45,
+			tremolo = [24.0, 0.35],
+			amp = [[0.0, 0.0], [0.015, 1.0], [length * 0.6, 0.6], [length, 0.0]],
+		}), t, 0.75 - i * 0.03)
+		out = Synth.mix_into(out, Synth.noise_sweep(length, {
+			freq = [[0.0, 1100.0], [length, 800.0]],
+			q = [[0.0, 2.0]],
+			amp = [[0.0, 0.0], [0.01, 0.5], [length, 0.0]],
+		}, rng), t, 0.4)
+		t += length + gap + rng.randf_range(0.0, 0.03) + i * 0.006
+	return out
+
+## "HAW HAW HAW HAW HAW!": Grandpa laughing at the player.
+static func _grandpa_laugh(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	return Synth.finish(_haws(rng, 6, 230.0, 0.06), 0.6)
+
+## Laughing so hard it hurts: a long squeaky wheeze in, then a run of
+## higher, faster haws that crack into wheezes at the end.
+static func _grandpa_cackle(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(2.0)
+	out = Synth.mix_into(out, Synth.noise_sweep(0.35, {
+		freq = [[0.0, 1800.0], [0.35, 3200.0]],
+		q = [[0.0, 6.0]],
+		amp = [[0.0, 0.0], [0.1, 0.6], [0.3, 0.5], [0.35, 0.0]],
+	}, rng), 0.0, 0.6)
+	out = Synth.mix_into(out, _haws(rng, 9, 300.0, 0.03), 0.38, 1.0)
+	for i in 2:
+		out = Synth.mix_into(out, Synth.noise_sweep(0.22, {
+			freq = [[0.0, 2400.0], [0.22, 3400.0]],
+			q = [[0.0, 7.0]],
+			amp = [[0.0, 0.0], [0.05, 0.7], [0.22, 0.0]],
+		}, rng), 1.5 + i * 0.25, 0.6)
+	return Synth.finish(out, 0.65)
+
+## A wrench on a car panel: a hollow sheet-metal bong with a tinny rattle.
+static func _car_whack(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.thump(0.5, 260.0, 0.003, 0.2, rng)
+	out = Synth.mix_into(out, _metal_ring(0.6, 480.0, 14.0, 0.22, rng), 0.0, 0.6)
+	out = Synth.mix_into(out, _metal_ring(0.4, 1250.0, 20.0, 0.09, rng), 0.0, 0.35)
+	for hit in 3:
+		out = Synth.mix_into(out, _metal_ring(0.08, rng.randf_range(2200.0, 3200.0), 14.0, 0.02, rng),
+				0.08 + hit * 0.06, 0.25)
+	return Synth.finish(out)
+
+## A rusty wheelchair rolling: dry squeaks off an ungreased axle, one per
+## turn, over a low rumble of tyres on dirt.
+static func _wheelchair_squeak(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.noise_sweep(0.8, {
+		freq = [[0.0, 220.0], [0.8, 260.0]],
+		q = [[0.0, 1.5]],
+		amp = [[0.0, 0.0], [0.1, 0.35], [0.7, 0.35], [0.8, 0.0]],
+	}, rng)
+	for i in 3:
+		var length := rng.randf_range(0.09, 0.13)
+		var pitch := rng.randf_range(1300.0, 1600.0)
+		out = Synth.mix_into(out, Synth.tones(length, [[[0.0, pitch], [length * 0.5, pitch * 1.25], [length, pitch * 0.95]]], {
+			square = 0.2,
+			tremolo = [40.0, 0.5],
+			amp = [[0.0, 0.0], [0.01, 1.0], [length, 0.0]],
+		}), 0.05 + i * 0.25 + rng.randf_range(0.0, 0.04), 0.5)
+	return Synth.finish(out, 0.5)
+
+## Cracking open a warm can: a click, then a fizzy "pssht".
+static func _beer_crack(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.5)
+	out = Synth.mix_into(out, _metal_ring(0.04, 2600.0, 10.0, 0.01, rng), 0.0, 0.8)
+	out = Synth.mix_into(out, Synth.noise_sweep(0.42, {
+		freq = [[0.0, 5200.0], [0.42, 3000.0]],
+		q = [[0.0, 1.5]],
+		amp = [[0.0, 0.0], [0.02, 0.9], [0.12, 0.5], [0.42, 0.0]],
+	}, rng), 0.03, 0.7)
 	return Synth.finish(out, 0.55)
 
 ## A cartoon wink: one bright little ting off a tin cup.

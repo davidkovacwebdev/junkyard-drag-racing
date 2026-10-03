@@ -78,3 +78,7 @@ extends Resource
 ## for it (the quest's note is empty: the crane came up empty, say). The
 ## giver weeps through it. Empty: `turn_in_line` either way.
 @export var empty_handed_line: String = ""
+## A one-shot played as the giver takes the quest back, on top of the usual
+## reward sounds (Grandpa cracking open the beer he sent you for, say).
+## Empty: nothing extra.
+@export var turn_in_sound: StringName = &""
