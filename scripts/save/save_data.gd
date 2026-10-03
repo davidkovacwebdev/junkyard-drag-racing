@@ -42,3 +42,8 @@ extends Resource
 @export var quest_notes: Dictionary = {}
 ## Tools and gadgets bought at the shop (see ItemData).
 @export var owned_items: Array[ItemData] = []
+## Item id -> uses left (see Inventory.item_uses).
+@export var item_uses: Dictionary = {}
+## How drunk the player is (see Drunk): beers in them, seconds until sober.
+@export var drunk_beers: int = 0
+@export var drunk_seconds_left: float = 0.0

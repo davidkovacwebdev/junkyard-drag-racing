@@ -123,6 +123,9 @@ func _snapshot() -> SaveData:
 	data.money = Inventory.money
 	data.spare_parts = Inventory.spare_parts.duplicate()
 	data.owned_items = Inventory.owned_items.duplicate()
+	data.item_uses = Inventory.item_uses.duplicate()
+	data.drunk_beers = Drunk.beers
+	data.drunk_seconds_left = Drunk.seconds_left
 	data.player_position = WorldState.player_position
 	data.has_player_position = WorldState.has_player_position
 	data.looted = WorldState.get_looted_snapshot()
@@ -179,6 +182,8 @@ func load_game() -> bool:
 	Inventory.money = data.money
 	Inventory.spare_parts = data.spare_parts
 	Inventory.owned_items = data.owned_items
+	Inventory.item_uses = data.item_uses.duplicate()
+	Drunk.restore(data.drunk_beers, data.drunk_seconds_left)
 	WorldState.player_position = data.player_position
 	WorldState.has_player_position = data.has_player_position
 	WorldState.restore_looted(data.looted)

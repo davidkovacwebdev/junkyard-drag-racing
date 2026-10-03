@@ -40,6 +40,7 @@ Cutscenes="*res://autoload/cutscenes.gd"
 Quests="*res://autoload/quests.gd"
 Journal="*res://autoload/journal.gd"
 Trunk="*res://autoload/trunk.gd"
+Drunk="*res://autoload/drunk.gd"
 WorldMap="*res://autoload/world_map.gd"
 QuestDebugger="*res://autoload/quest_debugger.gd"
 

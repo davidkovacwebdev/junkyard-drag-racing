@@ -40,6 +40,12 @@ var spare_parts: Array[PartData] = []
 var owned_items: Array[ItemData] = []
 ## Spaces in the trunk (I), and so the most items the player can carry.
 const ITEM_SLOTS := 6
+## Item id -> uses left, for items with `uses` (a six-pack's cans). An item
+## missing from here has all of its uses (see uses_left).
+var item_uses: Dictionary = {}
+
+## An item was used from the trunk; `item` is gone if that was its last use.
+signal item_used(item: ItemData)
 
 ## Add to the scrap tally. Returns the new total.
 func add_scrap(amount: int) -> int:
@@ -200,7 +206,27 @@ func remove_item(id: StringName) -> void:
 	for item in owned_items:
 		if item.id == id:
 			owned_items.erase(item)
+			item_uses.erase(id)
 			return
+
+## How many more times the owned `item` can be used (0 if it can't be).
+func uses_left(item: ItemData) -> int:
+	if item == null or item.uses <= 0:
+		return 0
+	return int(item_uses.get(item.id, item.uses))
+
+## Uses the owned `item` once: one use off, gone after its last. False when
+## it isn't usable (or isn't the player's).
+func use_item(item: ItemData) -> bool:
+	if item == null or not has_item(item.id) or uses_left(item) <= 0:
+		return false
+	var left := uses_left(item) - 1
+	if left <= 0:
+		remove_item(item.id)
+	else:
+		item_uses[item.id] = left
+	item_used.emit(item)
+	return true
 
 func is_trunk_full() -> bool:
 	return owned_items.size() >= ITEM_SLOTS
@@ -212,10 +238,12 @@ func buy_item(item: ItemData) -> bool:
 		return false
 	money -= item.price
 	owned_items.append(item)
+	item_uses.erase(item.id)
 	return true
 
 func reset() -> void:
 	owned_items.clear()
+	item_uses.clear()
 	owned_cars.clear()
 	selected_index = 0
 	scrap = 0

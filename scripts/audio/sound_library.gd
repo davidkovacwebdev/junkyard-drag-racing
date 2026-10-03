@@ -28,6 +28,8 @@ const NAMES: Array[StringName] = [
 	&"car_whack",
 	&"wheelchair_squeak",
 	&"beer_crack",
+	&"beer_chug",
+	&"puke",
 	&"wink_ting",
 	&"gate_rattle",
 	&"trunk_open",
@@ -223,6 +225,8 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"car_whack": return _car_whack(rng)
 		&"wheelchair_squeak": return _wheelchair_squeak(rng)
 		&"beer_crack": return _beer_crack(rng)
+		&"beer_chug": return _beer_chug(rng)
+		&"puke": return _puke(rng)
 		&"wink_ting": return _wink_ting()
 		&"gate_rattle": return _gate_rattle(rng)
 		&"trunk_open": return _trunk_open(rng)
@@ -1022,6 +1026,56 @@ static func _beer_crack(rng: RandomNumberGenerator) -> PackedFloat32Array:
 		amp = [[0.0, 0.0], [0.02, 0.9], [0.12, 0.5], [0.42, 0.0]],
 	}, rng), 0.03, 0.7)
 	return Synth.finish(out, 0.55)
+
+## Drinking one from the trunk: the can cracks, three throaty gulps, and a
+## satisfied little "ahh" breath.
+static func _beer_chug(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := _beer_crack(rng)
+	for i in 3:
+		var at := 0.42 + i * 0.22 + rng.randf_range(0.0, 0.03)
+		out = Synth.mix_into(out, Synth.thump(0.09, 380.0, 0.004, 0.04, rng), at, 0.7)
+		out = Synth.mix_into(out, Synth.tones(0.08, [[[0.0, 170.0], [0.08, 120.0]]], {
+			amp = [[0.0, 0.0], [0.01, 1.0], [0.08, 0.0]],
+		}), at, 0.5)
+	out = Synth.mix_into(out, Synth.noise_sweep(0.35, {
+		freq = [[0.0, 900.0], [0.35, 600.0]],
+		q = [[0.0, 1.5]],
+		amp = [[0.0, 0.0], [0.05, 0.4], [0.35, 0.0]],
+	}, rng), 1.15, 0.6)
+	return Synth.finish(out, 0.6)
+
+## Throwing up out of the car window: two dry heaves (a low croak with a
+## rasp on it), then the big gurgling hurl and the splatter hitting the dirt.
+static func _puke(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(2.0)
+	for i in 2:
+		var at := i * 0.45
+		out = Synth.mix_into(out, Synth.tones(0.28, [[[0.0, 140.0], [0.14, 190.0], [0.28, 110.0]]], {
+			square = 0.6,
+			tremolo = [30.0, 0.7],
+			amp = [[0.0, 0.0], [0.04, 1.0], [0.2, 0.7], [0.28, 0.0]],
+		}), at, 0.55)
+		out = Synth.mix_into(out, Synth.noise_sweep(0.28, {
+			freq = [[0.0, 700.0], [0.28, 400.0]],
+			q = [[0.0, 3.0]],
+			amp = [[0.0, 0.0], [0.05, 0.6], [0.28, 0.0]],
+		}, rng), at, 0.5)
+	# The hurl: a wet, gargling roar that sags as it empties out.
+	out = Synth.mix_into(out, Synth.tones(0.6, [[[0.0, 210.0], [0.6, 90.0]]], {
+		square = 0.5,
+		tremolo = [22.0, 0.9],
+		amp = [[0.0, 0.0], [0.03, 1.0], [0.45, 0.8], [0.6, 0.0]],
+	}), 1.0, 0.7)
+	out = Synth.mix_into(out, Synth.noise_sweep(0.6, {
+		freq = [[0.0, 1300.0], [0.6, 500.0]],
+		q = [[0.0, 2.0]],
+		amp = [[0.0, 0.0], [0.03, 0.9], [0.5, 0.6], [0.6, 0.0]],
+	}, rng), 1.0, 0.7)
+	# Splatter on the ground.
+	for i in 4:
+		out = Synth.mix_into(out, Synth.thump(0.12, 600.0, 0.002, 0.05, rng),
+				1.3 + i * 0.08 + rng.randf_range(0.0, 0.03), 0.6 - i * 0.1)
+	return Synth.finish(out, 0.75)
 
 ## A cartoon wink: one bright little ting off a tin cup.
 static func _wink_ting() -> PackedFloat32Array:
