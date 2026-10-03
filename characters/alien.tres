@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_data.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/legs/legs_alien.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/torsos/torso_alien.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/heads/head_alien.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/eyes/eyes_alien.tscn" id="5"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Zib"
+legs_scene = ExtResource("2")
+torso_scene = ExtResource("3")
+head_scene = ExtResource("4")
+eyes_scene = ExtResource("5")
+voice_pitch_hz = 270.0
+voice_throat = 1.55
+voice_rasp = 0.15
+voice_wobble = 0.65
+idle_lines = PackedStringArray("Blip. Blorp. You did not see me.", "Take me to your mechanic.", "Zib is not here. Zib is a bush.")

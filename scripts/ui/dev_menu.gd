@@ -5,7 +5,8 @@ extends CanvasLayer
 ##
 ## F1 toggles it, from any scene, Ctrl+M adds money, P stocks the spare stash with
 ## every part, F2 plays the demo cutscene, F3 replays Grandpa's opening scene and
-## F4 shows part durability bars in races (DurabilityOverlay). The rows are the very same `PartSlot` the
+## F4 shows part durability bars in races (DurabilityOverlay), F5 puts the
+## flying saucer (and its alien) back in the desert hangar. The rows are the very same `PartSlot` the
 ## garage uses, so a part looks and reads identically in both places; clicking
 ## one drops that part on the ground as a real `PartPickup` beside the car. A dev
 ## spawn is not special-cased anywhere downstream - it is collected, copied and
@@ -154,6 +155,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		KEY_F4:
 			DurabilityOverlay.shown = not DurabilityOverlay.shown
 			get_viewport().set_input_as_handled()
+		KEY_F5:
+			_restock_hangar()
+			get_viewport().set_input_as_handled()
 		KEY_F3:
 			_replay_opening()
 			get_viewport().set_input_as_handled()
@@ -165,6 +169,12 @@ func _replay_opening() -> void:
 		_set_status("Grandpa's opening only replays in the open world.")
 		return
 	director.replay_opening()
+
+func _restock_hangar() -> void:
+	WorldState.unclaim(HangarUfo.CLAIM_ID)
+	if get_tree().get_first_node_in_group(PlayerCar.GROUP) != null:
+		get_tree().reload_current_scene()
+	_set_status("The flying saucer is back in the hangar.")
 
 func _add_dev_money() -> void:
 	Inventory.money += _DEV_MONEY_AMOUNT

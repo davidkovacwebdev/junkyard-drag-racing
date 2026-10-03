@@ -227,21 +227,28 @@ func _spawn_float_text(text: String) -> void:
 	var parent := get_parent()
 	if parent == null:
 		return
+	spawn_float_text(parent, global_position + Vector2(0.0, -HOVER - ORB_RADIUS - 42.0),
+			text, text_color, text_outline_color)
+
+## A line of text that drifts up from `at` (its centre) and fades, parented to
+## `parent`. Shared with anything else that hands over loot without an orb.
+static func spawn_float_text(parent: Node, at: Vector2, text: String,
+		color: Color = Color(1.0, 0.97, 0.85, 1.0),
+		outline_color: Color = Color(0.08, 0.07, 0.05, 1.0)) -> void:
 	var label := Label.new()
 	label.text = text
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	label.add_theme_color_override("font_color", text_color)
-	label.add_theme_color_override("font_outline_color", text_outline_color)
+	label.add_theme_color_override("font_color", color)
+	label.add_theme_color_override("font_outline_color", outline_color)
 	label.add_theme_constant_override("outline_size", 5)
 	label.add_theme_font_size_override("font_size", 18)
 	label.size = Vector2(POPUP_WIDTH, 28.0)
 	label.z_as_relative = false
 	label.z_index = 40
 	parent.add_child(label)
-	label.global_position = global_position \
-			+ Vector2(-POPUP_WIDTH * 0.5, -HOVER - ORB_RADIUS - 42.0)
+	label.global_position = at - Vector2(POPUP_WIDTH * 0.5, 0.0)
 	var tween := label.create_tween()
 	tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	tween.tween_property(label, "global_position:y",

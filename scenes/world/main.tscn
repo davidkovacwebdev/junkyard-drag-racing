@@ -47,6 +47,7 @@
 [ext_resource type="PackedScene" path="res://scenes/world/house.tscn" id="house_scene"]
 [ext_resource type="PackedScene" path="res://scenes/world/crop_fields.tscn" id="landmark_fields"]
 [ext_resource type="PackedScene" path="res://scenes/world/graveyard.tscn" id="landmark_graveyard"]
+[ext_resource type="PackedScene" path="res://scenes/world/hangar.tscn" id="landmark_hangar"]
 [ext_resource type="PackedScene" path="res://scenes/world/lighthouse_point.tscn" id="landmark_lighthouse"]
 [ext_resource type="PackedScene" path="res://scenes/world/oil_field.tscn" id="landmark_oil"]
 [ext_resource type="PackedScene" path="res://scenes/world/fishing_port.tscn" id="landmark_port"]
@@ -187,6 +188,11 @@ position = Vector2(-442, 1472)
 script = ExtResource("15")
 biome = 2
 
+[node name="Desert2" type="Node2D" parent="Terrain" unique_id=957210816]
+position = Vector2(8400, 12179)
+script = ExtResource("15")
+biome = 2
+
 [node name="Forest" type="Node2D" parent="Terrain" unique_id=287679366]
 position = Vector2(-4786, -1178)
 script = ExtResource("15")
@@ -197,12 +203,12 @@ position = Vector2(872, 4220)
 script = ExtResource("15")
 
 [node name="Swamp2" type="Node2D" parent="Terrain" unique_id=1173123971]
-position = Vector2(8807, 14938)
+position = Vector2(10457, 9086)
 script = ExtResource("15")
 biome = 1
 
 [node name="Swamp3" type="Node2D" parent="Terrain" unique_id=2052393678]
-position = Vector2(9012, 15067)
+position = Vector2(6086, 15950)
 script = ExtResource("15")
 biome = 3
 
@@ -551,6 +557,9 @@ position = Vector2(2091, 4839)
 
 [node name="Graveyard" parent="Sortables" unique_id=1517397592 instance=ExtResource("landmark_graveyard")]
 position = Vector2(6900, 4248)
+
+[node name="Hangar" parent="Sortables" unique_id=293742891 instance=ExtResource("landmark_hangar")]
+position = Vector2(7526, 10778)
 
 [node name="PauseMenu" parent="." unique_id=1833115279 instance=ExtResource("6")]
 

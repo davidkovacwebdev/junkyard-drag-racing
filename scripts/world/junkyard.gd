@@ -208,7 +208,7 @@ func _spawn_junk_chunk(rng: RandomNumberGenerator) -> void:
 ## while the editor has the scene open.
 func _spawn_random_part(rng: RandomNumberGenerator) -> void:
 	var pool: Array[PartData] = []
-	pool.append_array(PartDatabase.bodies)
+	pool.append_array(PartDatabase.junk_bodies)
 	pool.append_array(PartDatabase.wheels)
 	pool.append_array(PartDatabase.junk_engines)
 	pool.append_array(PartDatabase.junk_accessories)
