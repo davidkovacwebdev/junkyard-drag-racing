@@ -1,0 +1,28 @@
+[gd_scene format=3]
+
+[node name="SixPackIcon" type="Node2D"]
+rotation = 0.04
+
+[node name="CanLeft" type="Polygon2D" parent="."]
+color = Color(0.64, 0.68, 0.74, 1)
+polygon = PackedVector2Array(-26, -8, -12, -8, -12, -24, -14, -27, -24, -27, -26, -24)
+
+[node name="CanMiddle" type="Polygon2D" parent="."]
+color = Color(0.64, 0.68, 0.74, 1)
+polygon = PackedVector2Array(-7, -8, 7, -8, 7, -24, 5, -27, -5, -27, -7, -24)
+
+[node name="CanRight" type="Polygon2D" parent="."]
+color = Color(0.64, 0.68, 0.74, 1)
+polygon = PackedVector2Array(12, -8, 26, -8, 26, -24, 24, -27, 14, -27, 12, -24)
+
+[node name="Carton" type="Polygon2D" parent="."]
+color = Color(0.7, 0.24, 0.18, 1)
+polygon = PackedVector2Array(-29, -12, -6, -12, -4, -30, 4, -30, 6, -12, 29, -12, 30, 24, -30, 24)
+
+[node name="Shade" type="Polygon2D" parent="."]
+color = Color(0.53, 0.17, 0.13, 1)
+polygon = PackedVector2Array(14, -12, 29, -12, 30, 24, 15, 24)
+
+[node name="Label" type="Polygon2D" parent="."]
+color = Color(0.93, 0.86, 0.6, 1)
+polygon = PackedVector2Array(-18, 0, 10, -1, 11, 11, -17, 12)

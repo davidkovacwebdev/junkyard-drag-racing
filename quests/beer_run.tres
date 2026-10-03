@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://items/six_pack.tres" id="2_beer"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"beer_run"
+title = "Beer Run"
+giver = "Grandpa"
+description = "Even bloodier the second time. Grandpa laughed until he cried, then admitted he did absolutely nothing when he hit your car with his wrench.
+
+He gave you $40. Buy a six-pack at the Shop, for yourself and for him, and bring it back."
+objective = "Buy a six-pack at the Shop"
+objective_place = "Shop"
+start_cutscene = "res://cutscenes/grandpa_beer.tres"
+start_money = 40
+item_goal = ExtResource("2_beer")
+reminder_line = "Beer, {player}. The Shop. A six-pack. It ain't rocket surgery."
+turn_in_line = "Ahh, there they are. One for you, five for me. That's how sharin' works, look it up."
+turn_in_sound = &"beer_crack"

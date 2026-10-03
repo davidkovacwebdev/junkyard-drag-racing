@@ -28,6 +28,8 @@ const PENNANT := Color(0.85, 0.45, 0.12)
 
 ## The quest that opens the ramp: it's open once that's been given.
 const UNLOCK_QUEST := &"ramp_check"
+## Quests that only ask for a run at it: entering the jump meets their goal.
+const RUN_QUESTS: Array[StringName] = [&"ramp_check", &"ramp_again"]
 const LOCKED_MESSAGE := "Ramp: Nobody's told you about this one yet"
 const LOCKED_COLOR := Color(0.95, 0.2, 0.2, 1)
 
