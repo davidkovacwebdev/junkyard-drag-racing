@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="BuildingData" format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/decorations/decoration_tires.tscn" id="1_2ope2"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/doors/door_chained.tscn" id="2_yxu88"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/roofs/roof_ac_unit.tscn" id="3_cr5sh"]
+[ext_resource type="Script" path="res://scripts/world/building_data.gd" id="4_fgien"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/walls/wall_plank.tscn" id="5_sfliv"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/windows/window_round_porthole.tscn" id="6_172kv"]
+
+[resource]
+script = ExtResource("4_fgien")
+wall_scene = ExtResource("5_sfliv")
+roof_scene = ExtResource("3_cr5sh")
+door_scene = ExtResource("2_yxu88")
+window_scene = ExtResource("6_172kv")
+decoration_scene = ExtResource("1_2ope2")

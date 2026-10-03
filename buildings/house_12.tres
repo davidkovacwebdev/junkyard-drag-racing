@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="BuildingData" format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/decorations/decoration_trash_bags.tscn" id="1_uc336"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/doors/door_chained.tscn" id="2_t3tmv"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/roofs/roof_sandbags.tscn" id="3_cf3y8"]
+[ext_resource type="Script" path="res://scripts/world/building_data.gd" id="4_xeuqx"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/walls/wall_plank.tscn" id="5_y025q"]
+
+[resource]
+script = ExtResource("4_xeuqx")
+wall_scene = ExtResource("5_y025q")
+roof_scene = ExtResource("3_cf3y8")
+door_scene = ExtResource("2_t3tmv")
+decoration_scene = ExtResource("1_uc336")

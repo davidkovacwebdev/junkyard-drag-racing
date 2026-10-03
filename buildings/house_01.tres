@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="BuildingData" format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/decorations/decoration_oil_barrel.tscn" id="1_360nq"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/doors/door_cardboard_flap.tscn" id="2_ynkej"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/roofs/roof_flat.tscn" id="3_2tooq"]
+[ext_resource type="Script" path="res://scripts/world/building_data.gd" id="4_k4wxy"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/walls/wall_plank.tscn" id="5_jbhqe"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/windows/window_square.tscn" id="6_bh67y"]
+
+[resource]
+script = ExtResource("4_k4wxy")
+wall_scene = ExtResource("5_jbhqe")
+roof_scene = ExtResource("3_2tooq")
+door_scene = ExtResource("2_ynkej")
+window_scene = ExtResource("6_bh67y")
+decoration_scene = ExtResource("1_360nq")

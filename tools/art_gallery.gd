@@ -162,12 +162,12 @@ func _shoot_scene(shot_name: String, scene: PackedScene, zoom: float) -> void:
 
 func _shoot_houses_and_trees() -> void:
 	var holder := _frozen_holder()
-	var spawner: HouseSpawner = HouseSpawner.new()
+	var parts_by_slot := BuildingDatabase.scan_parts()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 42
 	for i in 5:
 		var house: ComposedBuilding = load("res://scenes/world/composed_building.tscn").instantiate()
-		house.building_data = spawner._random_building(rng)
+		house.building_data = _random_building(parts_by_slot, rng)
 		house.position = Vector2(-900 + i * 420, 0)
 		holder.add_child(house)
 	var tree_names := ["oak", "pine", "birch", "palm", "spruce", "dead_tree"]
@@ -176,8 +176,15 @@ func _shoot_houses_and_trees() -> void:
 		tree.tree_data = load("res://trees/%s.tres" % tree_names[i])
 		tree.position = Vector2(-900 + i * 340, 420)
 		holder.add_child(tree)
-	spawner.free()
 	await _capture_centered(holder, null, 0.75, "houses_trees", Vector2(0, 150))
+
+func _random_building(parts_by_slot: Dictionary, rng: RandomNumberGenerator) -> BuildingData:
+	var data := BuildingData.new()
+	for slot in parts_by_slot:
+		var entries: Array = parts_by_slot[slot]
+		if not entries.is_empty():
+			data.set_part(slot, entries[rng.randi_range(0, entries.size() - 1)].scene)
+	return data
 
 ## Loads a whole scene as the running screen for a few seconds and grabs the window.
 func _shoot_screen(shot_name: String, scene_path: String) -> void:
