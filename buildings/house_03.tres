@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="BuildingData" format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/decorations/decoration_hubcaps.tscn" id="1_lrcln"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/doors/door_riot_shutter.tscn" id="2_0bql1"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/roofs/roof_tarp_lean.tscn" id="3_hc8gt"]
+[ext_resource type="Script" path="res://scripts/world/building_data.gd" id="4_i2kck"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/walls/wall_plywood.tscn" id="5_jmaw0"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/windows/window_round_porthole.tscn" id="6_8we8e"]
+
+[resource]
+script = ExtResource("4_i2kck")
+wall_scene = ExtResource("5_jmaw0")
+roof_scene = ExtResource("3_hc8gt")
+door_scene = ExtResource("2_0bql1")
+window_scene = ExtResource("6_8we8e")
+decoration_scene = ExtResource("1_lrcln")

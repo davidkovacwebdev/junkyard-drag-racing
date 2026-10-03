@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="BuildingData" format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/doors/door_cardboard_flap.tscn" id="1_nsr5a"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/roofs/roof_barrels.tscn" id="2_pgeth"]
+[ext_resource type="Script" path="res://scripts/world/building_data.gd" id="3_vwvdf"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/walls/wall_corrugated.tscn" id="4_xuy1e"]
+
+[resource]
+script = ExtResource("3_vwvdf")
+wall_scene = ExtResource("4_xuy1e")
+roof_scene = ExtResource("2_pgeth")
+door_scene = ExtResource("1_nsr5a")

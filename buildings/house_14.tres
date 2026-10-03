@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="BuildingData" format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/doors/door_steel_peephole.tscn" id="1_tb5v1"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/roofs/roof_rusty_peaked.tscn" id="2_1amr3"]
+[ext_resource type="Script" path="res://scripts/world/building_data.gd" id="3_npul7"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/walls/wall_tarp.tscn" id="4_ut3kr"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/windows/window_round_porthole.tscn" id="5_ncvk1"]
+
+[resource]
+script = ExtResource("3_npul7")
+wall_scene = ExtResource("4_ut3kr")
+roof_scene = ExtResource("2_1amr3")
+door_scene = ExtResource("1_tb5v1")
+window_scene = ExtResource("5_ncvk1")

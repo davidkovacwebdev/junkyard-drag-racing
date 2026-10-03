@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="BuildingData" format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/decorations/decoration_hubcaps.tscn" id="1_px8e7"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/doors/door_chained.tscn" id="2_m0ani"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/roofs/roof_corrugated_tin.tscn" id="3_npskr"]
+[ext_resource type="Script" path="res://scripts/world/building_data.gd" id="4_f6g03"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/walls/wall_corrugated.tscn" id="5_cn6ej"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/windows/window_boarded.tscn" id="6_i440r"]
+
+[resource]
+script = ExtResource("4_f6g03")
+wall_scene = ExtResource("5_cn6ej")
+roof_scene = ExtResource("3_npskr")
+door_scene = ExtResource("2_m0ani")
+window_scene = ExtResource("6_i440r")
+decoration_scene = ExtResource("1_px8e7")
