@@ -4,6 +4,10 @@ extends CanvasLayer
 ## anything bought at the shop (Inventory.owned_items). Six spaces, filled
 ## in the order things were picked up. Hover a space to read what's in it.
 ##
+## Some things can be used (a six-pack's cans; see ItemData.uses): press the
+## space's number (1-6) or double-click it. The space shows the uses left,
+## and Inventory.item_used tells whoever cares (Drunk, for beer).
+##
 ## Pauses the game like the journal and the pause menu; I or Esc closes it.
 ## Only opens where the journal can (world and buildings, no cutscene).
 
@@ -14,6 +18,8 @@ const SLOT_GAP := Vector2(18.0, 16.0)
 const OVERLAY_ALPHA := 0.5
 const EMPTY_HINT := "Hover something to look at it."
 const NOTHING_HINT := "Nothing in here yet but an old spare tire smell."
+const CANT_USE_LINE := "You can't use the %s like that."
+const USE_KEYS := [KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6]
 
 var _open: bool = false
 
@@ -54,12 +60,32 @@ func _input(event: InputEvent) -> void:
 	if not (event is InputEventKey and event.pressed and not event.echo):
 		return
 	var key: Key = event.physical_keycode
-	if _open and (key == KEY_I or key == KEY_ESCAPE):
+	if _open and USE_KEYS.has(key):
+		use_slot(USE_KEYS.find(key))
+		get_viewport().set_input_as_handled()
+	elif _open and (key == KEY_I or key == KEY_ESCAPE):
 		close()
 		get_viewport().set_input_as_handled()
 	elif not _open and key == KEY_I and _can_open():
 		open()
 		get_viewport().set_input_as_handled()
+
+## Uses whatever's in space `index` (0-based): a sound and its use line on
+## the info board, or `denied` when there's nothing usable there.
+func use_slot(index: int) -> void:
+	if index < 0 or index >= _slots.size() or _slots[index].item == null:
+		return
+	var item := _slots[index].item
+	if not Inventory.use_item(item):
+		Sfx.play(&"denied", -6.0, 0.0)
+		_info_name.text = item.display_name
+		_info_text.text = CANT_USE_LINE % item.display_name
+		return
+	if not item.use_sound.is_empty():
+		Sfx.play(item.use_sound, -4.0, 0.05)
+	_fill_slots()
+	_info_name.text = item.display_name
+	_info_text.text = item.use_line.replace("{left}", str(Inventory.uses_left(item)))
 
 func _can_open() -> bool:
 	return Journal.hud_allowed() and not get_tree().paused
@@ -109,6 +135,7 @@ func _build() -> void:
 		slot.size = slot_size
 		slot.hovered.connect(func(s: TrunkSlot) -> void: _show_info(s.item))
 		slot.unhovered.connect(func(_s: TrunkSlot) -> void: _show_info(null))
+		slot.activated.connect(func(s: TrunkSlot) -> void: use_slot(_slots.find(s)))
 		_panel.add_child(slot)
 		_slots.append(slot)
 
@@ -138,10 +165,10 @@ func _build() -> void:
 	info.add_child(_info_text)
 
 	var hint := _make_label(16, UiPalette.CARDBOARD_LIGHT)
-	hint.text = "I / Esc  close"
+	hint.text = "1-6 / double-click  use      I / Esc  close"
 	hint.set_anchors_preset(Control.PRESET_CENTER)
 	hint.offset_left = -PANEL_SIZE.x * 0.5 + 34.0
-	hint.offset_right = -PANEL_SIZE.x * 0.5 + 234.0
+	hint.offset_right = PANEL_SIZE.x * 0.5 - 34.0
 	hint.offset_top = PANEL_SIZE.y * 0.5 + 86.0
 	hint.offset_bottom = PANEL_SIZE.y * 0.5 + 110.0
 	_root.add_child(hint)

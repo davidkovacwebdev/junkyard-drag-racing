@@ -108,6 +108,20 @@ const GROUP := &"player"
 @export var bump_volume_db: float = -6.0
 @export var tire_screech_volume_db: float = -12.0
 
+@export_group("Drunk")
+## Drunk (see the `Drunk` autoload), the car wanders off the line it's
+## driven along: at full drunkenness by up to this share of its top speed,
+## sideways and back and forth, while it's being driven.
+@export var drunk_sway_speed: float = 0.55
+## And the body rocks from side to side by up to this much, moving or not.
+@export var drunk_rock_angle: float = deg_to_rad(7.0)
+## A puke stop: the car brakes hard and sits shaking for this long, the
+## sick hitting the ground `puke_splat_delay` in.
+@export var puke_seconds: float = 3.2
+@export var puke_splat_delay: float = 1.3
+@export var puke_shake_pixels: float = 3.0
+@export var puke_volume_db: float = -2.0
+
 ## The ignition only clicks the first time the car shows up this session.
 ## Coming back out of a building, the engine was never switched off.
 static var _engine_started_this_session: bool = false
@@ -158,6 +172,10 @@ var _boost_sound: StringName = &"backfire"
 ## GarbageTruck.set_contact_push()) rather than being a fixed shove.
 var _car_mass: float = 12.0
 var _sprint_pressed_last: bool = false
+## Seconds left of a puke stop (0: not puking), and whether this one's
+## puddle is down yet.
+var _puke_left: float = 0.0
+var _puked: bool = false
 
 func _ready() -> void:
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
@@ -258,6 +276,10 @@ func _physics_process(delta: float) -> void:
 	if _is_key_held(KEY_S) or _is_key_held(KEY_DOWN):
 		input_dir.y += 1.0
 
+	_update_puke(delta)
+	if _puke_left > 0.0:
+		input_dir = Vector2.ZERO
+
 	if input_dir.x > 0.0:
 		_facing_right = true
 	elif input_dir.x < 0.0:
@@ -274,7 +296,7 @@ func _physics_process(delta: float) -> void:
 	# Compared against velocity as it stood BEFORE this frame's move_toward
 	# touches it — "the car was already heading this way" — against the
 	# input direction just read above, "now the player wants that way".
-	var braking := _is_key_held(KEY_SPACE)
+	var braking := _is_key_held(KEY_SPACE) or _puke_left > 0.0
 	var skidding := _is_skidding(input_dir, on_puddle) or (braking and velocity.length() > skid_min_speed)
 
 	var target_velocity := Vector2.ZERO
@@ -283,6 +305,7 @@ func _physics_process(delta: float) -> void:
 		if _is_key_held(KEY_SHIFT):
 			speed_multiplier *= sprint_speed_multiplier
 		target_velocity = input_dir.normalized() * max_speed * speed_multiplier
+		target_velocity += Drunk.sway() * max_speed * drunk_sway_speed * speed_multiplier
 	var handling_multiplier := on_road_handling_multiplier if on_road else off_road_handling_multiplier
 	if on_puddle:
 		# Grip, not speed: the car can still carry its momentum, it just
@@ -483,7 +506,38 @@ func _update_sounds(delta: float, input_dir: Vector2, skidding: bool, impact_spe
 func _update_tilt(delta: float, facing_sign: float) -> void:
 	var target := clampf(velocity.y / max_speed, -1.0, 1.0) * tilt_max_angle
 	_tilt = lerpf(_tilt, target, 1.0 - exp(-tilt_response * delta))
-	_visual.rotation = _tilt * facing_sign
+	_visual.rotation = _tilt * facing_sign + Drunk.sway().x * drunk_rock_angle
+
+## Too many beers (see Drunk.puke_due()): the car pulls up, shakes as the
+## driver heaves out of the window, and leaves a puddle of sick behind
+## (on the ground decal layer, under the car, so it shows as the car drives
+## off). Not in a cutscene, and never twice at once.
+func _update_puke(delta: float) -> void:
+	if _puke_left <= 0.0:
+		if Cutscenes.is_active() or not Drunk.puke_due():
+			return
+		_puke_left = puke_seconds
+		_puked = false
+		Sfx.play(&"puke", puke_volume_db, 0.05)
+	_puke_left -= delta
+	if not _puked and _puke_left <= puke_seconds - puke_splat_delay:
+		_puked = true
+		_spawn_puke_puddle()
+	if _puke_left > 0.0 and _puke_left < puke_seconds - 0.3:
+		_visual.position = Vector2(randf_range(-1.0, 1.0), randf_range(-1.0, 0.5)) * puke_shake_pixels
+	else:
+		_visual.position = Vector2.ZERO
+		if _puke_left <= 0.0:
+			_puke_left = 0.0
+
+func _spawn_puke_puddle() -> void:
+	var puddle := PukePuddle.new()
+	puddle.position = global_position
+	if _skid_marks != null:
+		_skid_marks.add_child(puddle)
+	else:
+		puddle.z_index = -1
+		get_parent().add_child(puddle)
 
 ## How far the wheels turn this frame, in world pixels. The wheels roll on the
 ## car's total travel — the vertical component included — so driving up or

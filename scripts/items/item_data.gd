@@ -16,3 +16,15 @@ extends Resource
 @export_multiline var description: String = ""
 ## A few flat polygons, authored around (0, 0) in a roughly 64 px box.
 @export var icon_scene: PackedScene
+
+@export_group("Using it")
+## How many times it can be used from the trunk (1-6 or a double-click)
+## before it's gone; the trunk shows what's left. 0: not usable, it just sits
+## there being owned.
+@export var uses: int = 0
+## What using it does, for whoever listens to `Inventory.item_used`
+## (&"beer": Drunk). Empty: nothing beyond the sound.
+@export var use_effect: StringName = &""
+@export var use_sound: StringName = &""
+## Shown in the trunk when it's used. `{left}` becomes the uses left.
+@export var use_line: String = ""

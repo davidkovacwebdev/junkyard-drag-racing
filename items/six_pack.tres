@@ -1,6 +1,6 @@
-[gd_resource type="Resource" script_class="ItemData" format=3]
+[gd_resource type="Resource" script_class="ItemData" format=3 uid="uid://c0s7kqbr5yejs"]
 
-[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://b4kssi28o6a3g" path="res://scripts/items/item_data.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://scenes/items/icons/item_six_pack.tscn" id="2_icon"]
 
 [resource]
@@ -10,3 +10,7 @@ display_name = "Six-Pack"
 price = 20
 description = "Six cans of Junkyard Lager. Warm, but wet. Nobody's ever asked what's in it, and that's how we like it."
 icon_scene = ExtResource("2_icon")
+uses = 6
+use_effect = &"beer"
+use_sound = &"beer_chug"
+use_line = "*pssht* *glug glug glug* Ahh. {left} left."
