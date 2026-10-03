@@ -1,0 +1,23 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_head_alien"]
+script = ExtResource("2")
+id = &"head_alien"
+display_name = "Alien Head"
+slot = 3
+npc_only = true
+
+[node name="AlienHead" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_head_alien")
+
+[node name="Neck" type="Polygon2D" parent="."]
+color = Color(0.42, 0.58, 0.32, 1)
+polygon = PackedVector2Array(-6, -184, 6, -184, 6, -168, -6, -168)
+
+[node name="Skull" type="Polygon2D" parent="."]
+color = Color(0.5, 0.68, 0.38, 1)
+polygon = PackedVector2Array(-30, -236, -18, -250, 18, -250, 30, -236, 28, -212, 10, -180, -10, -180, -28, -212)

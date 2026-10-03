@@ -10,6 +10,9 @@ extends PartData
 ## installed (a fridge's built-in compressor motor, say). Left null, the
 ## body ships engineless and needs one equipped separately.
 @export var default_engine: EnginePartData
+## False for bodies hidden somewhere on the map (the hangar's flying saucer)
+## rather than dug out of bins and junk heaps.
+@export var found_in_junk: bool = true
 
 @export_group("Suspension")
 ## How far (px) the body settles onto each wheel's spring under its own

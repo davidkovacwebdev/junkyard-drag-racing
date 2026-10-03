@@ -5,6 +5,8 @@ extends Node
 ## any specific car's installed parts.
 
 var bodies: Array[BodyPartData] = []
+## The bodies that turn up as loot in bins and junk heaps.
+var junk_bodies: Array[BodyPartData] = []
 var wheels: Array[WheelPartData] = []
 var engines: Array[EnginePartData] = []
 ## The engines that turn up as loot in bins and junk heaps.
@@ -32,6 +34,7 @@ const _BODY_SCENES := [
 	"res://scenes/parts/bodies/body_vertical_car.tscn",
 	"res://scenes/parts/bodies/body_trex_fossil.tscn",
 	"res://scenes/parts/bodies/body_cardboard_box.tscn",
+	"res://scenes/parts/bodies/body_ufo.tscn",
 ]
 const _WHEEL_SCENES := [
 	"res://scenes/parts/wheels/wheel_standard.tscn",
@@ -146,6 +149,7 @@ func _ready() -> void:
 	_assign_tiers(wheels)
 	_assign_tiers(engines)
 	_assign_tiers(accessories)
+	junk_bodies.assign(bodies.filter(func(body: BodyPartData) -> bool: return body.found_in_junk))
 	junk_engines.assign(engines.filter(func(engine: EnginePartData) -> bool: return engine.found_in_junk))
 	junk_accessories.assign(accessories.filter(func(accessory: AccessoryPartData) -> bool: return accessory.found_in_junk))
 

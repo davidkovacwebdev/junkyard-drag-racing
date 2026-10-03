@@ -39,6 +39,9 @@ var _restock_plan_day: int = 0
 ## refill at the exact same instant every morning.
 var _restock_hour: float = RESTOCK_WINDOW_START
 var _restocked_today: bool = false
+## One-off finds the player has taken (the hangar's saucer). Unlike bins these
+## never come back.
+var _claimed: Dictionary = {}
 
 ## Chance a prop is full the first time the world is ever generated. Kept low on
 ## purpose: the city starts mostly picked-over, so finding a full bin is worth a
@@ -85,6 +88,15 @@ func mark_emptied(id: String) -> void:
 	_refilled.erase(id)
 	_empty_since[id] = DayNightCycle.day
 
+func is_claimed(id: String) -> bool:
+	return _claimed.has(id)
+
+func mark_claimed(id: String) -> void:
+	_claimed[id] = DayNightCycle.day
+
+func unclaim(id: String) -> void:
+	_claimed.erase(id)
+
 ## How many props are empty right now.
 func looted_count() -> int:
 	return _empty_since.size()
@@ -98,6 +110,7 @@ func get_looted_snapshot() -> Dictionary:
 		"restock_plan_day": _restock_plan_day,
 		"restock_hour": _restock_hour,
 		"restocked_today": _restocked_today,
+		"claimed": _claimed.duplicate(),
 	}
 
 ## Restore a previously-saved snapshot (SaveSystem on Continue).
@@ -107,6 +120,10 @@ func restore_looted(snapshot: Dictionary) -> void:
 	_restock_plan_day = 0
 	_restock_hour = RESTOCK_WINDOW_START
 	_restocked_today = false
+	_claimed.clear()
+	var claimed: Dictionary = snapshot.get("claimed", {})
+	for key in claimed.keys():
+		_claimed[String(key)] = int(claimed[key])
 	if snapshot.has("empty"):
 		var empty: Dictionary = snapshot["empty"]
 		for key in empty.keys():
@@ -135,6 +152,7 @@ func clear() -> void:
 	camera_zoom = 0.0
 	_empty_since.clear()
 	_refilled.clear()
+	_claimed.clear()
 	_restock_plan_day = 0
 	_restock_hour = RESTOCK_WINDOW_START
 	_restocked_today = false

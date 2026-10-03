@@ -108,6 +108,11 @@ const NAMES: Array[StringName] = [
 	&"tape_rip",
 	&"windup_ratchet",
 	&"anchor_drag_loop",
+	&"ufo_warble",
+	&"ufo_hum_loop",
+	&"ufo_reveal",
+	&"ufo_hatch",
+	&"alien_yelp",
 ]
 
 const LOOPING: Array[StringName] = [
@@ -118,6 +123,7 @@ const LOOPING: Array[StringName] = [
 	&"siren_loop",
 	&"can_rattle_loop",
 	&"anchor_drag_loop",
+	&"ufo_hum_loop",
 ]
 
 const CAR_SOUNDS: Array[StringName] = [
@@ -160,6 +166,7 @@ const CAR_SOUNDS: Array[StringName] = [
 	&"glove_boing",
 	&"glove_punch",
 	&"axe_chop",
+	&"ufo_warble",
 ]
 
 const UI_SOUNDS: Array[StringName] = [
@@ -186,6 +193,7 @@ const AMBIENT_SOUNDS: Array[StringName] = [
 	&"crow_caw",
 	&"cricket_chirp",
 	&"pumpjack_creak",
+	&"ufo_hum_loop",
 ]
 
 ## The AudioSettings bus a sound plays on, so each volume slider covers it.
@@ -306,6 +314,11 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"balloon_squeak": return _balloon_squeak()
 		&"tape_rip": return _tape_rip(rng)
 		&"windup_ratchet": return _windup_ratchet(rng)
+		&"ufo_warble": return _ufo_warble(rng)
+		&"ufo_hum_loop": return _ufo_hum_loop()
+		&"ufo_reveal": return _ufo_reveal()
+		&"ufo_hatch": return _ufo_hatch(rng)
+		&"alien_yelp": return _alien_yelp()
 	push_error("SoundLibrary: unknown sound '%s'" % sound_name)
 	return Synth.silence(0.05)
 
@@ -580,6 +593,21 @@ static func _fuselage_bong(rng: RandomNumberGenerator) -> PackedFloat32Array:
 	var out := Synth.thump(0.25, 400.0, 0.001, 0.06, rng)
 	Synth.mix_into(out, _metal_ring(0.8, 240.0, 30.0, 0.3, rng), 0.0, 0.6)
 	Synth.mix_into(out, _metal_ring(0.6, 610.0, 26.0, 0.2, rng), 0.0, 0.3)
+	return Synth.finish(out)
+
+## The flying saucer knocked: a hollow tin bong and a theremin note that
+## wobbles and sags, like the alien inside saying "ow".
+static func _ufo_warble(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.thump(0.15, 500.0, 0.001, 0.04, rng)
+	Synth.mix_into(out, _metal_ring(0.5, 330.0, 26.0, 0.18, rng), 0.0, 0.5)
+	var sag: Array = _wobbling(820.0, 0.45, 9.0, 0.04)
+	for point: Array in sag:
+		point[1] *= 1.0 - 0.45 * point[0] / 0.45
+	var warble := Synth.tones(0.45, [sag], {
+		square = 0.08,
+		amp = [[0.0, 0.0], [0.03, 1.0], [0.3, 0.6], [0.45, 0.0]],
+	})
+	Synth.mix_into(out, warble, 0.02, 0.45)
 	return Synth.finish(out)
 
 ## A fossil skeleton knocked: a dry thud and a quick clatter of hollow bones
@@ -1400,6 +1428,71 @@ static func _furnace_loop(rng: RandomNumberGenerator) -> PackedFloat32Array:
 	return Synth.finish(out, 0.6, 0.0)
 
 # --- Landmark ambience ----------------------------------------------------------
+
+## The hangar's saucer idling: a low two-tone hum that throbs twice a second,
+## with a thin whine riding on top. Every frequency fits whole cycles in 2 s.
+static func _ufo_hum_loop() -> PackedFloat32Array:
+	var hum := Synth.tones(2.0, [[[0.0, 60.0]], [[0.0, 91.0]], [[0.0, 120.0]]], {
+		amp = [[0.0, 1.0]],
+		tremolo = [2.0, 0.5],
+		fade = 0.0,
+		peak = 0.7,
+	})
+	var whine := Synth.tones(2.0, [[[0.0, 1480.0]]], {
+		amp = [[0.0, 1.0]],
+		tremolo = [3.0, 0.6],
+		fade = 0.0,
+		peak = 0.08,
+	})
+	return Synth.finish(Synth.mix_into(hum, whine), 0.6, 0.0)
+
+## Driving in on the saucer: three wobbly theremin notes falling away, the cheap
+## sci-fi B-movie sting.
+static func _ufo_reveal() -> PackedFloat32Array:
+	var notes: Array[PackedFloat32Array] = []
+	for pitch in [988.0, 740.0, 523.0]:
+		notes.append(Synth.tones(0.42, [_wobbling(pitch, 0.42, 6.5, 0.025)], {
+			square = 0.05,
+			amp = [[0.0, 0.0], [0.06, 1.0], [0.3, 0.8], [0.42, 0.0]],
+			peak = 0.6,
+		}))
+	return Synth.finish(Synth.concat(notes), 0.6)
+
+## The saucer's dome popping open: a suction pop, then a short airlock hiss.
+static func _ufo_hatch(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var pop := Synth.tones(0.08, [[[0.0, 260.0], [0.08, 900.0]]], {
+		amp = [[0.0, 0.0], [0.005, 1.0], [0.08, 0.0]],
+	})
+	Synth.mix_into(pop, Synth.thump(0.06, 1200.0, 0.001, 0.02, rng), 0.0, 0.5)
+	var hiss := Synth.noise_sweep(0.5, {
+		freq = [[0.0, 3200.0], [0.5, 1800.0]],
+		q = [[0.0, 1.5]],
+		amp = [[0.0, 0.0], [0.03, 1.0], [0.5, 0.0]],
+	}, rng)
+	return Synth.finish(Synth.mix_into(pop, hiss, 0.05, 0.35), 0.7)
+
+## The little alien panicking: two squeaky "eep!"s sliding up, with a nervous
+## warble.
+static func _alien_yelp() -> PackedFloat32Array:
+	var eep := func(duration: float, low: float, high: float) -> PackedFloat32Array:
+		return Synth.tones(duration, [[[0.0, low], [duration, high]]], {
+			square = 0.2,
+			amp = [[0.0, 0.0], [0.01, 1.0], [duration * 0.7, 0.8], [duration, 0.0]],
+			tremolo = [22.0, 0.4],
+			peak = 0.6,
+		})
+	return Synth.finish(Synth.concat([eep.call(0.12, 700.0, 1300.0), Synth.silence(0.05),
+			eep.call(0.2, 900.0, 1700.0)]), 0.6)
+
+## A pitch curve that wobbles `depth` (fraction of `pitch`) at `rate` Hz, for
+## theremin-ish vibrato.
+static func _wobbling(pitch: float, duration: float, rate: float, depth: float) -> Array:
+	var points: Array = []
+	var t := 0.0
+	while t <= duration:
+		points.append([t, pitch * (1.0 + depth * sin(TAU * rate * t))])
+		t += 0.01
+	return points
 
 ## A seagull over the fishing port: two squawky "kyow" cries that slide down.
 static func _gull_cry() -> PackedFloat32Array:

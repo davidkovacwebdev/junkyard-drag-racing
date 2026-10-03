@@ -275,7 +275,7 @@ func _junk_material() -> PhysicsMaterial:
 ## heap draw from. Falls back to the whole pool if nothing is that tier.
 func _random_part(rng: RandomNumberGenerator, tier: int) -> PartData:
 	var pool: Array[PartData] = []
-	pool.append_array(PartDatabase.bodies)
+	pool.append_array(PartDatabase.junk_bodies)
 	pool.append_array(PartDatabase.wheels)
 	pool.append_array(PartDatabase.junk_engines)
 	pool.append_array(PartDatabase.junk_accessories)

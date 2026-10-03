@@ -68,7 +68,7 @@ func _build_icon() -> void:
 	var instance := PartFactory.instantiate(part)
 	if instance == null:
 		return
-	_neutralize(instance)
+	neutralize(instance)
 	var wrapper := Node2D.new()
 	wrapper.name = "Icon"
 	wrapper.add_child(instance)
@@ -93,10 +93,10 @@ func _build_icon() -> void:
 func _draw_icon(center: Vector2, radius: float) -> void:
 	draw_circle(center, radius * 0.78, Color(0.07, 0.09, 0.11, 0.32))
 
-func _neutralize(node: Node) -> void:
+static func neutralize(node: Node) -> void:
 	if node is RigidBody2D:
 		node.freeze = true
 		node.collision_layer = 0
 		node.collision_mask = 0
 	for child in node.get_children():
-		_neutralize(child)
+		neutralize(child)
