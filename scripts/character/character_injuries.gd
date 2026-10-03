@@ -55,3 +55,14 @@ static func _mirrored(points: Array) -> Array:
 	for point: Vector2 in points:
 		out.push_front(Vector2(-point.x, point.y))
 	return out
+
+## How beaten up the player is right now, from the ramp quests: 1 after the
+## first spike-pit wipeout ("Downhill Billie") until the second run, 2 from
+## the second ("Downhill Billie (Again)") until Grandpa gets his beer
+## ("Beer Run"). 0 otherwise. PlayerCar bleeds a trail on the map by it.
+static func current_level() -> int:
+	if Quests.is_complete(&"ramp_again") and not Quests.is_complete(&"beer_run"):
+		return 2
+	if Quests.is_complete(&"ramp_check") and not Quests.is_complete(&"ramp_again"):
+		return 1
+	return 0

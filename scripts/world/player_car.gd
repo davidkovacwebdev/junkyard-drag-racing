@@ -122,6 +122,17 @@ const GROUP := &"player"
 @export var puke_shake_pixels: float = 3.0
 @export var puke_volume_db: float = -2.0
 
+@export_group("Bleeding")
+## Beaten up after the ramp (CharacterInjuries.current_level()), the car
+## drips blood as it goes: a drop every this many px driven, at level 1 and
+## level 2 (index 0 and 1).
+@export var blood_drop_spacing := Vector2(85.0, 32.0)
+@export var blood_drop_radius := Vector2(7.0, 11.0)
+## Level 2 only: now and then a drop drags out into a smear, and parked, it
+## still drips every this many seconds.
+@export_range(0.0, 1.0) var blood_smear_chance: float = 0.2
+@export var blood_idle_drip_seconds: float = 0.9
+
 ## The ignition only clicks the first time the car shows up this session.
 ## Coming back out of a building, the engine was never switched off.
 static var _engine_started_this_session: bool = false
@@ -176,6 +187,10 @@ var _sprint_pressed_last: bool = false
 ## puddle is down yet.
 var _puke_left: float = 0.0
 var _puked: bool = false
+## Created on the first drop; null while the driver isn't bleeding.
+var _blood_trail: BloodTrail = null
+var _blood_distance: float = 0.0
+var _blood_idle: float = 0.0
 
 func _ready() -> void:
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
@@ -369,6 +384,7 @@ func _physics_process(delta: float) -> void:
 	_visual.animate_wheels(_roll_distance(delta, facing_sign), delta)
 
 	_update_skid_marks(skidding)
+	_update_blood(delta)
 	_update_sounds(delta, Vector2.ZERO if braking else input_dir, skidding, impact_speed)
 
 	# Keep the saved spot current so entering any place (or any other scene
@@ -529,6 +545,44 @@ func _update_puke(delta: float) -> void:
 		_visual.position = Vector2.ZERO
 		if _puke_left <= 0.0:
 			_puke_left = 0.0
+
+## Drips the beaten-up driver's blood behind the car (see the Bleeding
+## exports). Checked every frame, so it stops the moment the quests say
+## they're patched up.
+func _update_blood(delta: float) -> void:
+	var level := CharacterInjuries.current_level()
+	if level <= 0 or Cutscenes.is_active():
+		return
+	var heavy := level >= 2
+	var moved := velocity.length() * delta
+	_blood_distance += moved
+	_blood_idle += delta
+	var spacing := blood_drop_spacing.y if heavy else blood_drop_spacing.x
+	var drip := _blood_distance >= spacing
+	if heavy and moved < 0.5 and _blood_idle >= blood_idle_drip_seconds:
+		drip = true
+	if not drip:
+		return
+	_blood_distance = 0.0
+	_blood_idle = 0.0
+	var trail := _get_blood_trail()
+	var at := global_position + Vector2(randf_range(-10.0, 10.0), randf_range(-4.0, 4.0))
+	var radius := (blood_drop_radius.y if heavy else blood_drop_radius.x) * randf_range(0.8, 1.2)
+	if heavy and moved > 0.5 and randf() < blood_smear_chance:
+		trail.add_smear(at, at - velocity.normalized() * randf_range(18.0, 30.0), radius * 1.2)
+	else:
+		trail.add_drop(at, radius)
+
+func _get_blood_trail() -> BloodTrail:
+	if is_instance_valid(_blood_trail):
+		return _blood_trail
+	_blood_trail = BloodTrail.new()
+	if _skid_marks != null:
+		_skid_marks.add_child(_blood_trail)
+	else:
+		_blood_trail.z_index = -1
+		get_parent().add_child(_blood_trail)
+	return _blood_trail
 
 func _spawn_puke_puddle() -> void:
 	var puddle := PukePuddle.new()
