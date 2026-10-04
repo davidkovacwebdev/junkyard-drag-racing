@@ -23,6 +23,7 @@ const NAMES: Array[StringName] = [
 	&"grandpa_twitch",
 	&"grandpa_sob",
 	&"grandpa_hiccup",
+	&"grandpa_gasp",
 	&"grandpa_laugh",
 	&"grandpa_cackle",
 	&"car_whack",
@@ -32,6 +33,12 @@ const NAMES: Array[StringName] = [
 	&"puke",
 	&"wink_ting",
 	&"gate_rattle",
+	&"flag_kiss",
+	&"cemetery_gate_creak",
+	&"funeral_bell",
+	&"wood_clonk",
+	&"bacon_sizzle",
+	&"chain_rattle",
 	&"trunk_open",
 	&"trunk_close",
 	&"ignition_click",
@@ -194,6 +201,7 @@ const AMBIENT_SOUNDS: Array[StringName] = [
 	&"cricket_chirp",
 	&"pumpjack_creak",
 	&"ufo_hum_loop",
+	&"bacon_sizzle",
 ]
 
 ## The AudioSettings bus a sound plays on, so each volume slider covers it.
@@ -237,6 +245,13 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"puke": return _puke(rng)
 		&"wink_ting": return _wink_ting()
 		&"gate_rattle": return _gate_rattle(rng)
+		&"flag_kiss": return _flag_kiss(rng)
+		&"grandpa_gasp": return _grandpa_gasp(rng)
+		&"cemetery_gate_creak": return _cemetery_gate_creak(rng)
+		&"funeral_bell": return _funeral_bell(rng)
+		&"wood_clonk": return _wood_clonk(rng)
+		&"bacon_sizzle": return _bacon_sizzle(rng)
+		&"chain_rattle": return _chain_rattle(rng)
 		&"trunk_open": return _trunk_open(rng)
 		&"trunk_close": return _trunk_close(rng)
 		&"profile_scrapped": return _profile_scrapped(rng)
@@ -1129,6 +1144,109 @@ static func _gate_rattle(rng: RandomNumberGenerator) -> PackedFloat32Array:
 		amp = [[0.0, 0.0], [0.003, 1.0], [0.3, 0.0]],
 	}), 0.0, 0.35)
 	return Synth.finish(out, 0.6)
+
+## An old man's eyes popping: a sharp, raspy in-breath that jumps up in
+## pitch, "HUH!", with a little wheeze at the end.
+static func _grandpa_gasp(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.noise_sweep(0.3, {
+		freq = [[0.0, 700.0], [0.12, 1500.0], [0.3, 1700.0]],
+		q = [[0.0, 3.0]],
+		amp = [[0.0, 0.0], [0.03, 1.0], [0.18, 0.6], [0.3, 0.0]],
+	}, rng)
+	out = Synth.mix_into(out, Synth.tones(0.2, [[[0.0, 150.0], [0.08, 260.0], [0.2, 240.0]]], {
+		square = 0.4,
+		tremolo = [28.0, 0.5],
+		amp = [[0.0, 0.0], [0.02, 1.0], [0.14, 0.6], [0.2, 0.0]],
+	}), 0.02, 0.5)
+	out = Synth.mix_into(out, Synth.noise_sweep(0.2, {
+		freq = [[0.0, 2600.0], [0.2, 3000.0]],
+		q = [[0.0, 7.0]],
+		amp = [[0.0, 0.0], [0.04, 0.5], [0.2, 0.0]],
+	}, rng), 0.3, 0.35)
+	return Synth.finish(out, 0.6)
+
+## A big wet smooch on a flag: lips pressing in (a soft damp squelch), then
+## the "mwah" pop as they come off, and a little cloth flap.
+static func _flag_kiss(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.6)
+	out = Synth.mix_into(out, Synth.noise_sweep(0.16, {
+		freq = [[0.0, 700.0], [0.16, 1100.0]],
+		q = [[0.0, 3.0]],
+		amp = [[0.0, 0.0], [0.04, 0.6], [0.16, 0.0]],
+	}, rng), 0.0, 0.5)
+	out = Synth.mix_into(out, Synth.tones(0.12, [[[0.0, 380.0], [0.05, 900.0], [0.12, 600.0]]], {
+		amp = [[0.0, 0.0], [0.006, 1.0], [0.12, 0.0]],
+	}), 0.17, 0.8)
+	out = Synth.mix_into(out, Synth.thump(0.05, 3000.0, 0.001, 0.015, rng), 0.17, 0.6)
+	out = Synth.mix_into(out, Synth.noise_sweep(0.2, {
+		freq = [[0.0, 1800.0], [0.2, 1300.0]],
+		q = [[0.0, 1.2]],
+		amp = [[0.0, 0.0], [0.02, 0.4], [0.2, 0.0]],
+	}, rng), 0.34, 0.4)
+	return Synth.finish(out, 0.6)
+
+## Pushing open the cemetery's iron gate: a long rusty hinge creak that
+## climbs and sags, and a dull clank as it swings against its post.
+static func _cemetery_gate_creak(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(1.3)
+	out = Synth.mix_into(out, Synth.tones(0.9, [[[0.0, 330.0], [0.35, 520.0], [0.6, 440.0], [0.9, 610.0]]], {
+		square = 0.7,
+		tremolo = [26.0, 0.8],
+		amp = [[0.0, 0.0], [0.08, 0.8], [0.7, 0.6], [0.9, 0.0]],
+		peak = 0.5,
+	}), 0.0, 0.6)
+	out = Synth.mix_into(out, Synth.thump(0.3, 500.0, 0.002, 0.1, rng), 0.95, 0.8)
+	out = Synth.mix_into(out, _metal_ring(0.35, 640.0, 12.0, 0.12, rng), 0.95, 0.4)
+	return Synth.finish(out, 0.6)
+
+## One slow toll of an old church bell: a deep strike that hums away.
+static func _funeral_bell(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.tones(1.9, [[[0.0, 196.0]], [[0.0, 392.0]], [[0.0, 470.0]]], {
+		amp = [[0.0, 0.0], [0.005, 1.0], [0.3, 0.55], [1.9, 0.0]],
+		tremolo = [3.0, 0.25],
+		peak = 0.6,
+	})
+	out = Synth.mix_into(out, Synth.thump(0.12, 1200.0, 0.001, 0.04, rng), 0.0, 0.5)
+	return Synth.finish(out, 0.6)
+
+## Setting a lumpy wooden wheel down on stone: a hollow wooden knock, a
+## smaller rocking knock, and its nails rattling.
+static func _wood_clonk(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.6)
+	out = Synth.mix_into(out, Synth.thump(0.2, 900.0, 0.002, 0.06, rng), 0.0, 0.9)
+	out = Synth.mix_into(out, Synth.tones(0.15, [[[0.0, 260.0], [0.15, 220.0]]], {
+		amp = [[0.0, 0.0], [0.003, 1.0], [0.15, 0.0]],
+	}), 0.0, 0.5)
+	out = Synth.mix_into(out, Synth.thump(0.15, 1100.0, 0.002, 0.04, rng), 0.18, 0.5)
+	for i in 3:
+		out = Synth.mix_into(out, _metal_ring(0.06, rng.randf_range(3000.0, 4200.0), 16.0, 0.015, rng),
+				0.04 + i * 0.05, 0.2)
+	return Synth.finish(out, 0.6)
+
+## Bacon in a hot pan: a crackly bed of fizz with a few fat pops spitting
+## out of it.
+static func _bacon_sizzle(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.noise_sweep(1.4, {
+		freq = [[0.0, 5200.0], [1.4, 4400.0]],
+		q = [[0.0, 0.9]],
+		amp = [[0.0, 0.0], [0.15, 0.6], [1.0, 0.5], [1.4, 0.0]],
+	}, rng)
+	for i in 9:
+		out = Synth.mix_into(out, Synth.thump(0.03, 4000.0, 0.001, 0.008, rng),
+				rng.randf_range(0.05, 1.25), rng.randf_range(0.4, 0.8))
+	return Synth.finish(out, 0.5)
+
+## A heavy steel chain swung and dropped: a run of links clinking against
+## each other, then a dull heap of them settling.
+static func _chain_rattle(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.9)
+	for i in 9:
+		var at := i * rng.randf_range(0.04, 0.07)
+		out = Synth.mix_into(out, _metal_ring(0.12, rng.randf_range(1800.0, 3200.0), 14.0, 0.03, rng),
+				at, 0.6 - i * 0.04)
+	out = Synth.mix_into(out, Synth.thump(0.25, 700.0, 0.002, 0.08, rng), 0.5, 0.8)
+	out = Synth.mix_into(out, _metal_ring(0.3, 900.0, 10.0, 0.1, rng), 0.5, 0.4)
+	return Synth.finish(out, 0.65)
 
 ## Popping a rusty trunk: the latch clacks, the hinges groan as the lid
 ## swings up, and it bounces to a stop.

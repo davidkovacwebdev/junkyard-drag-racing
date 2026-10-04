@@ -2,6 +2,8 @@
 
 [ext_resource type="Script" path="res://scripts/world/graveyard_prop.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/audio/ambient_call.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/world/graveyard_gate.gd" id="3"]
+[ext_resource type="Script" path="res://scripts/world/minimap_marker.gd" id="4"]
 
 [node name="Graveyard" type="Node2D"]
 y_sort_enabled = true
@@ -113,3 +115,11 @@ volume_db = -12.0
 script = ExtResource("2")
 sound_name = &"crow_caw"
 interval_range = Vector2(8, 18)
+
+[node name="Gate" type="StaticBody2D" parent="."]
+position = Vector2(0, 200)
+script = ExtResource("3")
+
+[node name="MinimapMarker" type="Node2D" parent="."]
+script = ExtResource("4")
+kind = 10

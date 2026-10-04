@@ -362,12 +362,13 @@ func _build_screen() -> void:
 	_bottom_bar = _make_rect(UiPalette.INK, 1.0 - BAR_HEIGHT_FRACTION, 1.0)
 
 	_subtitle_name = _make_label(UiPalette.ACCENT_YELLOW, 18)
-	_subtitle_name.anchor_top = 0.08
-	_subtitle_name.anchor_bottom = 0.38
+	_subtitle_name.anchor_top = 0.04
+	_subtitle_name.anchor_bottom = 0.3
 	_bottom_bar.add_child(_subtitle_name)
-	_subtitle_line = _make_label(UiPalette.TEXT_LIGHT, 22)
-	_subtitle_line.anchor_top = 0.36
-	_subtitle_line.anchor_bottom = 0.95
+	# Sized so a line that wraps onto a second row still fits in the bar.
+	_subtitle_line = _make_label(UiPalette.TEXT_LIGHT, 19)
+	_subtitle_line.anchor_top = 0.29
+	_subtitle_line.anchor_bottom = 0.98
 	_subtitle_line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	# Left-aligned and laid out in full before it types, so the line reads left
 	# to right in place instead of growing out from the middle, and a word

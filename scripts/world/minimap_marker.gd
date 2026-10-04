@@ -16,6 +16,7 @@ enum Kind {
 	RALLY,
 	HILL_CLIMB,
 	DERBY,
+	GRAVEYARD,
 }
 
 @export var kind: Kind = Kind.HOME

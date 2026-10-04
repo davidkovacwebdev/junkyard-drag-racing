@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="QuestData" format=3 uid="uid://5r3j5dnmtdgj"]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://quests/chain_gang.tres" id="2_next"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"pay_respects"
+title = "Pay Your Respects"
+giver = "Grandpa"
+description = "Grandpa was crying again. Today's the anniversary of the tragic death of the Drag Queen, \"the best drag racer this town has ever seen\". You'd never heard of her, and you had to kiss her flag for saying so.
+
+He made her a \"beautiful\" wooden steering wheel, barely round and full of nails. Leave it next to her grave in the Graveyard."
+objective = "Leave Grandpa's wheel at the Drag Queen's grave"
+objective_place = "Graveyard"
+unlocks = Array[ExtResource("1_script")]([ExtResource("2_next")])
+start_cutscene = "res://cutscenes/grandpa_drag_queen.tres"
+reminder_line = "Her grave, {player}. In the Graveyard. Go pay your respects, you heathen."
+turn_in_cutscene = "res://cutscenes/grandpa_drag_queen_report.tres"

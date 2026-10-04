@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://items/chains.tres" id="2_chains"]
+[ext_resource type="Resource" path="res://quests/hill_climb_debut.tres" id="3_next"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"chain_gang"
+title = "Chains"
+giver = "Grandpa"
+description = "There's a new thing in town: a hill climbing race. Grandpa says it could be worth checking out, but first you need chains.
+
+Buy a set of chains at the Shop ($200) and bring them back so he can set everything up."
+objective = "Buy chains at the Shop"
+objective_place = "Shop"
+follow_ups = Array[ExtResource("1_script")]([ExtResource("3_next")])
+start_cutscene = "res://cutscenes/grandpa_chains.tres"
+item_goal = ExtResource("2_chains")
+turn_in_cutscene = "res://cutscenes/grandpa_bacon.tres"
+reminder_line = "Chains, {player}. The Shop's got 'em. Can't set nothin' up without chains."

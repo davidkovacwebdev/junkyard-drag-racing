@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3]
+
+[ext_resource type="Script" uid="uid://ckj8s3h32w3wv" path="res://scripts/character/character_data.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/legs/legs_bell.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/boots/boots_platform.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/torsos/torso_trench.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/heads/head_oval.tscn" id="5"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/hairs/hair_beehive.tscn" id="6"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/eyes/eyes_sad.tscn" id="7"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/accessories/acc_earrings.tscn" id="8"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Darlene"
+legs_scene = ExtResource("2")
+boots_scene = ExtResource("3")
+torso_scene = ExtResource("4")
+head_scene = ExtResource("5")
+hair_scene = ExtResource("6")
+eyes_scene = ExtResource("7")
+accessory_scene = ExtResource("8")
+voice_pitch_hz = 190.0
+voice_throat = 1.1
+voice_rasp = 0.3
+voice_wobble = 0.25

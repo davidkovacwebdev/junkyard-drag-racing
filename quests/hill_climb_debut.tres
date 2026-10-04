@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"hill_climb_debut"
+title = "King of the Hill"
+giver = "Grandpa"
+description = "Grandpa hung his bacon on the chains you bought him. Turns out that's what he needed them for.
+
+The new Hill Climb is open. Go enter a race there, then let Grandpa know how it went."
+objective = "Enter a race at the Hill Climb"
+objective_place = "Hill Climb"
+race_goal_venue = "Hill Climb"
+reminder_line = "The hill ain't gonna climb itself, {player}."
+turn_in_line = "You {part}, huh? Well, the bacon's almost done. Tell me all about it over a strip."

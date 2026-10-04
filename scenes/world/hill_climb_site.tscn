@@ -20,3 +20,4 @@ race_scene_path = "res://scenes/race/race_hill_climb.tscn"
 course = 1
 rules_line = "Highest up the hill wins. Weak heaps roll back down."
 wall_color = Color(0.36, 0.38, 0.45, 1)
+opens_with_quest = &"hill_climb_debut"
