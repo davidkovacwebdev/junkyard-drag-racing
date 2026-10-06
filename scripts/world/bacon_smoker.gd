@@ -49,6 +49,7 @@ var _collision: CollisionShape2D
 var _sizzle: AmbientCall
 
 func _ready() -> void:
+	add_to_group(OffscreenCuller.GROUP)
 	if Engine.is_editor_hint():
 		return
 	add_to_group(GROUP)

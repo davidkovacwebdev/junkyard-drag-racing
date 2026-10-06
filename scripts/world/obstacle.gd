@@ -33,6 +33,14 @@ extends StaticBody2D
 ## past instead.
 @export_range(0.0, 100.0) var corner_radius: float = 20.0
 
+## How far the body was moved down at runtime, from the box centre onto its
+## ground line (the box's bottom edge): the point Main's y-sort reads, the same
+## as trees, props and the car. Children are lifted
+## back up by it, and a subclass drawing in _draw() must draw from
+## `art_origin()`, so only the sort key moves.
+## Without this, the car pops in front of the wall while still behind it.
+var sort_offset: float = 0.0
+
 func _ready() -> void:
 	# `ColorRect` is optional: a subclass scene may draw its own art in
 	# _draw() instead (see RegistrationBooth), in which case there's no
@@ -45,3 +53,16 @@ func _ready() -> void:
 	var collision_height := size.y * collision_height_fraction
 	$CollisionShape2D.shape = RoundedRectShape.build(Vector2(size.x, collision_height), corner_radius)
 	$CollisionShape2D.position = Vector2(0.0, size.y / 2.0 - collision_height / 2.0)
+	if not Engine.is_editor_hint():
+		_sort_at_ground()
+
+## Where the box centre sits in local space, for a subclass's _draw().
+func art_origin() -> Vector2:
+	return Vector2(0.0, -sort_offset)
+
+func _sort_at_ground() -> void:
+	sort_offset = size.y / 2.0
+	position.y += sort_offset
+	for child in get_children():
+		if child is Node2D or child is Control:
+			child.position.y -= sort_offset

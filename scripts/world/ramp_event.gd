@@ -55,6 +55,7 @@ func interact(_actor: Node = null) -> void:
 		get_tree().change_scene_to_packed(interior_scene)
 
 func _draw() -> void:
+	draw_set_transform(art_origin())
 	var ground_y := size.y / 2.0
 	_draw_shadow(ground_y)
 	_draw_sign(Vector2(-118.0, ground_y + DECK_BACK.y - 6.0))
@@ -94,12 +95,12 @@ func _draw_sign(base: Vector2) -> void:
 	for post_x: float in [board.position.x + 12.0, board.end.x - 18.0]:
 		draw_rect(Rect2(post_x, board.end.y, 5.0, base.y - board.end.y), UiPalette.POST_GREY)
 	var pivot := board.get_center()
-	draw_set_transform(pivot, deg_to_rad(-3.0), Vector2.ONE)
+	draw_set_transform(art_origin() + pivot, deg_to_rad(-3.0), Vector2.ONE)
 	var local := Rect2(board.position - pivot, board.size)
 	draw_rect(local, UiPalette.CARDBOARD_BASE)
 	draw_rect(Rect2(local.end.x - 7.0, local.position.y, 7.0, local.size.y), UiPalette.CARDBOARD_SHADE)
 	draw_string(ThemeDB.fallback_font, local.position + Vector2(0.0, 25.0), "JUMP!", HORIZONTAL_ALIGNMENT_CENTER, local.size.x - 6.0, 22, UiPalette.DANGER_RED)
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	draw_set_transform(art_origin())
 
 func _draw_pennant(lip_back: Vector2) -> void:
 	var pole_top := lip_back + Vector2(-4.0, -56.0)

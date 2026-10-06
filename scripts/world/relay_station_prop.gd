@@ -39,6 +39,7 @@ const BLINK_TIME := 0.8
 var _time := 0.0
 
 func _ready() -> void:
+	add_to_group(OffscreenCuller.GROUP)
 	if Engine.is_editor_hint():
 		return
 	var footprint := Rect2(-44.0, -16.0, 88.0, 16.0) if kind == Kind.DISH else Rect2(-74.0, -24.0, 148.0, 24.0)

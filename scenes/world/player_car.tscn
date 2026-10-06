@@ -25,6 +25,7 @@ collision_layer = 3
 script = ExtResource("1")
 
 [node name="Visual" parent="." instance=ExtResource("2")]
+origin_on_ground = true
 auto_fit_width = 130.0
 horse_gait_rate = 0.5
 

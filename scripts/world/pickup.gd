@@ -89,6 +89,7 @@ var _icon: Node2D = null
 var _icon_center: Vector2 = Vector2.ZERO
 
 func _ready() -> void:
+	add_to_group(OffscreenCuller.GROUP)
 	# No z_index override on purpose: the orb takes part in the Y-sort of
 	# whatever holds it, exactly like the props and the car do. Forcing a Z here
 	# would make it float in front of the car even when the car is nearer the

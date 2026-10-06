@@ -33,6 +33,7 @@ var _drip_fall := -1.0
 var _drip_sound: AudioStreamPlayer2D
 
 func _ready() -> void:
+	add_to_group(OffscreenCuller.GROUP)
 	if Engine.is_editor_hint():
 		return
 	var shape := RectangleShape2D.new()

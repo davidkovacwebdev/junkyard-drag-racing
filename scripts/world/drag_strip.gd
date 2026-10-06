@@ -79,12 +79,12 @@ func _draw() -> void:
 	_draw_markings()
 	_draw_grandstand(rng)
 	_draw_scoreboard()
-	_draw_barrier_row(-_half_w - 6.0)
-	_draw_timing_pole(Vector2(finish_x, -_half_w - 14.0))
+	_draw_barrier_row(_barrier_row_ys()[0])
+	_draw_timing_pole(_timing_pole_bases()[0])
 	_draw_tire_wall()
-	_draw_light_tree(Vector2(start_x - 120.0, 0.0))
-	_draw_barrier_row(_half_w + 26.0)
-	_draw_timing_pole(Vector2(finish_x, _half_w + 30.0))
+	_draw_light_tree(_light_tree_base())
+	_draw_barrier_row(_barrier_row_ys()[1])
+	_draw_timing_pole(_timing_pole_bases()[1])
 	_draw_pit_clutter(rng)
 	_flush_art()
 
@@ -140,6 +140,15 @@ func _draw_markings() -> void:
 			_art.draw_rect(Rect2(finish_x - cell + c * cell, -_half_w + 6.0 + r * cell, cell, cell), color)
 
 # --- Structures ----------------------------------------------------------------
+
+func _barrier_row_ys() -> Array[float]:
+	return [-_half_w - 6.0, _half_w + 26.0]
+
+func _timing_pole_bases() -> Array[Vector2]:
+	return [Vector2(finish_x, -_half_w - 14.0), Vector2(finish_x, _half_w + 30.0)]
+
+func _light_tree_base() -> Vector2:
+	return Vector2(start_x - 120.0, 0.0)
 
 func _barrier_range() -> Vector2:
 	return Vector2(start_x + 60.0, _half_len - 60.0)
@@ -214,8 +223,11 @@ func _draw_crowd_row(stand: Rect2, seat_y: float, rng: RandomNumberGenerator) ->
 
 ## Scoreboard on two posts behind the strip near the start, showing a run time
 ## in yellow digits.
+func _scoreboard_base() -> Vector2:
+	return Vector2(start_x + 460.0, -_half_w - 44.0)
+
 func _draw_scoreboard() -> void:
-	var base := Vector2(start_x + 460.0, -_half_w - 44.0)
+	var base := _scoreboard_base()
 	var board := Rect2(base.x - 80.0, base.y - 130.0, 160.0, 64.0)
 	_art.draw_colored_polygon(FlatProps.octagon(base + Vector2(10.0, 2.0), 90.0, 8.0), UiPalette.SHADOW)
 	for post_x: float in [board.position.x + 20.0, board.end.x - 26.0]:
@@ -266,6 +278,15 @@ func _solid_rects() -> Array[Rect2]:
 	]
 	for spot in _pit_spots():
 		rects.append(Rect2(spot.x - 54.0, spot.y - 20.0, 124.0, 36.0))
+	var span := _barrier_range()
+	for base_y in _barrier_row_ys():
+		rects.append(Rect2(span.x, base_y - BARRIER_FACE_H - 4.0, span.y - span.x, BARRIER_FACE_H + 4.0))
+	var scoreboard := _scoreboard_base()
+	rects.append(Rect2(scoreboard.x - 70.0, scoreboard.y - 16.0, 140.0, 18.0))
+	for base in _timing_pole_bases():
+		rects.append(Rect2(base.x - 10.0, base.y - 12.0, 20.0, 14.0))
+	var light_tree := _light_tree_base()
+	rects.append(Rect2(light_tree.x - 12.0, light_tree.y - 12.0, 24.0, 14.0))
 	return rects
 
 # --- Geometry helpers ----------------------------------------------------------

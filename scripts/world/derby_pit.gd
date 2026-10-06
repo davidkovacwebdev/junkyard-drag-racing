@@ -37,6 +37,7 @@ func _ready() -> void:
 	for wreck in WRECKS:
 		RoundedRectShape.add_solid(self, Rect2(wreck.position.x, wreck.end.y - 30.0, wreck.size.x, 30.0))
 	RoundedRectShape.add_solid(self, Rect2(BOARD_RECT.position.x, BOARD_RECT.end.y + BOARD_POST_HEIGHT - 16.0, BOARD_RECT.size.x, 16.0))
+	RoundedRectShape.add_solid(self, Rect2(POLE_BASE.x - 16.0, POLE_BASE.y - 14.0, 32.0, 18.0))
 
 func _draw() -> void:
 	_art.clear()

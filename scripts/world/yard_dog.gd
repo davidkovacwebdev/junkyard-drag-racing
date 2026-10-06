@@ -47,6 +47,7 @@ var _stride := 0.0
 var _time := 0.0
 
 func _ready() -> void:
+	add_to_group(OffscreenCuller.GROUP)
 	_home = global_position
 	_player = get_tree().get_first_node_in_group(PlayerCar.GROUP) as Node2D
 

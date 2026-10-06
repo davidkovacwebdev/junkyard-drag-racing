@@ -18,7 +18,7 @@ extends Node2D
 ## preview deliberately shows the heap and the crane without them.
 
 @export_group("Junk")
-@export var junk_chunk_count: int = 18:
+@export var junk_chunk_count: int = 10:
 	set(value):
 		junk_chunk_count = maxi(value, 0)
 		if is_node_ready():
@@ -28,6 +28,8 @@ extends Node2D
 		part_count = maxi(value, 0)
 		if is_node_ready():
 			_assemble()
+## Sets the heap's size: its base spans `HEAP_WIDTH_SHARE` times this either
+## side of centre and its peak stands `HEAP_HEIGHT_SHARE` times this high.
 @export var radius: float = 160.0:
 	set(value):
 		radius = maxf(value, 1.0)
@@ -52,7 +54,7 @@ extends Node2D
 ## How big the crane is against the junk heap. The machine is authored for the
 ## interior yard (a 1900x1200 lot) at scale 1, so on the map it has to come down
 ## to the pile's size or the boom towers clear off the landmark.
-@export var crane_scale: float = 0.5:
+@export var crane_scale: float = 0.75:
 	set(value):
 		crane_scale = maxf(value, 0.01)
 		if is_node_ready():
@@ -60,18 +62,32 @@ extends Node2D
 ## How much cable the winch has paid out, in the crane's own (unscaled) units.
 ## Long enough that the parked claw reaches down to the heap instead of dangling
 ## over open ground.
-@export var crane_hoist: float = 280.0:
+@export var crane_hoist: float = 420.0:
 	set(value):
 		crane_hoist = value
 		if is_node_ready():
 			_assemble()
-## How far behind the heap centre the tracks sit, as a fraction of `radius`. The
-## base is set back a touch so the pile reads as heaped up in front of the crane.
-@export var crane_depth: float = 0.15:
+## Ground left between the heap's right foot and the crane's tracks.
+@export var crane_gap: float = 16.0:
 	set(value):
-		crane_depth = value
+		crane_gap = value
 		if is_node_ready():
 			_assemble()
+
+## The heap's base half-width, as a multiple of `radius`.
+const HEAP_WIDTH_SHARE := 1.4
+## The peak's height, as a multiple of `radius`.
+const HEAP_HEIGHT_SHARE := 1.25
+## The heap's outline, foot to foot over a peak left of centre, as (x, height)
+## shares of the base half-width and the peak height. Lumpy, not a dome.
+const HEAP_OUTLINE: Array[Vector2] = [
+	Vector2(-1.0, 0.0), Vector2(-0.8, 0.24), Vector2(-0.62, 0.5), Vector2(-0.42, 0.7),
+	Vector2(-0.24, 0.62), Vector2(-0.06, 1.0), Vector2(0.18, 0.9), Vector2(0.4, 0.7),
+	Vector2(0.56, 0.6), Vector2(0.78, 0.34), Vector2(1.0, 0.0),
+]
+## Where the shaded right flank starts along HEAP_OUTLINE (the peak).
+const HEAP_PEAK_INDEX := 5
+const MOUND_COLOR := Color(0.42, 0.34, 0.22, 1)
 
 const _JUNK_COLORS := [
 	Color(0.45, 0.4, 0.35, 1),
@@ -142,35 +158,63 @@ func _spawn_crane() -> void:
 		return
 	var crane := JunkyardCrane.new()
 	crane.name = "Crane"
+	crane.add_to_group(OffscreenCuller.GROUP)
 	crane.scale = Vector2(crane_scale, crane_scale)
 	_art.add_child(crane)
 	# Trolley and cable are the machine's own controls, and `_ready()` parks them
 	# at the exported defaults — so set them after the node is in the tree, or
 	# the parked values win.
-	crane.place_trolley(crane.trolley_offset)
 	crane.place_hoist(crane_hoist)
 	# Claw hangs at `-trolley` in the crane's local x, so standing the tracks at
 	# `trolley * scale` lands the claw above the heap centre (local x 0).
-	crane.position = Vector2(crane.trolley * crane_scale, -radius * crane_depth)
+	# Tracks on the ground beside the heap's right foot. The trolley is run out
+	# so the claw hangs over the peak.
+	var track_half := crane.track_width * 0.5 * crane_scale
+	crane.position = Vector2(radius * HEAP_WIDTH_SHARE + crane_gap + track_half, 0.0)
+	crane.place_trolley((crane.position.x - _heap_outline()[HEAP_PEAK_INDEX].x) / crane_scale)
+	if not Engine.is_editor_hint():
+		var tracks := Rect2(-crane.track_width * 0.5, -crane.track_height * 0.5, crane.track_width, crane.track_height * 0.5)
+		RoundedRectShape.add_solid(crane, tracks)
 
-## Dirt-colored base underneath the junk so the cluster reads as a
-## heaped-up hill rather than debris just floating on bare sand.
+## The heap, standing on the node's origin (the ground line, which is also its
+## y-sort point): one lumpy mound, a darker right flank and a ground shadow.
 func _spawn_mound(rng: RandomNumberGenerator) -> void:
+	var outline := _heap_outline()
+	var half_width := radius * HEAP_WIDTH_SHARE
+	var shadow := Polygon2D.new()
+	shadow.color = UiPalette.SHADOW
+	shadow.polygon = FlatProps.octagon(Vector2(16.0, 2.0), half_width + 20.0, 24.0)
+	_art.add_child(shadow)
 	var mound := Polygon2D.new()
-	mound.color = Color(0.32, 0.26, 0.17, 1)
-	var points := PackedVector2Array()
-	var point_count := 14
-	for i in point_count:
-		var angle := TAU * i / point_count
-		var r := radius * rng.randf_range(0.85, 1.15)
-		points.append(Vector2(cos(angle), sin(angle)) * r)
-	mound.polygon = points
+	mound.color = MOUND_COLOR
+	var jittered := PackedVector2Array()
+	for i in outline.size():
+		var lump := 0.0 if i == 0 or i == outline.size() - 1 else rng.randf_range(-6.0, 6.0)
+		jittered.append(outline[i] + Vector2(0.0, lump))
+	mound.polygon = jittered
 	_art.add_child(mound)
+	var flank := Polygon2D.new()
+	flank.color = MOUND_COLOR.darkened(0.25)
+	var flank_points := jittered.slice(HEAP_PEAK_INDEX)
+	flank_points.append(Vector2(outline[HEAP_PEAK_INDEX].x + half_width * 0.25, 0.0))
+	flank.polygon = flank_points
+	_art.add_child(flank)
 
+func _heap_outline() -> PackedVector2Array:
+	var points := PackedVector2Array()
+	for share in HEAP_OUTLINE:
+		points.append(Vector2(share.x * radius * HEAP_WIDTH_SHARE, -share.y * radius * HEAP_HEIGHT_SHARE))
+	return points
+
+## A spot on the heap's face, kept clear of its edges.
 func _random_point_in_pile(rng: RandomNumberGenerator) -> Vector2:
-	var angle := rng.randf_range(0.0, TAU)
-	var r := radius * sqrt(rng.randf())
-	return Vector2(cos(angle), sin(angle)) * r
+	var outline := _heap_outline()
+	var half_width := radius * HEAP_WIDTH_SHARE
+	for attempt in 12:
+		var point := Vector2(rng.randf_range(-half_width, half_width) * 0.8, -rng.randf_range(0.1, 0.85) * radius * HEAP_HEIGHT_SHARE)
+		if Geometry2D.is_point_in_polygon(point, outline):
+			return point
+	return Vector2(0.0, -radius * 0.4)
 
 func _spawn_junk_chunk(rng: RandomNumberGenerator) -> void:
 	var chunk := RigidBody2D.new()
@@ -178,14 +222,17 @@ func _spawn_junk_chunk(rng: RandomNumberGenerator) -> void:
 	# until the car actually bumps into it, instead of drifting off.
 	chunk.gravity_scale = 0.0
 	chunk.can_sleep = false
+	# Only the car (layer 2) moves it. Against the heap's own footprint or the
+	# other chunks it starts inside, it would be shoved off the pile at once.
+	chunk.collision_mask = 2
 	_art.add_child(chunk)
 	chunk.position = _random_point_in_pile(rng)
 	chunk.rotation = rng.randf_range(0.0, TAU)
 
-	var size := rng.randf_range(10.0, 22.0)
+	var size := Vector2(rng.randf_range(14.0, 30.0), rng.randf_range(8.0, 16.0))
 	var poly := PackedVector2Array([
-		Vector2(-size, -size), Vector2(size, -size),
-		Vector2(size, size), Vector2(-size, size),
+		Vector2(-size.x, -size.y), Vector2(size.x, -size.y),
+		Vector2(size.x * 0.8, size.y), Vector2(-size.x, size.y),
 	])
 
 	var visual := Polygon2D.new()

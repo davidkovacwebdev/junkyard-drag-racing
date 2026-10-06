@@ -104,6 +104,20 @@ func interact(_actor: Node = null) -> void:
 
 var _drawn_open := false
 
+func _ready() -> void:
+	super()
+	add_to_group(OffscreenCuller.GROUP)
+	if Engine.is_editor_hint():
+		return
+	var tires := CollisionShape2D.new()
+	tires.shape = RoundedRectShape.build(Vector2(32.0, 14.0), 6.0)
+	tires.position = art_origin() + _tire_stack_base() - Vector2(0.0, 7.0)
+	add_child(tires)
+
+## The spare tyres by the door, in box space.
+func _tire_stack_base() -> Vector2:
+	return Vector2(size.x / 2.0 + 18.0, size.y / 2.0)
+
 func _process(_delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
@@ -111,6 +125,7 @@ func _process(_delta: float) -> void:
 		queue_redraw()
 
 func _draw() -> void:
+	draw_set_transform(art_origin())
 	# DayNightCycle is an autoload, which doesn't exist in the editor.
 	_drawn_open = Engine.is_editor_hint() or _is_open()
 	var half := size / 2.0
@@ -122,7 +137,7 @@ func _draw() -> void:
 	_draw_roof(half)
 	_draw_sign(half)
 	_draw_flag(half)
-	FlatProps.draw_tire_stack(self, Vector2(half.x + 18.0, half.y), 2, 14.0, 8.0)
+	FlatProps.draw_tire_stack(self, _tire_stack_base(), 2, 14.0, 8.0)
 
 func _draw_shadow(half: Vector2) -> void:
 	draw_colored_polygon(PackedVector2Array([
@@ -175,22 +190,22 @@ func _draw_sign(half: Vector2) -> void:
 	for post_x: float in [board.position.x + 12.0, board.end.x - 16.0]:
 		draw_rect(Rect2(post_x, board.end.y, 5.0, 14.0), UiPalette.POST_GREY)
 	var pivot := board.get_center()
-	draw_set_transform(pivot, deg_to_rad(2.0), Vector2.ONE)
+	draw_set_transform(art_origin() + pivot, deg_to_rad(2.0), Vector2.ONE)
 	var local := Rect2(board.position - pivot, board.size)
 	draw_rect(local, SIGN_BOARD)
 	draw_string(ThemeDB.fallback_font, local.position + Vector2(0.0, 18.0), "ENTRY",
 			HORIZONTAL_ALIGNMENT_CENTER, local.size.x, 16, UiPalette.INK)
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	draw_set_transform(art_origin())
 
 ## Pole leaning up-and-right off the roof's right corner with a checkered cloth
 ## off its tip. Drawn in a rotated transform whose +x runs along the pole and +y
 ## points away from it.
 func _draw_flag(half: Vector2) -> void:
-	draw_set_transform(Vector2(half.x - 6.0, -half.y + 4.0), -PI / 4.0, Vector2.ONE)
+	draw_set_transform(art_origin() + Vector2(half.x - 6.0, -half.y + 4.0), -PI / 4.0, Vector2.ONE)
 	draw_colored_polygon(FlatProps.sliver(Vector2.ZERO, Vector2(FLAG_POLE_LENGTH, 0.0), 5.0), UiPalette.STEEL_BASE)
 	var hoist := FLAG_POLE_LENGTH - FLAG_ALONG * FLAG_CELL
 	for along in FLAG_ALONG:
 		for out in FLAG_OUT:
 			draw_rect(Rect2(hoist + along * FLAG_CELL, out * FLAG_CELL, FLAG_CELL, FLAG_CELL),
 					CHECKER_LIGHT if (along + out) % 2 == 0 else UiPalette.INK)
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	draw_set_transform(art_origin())

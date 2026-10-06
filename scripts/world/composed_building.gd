@@ -27,6 +27,8 @@ var _art: Node2D
 ## loadout changing at runtime) adjusts by the difference rather than adding a
 ## second shift on top of the first.
 var _applied_sort_offset: float = 0.0
+## Same, for how far the hand-placed children have been lifted.
+var _applied_child_lift: float = 0.0
 
 func _ready() -> void:
 	_assemble()
@@ -49,7 +51,7 @@ func _assemble() -> void:
 	# the footprint is (width, height-above-ground), so its ground is half the
 	# height below the visual centre the node is authored at.
 	var ground_local := building_size.y / 2.0
-	var sort_offset := ground_local - collision_height
+	var sort_offset := ground_local
 
 	if Engine.is_editor_hint():
 		# Preview only: place the art exactly where it lands at runtime, but do
@@ -63,29 +65,33 @@ func _assemble() -> void:
 	# which is also the point Main's y_sort_enabled reads to decide whether
 	# the car draws in front of or behind this building. On a tall, roofed
 	# building that leaves a dead band between the box's visual centre and
-	# the collision footprint's actual top edge, where the car pops in
-	# front on screen while still standing well above the wall — reported
-	# as the car floating "above the house". Fixed by shifting this body
-	# down onto the collision footprint's top edge, then pulling the
+	# the ground line, where the car pops in front on screen while still
+	# standing well above the wall — reported as the car floating "above the
+	# house". Fixed by shifting this body down onto its ground line (where
+	# trees, props and the car sort too), then pulling the
 	# collision shape and the assembled visuals back up by the same
 	# amount, so every pixel lands exactly where Obstacle would have put
-	# it — only the sort key moves. Skipping super._ready() (rather than
-	# patching this into Obstacle itself) keeps House/RegistrationBooth,
-	# which draw straight off Obstacle's own box-centred convention,
-	# completely unaffected.
+	# it — only the sort key moves. Obstacle does the same shift, but once;
+	# this one has to survive a re-assemble, hence its own copy.
 	size = building_size
 	collision_height_fraction = fraction
 	corner_radius = corner
 	position.y += sort_offset - _applied_sort_offset
 	_applied_sort_offset = sort_offset
+	# Hand-placed children (the shop's sign) were placed against the old sort
+	# point, the footprint's top edge, so they're lifted back up to it.
+	var child_lift := collision_height - _applied_child_lift
+	_applied_child_lift = collision_height
+	for child in get_children():
+		if child != $CollisionShape2D and (child is Node2D or child is Control):
+			child.position.y -= child_lift
 
 	$CollisionShape2D.shape = RoundedRectShape.build(Vector2(building_size.x, collision_height), corner)
-	$CollisionShape2D.position = Vector2(0.0, collision_height / 2.0)
+	$CollisionShape2D.position = Vector2(0.0, -collision_height / 2.0)
 
-	# Ground line, in this shifted local space: one collision_height below
-	# the node's new origin, matching where every part's own building-space
-	# origin (y=0) expects to land.
-	_art = BuildingAssembler.assemble(building_data, self, Vector2(0.0, collision_height))
+	# The node's new origin is the ground line, where every part's own
+	# building-space origin (y=0) expects to land.
+	_art = BuildingAssembler.assemble(building_data, self, Vector2.ZERO)
 
 ## Drop the currently assembled art, if any. Uses `free()` rather than
 ## `queue_free()` so a re-assemble in the same frame can't briefly show both.

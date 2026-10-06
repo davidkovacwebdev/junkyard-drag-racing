@@ -24,6 +24,7 @@ const LOCKED_COLOR := Color(0.75, 0.75, 0.72)
 var _drawn_open: bool = false
 
 func _ready() -> void:
+	add_to_group(OffscreenCuller.GROUP)
 	if Engine.is_editor_hint():
 		return
 	var shape := RectangleShape2D.new()

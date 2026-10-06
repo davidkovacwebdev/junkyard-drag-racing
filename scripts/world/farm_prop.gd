@@ -58,6 +58,7 @@ const WINDMILL_SPIN := 1.4
 var _blade_angle := 0.0
 
 func _ready() -> void:
+	add_to_group(OffscreenCuller.GROUP)
 	set_process(kind == Kind.WINDMILL)
 	if not Engine.is_editor_hint():
 		_build_collision()
@@ -80,6 +81,8 @@ func _build_collision() -> void:
 			footprint = Rect2(-32.0, -12.0, 64.0, 12.0)
 		Kind.SCARECROW:
 			footprint = Rect2(-8.0, -8.0, 16.0, 8.0)
+		Kind.SIGN:
+			footprint = Rect2(-56.0, -12.0, 112.0, 12.0)
 		_:
 			return
 	var shape := RectangleShape2D.new()
