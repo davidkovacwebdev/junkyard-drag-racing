@@ -244,7 +244,7 @@ func _spawn_part(slot: Dictionary, rng: RandomNumberGenerator) -> void:
 func _part_pool() -> Array[PartData]:
 	var pool: Array[PartData] = []
 	pool.append_array(PartDatabase.junk_bodies)
-	pool.append_array(PartDatabase.wheels)
+	pool.append_array(PartDatabase.junk_wheels)
 	pool.append_array(PartDatabase.junk_engines)
 	pool.append_array(PartDatabase.junk_accessories)
 	return pool

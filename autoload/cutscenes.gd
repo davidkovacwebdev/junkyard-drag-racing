@@ -7,7 +7,7 @@ extends Node
 ##
 ## Steps, all awaitable and skip-aware:
 ##   Camera  — cut_to, camera_to, camera_follow, shake
-##   Screen  — fade_out, fade_in, title_card
+##   Screen  — fade_out, fade_in, title_card, part_card
 ##   Actors  — spawn_actor, walk, hop, fall_over, stand_up, face
 ##   Talk    — subtitle (typed in the bottom bar in the speaker's own voice,
 ##             moves on by itself; `{player}` becomes the player's name)
@@ -34,6 +34,9 @@ const SUBTITLE_HOLD_PER_LETTER := 0.02
 const SUBTITLE_CHARACTERS_PER_SECOND := 55.0
 ## Advancing a tween this far finishes it outright; used to skip.
 const SKIP_STEP_SECONDS := 1000.0
+const PART_CARD := preload("res://scenes/garage/part_slot.tscn")
+## As wide as the crane pen's part cards.
+const PART_CARD_WIDTH := 330.0
 
 var _active: bool = false
 var _skipping: bool = false
@@ -46,6 +49,7 @@ var _top_bar: ColorRect
 var _bottom_bar: ColorRect
 var _fade: ColorRect
 var _title: Label
+var _part_card: PartSlot = null
 var _subtitle_name: Label
 var _subtitle_line: Label
 var _speech: SpeechPlayer
@@ -120,6 +124,7 @@ func skip() -> void:
 func _end() -> void:
 	_hide_subtitle()
 	_title.visible = false
+	_free_part_card()
 	_follow_target = null
 	_shake_left = 0.0
 	for actor in _actors:
@@ -175,6 +180,44 @@ func title_card(text: String, seconds: float = 2.0) -> void:
 	await _await_tween(tween)
 	await wait(seconds)
 	_title.visible = false
+
+## The card the crane pen pops up for a part it hauls in (the garage's part
+## card), for a part the player is handed: popped up mid-screen, held, then
+## faded away.
+func part_card(part: PartData, seconds: float = 2.5) -> void:
+	if _skipping or part == null:
+		return
+	if is_instance_valid(_part_card):
+		_part_card.queue_free()
+	_part_card = PART_CARD.instantiate()
+	_part_card.custom_minimum_size = Vector2(PART_CARD_WIDTH, 0.0)
+	# Just for looking at: nothing to drag it onto here.
+	_part_card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_part_card.category = part.category
+	_part_card.modulate.a = 0.0
+	_layer.add_child(_part_card)
+	_part_card.set_part(part)
+	_part_card.reset_size()
+	var card_size := _part_card.get_combined_minimum_size()
+	_part_card.size = card_size
+	_part_card.position = (_layer.get_viewport().get_visible_rect().size - card_size) * 0.5
+	_part_card.pivot_offset = card_size * 0.5
+	_part_card.scale = Vector2(0.6, 0.6)
+	var pop := create_tween()
+	pop.tween_property(_part_card, "modulate:a", 1.0, 0.15)
+	pop.parallel().tween_property(_part_card, "scale", Vector2.ONE, 0.3) \
+			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	await _await_tween(pop)
+	await wait(seconds)
+	var fade := create_tween()
+	fade.tween_property(_part_card, "modulate:a", 0.0, 0.4)
+	await _await_tween(fade)
+	_free_part_card()
+
+func _free_part_card() -> void:
+	if is_instance_valid(_part_card):
+		_part_card.queue_free()
+	_part_card = null
 
 ## A line from `speaker_name`, typed into the bottom bar in their voice.
 ## `actor` (optional) does the talking squash while it types. Moves on by

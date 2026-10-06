@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="QuestData" format=3 uid="uid://sp08ogy0x6rn"]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"rally_debut"
+title = "Safety Last"
+giver = "Grandpa"
+description = "A new rally track has opened, and Grandpa gave you his precious helmet for it. It's an old football helmet. He says it's meant to be a wheel, so it's waiting in the garage with your spare parts.
+
+Go enter a race at the Rally, then let Grandpa know how it went."
+objective = "Enter a race at the Rally"
+objective_place = "Rally"
+start_cutscene = "res://cutscenes/grandpa_helmet.tres"
+race_goal_venue = "Rally"
+reminder_line = "Rally's waitin', {player}. Helmet's optional. Always was."
+turn_in_cutscene = "res://cutscenes/grandpa_rally_report.tres"

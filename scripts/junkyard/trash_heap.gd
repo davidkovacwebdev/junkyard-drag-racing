@@ -387,7 +387,7 @@ func _junk_material() -> PhysicsMaterial:
 func _random_part(rng: RandomNumberGenerator, tier: int) -> PartData:
 	var pool: Array[PartData] = []
 	pool.append_array(PartDatabase.junk_bodies)
-	pool.append_array(PartDatabase.wheels)
+	pool.append_array(PartDatabase.junk_wheels)
 	pool.append_array(PartDatabase.junk_engines)
 	pool.append_array(PartDatabase.junk_accessories)
 	var matching := pool.filter(func(part: PartData) -> bool: return part.tier == tier)

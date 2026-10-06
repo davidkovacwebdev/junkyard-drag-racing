@@ -19,3 +19,4 @@ interior_scene = ExtResource("3")
 debug_race_scene = ExtResource("race")
 race_scene_path = "res://scenes/race/race_rally.tscn"
 wall_color = Color(0.3, 0.44, 0.28, 1)
+opens_with_quest = &"rally_debut"

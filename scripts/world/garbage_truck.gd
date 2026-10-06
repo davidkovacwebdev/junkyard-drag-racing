@@ -348,7 +348,7 @@ func _maybe_drop_loot() -> void:
 	var drop_point := global_position - _last_move_dir * 60.0
 	var orb: Pickup
 	if _rng.randf() < part_share_of_drops:
-		var pool := _first_filled([PartDatabase.wheels, PartDatabase.junk_bodies, PartDatabase.junk_engines])
+		var pool := _first_filled([PartDatabase.junk_wheels, PartDatabase.junk_bodies, PartDatabase.junk_engines])
 		if pool.is_empty():
 			return
 		var part_orb := part_pickup_scene.instantiate() as PartPickup

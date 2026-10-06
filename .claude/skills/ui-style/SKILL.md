@@ -108,7 +108,7 @@ Saturation stays low everywhere. Yellow and red are the only loud colors — use
   - `SceneLoader` (autoload `autoload/scene_loader.gd`): the loading modal. A dimmed screen with a wood board, "LOADING", a junkyard quip and a `LoadingTrack` (uneven progress blocks with a tyre spinning its wheels at the fill head). It loads the next scene on a background thread and pauses the old one meanwhile. Every scene change into or out of gameplay goes through `SceneLoader.change_scene(path)` / `change_scene_packed(packed)` / `reload_current_scene()`. Only instant hops between menu screens (`scenes/menu/`) call `change_scene_to_file()` directly.
   - `BackButton` (`scenes/ui/back_button.tscn`): a ScrapButton that leaves the screen (Esc too).
   - `StatBar` (`scenes/garage/stat_bar.tscn`): 5 drawn blocks with uneven heights.
-  - `PartSlot` (`scenes/garage/part_slot.tscn`): the cardboard part card, shared by the garage and the F1 dev menu.
+  - `PartSlot` (`scenes/garage/part_slot.tscn`): the cardboard part card, shared by the garage, the F1 dev menu, the crane pen's haul cards and `Cutscenes.part_card(part)` (a part handed over in a cutscene).
   - `WorkshopBackdrop` (`scripts/garage/workshop_backdrop.gd`): plank wall + concrete floor for indoor screens.
   - `themes/scrap_theme.tres`: project-wide theme (`gui/theme/custom`) holding the font, flat scrollbars and cardboard tooltips. Put Godot-native widget styling there, not per scene.
   - `ScrapCursor` (autoload `autoload/scrap_cursor.gd`): the global cursor. It squashes on click and tilts over enabled buttons. Don't set OS cursors anywhere.

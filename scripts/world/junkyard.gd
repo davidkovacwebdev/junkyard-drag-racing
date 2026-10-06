@@ -256,7 +256,7 @@ func _spawn_junk_chunk(rng: RandomNumberGenerator) -> void:
 func _spawn_random_part(rng: RandomNumberGenerator) -> void:
 	var pool: Array[PartData] = []
 	pool.append_array(PartDatabase.junk_bodies)
-	pool.append_array(PartDatabase.wheels)
+	pool.append_array(PartDatabase.junk_wheels)
 	pool.append_array(PartDatabase.junk_engines)
 	pool.append_array(PartDatabase.junk_accessories)
 	if pool.is_empty():

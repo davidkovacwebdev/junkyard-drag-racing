@@ -10,6 +10,7 @@ extends RefCounted
 
 const NAMES: Array[StringName] = [
 	&"ui_click",
+	&"helmet_bwomp",
 	&"loading_crank",
 	&"profile_scrapped",
 	&"ui_hover",
@@ -266,6 +267,7 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 	match sound_name:
 		&"ui_click": return _ui_click(rng)
 		&"loading_crank": return _loading_crank(rng)
+		&"helmet_bwomp": return _helmet_bwomp(rng)
 		&"ui_hover": return _ui_hover()
 		&"dialog_open": return _dialog_open(rng)
 		&"cutscene_whoosh": return _cutscene_whoosh(rng)
@@ -922,6 +924,22 @@ static func _loading_crank(rng: RandomNumberGenerator) -> PackedFloat32Array:
 		amp = [[0.0, 0.0], [0.006, 1.0], [0.16, 0.0]],
 	}), 0.17, 0.45)
 	return Synth.finish(out, 0.65)
+
+## Grandpa's old football helmet jammed down over someone's head: a padded
+## bwomp, then the shell wobbling as it settles on their ears.
+static func _helmet_bwomp(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.4)
+	Synth.mix_into(out, Synth.thump(0.2, 220.0, 0.004, 0.07, rng), 0.0, 0.9)
+	Synth.mix_into(out, Synth.tones(0.18, [[[0.0, 210.0], [0.18, 105.0]]], {
+		square = 0.2,
+		amp = [[0.0, 0.0], [0.006, 1.0], [0.18, 0.0]],
+	}), 0.0, 0.5)
+	Synth.mix_into(out, Synth.tones(0.3, [[[0.0, 150.0], [0.3, 120.0]]], {
+		square = 0.1,
+		amp = [[0.0, 0.0], [0.02, 1.0], [0.3, 0.0]],
+		tremolo = [11.0, 0.8],
+	}), 0.08, 0.35)
+	return Synth.finish(out, 0.7)
 
 ## A cardboard board slapped down on a counter, with a little upward pop so
 ## it reads as "someone's talking to you" rather than a crash.

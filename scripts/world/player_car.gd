@@ -248,6 +248,16 @@ const PART_PICKUP := preload("res://scenes/world/part_pickup.tscn")
 ## Null unless a line is in the water.
 var _fishing: FishingCast = null
 
+## Rebuilds the car's look and weight from the selected car, after something
+## out in the world swapped one of its parts (Grandpa taking his helmet back).
+func refresh_parts() -> void:
+	var car := Inventory.get_selected_car()
+	if car == null:
+		return
+	_visual.build_from(car)
+	_car_mass = _compute_car_mass(car)
+	_visual.fit_collision(_collision)
+
 func _ready() -> void:
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	add_to_group(GROUP)
@@ -722,7 +732,7 @@ func _on_fishing_finished(caught: bool, spot: Vector2) -> void:
 		Pickup.spawn_float_text(get_parent(), spot + Vector2(0.0, -60.0), "Just an old boot.")
 		return
 	var orb: Pickup
-	var pools := [PartDatabase.wheels, PartDatabase.junk_bodies, PartDatabase.junk_engines].filter(
+	var pools := [PartDatabase.junk_wheels, PartDatabase.junk_bodies, PartDatabase.junk_engines].filter(
 			func(pool: Array) -> bool: return not pool.is_empty())
 	if roll < catch_boot_chance + catch_part_chance and not pools.is_empty():
 		var pool: Array = pools.pick_random()

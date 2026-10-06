@@ -14,12 +14,33 @@ const MAX_NAME_LENGTH := 16
 const NAME_TOKEN := "{player}"
 
 var player_name: String = ""
-## Null until character creation has run (or on a save older than it).
-var character: CharacterData = null
+## Set by character creation. A save without one (older than character
+## creation, or a world started straight from the editor) gets a plain
+## stand-in the first time it's asked for, so cutscenes always have the
+## player to show. The save keeps it from then on.
+var character: CharacterData = null:
+	get:
+		if character == null:
+			character = _stand_in()
+		return character
 
 func reset() -> void:
 	player_name = ""
 	character = null
+
+## The first part (by name) for every slot character creation always fills;
+## no hair or accessory, like the creation screen's starting look.
+static func _stand_in() -> CharacterData:
+	var stand_in := CharacterData.new()
+	stand_in.display_name = FALLBACK_NAME
+	var parts := CharacterDatabase.scan_player_parts()
+	for slot in CharacterPartData.Slot.values():
+		if slot == CharacterPartData.Slot.HAIR or slot == CharacterPartData.Slot.ACCESSORY:
+			continue
+		var choices: Array = parts.get(slot, [])
+		if not choices.is_empty():
+			stand_in.set_part(slot, choices[0].scene)
+	return stand_in
 
 func display_name() -> String:
 	return player_name if not player_name.is_empty() else FALLBACK_NAME

@@ -1,6 +1,7 @@
-[gd_resource type="Resource" script_class="QuestData" format=3]
+[gd_resource type="Resource" script_class="QuestData" format=3 uid="uid://c1atelu75brau"]
 
 [ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://quests/rally_debut.tres" id="2_next"]
 
 [resource]
 script = ExtResource("1_script")
@@ -12,6 +13,7 @@ description = "Grandpa hung his bacon on the chains you bought him. Turns out th
 The new Hill Climb is open. Go enter a race there, then let Grandpa know how it went."
 objective = "Enter a race at the Hill Climb"
 objective_place = "Hill Climb"
+unlocks = Array[ExtResource("1_script")]([ExtResource("2_next")])
 race_goal_venue = "Hill Climb"
 reminder_line = "The hill ain't gonna climb itself, {player}."
 turn_in_line = "You {part}, huh? Well, the bacon's almost done. Tell me all about it over a strip."
