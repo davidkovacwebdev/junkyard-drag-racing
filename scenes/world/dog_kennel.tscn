@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/dog_kennel.gd" id="1_kennel"]
+[ext_resource type="Script" path="res://scripts/world/yard_dog.gd" id="2_dog"]
+
+[node name="DogKennel" type="Node2D"]
+y_sort_enabled = true
+
+[node name="Kennel" type="StaticBody2D" parent="."]
+script = ExtResource("1_kennel")
+
+[node name="Dog" type="Node2D" parent="."]
+position = Vector2(96, 30)
+script = ExtResource("2_dog")

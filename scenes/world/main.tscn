@@ -29,7 +29,13 @@
 [ext_resource type="PackedScene" path="res://scenes/world/derby_pit.tscn" id="26_derby"]
 [ext_resource type="Resource" uid="uid://car7se0sm2ydv" path="res://trees/birch.tres" id="32_1notw"]
 [ext_resource type="Resource" path="res://trees/pine.tres" id="32_5jr8u"]
+[ext_resource type="Script" uid="uid://bvnkbci86ihd4" path="res://scripts/world/blocked_bridge.gd" id="blocked_bridge"]
+[ext_resource type="Script" uid="uid://03pa1fn0kmww" path="res://scripts/world/bridge_barricade.gd" id="bridge_barricade"]
+[ext_resource type="Script" uid="uid://dakqn4w0h4aoe" path="res://scripts/world/cloud_layer.gd" id="cloud_layer"]
+[ext_resource type="PackedScene" path="res://scenes/world/dog_kennel.tscn" id="dog_kennel"]
+[ext_resource type="Script" uid="uid://3ffqup24bsrx" path="res://scripts/world/fishing_boat.gd" id="fishing_boat"]
 [ext_resource type="Script" uid="uid://w1y26uy8y6we" path="res://scripts/world/floating_trash_spawner.gd" id="floating_trash_spawner"]
+[ext_resource type="Script" uid="uid://cu4bnxi4v8vu4" path="res://scripts/world/gull_spawner.gd" id="gull_spawner"]
 [ext_resource type="Resource" path="res://buildings/house_01.tres" id="house_data_01"]
 [ext_resource type="Resource" path="res://buildings/house_02.tres" id="house_data_02"]
 [ext_resource type="Resource" path="res://buildings/house_03.tres" id="house_data_03"]
@@ -48,14 +54,21 @@
 [ext_resource type="PackedScene" path="res://scenes/world/crop_fields.tscn" id="landmark_fields"]
 [ext_resource type="PackedScene" path="res://scenes/world/graveyard.tscn" id="landmark_graveyard"]
 [ext_resource type="PackedScene" path="res://scenes/world/hangar.tscn" id="landmark_hangar"]
+[ext_resource type="PackedScene" path="res://scenes/world/crashed_helicopter.tscn" id="landmark_helicopter"]
 [ext_resource type="PackedScene" path="res://scenes/world/lighthouse_point.tscn" id="landmark_lighthouse"]
+[ext_resource type="PackedScene" path="res://scenes/world/lonely_island.tscn" id="landmark_lonely_island"]
 [ext_resource type="PackedScene" path="res://scenes/world/oil_field.tscn" id="landmark_oil"]
+[ext_resource type="PackedScene" path="res://scenes/world/oil_rig.tscn" id="landmark_oil_rig"]
 [ext_resource type="PackedScene" path="res://scenes/world/fishing_port.tscn" id="landmark_port"]
+[ext_resource type="PackedScene" path="res://scenes/world/satellite_array.tscn" id="landmark_satellite_array"]
+[ext_resource type="PackedScene" path="res://scenes/world/shipwreck.tscn" id="landmark_shipwreck"]
+[ext_resource type="PackedScene" path="res://scenes/world/water_tower.tscn" id="landmark_water_tower"]
 [ext_resource type="Script" uid="uid://cgja4fmhwax6j" path="res://scripts/world/shark_spawner.gd" id="shark_spawner"]
 [ext_resource type="Resource" path="res://buildings/shop.tres" id="shop_building"]
 [ext_resource type="PackedScene" path="res://scenes/shop/shop.tscn" id="shop_interior"]
 [ext_resource type="PackedScene" path="res://scenes/world/shop_sign.tscn" id="shop_sign"]
 [ext_resource type="Script" uid="uid://bu5uxu5bnirmt" path="res://scripts/world/story_director.gd" id="story_director"]
+[ext_resource type="Script" uid="uid://cbycrxwy4n85t" path="res://scripts/world/tumbleweed_spawner.gd" id="tumbleweed_spawner"]
 
 [sub_resource type="Curve2D" id="Curve2D_688af"]
 _data = {
@@ -80,6 +93,12 @@ _data = {
 "points": PackedVector2Array(0, 0, 0, 0, 3958, -703, 0, 0, 0, 0, 4306, -1795, 0, 0, 0, 0, 4273, -2586, 0, 0, 0, 0, 4585, -4233, 0, 0, 0, 0, 3633, -4558, 0, 0, 0, 0, 2936, -3026, 0, 0, 0, 0, 3122, -2050)
 }
 point_count = 7
+
+[sub_resource type="Curve2D" id="Curve2D_lonely"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, -420, -40, 0, 0, 0, 0, -300, -250, 0, 0, 0, 0, -40, -320, 0, 0, 0, 0, 260, -270, 0, 0, 0, 0, 430, -60, 0, 0, 0, 0, 380, 180, 0, 0, 0, 0, 120, 300, 0, 0, 0, 0, -200, 280, 0, 0, 0, 0, -400, 150, 0, 0, 0, 0, -420, -40)
+}
+point_count = 10
 
 [sub_resource type="Curve2D" id="Curve2D_r1kpy"]
 _data = {
@@ -147,6 +166,12 @@ _data = {
 }
 point_count = 3
 
+[sub_resource type="Curve2D" id="Curve2D_road_westbridgelink"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, -8004, -147, 80, -450, -80, 450, -8120, 1250, 650, 0, 0, 0, -8480, 2000)
+}
+point_count = 3
+
 [sub_resource type="Curve2D" id="Curve2D_road_dragstriplink"]
 _data = {
 "points": PackedVector2Array(242.242, 79.86001, -242.242, -79.86001, 2829, 1288, 201.7, 158.7, -201.7, -158.7, 1950, 850, 107.2, 179.3, -107.2, -179.3, 1500, 300, 0, 0, 0, 0, 1307, -226)
@@ -208,7 +233,7 @@ script = ExtResource("15")
 biome = 1
 
 [node name="Swamp3" type="Node2D" parent="Terrain" unique_id=2052393678]
-position = Vector2(6086, 15950)
+position = Vector2(7746, 16895)
 script = ExtResource("15")
 biome = 3
 
@@ -237,6 +262,10 @@ curve = SubResource("Curve2D_bolr6")
 [node name="Small Island" type="Path2D" parent="Terrain" unique_id=1927772466]
 position = Vector2(-13324, 11126)
 curve = SubResource("Curve2D_hbyw3")
+
+[node name="Lonely Island" type="Path2D" parent="Terrain" unique_id=1925668722]
+position = Vector2(12150, 12700)
+curve = SubResource("Curve2D_lonely")
 
 [node name="Sharks" type="Node2D" parent="." unique_id=1392191221]
 z_index = -950
@@ -287,11 +316,19 @@ curve = SubResource("Curve2D_road_southwestarm")
 [node name="ForestLink" type="Path2D" parent="Roads" unique_id=789317830]
 curve = SubResource("Curve2D_road_forestlink")
 
+[node name="WestBridgeLink" type="Path2D" parent="Roads" unique_id=161283359]
+curve = SubResource("Curve2D_road_westbridgelink")
+
 [node name="DragStripLink" type="Path2D" parent="Roads" unique_id=690803523]
 curve = SubResource("Curve2D_road_dragstriplink")
 
 [node name="RallyLink" type="Path2D" parent="Roads" unique_id=1733019482]
 curve = SubResource("Curve2D_road_rallylink")
+
+[node name="WestBridge" type="Node2D" parent="." unique_id=682732962]
+position = Vector2(-8480, 2000)
+script = ExtResource("blocked_bridge")
+deck_width = 340.0
 
 [node name="SkidMarks" type="Node2D" parent="." unique_id=344039305]
 script = ExtResource("12")
@@ -329,6 +366,11 @@ kind = 9
 
 [node name="Sortables" type="Node2D" parent="." unique_id=58475017]
 y_sort_enabled = true
+
+[node name="WestBridgeBarricade" type="StaticBody2D" parent="Sortables" unique_id=696091618]
+position = Vector2(-8571, 2002)
+script = ExtResource("bridge_barricade")
+deck_width = 340.0
 
 [node name="PlayerCar" parent="Sortables" unique_id=1844304645 instance=ExtResource("1")]
 
@@ -444,7 +486,7 @@ script = ExtResource("21_marker")
 kind = 5
 
 [node name="Ramp" parent="Sortables" unique_id=1499947680 instance=ExtResource("16")]
-position = Vector2(460, 300)
+position = Vector2(1098, 2042)
 interior_scene = ExtResource("17")
 
 [node name="MinimapMarker" type="Node2D" parent="Sortables/Ramp" unique_id=963194865]
@@ -561,11 +603,48 @@ position = Vector2(6900, 4248)
 [node name="Hangar" parent="Sortables" unique_id=293742891 instance=ExtResource("landmark_hangar")]
 position = Vector2(7526, 10778)
 
+[node name="WaterTower" parent="Sortables" unique_id=1414641372 instance=ExtResource("landmark_water_tower")]
+position = Vector2(-2900, -2400)
+
+[node name="SatelliteArray" parent="Sortables" unique_id=1766979643 instance=ExtResource("landmark_satellite_array")]
+position = Vector2(6200, 10000)
+
+[node name="CrashedHelicopter" parent="Sortables" unique_id=451375106 instance=ExtResource("landmark_helicopter")]
+position = Vector2(5000, 12960)
+
+[node name="ShipwreckCove" parent="Sortables" unique_id=554697793 instance=ExtResource("landmark_shipwreck")]
+position = Vector2(-2820, 9120)
+
+[node name="OilRig" parent="Sortables" unique_id=1862323596 instance=ExtResource("landmark_oil_rig")]
+position = Vector2(-7300, 4900)
+
+[node name="LonelyIsland" parent="Sortables" unique_id=668891349 instance=ExtResource("landmark_lonely_island")]
+position = Vector2(12150, 12700)
+
+[node name="Gulls" type="Node2D" parent="Sortables" unique_id=386723825]
+script = ExtResource("gull_spawner")
+max_critters = 6
+
+[node name="Tumbleweeds" type="Node2D" parent="Sortables" unique_id=2114988025]
+script = ExtResource("tumbleweed_spawner")
+max_critters = 3
+spawn_interval = Vector2(4, 10)
+
+[node name="DogKennel" parent="Sortables" unique_id=1523049895 instance=ExtResource("dog_kennel")]
+position = Vector2(-4144, -1472)
+
+[node name="FishingBoat" type="Node2D" parent="Sortables" unique_id=337289220]
+position = Vector2(11000, 3200)
+script = ExtResource("fishing_boat")
+
 [node name="PauseMenu" parent="." unique_id=1833115279 instance=ExtResource("6")]
 
 [node name="Rain" type="Node2D" parent="." unique_id=597439047]
 z_index = 900
 script = ExtResource("20_rain")
+
+[node name="Clouds" type="Node2D" parent="." unique_id=561624755]
+script = ExtResource("cloud_layer")
 
 [node name="StoryDirector" type="Node" parent="." unique_id=1820218251]
 script = ExtResource("story_director")

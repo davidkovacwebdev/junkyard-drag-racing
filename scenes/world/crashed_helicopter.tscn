@@ -1,0 +1,15 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/world/crashed_helicopter.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/audio/ambient_call.gd" id="2"]
+
+[node name="CrashedHelicopter" type="StaticBody2D"]
+script = ExtResource("1")
+
+[node name="Creak" type="AudioStreamPlayer2D" parent="."]
+position = Vector2(0, -150)
+max_distance = 1200.0
+volume_db = -14.0
+script = ExtResource("2")
+sound_name = &"rotor_creak"
+interval_range = Vector2(4, 9)

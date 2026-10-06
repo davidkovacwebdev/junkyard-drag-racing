@@ -32,6 +32,14 @@ static func sliver(from: Vector2, to: Vector2, thickness: float) -> PackedVector
 	var side := (to - from).orthogonal().normalized() * thickness * 0.5
 	return PackedVector2Array([from - side, to - side, to + side, from + side])
 
+## A teardrop of flame standing on `base`, leaning a little to the right.
+static func flame(base: Vector2, half_width: float, height: float) -> PackedVector2Array:
+	return PackedVector2Array([
+		base + Vector2(-half_width, 0.0), base + Vector2(-half_width * 0.6, -height * 0.5),
+		base + Vector2(half_width * 0.15, -height), base + Vector2(half_width * 0.7, -height * 0.45),
+		base + Vector2(half_width, 0.0), base + Vector2(0.0, half_width * 0.5),
+	])
+
 ## Eight-sided stand-in for a circle or ellipse; this art has no smooth curves.
 static func octagon(center: Vector2, rx: float, ry: float) -> PackedVector2Array:
 	var points := PackedVector2Array()

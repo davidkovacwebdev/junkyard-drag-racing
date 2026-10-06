@@ -1,10 +1,11 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/farm.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/world/farm_prop.gd" id="2"]
 [ext_resource type="Script" path="res://scripts/world/farm_barn.gd" id="3"]
 [ext_resource type="PackedScene" path="res://scenes/parts/engines/engine_horse.tscn" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/world/horse_farmer.tscn" id="5"]
+[ext_resource type="Script" path="res://scripts/world/chicken_flock.gd" id="6_chickens"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_barn"]
 resource_local_to_scene = true
@@ -88,3 +89,8 @@ script = ExtResource("2")
 kind = 4
 sign_title = "FARM"
 sign_subtitle = "HORSES FOR SALE"
+
+[node name="Chickens" type="Node2D" parent="."]
+position = Vector2(-200, 150)
+script = ExtResource("6_chickens")
+pen_size = Vector2(480, 160)

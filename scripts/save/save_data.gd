@@ -44,6 +44,8 @@ extends Resource
 @export var owned_items: Array[ItemData] = []
 ## Item id -> uses left (see Inventory.item_uses).
 @export var item_uses: Dictionary = {}
+## Times the tow truck has pulled the car out of the sea (WorldState.tow_count).
+@export var tow_count: int = 0
 ## How drunk the player is (see Drunk): beers in them, seconds until sober.
 @export var drunk_beers: int = 0
 @export var drunk_seconds_left: float = 0.0

@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/world/graveyard_prop.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/audio/ambient_call.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/world/bird_roost.gd" id="crow_roost"]
 
 [node name="Graveyard" type="Node2D"]
 y_sort_enabled = true
@@ -113,3 +114,8 @@ volume_db = -12.0
 script = ExtResource("2")
 sound_name = &"crow_caw"
 interval_range = Vector2(8, 18)
+
+[node name="CrowRoost" type="Node2D" parent="."]
+y_sort_enabled = true
+script = ExtResource("crow_roost")
+perches = Array[Vector3]([Vector3(-200, 20, 48), Vector3(60, 30, 48), Vector3(200, 120, 48), Vector3(-120, 30, 60), Vector3(40, -90, 146), Vector3(-218, -120, 134), Vector3(232, -40, 114), Vector3(-80, 75, 0), Vector3(150, 70, 0)])

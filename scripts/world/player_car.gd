@@ -45,6 +45,8 @@ const GROUP := &"player"
 ## Same resolution again, for the ground-decal layer skid marks are
 ## drawn into (see SkidMarksLayer).
 @export var skid_marks_path: NodePath = ^"../SkidMarks"
+## And for the island terrain, which says where the sea starts (see Wading).
+@export var terrain_path: NodePath = ^"../../Terrain"
 
 ## A skid mark starts stamping once the car's current heading and the
 ## player's new input direction diverge past this angle — "the car goes
@@ -122,6 +124,35 @@ const GROUP := &"player"
 @export var puke_shake_pixels: float = 3.0
 @export var puke_volume_db: float = -2.0
 
+@export_group("Wading")
+## Off the sand the car bogs down: top speed is cut to this share, falling to
+## nothing as it sinks, and the sea drags the speed it brought in off at
+## `water_drag` per second, so even a sprint only makes it a few lengths out.
+@export var wade_speed_multiplier: float = 0.4
+@export var wade_handling_multiplier: float = 0.4
+@export var water_drag: float = 3.0
+## Seconds in the water until the car is sunk to its axles and stuck, and how
+## fast it drains once it's back on land.
+@export var sink_seconds: float = 1.8
+@export var drain_seconds: float = 0.6
+## How far the body settles into the water when fully sunk.
+@export var sink_depth: float = 4.0
+@export var splash_volume_db: float = -4.0
+@export var glug_volume_db: float = -4.0
+
+@export_group("Fishing")
+## The fishing rod casts to the nearest water between these distances (world
+## px), searched in rings `cast_ring_step` apart. The minimum keeps the bobber
+## clear of the surf, out where it reads as sea.
+@export var cast_min_distance: float = 340.0
+@export var cast_reach: float = 620.0
+@export var cast_ring_step: float = 40.0
+## What comes up on the hook: a part this often, an old boot this often, scrap
+## (`catch_scrap` of it) the rest of the time.
+@export_range(0.0, 1.0) var catch_part_chance: float = 0.15
+@export_range(0.0, 1.0) var catch_boot_chance: float = 0.2
+@export var catch_scrap := Vector2i(2, 5)
+
 @export_group("Bleeding")
 ## Beaten up after the ramp (CharacterInjuries.current_level()), the car
 ## drips blood as it goes: a drop every this many px driven, at level 1 and
@@ -191,15 +222,39 @@ var _puked: bool = false
 var _blood_trail: BloodTrail = null
 var _blood_distance: float = 0.0
 var _blood_idle: float = 0.0
+## Null on a map without islands (the junkyard yard), where there's no sea.
+var _terrain: TerrainNetwork = null
+var _water_line: CarWaterLine
+## 0 dry, 1 sunk to the axles. Stuck latches at 1 and lets go back on land.
+var _sink: float = 0.0
+var _stuck: bool = false
+var _tow_called: bool = false
+## The puke shake, kept apart so the sink offset can sit on top of it.
+var _visual_shake: Vector2 = Vector2.ZERO
+var _default_collision_mask: int = 1
+
+const TOW_RESCUE := preload("res://cutscenes/tow_truck_rescue.tres")
+const SCRAP_PICKUP := preload("res://scenes/world/scrap_pickup.tscn")
+const PART_PICKUP := preload("res://scenes/world/part_pickup.tscn")
+## Null unless a line is in the water.
+var _fishing: FishingCast = null
 
 func _ready() -> void:
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	add_to_group(GROUP)
 	Cutscenes.started.connect(_set_hud_visible.bind(false))
 	Cutscenes.finished.connect(_set_hud_visible.bind(true))
-	_road_network = _resolve_roads()
-	_skid_marks = _resolve_skid_marks()
-	_puddles = _resolve_puddles()
+	_road_network = _resolve_in_scene(roads_path, RoadNetwork) as RoadNetwork
+	_skid_marks = _resolve_in_scene(skid_marks_path, SkidMarksLayer) as SkidMarksLayer
+	_puddles = _resolve_in_scene(puddles_path, PuddleField) as PuddleField
+	_terrain = _resolve_in_scene(terrain_path, TerrainNetwork) as TerrainNetwork
+	_water_line = CarWaterLine.new()
+	add_child(_water_line)
+	move_child(_water_line, _visual.get_index())
+	_water_line.hold(_visual)
+	_default_collision_mask = collision_mask
+	Inventory.set_use_check(&"fish", _fishing_blocked_reason)
+	Inventory.item_used.connect(_on_item_used)
 	var car := Inventory.get_selected_car()
 	if car != null:
 		_visual.audible_accessories = true
@@ -216,8 +271,21 @@ func _ready() -> void:
 	_interact_pressed_last = _is_key_held(KEY_E)
 	_test_pressed_last = _is_key_held(KEY_T)
 
+func _exit_tree() -> void:
+	Inventory.set_use_check(&"fish", Callable())
+	if Inventory.item_used.is_connected(_on_item_used):
+		Inventory.item_used.disconnect(_on_item_used)
+
 func get_road_network() -> RoadNetwork:
 	return _road_network
+
+func get_terrain() -> TerrainNetwork:
+	return _terrain
+
+## Hauled out by the tow truck, the car is dragged straight through the sea
+## wall, so it stops colliding with anything until it's set down.
+func set_towed(towed: bool) -> void:
+	collision_mask = 0 if towed else _default_collision_mask
 
 ## Every drive/interact key goes through here, so a cutscene can take the
 ## wheel just by being active.
@@ -295,33 +363,46 @@ func _physics_process(delta: float) -> void:
 	if _puke_left > 0.0:
 		input_dir = Vector2.ZERO
 
+	# One on-road check feeds both multipliers, rather than querying the
+	# road network twice for the same answer. The puddle check sits beside it
+	# and feeds the skid test too — standing water lets the tires go with far
+	# less provocation than dry tarmac. A road (a bridge deck, say) is never sea.
+	var on_road := _road_network != null and _road_network.is_on_road(global_position)
+	var on_puddle := _puddles != null and _puddles.is_on_puddle(global_position)
+	var in_water := not on_road and _terrain != null and _terrain.is_in_water(_terrain.to_local(global_position))
+	_update_wading(delta, in_water)
+	if _stuck:
+		input_dir = Vector2.ZERO
+	if is_instance_valid(_fishing):
+		# Driving off reels the line in; the car holds still while it does.
+		if input_dir != Vector2.ZERO:
+			_fishing.cancel()
+		input_dir = Vector2.ZERO
+
 	if input_dir.x > 0.0:
 		_facing_right = true
 	elif input_dir.x < 0.0:
 		_facing_right = false
 	_visual.scale.x = 1.0 if _facing_right else -1.0
 
-	# One on-road check feeds both multipliers, rather than querying the
-	# road network twice for the same answer. The puddle check sits beside it
-	# and feeds the skid test too — standing water lets the tires go with far
-	# less provocation than dry tarmac.
-	var on_road := _road_network != null and _road_network.is_on_road(global_position)
-	var on_puddle := _puddles != null and _puddles.is_on_puddle(global_position)
-
 	# Compared against velocity as it stood BEFORE this frame's move_toward
 	# touches it — "the car was already heading this way" — against the
 	# input direction just read above, "now the player wants that way".
 	var braking := _is_key_held(KEY_SPACE) or _puke_left > 0.0
-	var skidding := _is_skidding(input_dir, on_puddle) or (braking and velocity.length() > skid_min_speed)
+	var skidding := not in_water and (_is_skidding(input_dir, on_puddle) or (braking and velocity.length() > skid_min_speed))
 
 	var target_velocity := Vector2.ZERO
 	if input_dir != Vector2.ZERO and not braking:
 		var speed_multiplier := on_road_speed_multiplier if on_road else off_road_speed_multiplier
 		if _is_key_held(KEY_SHIFT):
 			speed_multiplier *= sprint_speed_multiplier
+		if in_water:
+			speed_multiplier *= wade_speed_multiplier * (1.0 - _sink)
 		target_velocity = input_dir.normalized() * max_speed * speed_multiplier
 		target_velocity += Drunk.sway() * max_speed * drunk_sway_speed * speed_multiplier
 	var handling_multiplier := on_road_handling_multiplier if on_road else off_road_handling_multiplier
+	if in_water:
+		handling_multiplier *= wade_handling_multiplier
 	if on_puddle:
 		# Grip, not speed: the car can still carry its momentum, it just
 		# can't change what it's doing anything like as quickly.
@@ -336,6 +417,8 @@ func _physics_process(delta: float) -> void:
 	else:
 		var base_rate := friction if input_dir == Vector2.ZERO else acceleration
 		velocity = velocity.move_toward(target_velocity, base_rate * handling_multiplier * delta)
+	if in_water:
+		velocity *= exp(-water_drag * delta)
 	var velocity_before_move := velocity
 	move_and_slide()
 	_strip_velocity_into_collisions()
@@ -540,11 +623,105 @@ func _update_puke(delta: float) -> void:
 		_puked = true
 		_spawn_puke_puddle()
 	if _puke_left > 0.0 and _puke_left < puke_seconds - 0.3:
-		_visual.position = Vector2(randf_range(-1.0, 1.0), randf_range(-1.0, 0.5)) * puke_shake_pixels
+		_visual_shake = Vector2(randf_range(-1.0, 1.0), randf_range(-1.0, 0.5)) * puke_shake_pixels
 	else:
-		_visual.position = Vector2.ZERO
+		_visual_shake = Vector2.ZERO
 		if _puke_left <= 0.0:
 			_puke_left = 0.0
+
+## Off the sand (see the Wading exports) the car sinks a little more every
+## moment, splashing on the way in; sunk to its axles it's stuck for good and
+## the tow truck gets called (TowTruckRescueCutscene). Back on land it drains
+## and lets go. Called every frame, so the water line and sink offset follow.
+func _update_wading(delta: float, in_water: bool) -> void:
+	if in_water and _sink <= 0.0:
+		Sfx.play(&"car_splash", splash_volume_db, 0.05)
+	if in_water:
+		_sink = minf(_sink + delta / sink_seconds, 1.0)
+	else:
+		_sink = maxf(_sink - delta / drain_seconds, 0.0)
+		_stuck = false
+		_tow_called = false
+	if in_water and _sink >= 1.0 and not _stuck:
+		_stuck = true
+		velocity = Vector2.ZERO
+		Sfx.play(&"car_sink_glug", glug_volume_db)
+	if _stuck and not _tow_called and not Cutscenes.is_active():
+		_tow_called = true
+		var rescue := TOW_RESCUE as TowTruckRescueCutscene
+		rescue.car = self
+		Cutscenes.play(rescue)
+	_water_line.level = _sink if in_water else 0.0
+	_visual.position = _visual_shake + Vector2(0.0, _sink * sink_depth)
+
+## The rod's use check (see Inventory.use_blocked_reason()): "" when there's
+## water to cast into and nothing in the way.
+func _fishing_blocked_reason(_item: ItemData) -> String:
+	if is_instance_valid(_fishing):
+		return "You've already got a line in."
+	if _stuck or Cutscenes.is_active():
+		return "Not now."
+	if _find_cast_spot() == null:
+		return "No water close enough to cast into. Park by the sea."
+	return ""
+
+func _on_item_used(item: ItemData) -> void:
+	if item.use_effect != &"fish":
+		return
+	var spot: Variant = _find_cast_spot()
+	if spot == null:
+		return
+	velocity = Vector2.ZERO
+	_fishing = FishingCast.new()
+	_fishing.spot = spot
+	_fishing.finished.connect(_on_fishing_finished)
+	add_child(_fishing)
+
+## The nearest open water around the car, searched outward in rings, or null.
+## A spot only counts with more sea past it (so the bobber lands out in the
+## blue, not in the surf), and roads (a bridge deck) don't count as water.
+func _find_cast_spot() -> Variant:
+	if _terrain == null:
+		return null
+	var distance := cast_min_distance
+	while distance <= cast_reach:
+		for i in 16:
+			var direction := Vector2.from_angle(TAU * i / 16.0)
+			var point := global_position + direction * distance
+			if _is_open_water(point) and _is_open_water(point + direction * cast_ring_step * 3.0):
+				return point
+		distance += cast_ring_step
+	return null
+
+func _is_open_water(point: Vector2) -> bool:
+	return _terrain.is_in_water(_terrain.to_local(point)) \
+			and not (_road_network != null and _road_network.is_on_road(point))
+
+## Whatever was on the hook flies out of the sea into the car: an old boot, a
+## car part, or (most of the time) a handful of scrap.
+func _on_fishing_finished(caught: bool, spot: Vector2) -> void:
+	_fishing = null
+	if not caught:
+		return
+	var roll := randf()
+	if roll < catch_boot_chance:
+		Sfx.play_at(&"boot_squelch", spot, -4.0)
+		Pickup.spawn_float_text(get_parent(), spot + Vector2(0.0, -60.0), "Just an old boot.")
+		return
+	var orb: Pickup
+	var pools := [PartDatabase.wheels, PartDatabase.junk_bodies, PartDatabase.junk_engines].filter(
+			func(pool: Array) -> bool: return not pool.is_empty())
+	if roll < catch_boot_chance + catch_part_chance and not pools.is_empty():
+		var pool: Array = pools.pick_random()
+		var part_orb := PART_PICKUP.instantiate() as PartPickup
+		part_orb.configure(pool.pick_random())
+		orb = part_orb
+	else:
+		var scrap_orb := SCRAP_PICKUP.instantiate() as ScrapPickup
+		scrap_orb.amount = randi_range(catch_scrap.x, catch_scrap.y)
+		orb = scrap_orb
+	get_parent().add_child(orb)
+	orb.launch(spot, global_position, 120.0, 0.8)
 
 ## Drips the beaten-up driver's blood behind the car (see the Bleeding
 ## exports). Checked every frame, so it stops the moment the quests say
@@ -606,11 +783,13 @@ func _roll_distance(delta: float, facing_sign: float) -> float:
 	var direction := 1.0 if velocity.x * facing_sign >= 0.0 else -1.0
 	return speed * direction * delta
 
-## Same resolution TrashSpawner uses: the exported path first, falling back
-## to searching the current scene for any RoadNetwork.
-func _resolve_roads() -> RoadNetwork:
-	var node := get_node_or_null(roads_path)
-	if node is RoadNetwork:
+## The exported path first, falling back to searching the current scene for
+## the first node of `type` — the same convention TrashSpawner uses — so a
+## reparented car still finds its roads, skid-mark layer, puddles and terrain.
+## Null is a valid answer (the junkyard has no puddles or sea).
+func _resolve_in_scene(path: NodePath, type: Script) -> Node:
+	var node := get_node_or_null(path)
+	if is_instance_of(node, type):
 		return node
 	var scene := get_tree().current_scene
 	if scene == null:
@@ -618,45 +797,7 @@ func _resolve_roads() -> RoadNetwork:
 	var stack: Array[Node] = [scene]
 	while not stack.is_empty():
 		var current: Node = stack.pop_back()
-		if current is RoadNetwork:
-			return current
-		for child in current.get_children():
-			stack.append(child)
-	return null
-
-## Same resolution again, for the ground-decal layer skid marks are drawn
-## into — a plain type search rather than a name lookup, matching
-## _resolve_roads().
-func _resolve_skid_marks() -> SkidMarksLayer:
-	var node := get_node_or_null(skid_marks_path)
-	if node is SkidMarksLayer:
-		return node
-	var scene := get_tree().current_scene
-	if scene == null:
-		scene = get_parent()
-	var stack: Array[Node] = [scene]
-	while not stack.is_empty():
-		var current: Node = stack.pop_back()
-		if current is SkidMarksLayer:
-			return current
-		for child in current.get_children():
-			stack.append(child)
-	return null
-
-## And once more for the puddle layer the wet-road grip test reads. Null is a
-## valid answer (a scene with no puddles in it), which just means the car is
-## never on one.
-func _resolve_puddles() -> PuddleField:
-	var node := get_node_or_null(puddles_path)
-	if node is PuddleField:
-		return node
-	var scene := get_tree().current_scene
-	if scene == null:
-		scene = get_parent()
-	var stack: Array[Node] = [scene]
-	while not stack.is_empty():
-		var current: Node = stack.pop_back()
-		if current is PuddleField:
+		if is_instance_of(current, type):
 			return current
 		for child in current.get_children():
 			stack.append(child)

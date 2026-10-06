@@ -10,6 +10,8 @@ extends Node
 ## - `PuddleField` fades its puddles in with `get_wetness()`,
 ## - `RainLayer` sets its alpha from `get_rain_intensity()`,
 ## - `PlayerCar` loses grip while it's standing in a puddle.
+## - `CloudLayer` shows as many clouds (and their shadows) as `cloud_cover`
+##   asks for: none on a clear day, the whole sky while it rains.
 ##
 ## The schedule is a **pure function of the day number**, so the same day
 ## always has the same weather. That's what lets rain survive a map reload
@@ -32,8 +34,8 @@ const RAIN_DAY_CHANCE := 0.55
 ## Chance a rainy day gets a second, separate shower.
 const SECOND_SHOWER_CHANCE := 0.3
 ## A shower's length, in in-game hours.
-const SHOWER_MIN_HOURS := 1.0
-const SHOWER_MAX_HOURS := 3.0
+const SHOWER_MIN_HOURS := 3.0
+const SHOWER_MAX_HOURS := 6.0
 
 ## Seconds for the visible rain to fade in or out, so a shower arrives as a
 ## building drizzle rather than a hard cut.
@@ -44,6 +46,20 @@ const FADE_TIME := 2.0
 const SOAK_SECONDS := 8.0
 const DRY_SECONDS := 45.0
 
+## Clouds roll in this many in-game hours before a shower, and break up over
+## the same span after it.
+const CLOUD_BUILD_HOURS := 1.5
+## Seed for each day's fair-weather clouds, kept apart from the rain roll so
+## adding clouds didn't change which days rain.
+const CLOUD_SEED := 4410
+## Chance a day's dry stretches are a clear blue sky, else a few fair clouds.
+const CLEAR_DAY_CHANCE := 0.4
+const FAIR_COVER_MIN := 0.15
+const FAIR_COVER_MAX := 0.45
+## Seconds cloud cover takes to catch up when it jumps (the debug key, or a
+## new day's fair-weather roll at midnight).
+const COVER_FADE_TIME := 6.0
+
 ## Testing/authoring aid: hold J to cycle the weather auto -> raining -> dry.
 ## Same idea as DayNightCycle's K fast-forward.
 const DEBUG_TOGGLE_KEY := KEY_J
@@ -52,6 +68,11 @@ const DEBUG_TOGGLE_KEY := KEY_J
 var wetness: float = 0.0
 ## 0 = no rain falling, 1 = full shower. Drives the rain layer's alpha.
 var rain_intensity: float = 0.0
+## 0 = clear sky, 1 = overcast. Drives the cloud layer.
+var cloud_cover: float = 0.0
+
+## Today's cloud cover away from any shower.
+var _fair_cover: float = 0.0
 
 ## Showers for the current day, as Vector2(start_hour, length_hours).
 var _windows: Array[Vector2] = []
@@ -64,6 +85,7 @@ func _ready() -> void:
 	DayNightCycle.day_changed.connect(_on_day_changed)
 	_schedule(DayNightCycle.day)
 	_was_raining = _is_raining_now()
+	cloud_cover = _cloud_cover_target()
 
 func _process(delta: float) -> void:
 	_handle_debug_toggle()
@@ -77,6 +99,7 @@ func _process(delta: float) -> void:
 			rain_stopped.emit()
 
 	rain_intensity = move_toward(rain_intensity, 1.0 if raining else 0.0, delta / FADE_TIME)
+	cloud_cover = move_toward(cloud_cover, _cloud_cover_target(), delta / COVER_FADE_TIME)
 
 	# Soaking scales with how hard it's coming down, so the ground barely
 	# dampens during the two-second fade-in; drying is a slow constant.
@@ -92,6 +115,10 @@ func get_rain_intensity() -> float:
 ## 0..1, how wet the ground has become.
 func get_wetness() -> float:
 	return wetness
+
+## 0..1, how much of the sky is cloud right now.
+func get_cloud_cover() -> float:
+	return cloud_cover
 
 func is_raining() -> bool:
 	return rain_intensity > 0.05
@@ -127,6 +154,9 @@ func _on_day_changed(day: int) -> void:
 ## always rains the same way, whichever scene asks.
 func _schedule(day: int) -> void:
 	_windows.clear()
+	var cloud_rng := RandomNumberGenerator.new()
+	cloud_rng.seed = CLOUD_SEED + day
+	_fair_cover = 0.0 if cloud_rng.randf() < CLEAR_DAY_CHANCE else cloud_rng.randf_range(FAIR_COVER_MIN, FAIR_COVER_MAX)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = SCHEDULE_SEED + day
 	if rng.randf() >= RAIN_DAY_CHANCE:
@@ -154,6 +184,21 @@ func _is_raining_at(hour: float) -> bool:
 		if fposmod(hour - window.x, 24.0) < window.y:
 			return true
 	return false
+
+## Fair-weather cover, climbing to overcast across the build-up before each
+## shower, staying there while it rains, then breaking up again after.
+func _cloud_cover_target() -> float:
+	if _override >= 0:
+		return 1.0 if _override == 1 else _fair_cover
+	var hour := DayNightCycle.get_hour()
+	var target := _fair_cover
+	for window in _windows:
+		var span := window.y + CLOUD_BUILD_HOURS * 2.0
+		var into := fposmod(hour - window.x + CLOUD_BUILD_HOURS, 24.0)
+		if into < span:
+			var build := clampf(minf(into, span - into) / CLOUD_BUILD_HOURS, 0.0, 1.0)
+			target = maxf(target, lerpf(_fair_cover, 1.0, build))
+	return target
 
 ## Hold J to step the override auto -> forced dry -> forced rain -> auto.
 func _handle_debug_toggle() -> void:

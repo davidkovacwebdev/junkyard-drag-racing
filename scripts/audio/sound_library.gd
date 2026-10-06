@@ -113,6 +113,26 @@ const NAMES: Array[StringName] = [
 	&"ufo_reveal",
 	&"ufo_hatch",
 	&"alien_yelp",
+	&"car_splash",
+	&"car_sink_glug",
+	&"tow_reverse_beep",
+	&"tow_winch",
+	&"rod_cast",
+	&"bobber_plop",
+	&"reel_whirr",
+	&"boot_squelch",
+	&"tank_drip",
+	&"dish_chirp",
+	&"rotor_creak",
+	&"hull_creak",
+	&"rig_clank",
+	&"castaway_holler",
+	&"wing_flutter",
+	&"tumbleweed_crunch",
+	&"dog_bark",
+	&"chicken_cluck",
+	&"chicken_squawk",
+	&"boat_putter_loop",
 ]
 
 const LOOPING: Array[StringName] = [
@@ -124,6 +144,7 @@ const LOOPING: Array[StringName] = [
 	&"can_rattle_loop",
 	&"anchor_drag_loop",
 	&"ufo_hum_loop",
+	&"boat_putter_loop",
 ]
 
 const CAR_SOUNDS: Array[StringName] = [
@@ -167,6 +188,8 @@ const CAR_SOUNDS: Array[StringName] = [
 	&"glove_punch",
 	&"axe_chop",
 	&"ufo_warble",
+	&"car_splash",
+	&"car_sink_glug",
 ]
 
 const UI_SOUNDS: Array[StringName] = [
@@ -194,6 +217,15 @@ const AMBIENT_SOUNDS: Array[StringName] = [
 	&"cricket_chirp",
 	&"pumpjack_creak",
 	&"ufo_hum_loop",
+	&"tank_drip",
+	&"dish_chirp",
+	&"rotor_creak",
+	&"hull_creak",
+	&"rig_clank",
+	&"castaway_holler",
+	&"wing_flutter",
+	&"chicken_cluck",
+	&"boat_putter_loop",
 ]
 
 ## The AudioSettings bus a sound plays on, so each volume slider covers it.
@@ -319,6 +351,26 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"ufo_reveal": return _ufo_reveal()
 		&"ufo_hatch": return _ufo_hatch(rng)
 		&"alien_yelp": return _alien_yelp()
+		&"car_splash": return _car_splash(rng)
+		&"car_sink_glug": return _car_sink_glug(rng)
+		&"tow_reverse_beep": return _tow_reverse_beep()
+		&"tow_winch": return _tow_winch(rng)
+		&"rod_cast": return _rod_cast(rng)
+		&"bobber_plop": return _bobber_plop(rng)
+		&"reel_whirr": return _reel_whirr(rng)
+		&"boot_squelch": return _boot_squelch(rng)
+		&"tank_drip": return _tank_drip(rng)
+		&"dish_chirp": return _dish_chirp()
+		&"rotor_creak": return _rotor_creak(rng)
+		&"hull_creak": return _hull_creak(rng)
+		&"rig_clank": return _rig_clank(rng)
+		&"castaway_holler": return _castaway_holler(rng)
+		&"wing_flutter": return _wing_flutter(rng)
+		&"tumbleweed_crunch": return _tumbleweed_crunch(rng)
+		&"dog_bark": return _dog_bark(rng)
+		&"chicken_cluck": return _chicken_cluck(rng)
+		&"chicken_squawk": return _chicken_squawk(rng)
+		&"boat_putter_loop": return _boat_putter_loop(rng)
 	push_error("SoundLibrary: unknown sound '%s'" % sound_name)
 	return Synth.silence(0.05)
 
@@ -1710,3 +1762,314 @@ static func _windup_ratchet(rng: RandomNumberGenerator) -> PackedFloat32Array:
 		out = Synth.mix_into(out, _metal_ring(0.03, 3000.0, 15.0, 0.006, rng), i * 0.05, 0.7)
 		out = Synth.mix_into(out, Synth.thump(0.02, 1500.0, 0.001, 0.01, rng), i * 0.05, 0.4)
 	return Synth.finish(out, 0.6)
+
+# --- Wading & the tow truck ---------------------------------------------------
+
+## The car rolling off the sand into the sea: a heavy hollow whump with a big
+## low slosh and spray coming off the bonnet. A fatter cousin of the shark's.
+static func _car_splash(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.thump(0.3, 140.0, 0.01, 0.16, rng)
+	var slosh := Synth.noise_sweep(0.7, {
+		freq = [[0.0, 300.0], [0.12, 1000.0], [0.7, 260.0]],
+		q = [[0.0, 1.0]],
+		amp = [[0.0, 0.0], [0.05, 1.0], [0.7, 0.0]],
+	}, rng)
+	Synth.mix_into(out, slosh, 0.0, 0.8)
+	var spray := Synth.noise_sweep(0.45, {
+		freq = [[0.0, 3400.0], [0.45, 2000.0]],
+		q = [[0.0, 2.0]],
+		amp = [[0.0, 0.0], [0.04, 1.0], [0.45, 0.0]],
+		highpass = 1600.0,
+	}, rng)
+	Synth.mix_into(out, spray, 0.05, 0.3)
+	return Synth.finish(out, 0.75)
+
+## Sunk to the axles: a run of fat bubbles glugging up past the doors, each
+## one a little pitch-rising bloop, slowing and dropping as it settles.
+static func _car_sink_glug(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(1.3)
+	var at := 0.0
+	for i in 6:
+		var pitch := 220.0 - i * 18.0 + rng.randf_range(-15.0, 15.0)
+		var bloop := Synth.tones(0.11, [[[0.0, pitch], [0.11, pitch * 1.9]]], {
+			amp = [[0.0, 0.0], [0.01, 1.0], [0.08, 0.6], [0.11, 0.0]],
+		})
+		Synth.mix_into(out, bloop, at, 0.8 - i * 0.08)
+		Synth.mix_into(out, Synth.thump(0.08, 400.0, 0.005, 0.05, rng), at, 0.3)
+		at += 0.13 + i * 0.03
+	return Synth.finish(out, 0.7)
+
+## A tow truck backing up: three cheap buzzy reversing beeps.
+static func _tow_reverse_beep() -> PackedFloat32Array:
+	var amp := []
+	for i in 3:
+		var start := i * 0.5
+		amp.append_array([[start, 0.0], [start + 0.01, 1.0], [start + 0.26, 1.0], [start + 0.27, 0.0]])
+	return Synth.tones(1.4, [[[0.0, 1040.0]]], {
+		square = 0.6,
+		amp = amp,
+		peak = 0.5,
+	})
+
+## The winch hauling a car out: a strained little motor whining up, with the
+## cable drum's ratchet clicking along the top of it.
+static func _tow_winch(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var duration := 2.0
+	var out := Synth.engine(duration, {
+		freq = [[0.0, 40.0], [0.3, 75.0], [1.7, 85.0], [2.0, 50.0]],
+		amp = [[0.0, 0.0], [0.15, 1.0], [1.8, 1.0], [2.0, 0.0]],
+		cutoff = [[0.0, 900.0], [0.3, 1800.0], [2.0, 1200.0]],
+		harmonics = 18,
+		rolloff = 1.4,
+		drive = 0.15,
+		jitter = 0.03,
+	}, rng)
+	var click := 0.1
+	while click < duration - 0.15:
+		Synth.mix_into(out, _metal_ring(0.03, 2600.0, 12.0, 0.006, rng), click, 0.35)
+		click += 0.09
+	return Synth.finish(out, 0.7)
+
+# --- Fishing ------------------------------------------------------------------
+
+## Casting the rod: a swishing whip through the air with the reel's line
+## zipping out under it.
+static func _rod_cast(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.noise_sweep(0.35, {
+		freq = [[0.0, 900.0], [0.12, 2600.0], [0.35, 1400.0]],
+		q = [[0.0, 2.0]],
+		amp = [[0.0, 0.0], [0.08, 1.0], [0.35, 0.0]],
+	}, rng)
+	var zip := Synth.silence(0.4)
+	for i in 10:
+		Synth.mix_into(zip, _metal_ring(0.02, 3400.0, 14.0, 0.004, rng), 0.05 + i * 0.03, 0.5 - i * 0.04)
+	Synth.mix_into(out, zip, 0.0, 0.6)
+	return Synth.finish(out, 0.6)
+
+## The bobber hitting the water, or ducking under on a bite: a small round
+## plop with a pitched bloop in it.
+static func _bobber_plop(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.tones(0.12, [[[0.0, 380.0], [0.12, 700.0]]], {
+		amp = [[0.0, 0.0], [0.01, 1.0], [0.12, 0.0]],
+	})
+	Synth.mix_into(out, Synth.noise_sweep(0.12, {
+		freq = [[0.0, 1400.0], [0.12, 700.0]],
+		q = [[0.0, 1.5]],
+		amp = [[0.0, 0.0], [0.01, 1.0], [0.12, 0.0]],
+	}, rng), 0.0, 0.5)
+	return Synth.finish(out, 0.6)
+
+## Winding the line back in: a fast plasticky ratchet clicking along.
+static func _reel_whirr(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.7)
+	var at := 0.0
+	while at < 0.65:
+		Synth.mix_into(out, _metal_ring(0.02, 2200.0, 10.0, 0.005, rng), at, 0.6)
+		Synth.mix_into(out, Synth.thump(0.015, 1200.0, 0.001, 0.008, rng), at, 0.3)
+		at += 0.035
+	return Synth.finish(out, 0.55)
+
+## An old boot landing on the hook: a wet, squishy, deflating squelch.
+static func _boot_squelch(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.noise_sweep(0.4, {
+		freq = [[0.0, 500.0], [0.15, 900.0], [0.4, 250.0]],
+		q = [[0.0, 3.0]],
+		amp = [[0.0, 0.0], [0.03, 1.0], [0.3, 0.6], [0.4, 0.0]],
+		lowpass = 1800.0,
+	}, rng)
+	Synth.mix_into(out, Synth.tones(0.3, [[[0.0, 220.0], [0.3, 110.0]]], {
+		square = 0.3,
+		amp = [[0.0, 0.0], [0.05, 0.8], [0.3, 0.0]],
+	}), 0.05, 0.4)
+	return Synth.finish(out, 0.6)
+
+## A drop from the leaky water tower landing: a small wet plink with a hollow,
+## tinny ring off the tank above it.
+static func _tank_drip(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.tones(0.1, [[[0.0, 900.0], [0.1, 1500.0]]], {
+		amp = [[0.0, 0.0], [0.004, 1.0], [0.1, 0.0]],
+	})
+	Synth.mix_into(out, Synth.noise_sweep(0.08, {
+		freq = [[0.0, 2400.0], [0.08, 1200.0]],
+		q = [[0.0, 2.0]],
+		amp = [[0.0, 0.0], [0.003, 1.0], [0.08, 0.0]],
+	}, rng), 0.0, 0.3)
+	Synth.mix_into(out, _metal_ring(0.4, 620.0, 30.0, 0.12, rng), 0.0, 0.2)
+	return Synth.finish(out, 0.55)
+
+## The satellite array's control hut talking to the sky: a burst of cheap,
+## buzzy telemetry blips that hop between pitches.
+static func _dish_chirp() -> PackedFloat32Array:
+	var notes: Array = []
+	for frequency in [1760.0, 2350.0, 1760.0, 2790.0, 2090.0]:
+		notes.append(Synth.tones(0.05, [[[0.0, frequency]]], {
+			square = 0.6,
+			amp = [[0.0, 0.0], [0.003, 1.0], [0.04, 0.6], [0.05, 0.0]],
+		}))
+		notes.append(Synth.silence(0.03))
+	return Synth.finish(Synth.concat(notes), 0.45)
+
+## The crashed helicopter's bent rotor blade swinging in the wind: a slow,
+## rusty metal groan with a faint gust under it.
+static func _rotor_creak(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.tones(0.8, [[[0.0, 330.0], [0.4, 410.0], [0.8, 300.0]]], {
+		square = 0.6,
+		amp = [[0.0, 0.0], [0.1, 0.8], [0.6, 0.6], [0.8, 0.0]],
+		tremolo = [26.0, 0.8],
+		peak = 0.5,
+	})
+	Synth.mix_into(out, Synth.noise_sweep(0.8, {
+		freq = [[0.0, 300.0], [0.4, 600.0], [0.8, 300.0]],
+		q = [[0.0, 1.0]],
+		amp = [[0.0, 0.0], [0.3, 1.0], [0.8, 0.0]],
+	}, rng), 0.0, 0.3)
+	return Synth.finish(out, 0.55)
+
+## The beached shipwreck settling in the surf: a long, low, woody groan with a
+## couple of dry knocks from loose timbers.
+static func _hull_creak(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.tones(1.1, [[[0.0, 120.0], [0.5, 150.0], [1.1, 105.0]], [[0.0, 240.0], [0.5, 300.0], [1.1, 210.0]]], {
+		square = 0.7,
+		amp = [[0.0, 0.0], [0.2, 0.9], [0.8, 0.7], [1.1, 0.0]],
+		tremolo = [18.0, 0.7],
+		peak = 0.5,
+	})
+	Synth.mix_into(out, Synth.thump(0.12, 700.0, 0.002, 0.04, rng), 0.3, 0.5)
+	Synth.mix_into(out, Synth.thump(0.12, 600.0, 0.002, 0.04, rng), 0.75, 0.4)
+	return Synth.finish(out, 0.6)
+
+## Work on the offshore rig carrying over the water: a heavy steel clank with a
+## long, dull ring after it.
+static func _rig_clank(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.thump(0.25, 400.0, 0.003, 0.08, rng)
+	Synth.mix_into(out, _metal_ring(1.2, 310.0, 40.0, 0.35, rng), 0.0, 0.5)
+	Synth.mix_into(out, _metal_ring(0.8, 740.0, 30.0, 0.2, rng), 0.0, 0.25)
+	return Synth.finish(out, 0.6)
+
+## The castaway yelling at the shore: a hoarse, cracking "hey-oooo!" that
+## rises and falls, with breath in it.
+static func _castaway_holler(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var shout := func(duration: float, low: float, high: float, vowel: float) -> PackedFloat32Array:
+		var voice := Synth.tones(duration, [[[0.0, low], [duration * 0.3, high], [duration, low * 0.85]]], {
+			square = 0.5,
+			amp = [[0.0, 0.0], [0.03, 1.0], [duration * 0.7, 0.8], [duration, 0.0]],
+			tremolo = [6.0, 0.15],
+			peak = 0.6,
+		})
+		var band := Synth.Formant.new()
+		band.tune(vowel, 4.0)
+		for i in voice.size():
+			voice[i] = voice[i] * 0.5 + band.step(voice[i]) * 0.8
+		var breath := Synth.noise_sweep(duration, {
+			freq = [[0.0, vowel]], q = [[0.0, 2.0]],
+			amp = [[0.0, 0.0], [0.03, 1.0], [duration, 0.0]], peak = 0.3,
+		}, rng)
+		return Synth.mix_into(voice, breath, 0.0, 0.4)
+	return Synth.finish(Synth.concat([shout.call(0.22, 240.0, 300.0, 1900.0), Synth.silence(0.04),
+			shout.call(0.6, 260.0, 340.0, 700.0)]), 0.6)
+
+## A bird taking off: a quick run of soft, papery wing beats that speed up and
+## fade as it climbs away.
+static func _wing_flutter(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.55)
+	var at := 0.0
+	var gap := 0.075
+	var level := 1.0
+	while at < 0.5:
+		Synth.mix_into(out, Synth.noise_sweep(0.05, {
+			freq = [[0.0, 700.0], [0.05, 1300.0]],
+			q = [[0.0, 1.2]],
+			amp = [[0.0, 0.0], [0.006, 1.0], [0.05, 0.0]],
+		}, rng), at, level)
+		Synth.mix_into(out, Synth.thump(0.04, 300.0, 0.003, 0.02, rng), at, level * 0.4)
+		at += gap
+		gap *= 0.9
+		level *= 0.85
+	return Synth.finish(out, 0.55)
+
+## Driving through a tumbleweed: a dry, twiggy crackle over a soft papery
+## whump.
+static func _tumbleweed_crunch(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.noise_sweep(0.3, {
+		freq = [[0.0, 2200.0], [0.3, 900.0]],
+		q = [[0.0, 0.9]],
+		amp = [[0.0, 0.0], [0.01, 0.7], [0.3, 0.0]],
+	}, rng)
+	Synth.mix_into(out, Synth.thump(0.12, 400.0, 0.003, 0.05, rng), 0.0, 0.6)
+	for i in 14:
+		Synth.mix_into(out, Synth.thump(0.012, 5000.0, 0.0005, 0.004, rng), rng.randf_range(0.0, 0.26), rng.randf_range(0.3, 0.8))
+	return Synth.finish(out, 0.6)
+
+## A scruffy yard dog: two gruff "ruff!"s, each a short growly voice through an
+## open "a" vowel with a breathy bark on top.
+static func _dog_bark(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var ruff := func(duration: float, pitch: float) -> PackedFloat32Array:
+		var voice := Synth.tones(duration, [[[0.0, pitch * 0.8], [duration * 0.25, pitch], [duration, pitch * 0.6]]], {
+			square = 0.7,
+			amp = [[0.0, 0.0], [0.01, 1.0], [duration * 0.5, 0.6], [duration, 0.0]],
+			tremolo = [55.0, 0.4],
+			peak = 0.6,
+		})
+		var band := Synth.Formant.new()
+		band.tune(900.0, 3.0)
+		for i in voice.size():
+			voice[i] = voice[i] * 0.4 + band.step(voice[i]) * 1.2
+		var breath := Synth.noise_sweep(duration, {
+			freq = [[0.0, 1200.0], [duration, 700.0]], q = [[0.0, 1.5]],
+			amp = [[0.0, 0.0], [0.01, 1.0], [duration, 0.0]], peak = 0.5,
+		}, rng)
+		return Synth.mix_into(voice, breath, 0.0, 0.5)
+	return Synth.finish(Synth.concat([ruff.call(0.14, 330.0), Synth.silence(0.09), ruff.call(0.18, 300.0)]), 0.65)
+
+## A chicken scurrying off: three quick, nasal "bok"s.
+static func _chicken_cluck(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var bok := func(duration: float, pitch: float) -> PackedFloat32Array:
+		var voice := Synth.tones(duration, [[[0.0, pitch * 1.2], [duration, pitch]], [[0.0, pitch * 2.4], [duration, pitch * 2.0]]], {
+			square = 0.6,
+			amp = [[0.0, 0.0], [0.006, 1.0], [duration, 0.0]],
+			peak = 0.6,
+		})
+		return Synth.mix_into(voice, Synth.thump(duration, 1500.0, 0.002, duration * 0.6, rng), 0.0, 0.4)
+	return Synth.finish(Synth.concat([bok.call(0.07, 620.0), Synth.silence(0.06), bok.call(0.07, 600.0),
+			Synth.silence(0.06), bok.call(0.09, 660.0)]), 0.55)
+
+## A chicken clipped by the car: a startled "bok-BKAAAWK!" that shoots up and
+## cracks, over a burst of flapping feathers.
+static func _chicken_squawk(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var duration := 0.55
+	var bok := Synth.tones(0.08, [[[0.0, 700.0], [0.08, 600.0]]], {
+		square = 0.6,
+		amp = [[0.0, 0.0], [0.005, 1.0], [0.08, 0.0]],
+		peak = 0.6,
+	})
+	var shriek := Synth.tones(duration, [[[0.0, 700.0], [0.08, 1500.0], [0.3, 1300.0], [duration, 900.0]],
+			[[0.0, 1400.0], [0.08, 3000.0], [0.3, 2600.0], [duration, 1800.0]]], {
+		square = 0.75,
+		amp = [[0.0, 0.0], [0.02, 1.0], [0.35, 0.8], [duration, 0.0]],
+		tremolo = [38.0, 0.5],
+		peak = 0.6,
+	})
+	var flap := Synth.silence(duration)
+	for beat in 6:
+		Synth.mix_into(flap, Synth.noise_sweep(0.05, {
+			freq = [[0.0, 800.0], [0.05, 1500.0]], q = [[0.0, 1.2]],
+			amp = [[0.0, 0.0], [0.006, 1.0], [0.05, 0.0]],
+		}, rng), beat * 0.075, 1.0 - beat * 0.12)
+	var out := Synth.concat([bok, Synth.silence(0.03), shriek])
+	Synth.mix_into(out, flap, 0.1, 0.5)
+	return Synth.finish(out, 0.75)
+
+## The fishing boat's little inboard motor: a lazy putt-putt-putt of low thumps
+## over a dull hum. Eight putts and a 50 Hz hum fit 2 s exactly, so it loops.
+static func _boat_putter_loop(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var duration := 2.0
+	var out := Synth.tones(duration, [[[0.0, 50.0]], [[0.0, 100.0]]], {
+		square = 0.4,
+		amp = [[0.0, 1.0]],
+		fade = 0.0,
+		peak = 0.25,
+	})
+	var putts := 8
+	for putt in putts:
+		Synth.mix_into(out, Synth.thump(0.16, 320.0, 0.004, 0.1, rng), duration * putt / putts, 0.9 if putt % 2 == 0 else 0.7)
+	return Synth.finish(out, 0.6, 0.0)

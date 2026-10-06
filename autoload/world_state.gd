@@ -39,6 +39,9 @@ var _restock_plan_day: int = 0
 ## refill at the exact same instant every morning.
 var _restock_hour: float = RESTOCK_WINDOW_START
 var _restocked_today: bool = false
+## Times Hank's tow truck has pulled the car out of the sea. From the third,
+## he hands over his fishing rod (TowTruckRescueCutscene).
+var tow_count: int = 0
 ## One-off finds the player has taken (the hangar's saucer). Unlike bins these
 ## never come back.
 var _claimed: Dictionary = {}
@@ -153,6 +156,7 @@ func clear() -> void:
 	_empty_since.clear()
 	_refilled.clear()
 	_claimed.clear()
+	tow_count = 0
 	_restock_plan_day = 0
 	_restock_hour = RESTOCK_WINDOW_START
 	_restocked_today = false

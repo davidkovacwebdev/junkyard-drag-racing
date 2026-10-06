@@ -165,9 +165,10 @@ func _process(delta: float) -> void:
 
 ## Walk the collection circle past the car each physics frame rather than
 ## relying on `body_entered`: a prop dropped on top of a parked car is already
-## overlapping the moment it spawns, and an entry event may never fire.
+## overlapping the moment it spawns, and an entry event may never fire. Not
+## mid-flight, so loot thrown at the car (a fishing catch) lands first.
 func _physics_process(_delta: float) -> void:
-	if _collected:
+	if _collected or _flying:
 		return
 	for body in get_overlapping_bodies():
 		if body is PlayerCar:

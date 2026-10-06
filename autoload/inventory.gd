@@ -47,6 +47,10 @@ var item_uses: Dictionary = {}
 ## An item was used from the trunk; `item` is gone if that was its last use.
 signal item_used(item: ItemData)
 
+## use_effect -> Callable(item) -> String: whoever handles an effect can say
+## why it can't be used right now (the rod needs water nearby). Empty means go.
+var _use_checks: Dictionary = {}
+
 ## Add to the scrap tally. Returns the new total.
 func add_scrap(amount: int) -> int:
 	scrap += amount
@@ -215,21 +219,48 @@ func uses_left(item: ItemData) -> int:
 		return 0
 	return int(item_uses.get(item.id, item.uses))
 
-## Uses the owned `item` once: one use off, gone after its last. False when
-## it isn't usable (or isn't the player's).
+## Whether the owned `item` has a use in it (reusable tools always do).
+func can_use(item: ItemData) -> bool:
+	return item != null and has_item(item.id) and (item.reusable or uses_left(item) > 0)
+
+## Uses the owned `item` once: one use off, gone after its last (a reusable
+## one never runs out). False when it isn't usable (or isn't the player's).
 func use_item(item: ItemData) -> bool:
-	if item == null or not has_item(item.id) or uses_left(item) <= 0:
+	if not can_use(item):
 		return false
-	var left := uses_left(item) - 1
-	if left <= 0:
-		remove_item(item.id)
-	else:
-		item_uses[item.id] = left
+	if not item.reusable:
+		var left := uses_left(item) - 1
+		if left <= 0:
+			remove_item(item.id)
+		else:
+			item_uses[item.id] = left
 	item_used.emit(item)
 	return true
 
+## Lets the handler of `effect` veto using an item right now; see
+## `use_blocked_reason()`. Pass an invalid Callable to remove it.
+func set_use_check(effect: StringName, check: Callable) -> void:
+	if check.is_valid():
+		_use_checks[effect] = check
+	else:
+		_use_checks.erase(effect)
+
+## Why `item` can't be used right now, or "" if it can.
+func use_blocked_reason(item: ItemData) -> String:
+	var check: Callable = _use_checks.get(item.use_effect, Callable())
+	return String(check.call(item)) if check.is_valid() else ""
+
 func is_trunk_full() -> bool:
 	return owned_items.size() >= ITEM_SLOTS
+
+## Puts `item` in the trunk for free (a gift). False when it's already owned
+## or the trunk is full.
+func give_item(item: ItemData) -> bool:
+	if item == null or has_item(item.id) or is_trunk_full():
+		return false
+	owned_items.append(item)
+	item_uses.erase(item.id)
+	return true
 
 ## Pays for `item` and puts it in the trunk. False (and nothing changes) when
 ## it's already owned, the trunk is full, or the player can't afford it.

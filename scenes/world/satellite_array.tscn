@@ -1,0 +1,38 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/world/relay_station_prop.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/audio/ambient_call.gd" id="2"]
+
+[node name="SatelliteArray" type="Node2D"]
+y_sort_enabled = true
+
+[node name="DishBack" type="StaticBody2D" parent="."]
+position = Vector2(-60, -200)
+script = ExtResource("1")
+aim_degrees = 24.0
+sweep_phase = 1.3
+
+[node name="DishLeft" type="StaticBody2D" parent="."]
+position = Vector2(-280, -20)
+script = ExtResource("1")
+aim_degrees = 34.0
+
+[node name="DishRight" type="StaticBody2D" parent="."]
+position = Vector2(180, 30)
+script = ExtResource("1")
+aim_degrees = 28.0
+sweep_phase = 2.6
+
+[node name="Hut" type="StaticBody2D" parent="."]
+position = Vector2(-40, 170)
+script = ExtResource("1")
+kind = 1
+
+[node name="Chirps" type="AudioStreamPlayer2D" parent="."]
+position = Vector2(-40, 100)
+max_distance = 1300.0
+volume_db = -14.0
+script = ExtResource("2")
+sound_name = &"dish_chirp"
+interval_range = Vector2(5, 12)
+pitch_variation = 0.04

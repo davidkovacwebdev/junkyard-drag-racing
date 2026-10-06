@@ -129,6 +129,7 @@ func _snapshot() -> SaveData:
 	data.player_position = WorldState.player_position
 	data.has_player_position = WorldState.has_player_position
 	data.looted = WorldState.get_looted_snapshot()
+	data.tow_count = WorldState.tow_count
 	data.races_won = RaceProgression.races_won
 	data.day = DayNightCycle.day
 	data.time_of_day = DayNightCycle.time_of_day
@@ -187,6 +188,7 @@ func load_game() -> bool:
 	WorldState.player_position = data.player_position
 	WorldState.has_player_position = data.has_player_position
 	WorldState.restore_looted(data.looted)
+	WorldState.tow_count = data.tow_count
 	RaceProgression.races_won = data.races_won
 	DayNightCycle.day = data.day
 	DayNightCycle.time_of_day = data.time_of_day

@@ -1,0 +1,55 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_body.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/body_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_tow_truck"]
+script = ExtResource("2")
+id = &"body_tow_truck"
+display_name = "Tow Truck"
+mass = 35.0
+speed = 2.0
+
+[node name="BodyTowTruck" type="RigidBody2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_tow_truck")
+
+[node name="Bed" type="Polygon2D" parent="."]
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-150, -30, 30, -30, 30, 16, -150, 16)
+
+[node name="Boom" type="Polygon2D" parent="."]
+color = Color(0.82, 0.66, 0.26, 1)
+polygon = PackedVector2Array(-58, -30, -34, -30, -158, -142, -180, -128)
+
+[node name="Hook" type="Polygon2D" parent="."]
+color = Color(0.2, 0.2, 0.21, 1)
+polygon = PackedVector2Array(-186, -126, -168, -126, -166, -104, -178, -94, -192, -102, -184, -108)
+
+[node name="Cab" type="Polygon2D" parent="."]
+color = Color(0.82, 0.66, 0.26, 1)
+polygon = PackedVector2Array(30, 16, 30, -96, 100, -96, 140, -46, 158, -40, 158, 16)
+
+[node name="CabShade" type="Polygon2D" parent="."]
+color = Color(0.67, 0.53, 0.2, 1)
+polygon = PackedVector2Array(30, -14, 158, -14, 158, 16, 30, 16)
+
+[node name="Window" type="Polygon2D" parent="."]
+color = Color(0.45, 0.6, 0.66, 1)
+polygon = PackedVector2Array(44, -84, 96, -84, 124, -50, 44, -50)
+
+[node name="Beacon" type="Polygon2D" parent="."]
+color = Color(0.95, 0.55, 0.12, 1)
+polygon = PackedVector2Array(52, -96, 56, -114, 78, -114, 82, -96)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(-150, -30, 30, -30, 30, -96, 100, -96, 140, -46, 158, -40, 158, 16, -150, 16)
+
+[node name="HookMount" type="Marker2D" parent="."]
+position = Vector2(-176, -98)
+
+[node name="WheelMount0" type="Marker2D" parent="."]
+position = Vector2(-100, 16)
+
+[node name="WheelMount1" type="Marker2D" parent="."]
+position = Vector2(100, 16)

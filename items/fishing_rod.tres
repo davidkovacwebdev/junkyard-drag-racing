@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" uid="uid://b4kssi28o6a3g" path="res://scripts/items/item_data.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/items/icons/item_fishing_rod.tscn" id="2_icon"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"fishing_rod"
+display_name = "Fishing Rod"
+description = "Hank's old rod. Use it near the water to fish trash outta the sea. Scrap, parts, the odd boot."
+icon_scene = ExtResource("2_icon")
+use_effect = &"fish"
+reusable = true
+closes_trunk = true

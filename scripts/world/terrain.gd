@@ -68,6 +68,9 @@ enum Mode {
 @export var beach_width: float = 44.0
 ## How far in from the coast the inland tone starts.
 @export var inland_inset: float = 320.0
+## How far past the shoreline the car can wade before the sea walls it off.
+## Past the foam, so it gets properly out into the water before it's stuck.
+@export var wade_depth: float = 260.0
 ## How much the shallow/foam/beach bands wander in width along the coast
 ## instead of tracing it as perfect concentric rings — 0 is a clean shrink-wrap,
 ## 1 is a strong flare. Purely cosmetic: `land`/`inland` (and so biomes and
@@ -120,6 +123,32 @@ enum Mode {
 ## disables it and every island matches exactly. Biome colours are untouched —
 ## `terrain_biome.gd` already owns that palette.
 @export_range(0.0, 1.0) var island_color_variance: float = 0.5
+
+@export_group("Biome seam")
+## Picks which bends and drift patches the borders get. Change it (or press
+## Shuffle) to roll a new layout; the markers and biomes stay put.
+@export var biome_seed: int = 0
+@export_tool_button("Shuffle biome seed", "RandomNumberGenerator") var shuffle_biome_seed := func() -> void:
+	biome_seed = randi() % 100000
+	notify_property_list_changed()
+
+## Borders between biomes are bent into long lazy curves by a smooth noise
+## field instead of running ruler-straight, and the three-way corners bend with
+## them. Both cells share the exact same seam, so there are no gaps or
+## overlaps. 0 keeps the straight Voronoi borders.
+@export var biome_seam_wobble: float = 480.0
+## Width of one bend in the seam, in pixels. Bigger = longer, gentler curves.
+@export var biome_seam_wobble_size: float = 1900.0
+## Big chunky patches of the neighbouring biome drift across each border, a
+## few per screen, mostly large. Built once per rebuild from the marker
+## positions, so they're stable between runs and cost nothing per frame.
+@export var biome_drifts_enabled: bool = true
+## Average gap between drift patches along a border, in pixels.
+@export var biome_drift_spacing: float = 1100.0
+## How far past its own size a patch can drift from the border, in pixels.
+@export var biome_drift_zone: float = 700.0
+## Patch radius as (min, max) pixels. Sizes lean toward the max.
+@export var biome_drift_size: Vector2 = Vector2(160.0, 560.0)
 
 @export_group("Authored curves")
 ## How coarsely a `Path2D` child's curve is sampled into a coastline, in
@@ -198,6 +227,12 @@ class BiomePatch:
 	var land: Array[PackedVector2Array] = []
 	var inland: Array[PackedVector2Array] = []
 
+## A drifted patch of one biome sitting in a neighbour's cell, clipped to it.
+class BiomeDrift:
+	var biome: int = TerrainBiome.Kind.PLAINS
+	var polygon: PackedVector2Array
+	var bounds: Rect2
+
 ## Every island's bands, ready to draw.
 var _islands: Array[Island] = []
 ## Just the shorelines, for the query API.
@@ -206,6 +241,10 @@ var _coastlines: Array[PackedVector2Array] = []
 var _markers: Array[BiomeMarker] = []
 ## One Voronoi cell per marker, in this node's local space.
 var _cells: Array[PackedVector2Array] = []
+## Drift patches across every biome border, in draw order.
+var _drifts: Array[BiomeDrift] = []
+var _wobble_noise_x := FastNoiseLite.new()
+var _wobble_noise_y := FastNoiseLite.new()
 ## Editor-only: snapshot of the inputs, polled so edits get noticed.
 var _signature: String = ""
 ## Editor-only: true while the cheap stand-in is on screen, waiting for the
@@ -284,17 +323,19 @@ func _rebuild() -> void:
 	_build_cells()
 	queue_redraw()
 
-## Built once: an outline of segments per coastline, so the physics server does
-## the water check instead of a per-frame point-in-polygon test.
+## Built once: an outline of segments per coastline, pushed `wade_depth` out to
+## sea so the car can roll into the shallows (and get stuck there, see
+## `PlayerCar`) but never drive off across the ocean.
 func _build_shore_collision() -> void:
 	var shore_body := StaticBody2D.new()
 	shore_body.name = "ShoreCollision"
 	shore_body.add_to_group(SHORE_GROUP)
 	for coastline in _coastlines:
-		var outline := CollisionPolygon2D.new()
-		outline.build_mode = CollisionPolygon2D.BUILD_SEGMENTS
-		outline.polygon = coastline
-		shore_body.add_child(outline)
+		for wall in Geometry2D.offset_polygon(coastline, wade_depth, Geometry2D.JOIN_ROUND):
+			var outline := CollisionPolygon2D.new()
+			outline.build_mode = CollisionPolygon2D.BUILD_SEGMENTS
+			outline.polygon = wall
+			shore_body.add_child(outline)
 	add_child(shore_body)
 
 func _add_island(coastline: PackedVector2Array) -> void:
@@ -325,9 +366,152 @@ func _build_cells() -> void:
 			if cell.size() < 3:
 				break
 		_cells.append(cell)
+	_drifts.clear()
+	var seams := _wobble_cells()
+	if biome_drifts_enabled:
+		for pair: Vector2i in seams:
+			_scatter_drifts(pair, seams[pair][0], seams[pair][1])
 	# Now that the cells exist, slice each island up by them.
 	for i in _islands.size():
 		_build_patches(_islands[i])
+
+## Subdivide every border shared by two cells, then push every cell corner
+## through the wobble field. Each seam is subdivided once per pair and handed to
+## both cells, so the two sides always meet exactly. Returns the straight seams,
+## pair -> [start, end], for the drift patches to follow.
+func _wobble_cells() -> Dictionary:
+	var seams := {}
+	if biome_seam_wobble <= 0.0:
+		for i in _cells.size():
+			for k in _cells[i].size():
+				var start := _cells[i][k]
+				var end := _cells[i][(k + 1) % _cells[i].size()]
+				var neighbour := _neighbour_across(i, start, end)
+				if neighbour > i:
+					seams[Vector2i(i, neighbour)] = [start, end]
+		return seams
+	_wobble_noise_x.seed = land_seed + biome_seed * 2
+	_wobble_noise_y.seed = land_seed + biome_seed * 2 + 1
+	for noise in [_wobble_noise_x, _wobble_noise_y]:
+		noise.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
+		noise.frequency = 1.0 / biome_seam_wobble_size
+		noise.fractal_type = FastNoiseLite.FRACTAL_NONE
+	var step := biome_seam_wobble_size / 8.0
+	for i in _cells.size():
+		var cell := _cells[i]
+		if cell.size() < 3:
+			continue
+		var wobbled := PackedVector2Array()
+		for k in cell.size():
+			var start := cell[k]
+			var end := cell[(k + 1) % cell.size()]
+			wobbled.append(_wobbled(start))
+			var neighbour := _neighbour_across(i, start, end)
+			if neighbour < 0:
+				continue
+			var pair := Vector2i(mini(i, neighbour), maxi(i, neighbour))
+			if not seams.has(pair):
+				seams[pair] = [start, end, _seam_points(start, end, step)]
+			var seam_start: Vector2 = seams[pair][0]
+			var points: PackedVector2Array = seams[pair][2].duplicate()
+			if start.distance_squared_to(seam_start) > end.distance_squared_to(seam_start):
+				points.reverse()
+			wobbled.append_array(points)
+		_cells[i] = wobbled
+	return seams
+
+## The wobbled points strictly between `start` and `end`, `step` apart.
+func _seam_points(start: Vector2, end: Vector2, step: float) -> PackedVector2Array:
+	var points := PackedVector2Array()
+	var count := int(ceilf(start.distance_to(end) / step))
+	for index in range(1, count):
+		points.append(_wobbled(start.lerp(end, float(index) / count)))
+	return points
+
+## Where `point` lands once the smooth noise field has pushed it around.
+func _wobbled(point: Vector2) -> Vector2:
+	if biome_seam_wobble <= 0.0:
+		return point
+	return point + Vector2(_wobble_noise_x.get_noise_2dv(point), _wobble_noise_y.get_noise_2dv(point)) * biome_seam_wobble
+
+## The cell on the other side of the edge `start`-`end` of cell `index`, or -1
+## if the edge is on the outer box.
+func _neighbour_across(index: int, start: Vector2, end: Vector2) -> int:
+	if start.distance_squared_to(end) < 1.0:
+		return -1
+	var own := _marker_point(index)
+	for other in _markers.size():
+		if other == index:
+			continue
+		var away := _marker_point(other)
+		var normal := (away - own).normalized()
+		var middle := (own + away) * 0.5
+		if absf((start - middle).dot(normal)) < 0.5 and absf((end - middle).dot(normal)) < 0.5:
+			return other
+	return -1
+
+## Scatter drift patches along the straight seam between the cells in `pair`,
+## then push them through the wobble field so they follow the bent seam. Each
+## patch sits in one cell wearing the other's colour, kept clear of the seam so
+## it never melts into it as a thin spike. Sizes lean large, patches crowd the
+## seam, and some get a small satellite chunk further out.
+func _scatter_drifts(pair: Vector2i, start: Vector2, end: Vector2) -> void:
+	if _markers[pair.x].biome == _markers[pair.y].biome:
+		return
+	var length := start.distance_to(end)
+	if length < 1.0 or biome_drift_spacing <= 0.0:
+		return
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash(Vector2i(_marker_point(pair.x))) ^ (hash(Vector2i(_marker_point(pair.y))) * 31) ^ hash(biome_seed)
+	var direction := (end - start) / length
+	var along := rng.randf() * biome_drift_spacing * 0.5
+	while along < length:
+		if rng.randf() < 0.8:
+			var host := pair.x if rng.randf() < 0.5 else pair.y
+			var guest := pair.y if host == pair.x else pair.x
+			var into_host := (_marker_point(host) - _marker_point(guest)).normalized()
+			var closeness := pow(rng.randf(), 1.4)
+			var radius := lerpf(biome_drift_size.x, biome_drift_size.y, sqrt(rng.randf()))
+			radius *= lerpf(1.0, 0.65, closeness)
+			var depth := radius * 1.1 + closeness * biome_drift_zone
+			var center := _wobbled(start + direction * along + into_host * depth)
+			var heading := direction.angle() + rng.randf_range(-0.6, 0.6)
+			if rng.randf() < 0.25:
+				heading = rng.randf() * TAU
+			var biome := _markers[guest].biome
+			_add_drift(_drift_shape(center, radius, heading, rng), biome, host, radius)
+			if rng.randf() < 0.3:
+				var satellite_radius := radius * rng.randf_range(0.3, 0.5)
+				var satellite_direction := into_host.rotated(rng.randf_range(-1.0, 1.0))
+				var satellite_center := center + satellite_direction * (radius + satellite_radius) * 1.1
+				_add_drift(_drift_shape(satellite_center, satellite_radius, rng.randf() * TAU, rng), biome, host, satellite_radius)
+		along += biome_drift_spacing * rng.randf_range(0.6, 1.4)
+
+## A chunky 5-8 sided patch, stretched along `heading` by a random amount, so
+## some are round blobs and some long drifts.
+func _drift_shape(center: Vector2, radius: float, heading: float, rng: RandomNumberGenerator) -> PackedVector2Array:
+	var corner_count := rng.randi_range(5, 8)
+	var stretch := Vector2(rng.randf_range(1.0, 2.2), rng.randf_range(0.6, 1.0))
+	var points := PackedVector2Array()
+	for corner in corner_count:
+		var angle := TAU * (corner + rng.randf_range(-0.3, 0.3)) / corner_count
+		var reach := radius * rng.randf_range(0.6, 1.0)
+		points.append(center + (Vector2(cos(angle) * stretch.x, sin(angle) * stretch.y) * reach).rotated(heading))
+	return points
+
+## Clip a drift patch to its host cell, so it never spills into a third biome.
+## Slivers left over from the clip are dropped rather than drawn as crumbs.
+func _add_drift(shape: PackedVector2Array, biome: int, host: int, radius: float) -> void:
+	for piece in Geometry2D.intersect_polygons(shape, _cells[host]):
+		if piece.size() < 3 or _polygon_area(piece) < radius * radius * 0.4:
+			continue
+		var drift := BiomeDrift.new()
+		drift.biome = biome
+		drift.polygon = piece
+		drift.bounds = Rect2(piece[0], Vector2.ZERO)
+		for point in piece:
+			drift.bounds = drift.bounds.expand(point)
+		_drifts.append(drift)
 
 ## Every marker's position in this node's local space. Markers are ordinary
 ## children, so this keeps working if the terrain node itself is moved or scaled.
@@ -373,12 +557,29 @@ func is_on_land(point: Vector2) -> bool:
 			return true
 	return false
 
-## Which biome owns the land here, or -1 if there are no markers. This is the
-## raw nearest-marker rule the cells are cut from, so it agrees with what's
-## drawn even where the point is out at sea.
+## True if `point` is past the surf, out in the blue. Reads the drawn foam
+## band, so it matches where the water visibly starts.
+func is_in_water(point: Vector2) -> bool:
+	for island in _islands:
+		for surf in island.foam:
+			if Geometry2D.is_point_in_polygon(point, surf):
+				return false
+	return true
+
+## Which biome owns the land here, or -1 if there are no markers. Reads the
+## cells and drift patches themselves, so it agrees with what's drawn even
+## where the point is out at sea; past the cells it falls back to the raw
+## nearest-marker rule they are cut from.
 func biome_at(point: Vector2) -> int:
 	if _markers.is_empty():
 		return -1
+	for index in range(_drifts.size() - 1, -1, -1):
+		var drift := _drifts[index]
+		if drift.bounds.has_point(point) and Geometry2D.is_point_in_polygon(point, drift.polygon):
+			return drift.biome
+	for i in _cells.size():
+		if _cells[i].size() >= 3 and Geometry2D.is_point_in_polygon(point, _cells[i]):
+			return _markers[i].biome
 	var best := INF
 	var biome := _markers[0].biome
 	for i in _markers.size():
@@ -698,6 +899,25 @@ func _build_patches(island: Island) -> void:
 		if patch.land.is_empty():
 			continue
 		island.patches.append(patch)
+	var island_bounds := Rect2(island.coastline[0], Vector2.ZERO)
+	for point in island.coastline:
+		island_bounds = island_bounds.expand(point)
+	for drift in _drifts:
+		if not drift.bounds.intersects(island_bounds):
+			continue
+		var patch := BiomePatch.new()
+		patch.biome = drift.biome
+		patch.land = _clip_to(drift.polygon, island.land)
+		patch.inland = _clip_to(drift.polygon, island.inland)
+		if patch.land.is_empty():
+			continue
+		island.patches.append(patch)
+
+func _polygon_area(polygon: PackedVector2Array) -> float:
+	var twice_area := 0.0
+	for i in polygon.size():
+		twice_area += polygon[i].cross(polygon[(i + 1) % polygon.size()])
+	return absf(twice_area) * 0.5
 
 ## A cell's share of every polygon in a band, as a flat list of pieces.
 func _clip_to(cell: PackedVector2Array, band: Array[PackedVector2Array]) -> Array[PackedVector2Array]:
@@ -764,7 +984,9 @@ func _compute_signature() -> String:
 			foam_width, beach_width, inland_inset, water_band_variance,
 			island_color_variance, shallow_color, foam_color, beach_color,
 			land_color, inland_color, coast_tolerance_deg, fast_preview,
-			preview_tolerance_deg, preview_settle_sec]:
+			preview_tolerance_deg, preview_settle_sec, biome_seam_wobble,
+			biome_seam_wobble_size, biome_drifts_enabled, biome_drift_spacing,
+			biome_drift_zone, biome_drift_size, biome_seed]:
 		parts.append(str(value))
 	for child in get_children():
 		if child is Path2D:

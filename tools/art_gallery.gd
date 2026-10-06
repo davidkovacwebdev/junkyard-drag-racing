@@ -20,6 +20,12 @@ const WORLD_SHOTS := [
 	{"name": "oil_field", "scene": "res://scenes/world/oil_field.tscn", "zoom": 0.9},
 	{"name": "crop_fields", "scene": "res://scenes/world/crop_fields.tscn", "zoom": 0.8},
 	{"name": "graveyard", "scene": "res://scenes/world/graveyard.tscn", "zoom": 0.9},
+	{"name": "water_tower", "scene": "res://scenes/world/water_tower.tscn", "zoom": 1.0},
+	{"name": "satellite_array", "scene": "res://scenes/world/satellite_array.tscn", "zoom": 0.9},
+	{"name": "crashed_helicopter", "scene": "res://scenes/world/crashed_helicopter.tscn", "zoom": 1.1},
+	{"name": "shipwreck", "scene": "res://scenes/world/shipwreck.tscn", "zoom": 1.0},
+	{"name": "oil_rig", "scene": "res://scenes/world/oil_rig.tscn", "zoom": 1.0},
+	{"name": "lonely_island", "scene": "res://scenes/world/lonely_island.tscn", "zoom": 1.1},
 ]
 
 const PROP_ROW := [

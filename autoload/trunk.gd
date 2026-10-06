@@ -4,8 +4,10 @@ extends CanvasLayer
 ## anything bought at the shop (Inventory.owned_items). Six spaces, filled
 ## in the order things were picked up. Hover a space to read what's in it.
 ##
-## Some things can be used (a six-pack's cans; see ItemData.uses): press the
-## space's number (1-6) or double-click it. The space shows the uses left,
+## Some things can be used (a six-pack's cans; see ItemData.uses), or used
+## over and over (the fishing rod; ItemData.reusable): press the space's
+## number (1-6) or double-click it. Something used out in the world shuts the
+## trunk (ItemData.closes_trunk). The space shows the uses left,
 ## and Inventory.item_used tells whoever cares (Drunk, for beer).
 ##
 ## Pauses the game like the journal and the pause menu; I or Esc closes it.
@@ -76,13 +78,17 @@ func use_slot(index: int) -> void:
 	if index < 0 or index >= _slots.size() or _slots[index].item == null:
 		return
 	var item := _slots[index].item
-	if not Inventory.use_item(item):
+	var blocked := Inventory.use_blocked_reason(item) if Inventory.can_use(item) else CANT_USE_LINE % item.display_name
+	if not blocked.is_empty() or not Inventory.use_item(item):
 		Sfx.play(&"denied", -6.0, 0.0)
 		_info_name.text = item.display_name
-		_info_text.text = CANT_USE_LINE % item.display_name
+		_info_text.text = blocked
 		return
 	if not item.use_sound.is_empty():
 		Sfx.play(item.use_sound, -4.0, 0.05)
+	if item.closes_trunk:
+		close()
+		return
 	_fill_slots()
 	_info_name.text = item.display_name
 	_info_text.text = item.use_line.replace("{left}", str(Inventory.uses_left(item)))

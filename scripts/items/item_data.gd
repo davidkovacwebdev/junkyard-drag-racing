@@ -28,3 +28,9 @@ extends Resource
 @export var use_sound: StringName = &""
 ## Shown in the trunk when it's used. `{left}` becomes the uses left.
 @export var use_line: String = ""
+## Never runs out: usable any number of times, `uses` is ignored (a tool, like
+## the fishing rod, rather than something you consume).
+@export var reusable: bool = false
+## Using it is something done out in the world (casting the rod), so the trunk
+## shuts to get out of the way.
+@export var closes_trunk: bool = false

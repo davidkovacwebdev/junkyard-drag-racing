@@ -11,7 +11,7 @@ extends Node
 ##   Actors  — spawn_actor, walk, hop, fall_over, stand_up, face
 ##   Talk    — subtitle (typed in the bottom bar in the speaker's own voice,
 ##             moves on by itself; `{player}` becomes the player's name)
-##   Misc    — wait, sound
+##   Misc    — wait, sound, play_tween
 ##
 ## Actors are cleaned up when the cutscene ends. A cutscene's `gives_quest`
 ## goes into the quest log once the bars are gone. Which one-time scenes have
@@ -268,6 +268,11 @@ func stand_up(actor: CutsceneActor) -> void:
 
 func face(actor: CutsceneActor, right: bool) -> void:
 	actor.face(right)
+
+## Waits on a tween the scene made itself (a vehicle driving in, a prop being
+## dragged), so Esc finishes it outright like every other step.
+func play_tween(tween: Tween) -> void:
+	await _await_tween(tween)
 
 # --- Internals ------------------------------------------------------------------------------
 
