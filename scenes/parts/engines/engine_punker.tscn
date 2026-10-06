@@ -1,0 +1,51 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/punker_engine.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/engine_part_data.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/character/character_rig.gd" id="3"]
+[ext_resource type="Resource" path="res://characters/punker.tres" id="4"]
+
+[sub_resource type="Resource" id="Resource_punker"]
+script = ExtResource("2")
+id = &"engine_punker"
+display_name = "Scrap Dealer"
+mass = 9.0
+durability = 55.0
+speed = 1.4
+material_type = 6
+power = 1.6
+found_in_junk = false
+start_sound = &"punker_hup"
+boost_sound = &"punker_hup"
+
+[node name="EnginePunker" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_punker")
+
+[node name="HitchPost" type="Polygon2D" parent="."]
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-3, 0, 3, 0, 2.5, -11, -2.5, -11)
+
+[node name="HitchRing" type="Polygon2D" parent="."]
+color = Color(0.64, 0.68, 0.74, 1)
+polygon = PackedVector2Array(-5, -20, 5, -20, 5, -12, -5, -12)
+
+[node name="Harness" type="Node2D" parent="."]
+
+[node name="Lead" type="Polygon2D" parent="Harness"]
+color = Color(0.62, 0.5, 0.3, 1)
+
+[node name="Runner" type="Node2D" parent="Harness"]
+position = Vector2(60, 0)
+
+[node name="Shadow" type="Polygon2D" parent="Harness/Runner"]
+color = Color(0, 0, 0, 0.18)
+polygon = PackedVector2Array(-22, 0, -15, -4, 15, -4, 22, 0, 15, 4, -15, 4)
+
+[node name="Character" type="Node2D" parent="Harness/Runner"]
+scale = Vector2(0.5, 0.5)
+script = ExtResource("3")
+character_data = ExtResource("4")
+
+[node name="LeadPoint" type="Marker2D" parent="Harness/Runner"]
+position = Vector2(-15, -54)

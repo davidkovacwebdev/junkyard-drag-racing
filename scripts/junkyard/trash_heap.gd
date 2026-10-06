@@ -46,8 +46,34 @@ extends Node2D
 ## heap scale, break into slivers thin enough to slip through the floor under a
 ## heavy landing. A lost piece is dropped back on the heap rather than gone.
 @export var lost_depth: float = 300.0
+## Tip the load in from the sky as soon as the heap is ready. Off, the heap
+## waits for someone to deliver it with `dump_from()` (the crane pen's garbage
+## truck) and doesn't count as settled until that's done.
+@export var tip_on_ready: bool = true
+## Seconds between pieces shot out by `dump_from()`.
+@export var dump_interval: float = 0.07
+## How long a piece shot out by `dump_from()` flies through the others before
+## it starts to collide with them. Pieces leave the same mouth a fraction of a
+## second apart, so without this the next one would spawn inside the last.
+@export var dump_ghost_time: float = 0.45
 ## Fixed seed = the same heap every visit; 0 = tipped fresh every time.
 @export var heap_seed: int = 0
+## How long every piece has to lie still in a row for the load to count as
+## fallen into place. Long enough that a piece hanging at the top of its queue
+## before it drops, or bouncing at the peak of a hop, doesn't count.
+@export var settle_hold: float = 0.6
+## Give up waiting after this long and call it settled anyway, so one piece
+## jittering forever on a jagged neighbour can't lock the crane out.
+@export var settle_timeout: float = 20.0
+## Slower than this (units/s, and radians/s for the spin) counts as lying still.
+@export var still_speed: float = 6.0
+@export var still_spin: float = 0.3
+
+## The load has finished falling and stacking: every piece has lain still for
+## `settle_hold` (or `settle_timeout` ran out). Fires once.
+signal settled()
+## `dump_from()` has shot out its last piece.
+signal dumped()
 
 const ITEM_GROUP := &"heap_item"
 
@@ -55,8 +81,18 @@ const ITEM_GROUP := &"heap_item"
 var _items: Array[Node2D] = []
 ## Friction/bounce for the junk, shared by every piece.
 var _material: PhysicsMaterial = null
+var _settled: bool = false
+## How long the whole load has lain still, and how long it's been falling.
+var _still_time: float = 0.0
+var _fall_time: float = 0.0
+## True until the load has been delivered: `_ready()` with `tip_on_ready`, or
+## the end of `dump_from()`. Nothing counts as settled before that.
+var _awaiting_load: bool = true
 
 func _ready() -> void:
+	if not tip_on_ready:
+		return
+	_awaiting_load = false
 	var rng := _rng()
 	# Height the next piece starts at: climbs as the queue grows (-y is up).
 	var cursor := -drop_height
@@ -66,7 +102,8 @@ func _ready() -> void:
 	for i in top_count:
 		cursor = _spawn_part(rng, 1, cursor)
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
+	_watch_settling(delta)
 	for item in _items:
 		if not is_instance_valid(item) or item.position.y < lost_depth:
 			continue
@@ -78,6 +115,30 @@ func _physics_process(_delta: float) -> void:
 		body.global_position = at
 		body.linear_velocity = Vector2.ZERO
 		body.angular_velocity = 0.0
+
+## Until the load has come to rest, count how long it's been lying still and
+## say so once it has.
+func _watch_settling(delta: float) -> void:
+	if _settled or _awaiting_load:
+		return
+	_fall_time += delta
+	_still_time = _still_time + delta if _all_still() else 0.0
+	if _still_time >= settle_hold or _fall_time >= settle_timeout:
+		_settled = true
+		settled.emit()
+
+func _all_still() -> bool:
+	for item in _items:
+		var body := item as RigidBody2D
+		if body == null or not is_instance_valid(body) or body.freeze or body.sleeping:
+			continue
+		if body.linear_velocity.length() > still_speed or absf(body.angular_velocity) > still_spin:
+			return false
+	return true
+
+## True once the load has fallen into place (see `settled`).
+func is_settled() -> bool:
+	return _settled
 
 func _rng() -> RandomNumberGenerator:
 	var rng := RandomNumberGenerator.new()
@@ -151,6 +212,13 @@ func take(item: Node2D) -> void:
 	if is_instance_valid(item):
 		item.remove_from_group(ITEM_GROUP)
 
+## Count something that wasn't tipped in as part of the heap, so the claw can
+## grab it like any other piece (the Scrap Dealer standing by the crane, see
+## PenBystander). It has to carry its own `part_data`.
+func add_item(body: RigidBody2D) -> void:
+	body.add_to_group(ITEM_GROUP)
+	_items.append(body)
+
 func items() -> Array[Node2D]:
 	return _items.duplicate()
 
@@ -178,6 +246,49 @@ func item_bounds() -> Rect2:
 	return rect
 
 # --- Tipping the load in -------------------------------------------------------
+
+## Deliver the whole load through one opening instead of out of the sky: every
+## piece is shot out of `mouth` (global) one after another, flung toward
+## `toward` (global x it should land around) at a spread of speeds, the deep
+## layer first so it still ends up at the bottom. Await it, or listen for
+## `dumped`.
+func dump_from(mouth: Vector2, toward: float) -> void:
+	var rng := _rng()
+	var tiers: Array[int] = []
+	for i in deep_count:
+		tiers.append(2)
+	for i in top_count:
+		tiers.append(1)
+	var start := to_local(mouth)
+	for tier in tiers:
+		if not is_inside_tree():
+			return
+		var body := _build_part(rng, tier)
+		if body != null:
+			_tip(body, start + Vector2(rng.randf_range(-6.0, 6.0), rng.randf_range(-10.0, 10.0)))
+			body.rotation = rng.randf_range(0.0, TAU)
+			# Flight time from the mouth's height to the floor, then the speed that
+			# lands it a random distance past the mouth, short of and beyond `toward`.
+			var reach := (toward - mouth.x) * rng.randf_range(0.55, 1.35)
+			var lift := rng.randf_range(80.0, 260.0)
+			body.linear_velocity = Vector2(reach * 1.6, -lift)
+			body.angular_velocity = rng.randf_range(-6.0, 6.0)
+			_ghost(body)
+		await get_tree().create_timer(dump_interval, false, true).timeout
+	_awaiting_load = false
+	dumped.emit()
+
+## Let a freshly dumped piece pass through the other pieces in flight for
+## `dump_ghost_time`: its own layer goes to 2 (still colliding with the floor,
+## the walls and everything already landed on layer 1, but not with another
+## layer-2 piece), then back to 1.
+func _ghost(body: RigidBody2D) -> void:
+	body.collision_layer = 2
+	body.collision_mask = 1
+	await get_tree().create_timer(dump_ghost_time, false, true).timeout
+	if is_instance_valid(body):
+		body.collision_layer = 1
+		body.collision_mask = 1
 
 ## A real part scene of `tier` from the same catalog the garage browses,
 ## shrunk to the size the world's cars wear it at (PartScale), so the heap is

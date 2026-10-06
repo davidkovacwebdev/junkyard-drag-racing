@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_data.gd" id="1_data"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/legs/legs_slacks.tscn" id="2_legs"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/boots/boots_slipper.tscn" id="3_boots"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/torsos/torso_skinny.tscn" id="4_torso"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/heads/head_pear.tscn" id="5_head"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/hairs/hair_balding.tscn" id="6_hair"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/eyes/eyes_sleepy.tscn" id="7_eyes"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/accessories/acc_beard_grandpa.tscn" id="8_beard"]
+
+[resource]
+script = ExtResource("1_data")
+display_name = "Old Mo"
+legs_scene = ExtResource("2_legs")
+boots_scene = ExtResource("3_boots")
+torso_scene = ExtResource("4_torso")
+head_scene = ExtResource("5_head")
+hair_scene = ExtResource("6_hair")
+eyes_scene = ExtResource("7_eyes")
+accessory_scene = ExtResource("8_beard")
+voice_pitch_hz = 175.0
+voice_throat = 0.9
+voice_rasp = 0.7
+voice_wobble = 0.65
+idle_lines = PackedStringArray("I've been standing by this crane since before it was a crane.", "Heh heh. Too slow, sonny.", "Back in my day the claws had teeth.")

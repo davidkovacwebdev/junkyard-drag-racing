@@ -7,6 +7,8 @@ extends CanvasLayer
 ##                start cutscene).
 ##   Finish     - completes it on the spot: pays its reward, hands out its
 ##                follow-ups and unlocks, exactly like finishing it for real.
+##   Finish all - finishes every quest, earliest in the story first, so all
+##                their rewards and unlocks land: everything opened up.
 ##   Reset all  - empties the quest log.
 ##
 ## Debug builds only, like the F1 dev menu. Pauses the game while open; F5 or
@@ -118,6 +120,15 @@ func _on_finish(quest: QuestData) -> void:
 	Quests.complete(quest.id)
 	_refresh()
 
+## Finish every quest the way the Finish button does, earliest in the chain
+## first (`_quests` is latest first), so each one's follow-ups and unlocks are
+## handed out before their turn comes.
+func _on_finish_all() -> void:
+	for i in range(_quests.size() - 1, -1, -1):
+		var quest := _quests[i]
+		if not Quests.is_complete(quest.id):
+			_on_finish(quest)
+
 func _on_reset() -> void:
 	Quests.reset()
 	_refresh()
@@ -169,6 +180,10 @@ func _build() -> void:
 	reset.position = Vector2(24.0, BOARD_SIZE.y - 64.0)
 	reset.pressed.connect(_on_reset)
 	board.add_child(reset)
+	var finish_all := _make_button("Finish all quests", 210.0, 8)
+	finish_all.position = Vector2(244.0, BOARD_SIZE.y - 64.0)
+	finish_all.pressed.connect(_on_finish_all)
+	board.add_child(finish_all)
 
 func _refresh() -> void:
 	for child in _rows.get_children():

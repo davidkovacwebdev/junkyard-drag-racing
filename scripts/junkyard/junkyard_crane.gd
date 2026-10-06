@@ -245,8 +245,8 @@ func _draw_boom() -> void:
 
 	# pylon above the mast with the two tie cables holding the boom up
 	draw_rect(Rect2(-RAIL, y - PYLON_H, RAIL * 2.0, PYLON_H), steel_color)
-	draw_colored_polygon(FlatProps.sliver(Vector2(0.0, y - PYLON_H + 2.0), Vector2(left + 30.0, top), 6.0), cable_color)
-	draw_colored_polygon(FlatProps.sliver(Vector2(0.0, y - PYLON_H + 2.0), Vector2(right - 12.0, top), 6.0), cable_color)
+	draw_colored_polygon(FlatProps.sliver(Vector2(0.0, y - PYLON_H + 2.0), Vector2(left + 30.0, top), 8.0), cable_color)
+	draw_colored_polygon(FlatProps.sliver(Vector2(0.0, y - PYLON_H + 2.0), Vector2(right - 12.0, top), 8.0), cable_color)
 
 	draw_rect(Rect2(left, top, right - left, RAIL), steel_color)
 	draw_rect(Rect2(left, bottom - RAIL, right - left, RAIL), steel_color)
@@ -272,8 +272,8 @@ func _draw_hoist() -> void:
 	draw_rect(Rect2(anchor.x - 34.0, anchor.y - 4.0, 68.0, 22.0), dark_color)
 
 	var claw := claw_local()
-	draw_colored_polygon(FlatProps.sliver(anchor + Vector2(-14.0, 16.0), claw + Vector2(-9.0, -6.0), 5.0), cable_color)
-	draw_colored_polygon(FlatProps.sliver(anchor + Vector2(14.0, 16.0), claw + Vector2(9.0, -6.0), 5.0), cable_color)
+	draw_colored_polygon(FlatProps.sliver(anchor + Vector2(-14.0, 16.0), claw + Vector2(-9.0, -6.0), 8.0), cable_color)
+	draw_colored_polygon(FlatProps.sliver(anchor + Vector2(14.0, 16.0), claw + Vector2(9.0, -6.0), 8.0), cable_color)
 
 	# the block the shells hinge on, swinging with the cables
 	var block := Vector2(claw_radius * 0.8, claw_radius * 0.5)

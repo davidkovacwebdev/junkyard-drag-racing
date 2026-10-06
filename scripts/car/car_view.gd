@@ -14,7 +14,8 @@ extends Node2D
 ## > 0: a car wider than this (before this node's own scale) is shrunk to fit,
 ## so long bodies aren't cropped. Smaller cars keep their size.
 @export var max_width: float = 0.0
-## Passed to a horse engine's `gait_rate`, so the map car's horse trots slower.
+## Passed to a horse (or punker) engine's `gait_rate`, so the map car's
+## runner doesn't scurry.
 @export var horse_gait_rate: float = 1.0
 ## Whether the accessories make their sounds (the map car), or stay quiet (the
 ## garage preview).
@@ -110,8 +111,8 @@ func build_from(car: CarModelData) -> void:
 		# snapping to this body's EngineMount seats them on the hood/top/
 		# stern/... instead of straddling the body origin.
 		_body.place_engine(_engine)
-		if _engine is HorseEngine:
-			(_engine as HorseEngine).gait_rate = horse_gait_rate
+		if _engine is HorseEngine or _engine is PunkerEngine:
+			_engine.set(&"gait_rate", horse_gait_rate)
 
 	_accessories = CarAccessory.instantiate_all(car)
 	for accessory in _accessories:
