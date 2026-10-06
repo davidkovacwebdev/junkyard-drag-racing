@@ -85,6 +85,13 @@ const NAMES: Array[StringName] = [
 	&"crane_clang",
 	&"crane_miss",
 	&"crane_shove",
+	&"crane_ready",
+	&"cable_creak",
+	&"punker_hup",
+	&"punker_yelp",
+	&"trash_dump",
+	&"oldmo_cackle",
+	&"oldmo_wheeze",
 	&"rooster_crow",
 	&"horse_neigh",
 	&"forge_hammer",
@@ -332,6 +339,13 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"crane_clang": return _crane_clang(rng)
 		&"crane_miss": return _crane_miss(rng)
 		&"crane_shove": return _crane_shove(rng)
+		&"crane_ready": return _crane_ready(rng)
+		&"cable_creak": return _cable_creak(rng)
+		&"punker_hup": return _punker_hup(rng)
+		&"punker_yelp": return _punker_yelp(rng)
+		&"trash_dump": return _trash_dump(rng)
+		&"oldmo_cackle": return _oldmo_cackle(rng)
+		&"oldmo_wheeze": return _oldmo_wheeze(rng)
 		&"rooster_crow": return _rooster_crow()
 		&"horse_neigh": return _horse_neigh(rng)
 		&"forge_hammer": return _forge_hammer(rng)
@@ -1489,6 +1503,121 @@ static func _crane_shove(rng: RandomNumberGenerator) -> PackedFloat32Array:
 	Synth.mix_into(out, Synth.thump(0.12, 900.0, 0.002, 0.03, rng), 0.02, 0.35)
 	Synth.mix_into(out, _metal_ring(0.2, 470.0, 12.0, 0.05, rng), 0.0, 0.2)
 	return Synth.finish(out, 0.7)
+
+## The crane cab's "ready" buzzer once the junk has landed: a clunk as the
+## brake lets go, then two cheap buzzy beeps, the second a step up.
+static func _crane_ready(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.tones(0.5, [[[0.0, 520.0], [0.21, 520.0], [0.22, 690.0]]], {
+		square = 0.7,
+		amp = [[0.0, 0.0], [0.08, 0.0], [0.09, 1.0], [0.2, 1.0], [0.21, 0.0],
+				[0.24, 0.0], [0.25, 1.0], [0.42, 1.0], [0.44, 0.0]],
+		peak = 0.4,
+	})
+	Synth.mix_into(out, Synth.thump(0.2, 260.0, 0.004, 0.07, rng), 0.0, 1.0)
+	return Synth.finish(out, 0.7)
+
+## The swinging claw turning round at the end of a swing: a rusty sheave
+## squealing up and back down in little stick-slip judders, with a faint grind.
+static func _cable_creak(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.tones(0.42, [[[0.0, 610.0], [0.15, 760.0], [0.42, 560.0]]], {
+		square = 0.35,
+		tremolo = [34.0, 0.7],
+		amp = [[0.0, 0.0], [0.05, 1.0], [0.25, 0.8], [0.42, 0.0]],
+		peak = 0.5,
+	})
+	Synth.mix_into(out, Synth.noise_sweep(0.42, {
+		freq = [[0.0, 1400.0], [0.42, 1100.0]],
+		q = [[0.0, 3.0]],
+		amp = [[0.0, 0.0], [0.05, 1.0], [0.42, 0.0]],
+	}, rng), 0.0, 0.25)
+	return Synth.finish(out, 0.6)
+
+## The Scrap Dealer digging in to pull the car: a gruff, punchy "HUP!" that
+## drops off at the end, with a huff of breath behind it.
+static func _punker_hup(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.tones(0.22, [[[0.0, 190.0], [0.05, 175.0], [0.22, 120.0]]], {
+		square = 0.55,
+		tremolo = [22.0, 0.35],
+		amp = [[0.0, 0.0], [0.015, 1.0], [0.12, 0.8], [0.22, 0.0]],
+	})
+	out = Synth.mix_into(out, Synth.noise_sweep(0.28, {
+		freq = [[0.0, 900.0], [0.28, 600.0]],
+		q = [[0.0, 2.5]],
+		amp = [[0.0, 0.0], [0.02, 0.8], [0.1, 0.3], [0.28, 0.0]],
+	}, rng), 0.0, 0.45)
+	return Synth.finish(out, 0.65)
+
+## The Scrap Dealer getting shoved by the claw: a startled "hey!" that jumps
+## up in pitch, raspy.
+static func _punker_yelp(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.tones(0.26, [[[0.0, 170.0], [0.06, 290.0], [0.26, 240.0]]], {
+		square = 0.5,
+		tremolo = [26.0, 0.4],
+		amp = [[0.0, 0.0], [0.02, 1.0], [0.18, 0.7], [0.26, 0.0]],
+	})
+	out = Synth.mix_into(out, Synth.noise_sweep(0.26, {
+		freq = [[0.0, 1300.0], [0.26, 1800.0]],
+		q = [[0.0, 3.0]],
+		amp = [[0.0, 0.0], [0.03, 0.6], [0.26, 0.0]],
+	}, rng), 0.0, 0.35)
+	return Synth.finish(out, 0.6)
+
+## A garbage truck tipping its load out: a low rumbling slide under a long,
+## uneven cascade of junk knocks and tinny clanks, thinning out at the end.
+static func _trash_dump(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var duration := 1.9
+	var out := Synth.noise_sweep(duration, {
+		freq = [[0.0, 260.0], [0.6, 340.0], [duration, 200.0]],
+		q = [[0.0, 1.5]],
+		amp = [[0.0, 0.0], [0.15, 0.8], [1.3, 0.6], [duration, 0.0]],
+		lowpass = 900.0,
+	}, rng)
+	for i in 34:
+		var at := rng.randf_range(0.05, duration - 0.3) * (0.4 + 0.6 * float(i) / 34.0)
+		var gain := rng.randf_range(0.25, 0.7) * (1.0 - at / duration * 0.6)
+		out = Synth.mix_into(out, Synth.thump(0.14, rng.randf_range(350.0, 1600.0), 0.002, 0.04, rng), at, gain)
+		if i % 4 == 0:
+			out = Synth.mix_into(out, _metal_ring(0.25, rng.randf_range(700.0, 1500.0), 25.0, 0.06, rng), at, gain * 0.5)
+	return Synth.finish(out, 0.7)
+
+## Old Mo dodging the claw: three quick, thin, quavering "heh"s, each a
+## little higher, breathy and wobbling like a very old man.
+static func _oldmo_cackle(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.6)
+	for i in 3:
+		var pitch := 240.0 + i * 25.0
+		var at := i * 0.16
+		out = Synth.mix_into(out, Synth.tones(0.12, [[[0.0, pitch], [0.12, pitch * 0.85]]], {
+			square = 0.3,
+			tremolo = [32.0, 0.6],
+			amp = [[0.0, 0.0], [0.015, 1.0], [0.07, 0.6], [0.12, 0.0]],
+		}), at, 0.7)
+		out = Synth.mix_into(out, Synth.noise_sweep(0.12, {
+			freq = [[0.0, 1800.0]],
+			q = [[0.0, 2.0]],
+			amp = [[0.0, 0.0], [0.01, 0.7], [0.12, 0.0]],
+		}, rng), at, 0.4)
+	return Synth.finish(out, 0.6)
+
+## Old Mo out of breath: a long rattling in-breath and a sagging out-breath,
+## all air and gravel.
+static func _oldmo_wheeze(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.noise_sweep(0.5, {
+		freq = [[0.0, 1100.0], [0.5, 1900.0]],
+		q = [[0.0, 6.0]],
+		amp = [[0.0, 0.0], [0.1, 0.8], [0.45, 0.7], [0.5, 0.0]],
+	}, rng)
+	out = Synth.mix_into(out, Synth.noise_sweep(0.6, {
+		freq = [[0.0, 900.0], [0.6, 500.0]],
+		q = [[0.0, 2.5]],
+		amp = [[0.0, 0.0], [0.05, 0.9], [0.6, 0.0]],
+	}, rng), 0.55, 0.8)
+	out = Synth.mix_into(out, Synth.tones(0.5, [[[0.0, 150.0], [0.5, 120.0]]], {
+		square = 0.2,
+		tremolo = [18.0, 0.8],
+		amp = [[0.0, 0.0], [0.05, 0.4], [0.5, 0.0]],
+	}), 0.55, 0.4)
+	return Synth.finish(out, 0.6)
 
 # --- Scrap forge ----------------------------------------------------------------
 

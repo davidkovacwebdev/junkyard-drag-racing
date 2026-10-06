@@ -180,6 +180,14 @@ var _test_pressed_last: bool = false
 var _holding_target: Object = null
 var _hold_progress: float = 0.0
 
+## The tooltip's and hold bar's authored bottom offsets (player_car.tscn),
+## and how far both rise when a scene hint holds the bottom line.
+const TOOLTIP_TOP := -60.0
+const TOOLTIP_BOTTOM := -20.0
+const HOLD_BAR_TOP := -78.0
+const HOLD_BAR_BOTTOM := -64.0
+const SCENE_HINT_LIFT := 44.0
+
 @onready var _visual: CarView = $Visual as CarView
 @onready var _interaction_zone: Area2D = $InteractionZone
 @onready var _tooltip_label: Label = $UI/TooltipLabel
@@ -923,6 +931,7 @@ func _process_interaction(delta: float) -> void:
 		_tooltip_label.text = _interact_prompt(prompt_target)
 		_tooltip_label.add_theme_color_override("font_color", _interact_prompt_color(prompt_target))
 		_tooltip_label.visible = true
+		_lift_prompt_above_scene_hint()
 	else:
 		_tooltip_label.visible = false
 
@@ -962,6 +971,21 @@ func _is_click_only(target: Object) -> bool:
 	if target != null and target.has_method("uses_click_interaction"):
 		return bool(target.call("uses_click_interaction"))
 	return false
+
+## Some scenes (the cemetery, the junkyard) keep their own hint line in the
+## same bottom-centre slot as the tooltip. While one of those ("scene_hint"
+## group) is showing, the tooltip and its hold bar ride a line above it so
+## the two never print over each other.
+func _lift_prompt_above_scene_hint() -> void:
+	var lift := 0.0
+	for hint in get_tree().get_nodes_in_group(&"scene_hint"):
+		if hint is Label and hint.is_visible_in_tree() and hint.text != "":
+			lift = SCENE_HINT_LIFT
+			break
+	_tooltip_label.offset_top = TOOLTIP_TOP - lift
+	_tooltip_label.offset_bottom = TOOLTIP_BOTTOM - lift
+	_hold_bar_bg.offset_top = HOLD_BAR_TOP - lift
+	_hold_bar_bg.offset_bottom = HOLD_BAR_BOTTOM - lift
 
 ## The tooltip line. The default is about the E key, which is the wrong
 ## thing to say about a click-only target, so a target can write its own

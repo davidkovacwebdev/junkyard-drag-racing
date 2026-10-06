@@ -115,6 +115,7 @@ const _ENGINE_SCENES := [
 	"res://scenes/parts/engines/engine_air_tank.tscn",
 	"res://scenes/parts/engines/engine_firework_rocket.tscn",
 	"res://scenes/parts/engines/engine_horse.tscn",
+	"res://scenes/parts/engines/engine_punker.tscn",
 ]
 
 const _ACCESSORY_SCENES := [

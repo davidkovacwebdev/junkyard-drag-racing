@@ -64,7 +64,7 @@ text = "GRAVEYARD"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Hint" type="Label" parent="UI"]
+[node name="Hint" type="Label" parent="UI" groups=["scene_hint"]]
 anchors_preset = -1
 anchor_left = 0.5
 anchor_top = 1.0
