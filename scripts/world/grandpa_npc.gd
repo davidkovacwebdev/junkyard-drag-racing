@@ -17,7 +17,8 @@ extends StaticBody2D
 ## minimap finds him and draws his head.
 ##
 ## He holds still while a cutscene runs, so the scene can call `sip()`,
-## `twitch()`, `bang()`, `sob()`, `hiccup()`, `wink()` and `laugh()` on its
+## `twitch()`, `bang()`, `sob()`, `hiccup()`, `wink()`, `widen_eyes()` and
+## `laugh()` on its
 ## own beats instead. The bent wrench only comes out for `bang()`, when he
 ## whacks at his busted wheelchair; `bang(..., true)` swings the straight new
 ## one the player brought him instead.
@@ -63,6 +64,9 @@ const WINK_EYE_NODES := [^"WhiteLeft", ^"PupilLeft"]
 const WINK_LID := [Vector2(-19.0, -218.0), Vector2(-10.0, -215.0), Vector2(-1.0, -218.0),
 		Vector2(-1.0, -213.0), Vector2(-10.0, -210.0), Vector2(-19.0, -213.0)]
 const WINK_LID_COLOR := Color(0.06, 0.06, 0.08, 1)
+## Wide eyes: they pop this much bigger, around this point (character space).
+const WIDE_EYES_SCALE := 1.4
+const EYES_CENTER := Vector2(0.0, -214.0)
 ## A belly laugh: he rocks back this far and his shoulders bounce this often.
 const LAUGH_LEAN := 0.12
 const LAUGH_BOUNCES_PER_SECOND := 7.0
@@ -156,6 +160,9 @@ func interact(talker: Node = null) -> void:
 	if _dialog.is_open():
 		return
 	_talker = talker as Node2D
+	if _ready_quest() != null and not _ready_quest().turn_in_cutscene.is_empty():
+		_hand_in_with_scene(_ready_quest())
+		return
 	if _ready_quest() == null and not Quests.available_from(display_name).is_empty():
 		_start_quest(Quests.available_from(display_name)[0])
 		return
@@ -215,6 +222,22 @@ func _start_quest(quest: QuestData) -> void:
 	if scene.gives_quest == null:
 		scene.gives_quest = quest
 	Cutscenes.play(scene)
+
+## Hands in a quest that has a `turn_in_cutscene`: the scene plays, then he
+## takes the quest back and pays up as usual.
+func _hand_in_with_scene(quest: QuestData) -> void:
+	var scene := ResourceLoader.load(quest.turn_in_cutscene, "", ResourceLoader.CACHE_MODE_REPLACE) as Cutscene
+	if scene != null:
+		if "grandpa" in scene:
+			scene.set("grandpa", self)
+		await Cutscenes.play(scene)
+	var reward := Quests.turn_in(quest.id)
+	if reward < 0:
+		return
+	if not quest.turn_in_sound.is_empty():
+		Sfx.play_at(quest.turn_in_sound, global_position, -4.0, 0.05)
+	if reward > 0:
+		Sfx.play(&"cash_register", -4.0, 0.0)
 
 ## The oldest of his quests that's ready to hand in, if any.
 func _ready_quest() -> QuestData:
@@ -339,11 +362,42 @@ func roll_to(offset: Vector2, seconds: float = 0.8) -> Tween:
 		_move.tween_callback(actor.face.bind(facing_right))
 	return _move
 
+## The middle of the little trans flag on his wheelchair's pole, in the
+## world (the Drag Queen's flag, which the player has to kiss).
+func trans_flag_position() -> Vector2:
+	var flag := actor.find_child("FlagTrans", true, false) as Polygon2D
+	if flag == null or flag.polygon.is_empty():
+		return actor.global_position + Vector2(0.0, -115.0)
+	var middle := Vector2.ZERO
+	for point in flag.polygon:
+		middle += point
+	return flag.global_transform * (middle / flag.polygon.size())
+
 ## Turns so the wrench hand (and so `bang()`'s strike) is on the side of
 ## `world_point`. The wrench is in his left hand: facing right puts it on
 ## the left of the screen.
 func face_wrench_toward(world_point: Vector2) -> void:
 	actor.face(world_point.x < actor.global_position.x)
+
+## His eyes pop wide open for `seconds`, with a jolt and a sharp gasp.
+func widen_eyes(seconds: float = 1.6, volume_db: float = -4.0) -> Tween:
+	Sfx.play_at(&"grandpa_gasp", global_position, volume_db, 0.05)
+	_restart_move()
+	_move.tween_property(actor, "position:y", -10.0, 0.08).set_ease(Tween.EASE_OUT)
+	_move.tween_property(actor, "position:y", 0.0, 0.18).set_ease(Tween.EASE_IN)
+	var eyes := actor.find_child("EyesPart", true, false) as Node2D
+	if eyes == null:
+		return _move
+	var rest := eyes.position
+	# Grown around the middle of the eyes, not the character's feet.
+	var wide := rest + EYES_CENTER * (1.0 - WIDE_EYES_SCALE)
+	var pop := create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	pop.tween_property(eyes, "scale", Vector2.ONE * WIDE_EYES_SCALE, 0.12)
+	pop.parallel().tween_property(eyes, "position", wide, 0.12)
+	pop.tween_interval(seconds)
+	pop.tween_property(eyes, "scale", Vector2.ONE, 0.2)
+	pop.parallel().tween_property(eyes, "position", rest, 0.2)
+	return _move
 
 ## A drunk "hic!": a little jump in the chair.
 func hiccup(volume_db: float = -6.0) -> Tween:

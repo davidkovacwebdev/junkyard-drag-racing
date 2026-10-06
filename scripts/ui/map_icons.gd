@@ -144,6 +144,17 @@ static func draw_landmark(canvas: CanvasItem, kind: MinimapMarker.Kind, at: Vect
 		MinimapMarker.Kind.DERBY:
 			canvas.draw_colored_polygon(FlatProps.octagon(at, unit, unit * 0.8), FlatProps.RUBBER_TOP)
 			canvas.draw_colored_polygon(FlatProps.octagon(at, unit * 0.45, unit * 0.36), UiPalette.DANGER_RED)
+		MinimapMarker.Kind.GRAVEYARD:
+			# A tombstone on its mound.
+			canvas.draw_colored_polygon(PackedVector2Array([
+				at + Vector2(-unit * 0.7, unit * 0.8), at + Vector2(-unit * 0.7, -unit * 0.5), at + Vector2(-unit * 0.35, -unit),
+				at + Vector2(unit * 0.35, -unit), at + Vector2(unit * 0.7, -unit * 0.5), at + Vector2(unit * 0.7, unit * 0.8),
+			]), GraveyardProp.STONE)
+			canvas.draw_colored_polygon(PackedVector2Array([
+				at + Vector2(unit * 0.35, -unit), at + Vector2(unit * 0.7, -unit * 0.5),
+				at + Vector2(unit * 0.7, unit * 0.8), at + Vector2(unit * 0.35, unit * 0.8),
+			]), GraveyardProp.STONE_SHADE)
+			canvas.draw_colored_polygon(FlatProps.octagon(at + Vector2(0, unit * 0.8), unit, unit * 0.3), GraveyardProp.MOUND)
 
 static func draw_square(canvas: CanvasItem, at: Vector2, half_size: float, color: Color) -> void:
 	canvas.draw_colored_polygon(PackedVector2Array([

@@ -14,6 +14,9 @@ extends Node
 const OPENING_CAR_SPOT := Vector2(310.0, -105.0)
 ## Grandpa sits just left of the car, wrench side towards it.
 const GRANDPA_SPOT := OPENING_CAR_SPOT + Vector2(-105.0, 15.0)
+## His bacon smoker stands off to his left (it hides itself until he's
+## built it; see BaconSmoker).
+const SMOKER_SPOT := GRANDPA_SPOT + Vector2(-210.0, -10.0)
 
 const GROUP := &"story_director"
 ## The opening's lines and staging; edit them in the inspector on the .tres.
@@ -30,6 +33,9 @@ func _ready() -> void:
 	grandpa.position = GRANDPA_SPOT
 	sortables.add_child.call_deferred(grandpa)
 	_grandpa = grandpa
+	var smoker := BaconSmoker.new()
+	smoker.position = SMOKER_SPOT
+	sortables.add_child.call_deferred(smoker)
 	# Saves from before character creation have no player character; they
 	# skip the intro rather than meeting Grandpa mid-game.
 	if PlayerProfile.character == null or Cutscenes.has_seen(GrandpaScrapsCutscene.ID):

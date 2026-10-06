@@ -72,6 +72,10 @@ extends Resource
 @export_file("*.tscn") var reward_part: String = ""
 ## What the giver says if the player comes back before the goal is met.
 @export var reminder_line: String = ""
+## A scene played when the player hands the quest in to the giver (who it's
+## given to as `grandpa`, if it has one); the quest is finished and paid
+## once it's over, and `turn_in_line` isn't said. Empty: no scene.
+@export_file("*.tres") var turn_in_cutscene: String = ""
 ## What the giver says when the player hands the quest in.
 @export var turn_in_line: String = ""
 ## Said instead of `turn_in_line` when the goal was met with nothing to show

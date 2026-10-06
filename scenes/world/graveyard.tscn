@@ -3,6 +3,8 @@
 [ext_resource type="Script" path="res://scripts/world/graveyard_prop.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/audio/ambient_call.gd" id="2"]
 [ext_resource type="Script" path="res://scripts/world/bird_roost.gd" id="crow_roost"]
+[ext_resource type="Script" path="res://scripts/world/graveyard_gate.gd" id="3"]
+[ext_resource type="Script" path="res://scripts/world/minimap_marker.gd" id="4"]
 
 [node name="Graveyard" type="Node2D"]
 y_sort_enabled = true
@@ -119,3 +121,10 @@ interval_range = Vector2(8, 18)
 y_sort_enabled = true
 script = ExtResource("crow_roost")
 perches = Array[Vector3]([Vector3(-200, 20, 48), Vector3(60, 30, 48), Vector3(200, 120, 48), Vector3(-120, 30, 60), Vector3(40, -90, 146), Vector3(-218, -120, 134), Vector3(232, -40, 114), Vector3(-80, 75, 0), Vector3(150, 70, 0)])
+[node name="Gate" type="StaticBody2D" parent="."]
+position = Vector2(0, 200)
+script = ExtResource("3")
+
+[node name="MinimapMarker" type="Node2D" parent="."]
+script = ExtResource("4")
+kind = 10

@@ -27,6 +27,13 @@ const CLOSED_MESSAGE := "Closes at 8PM, open at 8AM"
 const CLOSED_COLOR := Color(0.95, 0.2, 0.2, 1)
 const OPEN_COLOR := Color(1, 1, 1, 1)
 
+## A venue that hasn't opened yet: what the booth says instead, until the
+## player has been given `opens_with_quest`.
+const LOCKED_MESSAGE := "Not open yet. Rumour is it's opening soon"
+
+## Empty: open from the start. Otherwise the booth stays shut (SHUT card,
+## LOCKED_MESSAGE) until the player has this quest, or has finished it.
+@export var opens_with_quest: StringName = &""
 ## The race DragStripMenu (this booth's interior_scene) sends the player into.
 @export_file("*.tscn") var race_scene_path: String = "res://scenes/race/race_drag_strip.tscn"
 ## Which rival roster the venue's bet fields come from.
@@ -58,13 +65,22 @@ const FLAG_OUT := 3
 const CHECKER_LIGHT := Color(0.86, 0.84, 0.78)
 const SIGN_BOARD := Color(0.85, 0.66, 0.12)
 
+func _is_unlocked() -> bool:
+	if opens_with_quest.is_empty() or Engine.is_editor_hint():
+		return true
+	return Quests.has_quest(opens_with_quest) or Quests.is_complete(opens_with_quest)
+
 func _is_open() -> bool:
+	if not _is_unlocked():
+		return false
 	var hour := DayNightCycle.get_hour()
 	return hour >= OPEN_HOUR and hour < CLOSE_HOUR
 
 ## Overrides PlayerCar's default prompt while closed; empty string when open
 ## falls back to the default "Drag Strip: Press space to enter".
 func get_interact_prompt() -> String:
+	if not _is_unlocked():
+		return "%s: %s" % [display_name, LOCKED_MESSAGE]
 	return "" if _is_open() else CLOSED_MESSAGE
 
 func get_interact_prompt_color() -> Color:
@@ -75,6 +91,8 @@ func get_interact_prompt_color() -> Color:
 ## overnight.
 func interact(_actor: Node = null) -> void:
 	if not _is_open():
+		if not _is_unlocked():
+			Sfx.play(&"denied", -6.0, 0.0)
 		return
 	print(display_name)
 	RaceProgression.menu_race_scene = race_scene_path

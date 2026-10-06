@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/items/icons/item_chains.tscn" id="2_icon"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"chains"
+display_name = "Chains"
+price = 200
+description = "Heavy-duty snow chains. Real steel, every link. That's why they cost what they cost, pal."
+icon_scene = ExtResource("2_icon")
