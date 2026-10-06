@@ -52,7 +52,7 @@ func interact(_actor: Node = null) -> void:
 		return
 	if interior_scene is PackedScene:
 		Sfx.play(&"door_close", -4.0)
-		get_tree().change_scene_to_packed(interior_scene)
+		SceneLoader.change_scene_packed(interior_scene)
 
 func _draw() -> void:
 	draw_set_transform(art_origin())

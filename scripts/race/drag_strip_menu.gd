@@ -216,7 +216,7 @@ func _on_race_pressed() -> void:
 	RaceProgression.pending_include_player = true
 	RaceProgression.pending_entry_fee = fee
 	RaceProgression.pending_bet_field = []
-	get_tree().change_scene_to_file(RaceProgression.menu_race_scene)
+	SceneLoader.change_scene(RaceProgression.menu_race_scene)
 
 func _on_bet_amount_pressed(index: int) -> void:
 	_bet_amount = BET_AMOUNTS[index]
@@ -276,4 +276,4 @@ func _on_bet_confirm_pressed() -> void:
 	RaceProgression.pending_bet_field = _bet_field
 	RaceProgression.last_bet_amount = _bet_amount
 	RaceProgression.last_bet_car_name = _bet_field_names[_bet_pick_index]
-	get_tree().change_scene_to_file(RaceProgression.menu_race_scene)
+	SceneLoader.change_scene(RaceProgression.menu_race_scene)

@@ -9,4 +9,5 @@ Godot 4 game. All art is flat polygons (`Polygon2D` in scenes, or `_draw()` code
 - **Sound:** every new feature gets a fitting sound per `.claude/skills/sound-design/SKILL.md`.
 - **Music:** follow `.claude/skills/music/SKILL.md`. Songs are versioned as new files and never deleted or overwritten.
 - **Headless runs clobber saves:** run every probe, tool or test scene with `-- --no-save` (e.g. `godot --headless res://tools/x.tscn -- --no-save`). SaveSystem then never writes or deletes the save. Never edit `project.godot` to strip SaveSystem.
+- **Native code:** audio DSP and road geometry live in the `junk_native` GDExtension (`rust/`). After changing Rust code run `cargo build` (and `cargo build --release` for exports) in `rust/`; Godot loads `rust/target/<debug|release>/`. Setup, build targets and exports: `rust/README.md`.
 - **Checking art:** render with `godot res://tools/art_gallery.tscn -- <out_dir> [parts|world|race|screens|all]` and compare against the gold-standard parts listed in the art-style skill.

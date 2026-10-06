@@ -59,7 +59,7 @@ func interact(_actor: Node = null) -> void:
 		return
 	Sfx.play(&"cemetery_gate_creak", -4.0, 0.05)
 	SaveSystem.save_game()
-	get_tree().change_scene_to_file(CEMETERY_SCENE)
+	SceneLoader.change_scene(CEMETERY_SCENE)
 
 func _draw() -> void:
 	_drawn_open = is_open()

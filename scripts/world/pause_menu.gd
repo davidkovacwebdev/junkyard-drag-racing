@@ -35,7 +35,7 @@ func _on_return_to_menu_pressed() -> void:
 func _leave_to(scene_path: String) -> void:
 	get_tree().paused = false
 	SaveSystem.save_game()
-	get_tree().change_scene_to_file(scene_path)
+	SceneLoader.change_scene(scene_path)
 
 func _on_quit_pressed() -> void:
 	SaveSystem.save_game()

@@ -43,6 +43,7 @@ Trunk="*res://autoload/trunk.gd"
 Drunk="*res://autoload/drunk.gd"
 WorldMap="*res://autoload/world_map.gd"
 QuestDebugger="*res://autoload/quest_debugger.gd"
+SceneLoader="*res://autoload/scene_loader.gd"
 
 [display]
 

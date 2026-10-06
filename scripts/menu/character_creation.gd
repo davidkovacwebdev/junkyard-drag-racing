@@ -186,4 +186,4 @@ func _start() -> void:
 	PlayerProfile.player_name = player_name
 	PlayerProfile.character = _character
 	Sfx.play(&"door_close", -4.0)
-	get_tree().change_scene_to_file(WORLD_SCENE)
+	SceneLoader.change_scene(WORLD_SCENE)

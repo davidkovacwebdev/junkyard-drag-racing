@@ -6,13 +6,19 @@ extends ScrapButton
 ## button), but menu screens override target_scene to go back to the
 ## main menu instead.
 
+const MENU_DIRECTORY := "res://scenes/menu/"
+
 @export_file("*.tscn") var target_scene: String = "res://scenes/world/main.tscn"
 
 func _pressed() -> void:
 	# No-ops if there's no active session (e.g. Settings reached straight
 	# from the main menu) — see SaveSystem's own guard.
 	SaveSystem.save_game()
-	get_tree().change_scene_to_file(target_scene)
+	# Menu screens load instantly; anything else (the map) gets the loading board.
+	if target_scene.begins_with(MENU_DIRECTORY):
+		get_tree().change_scene_to_file(target_scene)
+	else:
+		SceneLoader.change_scene(target_scene)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_ESCAPE:

@@ -26,6 +26,10 @@ extends Node2D
 ##
 ## `clear_areas` lists plots the generator bends roads around (the garage, by
 ## default), so a building never ends up in the middle of a street.
+##
+## The point-heavy geometry (decimating, filleting, kerb offsets, markings,
+## chunking and the lookup grids) runs natively: RoadGeometry and SegmentGrid in
+## rust/src/road_geometry.rs.
 
 enum Mode {
 	GENERATED, ## Procedural town from `city_seed` only.
@@ -115,27 +119,15 @@ var _corner_points: Array[PackedVector2Array] = []
 ## densified and clipped at every junction, so `_draw()` only replays them.
 var _edge_runs: Array[PackedVector2Array] = []
 var _dash_runs: Array[PackedVector2Array] = []
-## Junction-clipping broad phase. All the drawing roads' segments flattened into
-## `_segment_*`, and a grid mapping a cell to the segments whose own bounding
-## box, grown by the marking clearance, covers that cell. A cell's list is
-## therefore a superset of the segments that could block a point inside it, so
-## `_point_blocked` only ever runs the exact test on those few segments instead
-## of scanning whole roads — which matters because a hand-drawn road can be
-## thousands of pixels long and touch most of the map.
-var _blocking_cells: Dictionary = {}
-var _segment_road: PackedInt32Array = []
-var _segment_from: PackedVector2Array = []
-var _segment_to: PackedVector2Array = []
-var _blocking_cell_size: float = 1.0
+## Junction-clipping broad phase over the drawing roads: each segment is listed
+## in every cell its bounding box covers once grown by the marking clearance, so
+## a marking point only tests the few segments that could actually block it.
+var _blocking_grid: SegmentGrid
 ## Broad phase for `is_on_road`, the one query that runs every physics frame
-## while driving. Same shape as `_blocking_cells`, but over the full-fidelity
-## `_roads` (the placement queries must see the true polyline) and keyed off the
-## caller's own threshold instead of the marking clearance. Without it every
-## frame distance-tested all ~12k segments of the city and cost ~5.5 ms on its
-## own, which is what made driving around the map stutter.
-var _query_cells: Dictionary = {}
-var _query_segment_from: PackedVector2Array = []
-var _query_segment_to: PackedVector2Array = []
+## while driving. Over the full-fidelity `_roads` (the placement queries must see
+## the true polyline) and walked by the caller's own threshold. Without it every
+## frame distance-tested all ~12k segments of the city.
+var _query_grid: SegmentGrid
 ## Derived geometry per authored Path2D child, keyed by instance id. Deriving a
 ## road from a curve — sampling, clearing the no-build areas, filleting corners,
 ## decimating — is the most expensive thing a rebuild does, and it depends on
@@ -185,9 +177,6 @@ class DrawChunk:
 	var ribbons: Array[PackedVector2Array] = []
 	var discs := PackedVector2Array()
 	var islands := PackedVector2Array()
-	## Pairs of points, for `draw_multiline`.
-	var edge_segments := PackedVector2Array()
-	var dash_segments := PackedVector2Array()
 	## Every edge line and dash, baked into one draw command.
 	var markings := TriangleBatch.new()
 
@@ -225,14 +214,8 @@ class BakedNetwork:
 	var corner_points: Array[PackedVector2Array] = []
 	var edge_runs: Array[PackedVector2Array] = []
 	var dash_runs: Array[PackedVector2Array] = []
-	var blocking_cells: Dictionary = {}
-	var segment_road: PackedInt32Array = []
-	var segment_from: PackedVector2Array = []
-	var segment_to: PackedVector2Array = []
-	var blocking_cell_size: float = 1.0
-	var query_cells: Dictionary = {}
-	var query_segment_from: PackedVector2Array = []
-	var query_segment_to: PackedVector2Array = []
+	var blocking_grid: SegmentGrid
+	var query_grid: SegmentGrid
 	var draw_chunks: Dictionary = {}
 
 static var _runtime_bake: BakedNetwork = null
@@ -281,35 +264,7 @@ func _get_configuration_warnings() -> PackedStringArray:
 ## ribbon never have to handle a near-right-angle kink. Gentle bends from
 ## `_wavy_line` are left alone.
 func _round_sharp_corners(points: PackedVector2Array, radius: float) -> PackedVector2Array:
-	if points.size() < 3 or radius <= 0.0:
-		return points
-	var threshold := deg_to_rad(corner_fillet_angle_deg)
-	var out := PackedVector2Array()
-	out.append(points[0])
-	for i in range(1, points.size() - 1):
-		var prev := points[i - 1]
-		var curr := points[i]
-		var next := points[i + 1]
-		var in_dir := curr - prev
-		var out_dir := next - curr
-		if in_dir.length_squared() < 0.0001 or out_dir.length_squared() < 0.0001:
-			out.append(curr)
-			continue
-		in_dir = in_dir.normalized()
-		out_dir = out_dir.normalized()
-		if absf(in_dir.angle_to(out_dir)) < threshold:
-			out.append(curr)
-			continue
-		# Don't let the fillet eat more than half of either adjacent segment.
-		var r := minf(radius, minf(prev.distance_to(curr), curr.distance_to(next)) * 0.5)
-		var p1 := curr - in_dir * r
-		var p2 := curr + out_dir * r
-		var arc_steps := 6
-		for step in arc_steps + 1:
-			var t := float(step) / float(arc_steps)
-			out.append(p1.lerp(curr, t).lerp(curr.lerp(p2, t), t))
-	out.append(points[points.size() - 1])
-	return out
+	return RoadGeometry.round_sharp_corners(points, radius, deg_to_rad(corner_fillet_angle_deg))
 
 func _rebuild() -> void:
 	var runtime_signature := ""
@@ -361,14 +316,8 @@ func _capture_bake(signature: String) -> BakedNetwork:
 	bake.corner_points = _corner_points
 	bake.edge_runs = _edge_runs
 	bake.dash_runs = _dash_runs
-	bake.blocking_cells = _blocking_cells
-	bake.segment_road = _segment_road
-	bake.segment_from = _segment_from
-	bake.segment_to = _segment_to
-	bake.blocking_cell_size = _blocking_cell_size
-	bake.query_cells = _query_cells
-	bake.query_segment_from = _query_segment_from
-	bake.query_segment_to = _query_segment_to
+	bake.blocking_grid = _blocking_grid
+	bake.query_grid = _query_grid
 	bake.draw_chunks = _draw_chunks
 	return bake
 
@@ -381,14 +330,8 @@ func _restore_bake(bake: BakedNetwork) -> void:
 	_corner_points = bake.corner_points
 	_edge_runs = bake.edge_runs
 	_dash_runs = bake.dash_runs
-	_blocking_cells = bake.blocking_cells
-	_segment_road = bake.segment_road
-	_segment_from = bake.segment_from
-	_segment_to = bake.segment_to
-	_blocking_cell_size = bake.blocking_cell_size
-	_query_cells = bake.query_cells
-	_query_segment_from = bake.query_segment_from
-	_query_segment_to = bake.query_segment_to
+	_blocking_grid = bake.blocking_grid
+	_query_grid = bake.query_grid
 	_draw_chunks = bake.draw_chunks
 
 ## Sample the Path2D children, reusing whatever is still cached for any curve
@@ -428,123 +371,20 @@ func _derive_authored_road(path: Path2D, signature: String) -> AuthoredRoad:
 	if points.size() >= 2:
 		var road := _avoid_clear_areas(points)
 		cached.road = _round_sharp_corners(road, corner_fillet_radius)
-		cached.draw = _simplify(cached.road, SIMPLIFY_TOLERANCE)
+		cached.draw = RoadGeometry.simplify(cached.road, SIMPLIFY_TOLERANCE)
 	return cached
 
-## Douglas-Peucker: drop points that stay within `tolerance` of the line between
-## the points that survive. Iterative rather than recursive — a pathological
-## curve can put thousands of frames on the stack, which GDScript does not like.
-func _simplify(points: PackedVector2Array, tolerance: float) -> PackedVector2Array:
-	var n := points.size()
-	if n < 3 or tolerance <= 0.0:
-		return points
-	var keep := PackedByteArray()
-	keep.resize(n)
-	keep[0] = 1
-	keep[n - 1] = 1
-	var tolerance_squared := tolerance * tolerance
-	var spans: Array[Vector2i] = [Vector2i(0, n - 1)]
-	while not spans.is_empty():
-		var span: Vector2i = spans.pop_back()
-		var first := span.x
-		var last := span.y
-		if last - first < 2:
-			continue
-		var a := points[first]
-		var ab := points[last] - a
-		var length_squared := ab.length_squared()
-		var worst := -1.0
-		var worst_index := -1
-		for i in range(first + 1, last):
-			var deviation := 0.0
-			if length_squared <= 0.0:
-				deviation = points[i].distance_squared_to(a)
-			else:
-				var t := clampf((points[i] - a).dot(ab) / length_squared, 0.0, 1.0)
-				deviation = points[i].distance_squared_to(a + ab * t)
-			if deviation > worst:
-				worst = deviation
-				worst_index = i
-		if worst > tolerance_squared:
-			keep[worst_index] = 1
-			spans.append(Vector2i(first, worst_index))
-			spans.append(Vector2i(worst_index, last))
-	var out := PackedVector2Array()
-	for i in n:
-		if keep[i] == 1:
-			out.append(points[i])
-	return out
-
-## Build the junction-clipping broad phase. Every drawing road's segments are
-## flattened, then each one is registered in the grid cells its own bounding box
-## covers once grown by the marking clearance. Bucketing that generously makes a
-## cell's list a superset of the segments that could block a point inside it, so
-## `_point_blocked` only runs the exact test on those few segments.
 func _rebuild_blocking_grid() -> void:
-	_blocking_cells.clear()
-	_segment_road.clear()
-	_segment_from.clear()
-	_segment_to.clear()
-	_blocking_cell_size = maxf(road_width * 0.5 + shoulder_width + junction_clearance, 1.0)
-	if _draw_roads.size() < 2:
-		return
-	# Collect into plain arrays first: a packed array stored in a Dictionary is
-	# copied every time it's appended to, which this is about to do a lot of.
-	var buckets := {}
-	for i in _draw_roads.size():
-		var points := _draw_roads[i]
-		for s in range(points.size() - 1):
-			var segment := _segment_from.size()
-			_segment_road.append(i)
-			_segment_from.append(points[s])
-			_segment_to.append(points[s + 1])
-			var rect := Rect2(points[s], Vector2.ZERO).expand(points[s + 1])
-			rect = rect.grow(_blocking_cell_size)
-			var first := Vector2i((rect.position / _blocking_cell_size).floor())
-			var last := Vector2i((rect.end / _blocking_cell_size).floor())
-			for cx in range(first.x, last.x + 1):
-				for cy in range(first.y, last.y + 1):
-					var cell := Vector2i(cx, cy)
-					if buckets.has(cell):
-						buckets[cell].append(segment)
-					else:
-						buckets[cell] = [segment]
-	for cell in buckets:
-		_blocking_cells[cell] = PackedInt32Array(buckets[cell])
+	var roads: Array[PackedVector2Array] = _draw_roads if _draw_roads.size() >= 2 else []
+	var cell_size := maxf(_marking_block_distance(), 1.0)
+	_blocking_grid = SegmentGrid.create(roads, cell_size, cell_size)
 
-## Build the `is_on_road` broad phase. Same bucketing trick as the junction
-## grid: each full-fidelity segment lands in every cell its bounding box covers
-## once grown by `QUERY_CELL_SIZE`, which makes a cell's list a superset of the
-## segments that could possibly be within reach of a point inside it. The query
-## then runs the exact distance test on those few segments instead of all of
-## them — the difference between ~5.5 ms and ~0.05 ms per frame while driving.
+## How close a lane marking may get to another road before it breaks.
+func _marking_block_distance() -> float:
+	return road_width * 0.5 + shoulder_width + junction_clearance
+
 func _rebuild_query_grid() -> void:
-	_query_cells.clear()
-	_query_segment_from.clear()
-	_query_segment_to.clear()
-	if _roads.is_empty():
-		return
-	# Collect into plain arrays first, then pack: a packed array stored in a
-	# Dictionary is copied on every append, and this appends a lot.
-	var buckets := {}
-	for i in _roads.size():
-		var points := _roads[i]
-		for s in range(points.size() - 1):
-			var segment := _query_segment_from.size()
-			_query_segment_from.append(points[s])
-			_query_segment_to.append(points[s + 1])
-			var rect := Rect2(points[s], Vector2.ZERO).expand(points[s + 1])
-			var first := Vector2i((rect.position / QUERY_CELL_SIZE).floor())
-			var last := Vector2i((rect.end / QUERY_CELL_SIZE).floor())
-			for cx in range(first.x, last.x + 1):
-				for cy in range(first.y, last.y + 1):
-					var cell := Vector2i(cx, cy)
-					if buckets.has(cell):
-						buckets[cell].append(segment)
-					else:
-						buckets[cell] = [segment]
-	for cell in buckets:
-		_query_cells[cell] = PackedInt32Array(buckets[cell])
+	_query_grid = SegmentGrid.create(_roads, QUERY_CELL_SIZE, 0.0)
 
 # --- Queries for other systems -------------------------------------------------
 
@@ -572,26 +412,11 @@ func road_edge_offset() -> float:
 ## True if `point` lands on a road, using the same clearance the lane markings
 ## respect. `extra` widens the test, e.g. to keep a wide prop's footprint clear.
 func is_on_road(point: Vector2, extra: float = 0.0) -> bool:
-	var threshold := road_edge_offset() + extra
 	# Self-heal if a caller got here before the first rebuild. Cheap, and it
 	# keeps a miss from silently answering "no road anywhere".
-	if _query_cells.is_empty() and not _roads.is_empty():
+	if _query_grid == null:
 		_rebuild_query_grid()
-	# Any segment within `threshold` of the point has its bounding box inside
-	# the square of that radius, so walking the cells overlapping that square
-	# is guaranteed to offer up every segment that could pass the exact test.
-	var limit := threshold * threshold
-	var first := Vector2i(((point - Vector2(threshold, threshold)) / QUERY_CELL_SIZE).floor())
-	var last := Vector2i(((point + Vector2(threshold, threshold)) / QUERY_CELL_SIZE).floor())
-	for cx in range(first.x, last.x + 1):
-		for cy in range(first.y, last.y + 1):
-			var candidates: PackedInt32Array = _query_cells.get(
-					Vector2i(cx, cy), PackedInt32Array())
-			for segment in candidates:
-				if _distance_squared_to_segment(point, _query_segment_from[segment],
-						_query_segment_to[segment]) < limit:
-					return true
-	return false
+	return _query_grid.is_near(point, road_edge_offset() + extra)
 
 ## Unit direction of the road nearest `point`, or `fallback` if nothing is
 ## nearby. Lets a prop sit parallel to whatever street it was dropped beside.
@@ -618,13 +443,10 @@ func get_roundabouts() -> Array[Vector2]:
 ## Sample a Path2D's curve into a polyline in this node's space, so a hand-drawn
 ## curve renders through exactly the same path as a generated street.
 func _sample_curve(path: Path2D) -> PackedVector2Array:
-	var points := PackedVector2Array()
 	var curve := path.curve
 	if curve == null:
-		return points
-	for point in curve.get_baked_points():
-		points.append(path.transform * point)
-	return points
+		return PackedVector2Array()
+	return path.transform * curve.get_baked_points()
 
 # --- City generation -----------------------------------------------------------
 
@@ -664,7 +486,7 @@ func _generate_city() -> void:
 	# that actually changed.
 	_cached_generated_draw.clear()
 	for road in _cached_generated:
-		_cached_generated_draw.append(_simplify(road, SIMPLIFY_TOLERANCE))
+		_cached_generated_draw.append(RoadGeometry.simplify(road, SIMPLIFY_TOLERANCE))
 
 ## Street positions stepping outward from `anchor`, re-rolling the gap every
 ## time so blocks come out uneven. The anchor is always included, which is what
@@ -840,30 +662,7 @@ func _segment_hit(p1: Vector2, p2: Vector2, p3: Vector2, p4: Vector2) -> Variant
 ## runs. A road that would cross a building footprint bends around it instead,
 ## which is what keeps buildings off the tarmac.
 func _avoid_clear_areas(points: PackedVector2Array) -> PackedVector2Array:
-	if clear_areas.is_empty() or points.size() < 2:
-		return points
-	var margin := road_width * 0.5 + shoulder_width + 6.0
-	var out := PackedVector2Array()
-	for i in points.size():
-		var point := points[i]
-		var direction := _local_direction(points, i)
-		for area in clear_areas:
-			var grown := area.grow(margin)
-			if not grown.has_point(point):
-				continue
-			if absf(direction.x) >= absf(direction.y):
-				point.y = grown.position.y if absf(point.y - grown.position.y) < absf(point.y - grown.end.y) else grown.end.y
-			else:
-				point.x = grown.position.x if absf(point.x - grown.position.x) < absf(point.x - grown.end.x) else grown.end.x
-		out.append(point)
-	return out
-
-func _local_direction(points: PackedVector2Array, index: int) -> Vector2:
-	if index == 0:
-		return points[1] - points[0]
-	if index == points.size() - 1:
-		return points[index] - points[index - 1]
-	return points[index + 1] - points[index - 1]
+	return RoadGeometry.avoid_clear_areas(points, clear_areas, road_width * 0.5 + shoulder_width + 6.0)
 
 func _normalized_bounds() -> Rect2:
 	var rect := city_bounds
@@ -938,207 +737,33 @@ func _draw_island(canvas: Node2D, center: Vector2) -> void:
 ## they cross into another chunk; marking runs go in as loose segments.
 func _build_draw_chunks() -> void:
 	_draw_chunks.clear()
-	for i in _draw_roads.size():
-		var points := _draw_roads[i]
-		if points.size() < 2:
-			continue
-		_add_ribbon_pieces(points)
-		_chunk_at(points[0]).discs.append(points[0])
-		_chunk_at(points[points.size() - 1]).discs.append(points[points.size() - 1])
-		for corner in _corner_points[i]:
-			_chunk_at(corner).discs.append(corner)
-	for center in _roundabouts:
-		_chunk_at(center).islands.append(center)
-	for run in _edge_runs:
-		for s in range(1, run.size()):
-			var chunk := _chunk_at((run[s - 1] + run[s]) * 0.5)
-			chunk.edge_segments.append(run[s - 1])
-			chunk.edge_segments.append(run[s])
-	for run in _dash_runs:
-		for s in range(1, run.size()):
-			var chunk := _chunk_at((run[s - 1] + run[s]) * 0.5)
-			chunk.dash_segments.append(run[s - 1])
-			chunk.dash_segments.append(run[s])
-	for chunk: DrawChunk in _draw_chunks.values():
-		chunk.markings.add_segments(chunk.edge_segments, edge_color, edge_width)
-		chunk.markings.add_segments(chunk.dash_segments, line_color, line_width)
-
-func _add_ribbon_pieces(points: PackedVector2Array) -> void:
-	var cell := _chunk_cell((points[0] + points[1]) * 0.5)
-	var piece := PackedVector2Array([points[0]])
-	for s in range(1, points.size()):
-		var segment_cell := _chunk_cell((points[s - 1] + points[s]) * 0.5)
-		if segment_cell != cell:
-			var chunk := _chunk_for_cell(cell)
-			chunk.ribbons.append(piece)
-			chunk.discs.append(points[s - 1])
-			piece = PackedVector2Array([points[s - 1]])
-			cell = segment_cell
-		piece.append(points[s])
-	_chunk_for_cell(cell).ribbons.append(piece)
-
-func _chunk_cell(point: Vector2) -> Vector2i:
-	return Vector2i((point / DRAW_CHUNK_SIZE).floor())
-
-func _chunk_at(point: Vector2) -> DrawChunk:
-	return _chunk_for_cell(_chunk_cell(point))
-
-func _chunk_for_cell(cell: Vector2i) -> DrawChunk:
-	var chunk: DrawChunk = _draw_chunks.get(cell)
-	if chunk == null:
-		chunk = DrawChunk.new()
+	var markings := {"corner_points": _corner_points, "edge_runs": _edge_runs, "dash_runs": _dash_runs}
+	var style := {"chunk_size": DRAW_CHUNK_SIZE, "edge_color": edge_color, "edge_width": edge_width,
+			"line_color": line_color, "line_width": line_width}
+	var built := RoadGeometry.build_draw_chunks(_draw_roads, markings, _roundabouts, style)
+	for cell in built:
+		var parts: Dictionary = built[cell]
+		var chunk := DrawChunk.new()
+		chunk.ribbons.assign(parts["ribbons"])
+		chunk.discs = parts["discs"]
+		chunk.islands = parts["islands"]
+		chunk.markings.add_triangles(parts["points"], parts["colors"], parts["indices"])
 		_draw_chunks[cell] = chunk
-	return chunk
 
 # --- Geometry ------------------------------------------------------------------
 
 ## Everything a marking needs, worked out once per rebuild: where the discs go
-## under the ribbon, and the polylines to draw. This is the expensive half of a
-## redraw — offsetting both kerbs, densifying them, and testing every mark
-## against every other road — so it must not live in `_draw()`, which the editor
-## calls again on every poll that sees a curve change.
+## under the ribbon, and the edge lines and centre dashes, already offset,
+## densified and broken at every junction. This is the expensive half of a
+## redraw, so it must not live in `_draw()`, which the editor calls again on
+## every poll that sees a curve change.
 func _build_markings() -> void:
-	_edge_runs.clear()
-	_dash_runs.clear()
-	_corner_points.clear()
-	for i in _draw_roads.size():
-		var points := _draw_roads[i]
-		_corner_points.append(_corners_of(points))
-		_collect_edge_runs(points, i)
-		_collect_dash_runs(points, i)
-
-## The points along a road that need a disc under them. ~3° — anything
-## straighter than this is effectively collinear at road scale.
-func _corners_of(points: PackedVector2Array) -> PackedVector2Array:
-	var out := PackedVector2Array()
-	const MIN_TURN := 0.05
-	for i in range(1, points.size() - 1):
-		var a := points[i] - points[i - 1]
-		var b := points[i + 1] - points[i]
-		if a.length_squared() < 0.0001 or b.length_squared() < 0.0001:
-			continue
-		if absf(a.angle_to(b)) > MIN_TURN:
-			out.append(points[i])
-	return out
-
-## Solid edge lines down both sides, broken wherever another road crosses.
-func _collect_edge_runs(points: PackedVector2Array, index: int) -> void:
-	var inset := road_width * 0.5 - edge_inset
-	if inset <= 0.0:
-		return
-	_collect_line_runs(_offset_polyline(points, -inset), index, _edge_runs)
-	_collect_line_runs(_offset_polyline(points, inset), index, _edge_runs)
-
-## Cut a polyline into the runs that don't land on another road.
-func _collect_line_runs(points: PackedVector2Array, index: int,
-		out_runs: Array[PackedVector2Array]) -> void:
-	var dense := _densify(points, maxf(road_width * 0.3, 24.0))
-	var run := PackedVector2Array()
-	for point in dense:
-		if _point_blocked(point, index):
-			_append_run(out_runs, run)
-			run = PackedVector2Array()
-		else:
-			run.append(point)
-	_append_run(out_runs, run)
-
-## Dashed centre line, cut into one run per dash so the gaps stay gaps.
-##
-## The dash edges are placed at their exact arc-length positions rather than at
-## whichever densified sample happened to land nearest. Sampling quantises every
-## dash edge by up to one sample spacing, and the drawing polyline is decimated,
-## so its samples sit much further apart than the full-fidelity ones did — that
-## alone was trimming roughly 10% off every dash. Deriving the edges from
-## distance along the road keeps `dash_length`/`dash_gap` exact no matter how
-## heavily the polyline was decimated for drawing.
-func _collect_dash_runs(points: PackedVector2Array, index: int) -> void:
-	var dense := _densify(points, 14.0)
-	if dense.size() < 2:
-		return
-	var period := maxf(dash_length + dash_gap, 1.0)
-	var total := 0.0
-	for i in range(1, dense.size()):
-		total += dense[i].distance_to(dense[i - 1])
-	var edges := _dash_edges(total, period)
-
-	var run := PackedVector2Array()
-	var on_dash := fmod(dash_gap, period) < dash_length
-	if on_dash:
-		# The road opens part-way through a dash.
-		run.append(dense[0])
-	var edge_index := 0
-	var travelled := 0.0
-	for i in range(1, dense.size()):
-		var a := dense[i - 1]
-		var b := dense[i]
-		var segment_length := a.distance_to(b)
-		var segment_end := travelled + segment_length
-		# Place any dash edge that falls inside this step, exactly where it
-		# belongs. The point is tested for blocking like any other, so a dash
-		# still breaks at a junction.
-		while edge_index < edges.size() and edges[edge_index] <= segment_end + 0.0001:
-			var t := 0.0 if segment_length <= 0.0 else (edges[edge_index] - travelled) / segment_length
-			var at := a.lerp(b, clampf(t, 0.0, 1.0))
-			if on_dash:
-				if not _point_blocked(at, index):
-					run.append(at)
-				_append_run(_dash_runs, run)
-				run = PackedVector2Array()
-			elif not _point_blocked(at, index):
-				run.append(at)
-			on_dash = not on_dash
-			edge_index += 1
-		if on_dash:
-			if _point_blocked(b, index):
-				_append_run(_dash_runs, run)
-				run = PackedVector2Array()
-			else:
-				run.append(b)
-		travelled = segment_end
-	_append_run(_dash_runs, run)
-
-## Arc-length positions where the centre line flips between dash and gap. The
-## marking turns on at `k*period - dash_gap` and off `dash_length` later.
-func _dash_edges(total: float, period: float) -> PackedFloat32Array:
-	var edges := PackedFloat32Array()
-	var k := 0
-	while true:
-		var off_edge := k * period + dash_length - dash_gap
-		if off_edge > total + period:
-			break
-		var on_edge := k * period - dash_gap
-		if on_edge >= 0.0 and on_edge <= total:
-			edges.append(on_edge)
-		if off_edge >= 0.0 and off_edge <= total:
-			edges.append(off_edge)
-		k += 1
-	edges.sort()
-	return edges
-
-## One point is not a line — only keep runs worth drawing.
-func _append_run(out_runs: Array[PackedVector2Array], run: PackedVector2Array) -> void:
-	if run.size() >= 2:
-		out_runs.append(run)
-
-## Is this marking point sitting on some other road? The grid narrows it to the
-## handful of segments that could actually reach this point; without that, every
-## call had to distance-test every segment of every other road, which cost about
-## a second per redraw once the roads got long.
-func _point_blocked(point: Vector2, index: int) -> bool:
-	# A one-road network has nothing to collide with.
-	var candidates: PackedInt32Array = _blocking_cells.get(
-			Vector2i((point / _blocking_cell_size).floor()), PackedInt32Array())
-	if candidates.is_empty():
-		return false
-	var threshold := road_width * 0.5 + shoulder_width + junction_clearance
-	var limit := threshold * threshold
-	for segment in candidates:
-		if _segment_road[segment] == index:
-			continue
-		if _distance_squared_to_segment(point, _segment_from[segment],
-				_segment_to[segment]) < limit:
-			return true
-	return false
+	var settings := {"road_width": road_width, "edge_inset": edge_inset, "dash_length": dash_length,
+			"dash_gap": dash_gap, "block_distance": _marking_block_distance()}
+	var built := RoadGeometry.build_markings(_draw_roads, _blocking_grid, settings)
+	_corner_points.assign(built["corner_points"])
+	_edge_runs.assign(built["edge_runs"])
+	_dash_runs.assign(built["dash_runs"])
 
 func _distance_squared_to_segment(point: Vector2, a: Vector2, b: Vector2) -> float:
 	var ab := b - a
@@ -1147,91 +772,6 @@ func _distance_squared_to_segment(point: Vector2, a: Vector2, b: Vector2) -> flo
 		return point.distance_squared_to(a)
 	var t := clampf((point - a).dot(ab) / length_squared, 0.0, 1.0)
 	return point.distance_squared_to(a + ab * t)
-
-func _offset_polyline(points: PackedVector2Array, distance: float) -> PackedVector2Array:
-	var out := PackedVector2Array()
-	var n := points.size()
-	if n < 2:
-		return out
-	var miter_limit := 2.0 # max miter length, as a multiple of `distance`
-	for i in n:
-		var offset_dir: Vector2
-		if i == 0:
-			offset_dir = (points[1] - points[0]).normalized().orthogonal()
-		elif i == n - 1:
-			offset_dir = (points[i] - points[i - 1]).normalized().orthogonal()
-		else:
-			var t_in := (points[i] - points[i - 1]).normalized()
-			var t_out := (points[i + 1] - points[i]).normalized()
-			var n_in := t_in.orthogonal()
-			var n_out := t_out.orthogonal()
-			var bisector := n_in + n_out
-			if bisector.length_squared() < 0.0001:
-				# Near-180 reversal — no clean bisector, just use one side.
-				offset_dir = n_in
-			else:
-				bisector = bisector.normalized()
-				var cos_half := bisector.dot(n_in)
-				if cos_half < 1.0 / miter_limit:
-					# Too sharp to miter without folding — bevel: sit at the
-					# mean of the two side normals so the line simply turns.
-					offset_dir = bisector * cos_half
-				else:
-					offset_dir = bisector / cos_half
-		out.append(points[i] + offset_dir * distance)
-	return _trim_offset_loops(out)
-
-## A parallel offset is only valid while the road curves more gently than the
-## offset distance. Around a corner tighter than that, the offset points on the
-## inside cross back over themselves and the line renders as a broken loop.
-## Walk the offset and, whenever the newest segment crosses an earlier one, cut
-## the loop out at the crossing — leaving the clean cusp an inner edge line
-## should have. Loops are local to the tight corner, so only a short window of
-## recent points has to be tested.
-func _trim_offset_loops(points: PackedVector2Array) -> PackedVector2Array:
-	if points.size() < 4:
-		return points
-	const LOOP_WINDOW := 64
-	var out := PackedVector2Array()
-	out.append(points[0])
-	for i in range(1, points.size()):
-		# Drop duplicate points — they only confuse the segment-crossing test.
-		if points[i].distance_squared_to(out[out.size() - 1]) > 0.01:
-			out.append(points[i])
-		var guard := 0
-		while out.size() >= 4 and guard < LOOP_WINDOW:
-			guard += 1
-			var last := out.size() - 1
-			var first := maxi(0, last - LOOP_WINDOW)
-			var clipped := false
-			for j in range(first, last - 2):
-				var hit: Variant = Geometry2D.segment_intersects_segment(
-						out[j], out[j + 1], out[last - 1], out[last])
-				if hit == null:
-					continue
-				var trimmed := out.slice(0, j + 1)
-				trimmed.append(hit as Vector2)
-				out = trimmed
-				clipped = true
-				break
-			if not clipped:
-				break
-	return out
-
-## Subdivide long segments, so marks are laid out at a sane resolution along a
-## road that's made of only a handful of far-apart points.
-func _densify(points: PackedVector2Array, max_length: float) -> PackedVector2Array:
-	if points.size() < 2 or max_length <= 0.0:
-		return points
-	var out := PackedVector2Array()
-	out.append(points[0])
-	for i in range(1, points.size()):
-		var a := points[i - 1]
-		var b := points[i]
-		var steps := maxi(int(ceil(a.distance_to(b) / max_length)), 1)
-		for step in range(1, steps + 1):
-			out.append(a.lerp(b, float(step) / float(steps)))
-	return out
 
 # --- Editor polling ------------------------------------------------------------
 

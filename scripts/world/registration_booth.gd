@@ -100,7 +100,7 @@ func interact(_actor: Node = null) -> void:
 	RaceProgression.menu_course = course
 	RaceProgression.menu_venue_rules = rules_line
 	if interior_scene is PackedScene:
-		get_tree().change_scene_to_packed(interior_scene)
+		SceneLoader.change_scene_packed(interior_scene)
 
 var _drawn_open := false
 

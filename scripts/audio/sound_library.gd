@@ -10,6 +10,7 @@ extends RefCounted
 
 const NAMES: Array[StringName] = [
 	&"ui_click",
+	&"loading_crank",
 	&"profile_scrapped",
 	&"ui_hover",
 	&"dialog_open",
@@ -201,6 +202,7 @@ const CAR_SOUNDS: Array[StringName] = [
 
 const UI_SOUNDS: Array[StringName] = [
 	&"ui_click",
+	&"loading_crank",
 	&"profile_scrapped",
 	&"ui_hover",
 	&"dialog_open",
@@ -256,6 +258,7 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 	rng.seed = hash(sound_name)
 	match sound_name:
 		&"ui_click": return _ui_click(rng)
+		&"loading_crank": return _loading_crank(rng)
 		&"ui_hover": return _ui_hover()
 		&"dialog_open": return _dialog_open(rng)
 		&"cutscene_whoosh": return _cutscene_whoosh(rng)
@@ -891,6 +894,20 @@ static func _ui_click(rng: RandomNumberGenerator) -> PackedFloat32Array:
 		out[i] = lowpass.step(rng.randf_range(-1.0, 1.0)) * envelope \
 				+ sin(TAU * 1400.0 * t) * envelope * 0.3
 	return Synth.finish(out, 0.6)
+
+## The loading board's tyre getting cranked up: three ratchet clicks closing in
+## on each other, then a rubbery bwomp as the tyre drops onto the track.
+static func _loading_crank(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.4)
+	for click_time in [0.0, 0.07, 0.12]:
+		Synth.mix_into(out, _metal_ring(0.03, 2600.0, 14.0, 0.006, rng), click_time, 0.6)
+		Synth.mix_into(out, Synth.thump(0.02, 1400.0, 0.001, 0.01, rng), click_time, 0.35)
+	Synth.mix_into(out, Synth.thump(0.18, 260.0, 0.004, 0.08, rng), 0.17, 0.9)
+	Synth.mix_into(out, Synth.tones(0.16, [[[0.0, 190.0], [0.16, 95.0]]], {
+		square = 0.2,
+		amp = [[0.0, 0.0], [0.006, 1.0], [0.16, 0.0]],
+	}), 0.17, 0.45)
+	return Synth.finish(out, 0.65)
 
 ## A cardboard board slapped down on a counter, with a little upward pop so
 ## it reads as "someone's talking to you" rather than a crash.

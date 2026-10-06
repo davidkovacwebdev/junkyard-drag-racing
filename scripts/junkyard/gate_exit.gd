@@ -17,4 +17,4 @@ func _on_body_entered(body: Node2D) -> void:
 	_leaving = true
 	Sfx.play(&"gate_rattle", -4.0, 0.05)
 	SaveSystem.save_game()
-	get_tree().change_scene_to_file.call_deferred(target_scene)
+	SceneLoader.change_scene.call_deferred(target_scene)

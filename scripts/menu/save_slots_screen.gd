@@ -61,7 +61,7 @@ func _on_slot_pressed(slot: int, is_empty: bool) -> void:
 		get_tree().change_scene_to_file(CHARACTER_CREATION_SCENE)
 		return
 	SaveSystem.load_game()
-	get_tree().change_scene_to_file(WORLD_SCENE)
+	SceneLoader.change_scene(WORLD_SCENE)
 
 func _on_delete_pressed(slot: int) -> void:
 	if _delete_armed_slot != slot:

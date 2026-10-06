@@ -52,6 +52,19 @@ func add_segments(segments: PackedVector2Array, color: Color, width: float) -> v
 	for i in range(0, segments.size() - 1, 2):
 		add_line(segments[i], segments[i + 1], color, width)
 
+## Ready-made triangles, e.g. built natively (see RoadGeometry).
+func add_triangles(points: PackedVector2Array, colors: PackedColorArray, indices: PackedInt32Array) -> void:
+	if is_empty():
+		_points = points
+		_colors = colors
+		_indices = indices
+		return
+	var start := _points.size()
+	_points.append_array(points)
+	_colors.append_array(colors)
+	for index in indices:
+		_indices.append(start + index)
+
 func is_empty() -> bool:
 	return _indices.is_empty()
 

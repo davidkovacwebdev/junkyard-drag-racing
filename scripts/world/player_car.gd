@@ -1030,11 +1030,11 @@ func _activate(target: Object) -> void:
 	var interior = target.get("interior_scene")
 	if interior is PackedScene:
 		Sfx.play(&"door_close", -4.0)
-		get_tree().change_scene_to_packed(interior)
+		SceneLoader.change_scene_packed(interior)
 
 func _enter_debug_race(target: Object) -> void:
 	var race_scene = target.get("debug_race_scene")
 	if race_scene is PackedScene:
 		Sfx.play(&"door_close", -4.0)
 		DebugRace.request()
-		get_tree().change_scene_to_packed(race_scene)
+		SceneLoader.change_scene_packed(race_scene)

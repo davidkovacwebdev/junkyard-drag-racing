@@ -112,7 +112,7 @@ func _on_crane_pressed() -> void:
 		return
 	_close()
 	SaveSystem.save_game()
-	get_tree().change_scene_to_file(pen_scene)
+	SceneLoader.change_scene(pen_scene)
 
 func _on_leave_pressed() -> void:
 	_close()

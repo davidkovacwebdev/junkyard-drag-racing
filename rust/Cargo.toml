@@ -1,0 +1,14 @@
+[package]
+name = "junk_native"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+godot = { version = "0.5.5", features = ["api-4-7", "experimental-threads"] }
+
+# Sound is rendered in the editor too, so debug builds get optimised DSP.
+[profile.dev]
+opt-level = 3

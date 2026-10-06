@@ -27,6 +27,7 @@ Weird, funny, memorable. Not polite, not epic, not "children's YouTube". User fe
 | `scripts/audio/songs/<name>.gd` | One recipe per song: `extends RefCounted`, a `##` description, `static func compose() -> AudioStreamWAV` |
 | `scripts/audio/song_library.gd` | `SongLibrary.SONGS` registry (name → preloaded recipe) and the `MENU_PLAYLIST` / `OVERWORLD_PLAYLIST` / `RACE_PLAYLIST` |
 | `scripts/audio/music_synth.gd` | `MusicSynth`: pattern sequencer, instruments, singers, tape edits. Pattern language is documented at the top |
+| `rust/src/music_dsp.rs`, `rust/src/song_mix.rs` | Native `MusicDsp` (instrument, singer and drum sample loops) and `SongMix` (mix bus, tape edits, master). A new instrument is a `#[func]` here plus a `match` arm in `MusicSynth._render_note()`; rebuild with `cargo build` in `rust/` |
 | `tools/render_music.gd` | Bakes songs to `sounds/music/<name>.wav` + loop import settings |
 | `autoload/music.gd` | `Music` autoload: plays the scene group's playlist, crossfades into the next song as one ends |
 

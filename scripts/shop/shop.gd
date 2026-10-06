@@ -236,4 +236,4 @@ func _leave() -> void:
 	_leaving = true
 	_show_preview(null)
 	SaveSystem.save_game()
-	get_tree().change_scene_to_file(WORLD_SCENE)
+	SceneLoader.change_scene(WORLD_SCENE)

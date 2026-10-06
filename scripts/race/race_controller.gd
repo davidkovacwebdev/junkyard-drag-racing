@@ -410,4 +410,4 @@ func exit_race() -> void:
 		get_tree().quit()
 		return
 	var path := exit_scene_path if not exit_scene_path.is_empty() else DEFAULT_EXIT_SCENE
-	get_tree().change_scene_to_file(path)
+	SceneLoader.change_scene(path)

@@ -173,7 +173,7 @@ func _replay_opening() -> void:
 func _restock_hangar() -> void:
 	WorldState.unclaim(HangarUfo.CLAIM_ID)
 	if get_tree().get_first_node_in_group(PlayerCar.GROUP) != null:
-		get_tree().reload_current_scene()
+		SceneLoader.reload_current_scene()
 	_set_status("The flying saucer is back in the hangar.")
 
 func _add_dev_money() -> void:
