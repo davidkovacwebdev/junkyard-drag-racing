@@ -19,6 +19,10 @@ extends Node2D
 ## Whether the accessories make their sounds (the map car), or stay quiet (the
 ## garage preview).
 @export var audible_accessories: bool = false
+## The map cars: move the car so this node's origin sits on the ground line under
+## the middle of its wheels, the point Main's y-sort reads, so the whole car sorts as one from
+## where it stands, the same way every prop does. Off, the car is centred on the origin.
+@export var origin_on_ground: bool = false
 ## Which part category to highlight while dragging: -1 = none, or a
 ## PartData.Category value. Drawn by _draw() in this node's local space.
 var highlight: int = -1
@@ -26,6 +30,15 @@ var highlight: int = -1
 var highlight_spot: int = -1
 
 const _HIGHLIGHT_RADIUS := 40.0
+## How far above the car's lowest point art still counts as touching the ground.
+const _GROUND_BAND := 6.0
+## How deep (on screen, along y) the patch of ground the car stands on is, as a
+## share of the whole car's width: a car is deep, even if only its feet touch.
+const _FOOTPRINT_DEPTH_SHARE := 0.35
+const _FOOTPRINT_DEPTH_MIN := 24.0
+const _FOOTPRINT_DEPTH_MAX := 44.0
+const _FOOTPRINT_MIN_WIDTH := 16.0
+const _BARE_FOOTPRINT := Rect2(-_FOOTPRINT_MIN_WIDTH / 2.0, -_FOOTPRINT_DEPTH_MIN, _FOOTPRINT_MIN_WIDTH, _FOOTPRINT_DEPTH_MIN)
 
 var _fit: Node2D
 var _body: CarBody
@@ -36,6 +49,8 @@ var _mounts_local: Array[Vector2] = []
 var _engine_mount_raw: Vector2 = Vector2.ZERO
 var _engine_mount_local: Vector2 = Vector2.ZERO
 var _has_engine_mount: bool = false
+## In this node's local space, see `fit_collision()`.
+var _footprint: Rect2 = _BARE_FOOTPRINT
 
 func _ready() -> void:
 	_ensure_fit()
@@ -115,6 +130,19 @@ func jiggle(amount: float = 120.0) -> void:
 		if child is SoftBodyWobble:
 			child.poke(amount)
 
+## Shapes `collision` (a shape on the body carrying this view) to the patch of
+## ground the car stands on: a thin strip spanning whatever reaches the ground —
+## wheels, legs, tracks, hooves, or the body itself when it sits lowest.
+## Accessories never count. Call again after a facing flip (`scale.x` = -1).
+func fit_collision(collision: CollisionShape2D) -> void:
+	collision.shape = RoundedRectShape.build(_footprint.size, _footprint.size.y * 0.5)
+	mirror_collision(collision)
+
+## Keeps a `fit_collision()` shape under the car after `scale.x` flips it.
+func mirror_collision(collision: CollisionShape2D) -> void:
+	var center := _footprint.get_center()
+	collision.position = Vector2(center.x * signf(scale.x), center.y)
+
 ## Wheel mount positions in this node's local space (already fit-adjusted),
 ## so the garage can drop wheel zones right on top of them.
 func get_wheel_mounts() -> Array[Vector2]:
@@ -160,6 +188,7 @@ func _clear() -> void:
 	_has_engine_mount = false
 	_engine_mount_raw = Vector2.ZERO
 	_engine_mount_local = Vector2.ZERO
+	_footprint = _BARE_FOOTPRINT
 
 func _instance_visual(part: PartData) -> Node2D:
 	var instance := PartFactory.instantiate(part)
@@ -187,11 +216,65 @@ func _apply_fit(raw_mounts: Array[Vector2]) -> void:
 		scale = max_width / bounds.size.x
 	_fit.scale = Vector2(scale, scale)
 	_fit.position = -bounds.get_center() * scale
+	_footprint = _measure_footprint(bounds.size.x * scale)
+	if origin_on_ground:
+		# Centred on x too, so turning around mirrors the car in place instead of
+		# swinging its footprint into whatever it's parked against.
+		_fit.position -= Vector2(_footprint.get_center().x, _footprint.end.y)
+		_footprint.position = Vector2(-_footprint.size.x / 2.0, -_footprint.size.y)
 
 	_mounts_local.clear()
 	for m in raw_mounts:
 		_mounts_local.append(_fit.position + m * scale)
 	_engine_mount_local = _fit.position + _engine_mount_raw * scale
+
+## Spans the full width of every part that reaches the ground (each wheel, the
+## engine when it's a horse, the body when it sits lowest), not just the few
+## pixels where each one touches, so a big wheel is as solid as it looks.
+func _measure_footprint(car_width: float) -> Rect2:
+	var part_bounds: Array[Rect2] = []
+	var ground_parts: Array[Node2D] = [_body]
+	ground_parts.append_array(_wheels)
+	if _engine != null:
+		ground_parts.append(_engine)
+	for part in ground_parts:
+		var points := PackedVector2Array()
+		var to_view := get_global_transform().affine_inverse() * part.get_global_transform()
+		_collect_part_art(part, to_view, points)
+		if not points.is_empty():
+			part_bounds.append(_bounds_of(points))
+	if part_bounds.is_empty():
+		return _BARE_FOOTPRINT
+	var ground_y := -INF
+	for bounds in part_bounds:
+		ground_y = maxf(ground_y, bounds.end.y)
+	var left := INF
+	var right := -INF
+	for bounds in part_bounds:
+		if bounds.end.y >= ground_y - _GROUND_BAND:
+			left = minf(left, bounds.position.x)
+			right = maxf(right, bounds.end.x)
+	var center_x := (left + right) / 2.0
+	var width := maxf(right - left, _FOOTPRINT_MIN_WIDTH)
+	var depth := clampf(car_width * _FOOTPRINT_DEPTH_SHARE, _FOOTPRINT_DEPTH_MIN, _FOOTPRINT_DEPTH_MAX)
+	return Rect2(center_x - width / 2.0, ground_y - depth, width, depth)
+
+## Every Polygon2D vertex of one part, through `xform`, leaving out accessories
+## and the engine (a part of its own) when walking the body.
+func _collect_part_art(node: Node, xform: Transform2D, points: PackedVector2Array) -> void:
+	if node is Polygon2D and (node as Polygon2D).visible:
+		for vertex in (node as Polygon2D).polygon:
+			points.append(xform * vertex)
+	for child in node.get_children():
+		if child is CarAccessory or child == _engine or not child is Node2D:
+			continue
+		_collect_part_art(child, xform * (child as Node2D).get_transform(), points)
+
+static func _bounds_of(points: PackedVector2Array) -> Rect2:
+	var bounds := Rect2(points[0], Vector2.ZERO)
+	for point in points:
+		bounds = bounds.expand(point)
+	return bounds
 
 func _draw() -> void:
 	match highlight:

@@ -34,6 +34,7 @@ var _time := 0.0
 var _creak: AudioStreamPlayer2D
 
 func _ready() -> void:
+	add_to_group(OffscreenCuller.GROUP)
 	if Engine.is_editor_hint():
 		set_process(false)
 		return

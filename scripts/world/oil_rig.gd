@@ -24,6 +24,9 @@ const FLICKER_SPEED := 7.0
 
 var _time := 0.0
 
+func _ready() -> void:
+	add_to_group(OffscreenCuller.GROUP)
+
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint():
 		return

@@ -150,6 +150,7 @@ func _build_visual() -> void:
 	model.body = body
 	model.wheels = [wheel, wheel]
 	_visual.build_from(model)
+	_visual.fit_collision($CollisionShape2D)
 
 ## A plain, constant hum — the truck never changes speed, so there's no rpm
 ## to chase like the player's engine has. Positional (EngineSound is an
@@ -201,7 +202,10 @@ func _advance_along_road(delta: float) -> void:
 		_facing_right = true
 	elif desired_dir.x < -0.01:
 		_facing_right = false
-	_visual.scale.x = 1.0 if _facing_right else -1.0
+	var facing_scale := 1.0 if _facing_right else -1.0
+	if _visual.scale.x != facing_scale:
+		_visual.scale.x = facing_scale
+		_visual.mirror_collision($CollisionShape2D)
 
 	var move_dir := velocity.normalized() if velocity.length() > 1.0 else _last_move_dir
 	var skidding: bool = (

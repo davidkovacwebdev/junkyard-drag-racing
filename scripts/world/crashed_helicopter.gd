@@ -20,6 +20,7 @@ const BLADE_SWING_SPEED := 0.35
 var _time := 0.0
 
 func _ready() -> void:
+	add_to_group(OffscreenCuller.GROUP)
 	if Engine.is_editor_hint():
 		return
 	var shape := RectangleShape2D.new()

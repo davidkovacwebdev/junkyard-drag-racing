@@ -55,6 +55,7 @@ var _flap := 0.0
 var _feathers: Array = []
 
 func _ready() -> void:
+	add_to_group(OffscreenCuller.GROUP)
 	_player = get_tree().get_first_node_in_group(PlayerCar.GROUP) as Node2D
 	_facing = 1.0 if randf() < 0.5 else -1.0
 	_idle_wait = randf_range(IDLE_INTERVAL.x, IDLE_INTERVAL.y)

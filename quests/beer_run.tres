@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
 [ext_resource type="Resource" uid="uid://c0s7kqbr5yejs" path="res://items/six_pack.tres" id="2_beer"]
-[ext_resource type="Resource" path="res://quests/pay_respects.tres" id="3_next"]
+[ext_resource type="Resource" uid="uid://5r3j5dnmtdgj" path="res://quests/pay_respects.tres" id="3_next"]
 
 [resource]
 script = ExtResource("1_script")

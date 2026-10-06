@@ -13,8 +13,8 @@ extends RefCounted
 ## zero-size one. Mirrors BuildingAssembler.DEFAULT_FOOTPRINT.
 const DEFAULT_FOOTPRINT := Vector2(48.0, 34.0)
 
-## Draw order for each slot. Later slots draw on top of earlier ones; a
-## part's own z_offset nudges it from there (a decoration can, say, sit
+## Draw order for each slot (as child order). Later slots draw on top of
+## earlier ones; a part's own z_offset nudges it from there (a decoration can, say, sit
 ## behind the trunk instead of in front of it).
 static func base_z(slot: TreePartData.Slot) -> int:
 	match slot:
@@ -38,6 +38,7 @@ static func assemble(data: TreeData, parent: Node, spawn_position: Vector2) -> N
 	if data == null:
 		return root
 
+	var ordered_parts: Array[Array] = []
 	for slot in TreePartData.Slot.values():
 		var scene := data.get_part(slot)
 		if scene == null:
@@ -49,9 +50,13 @@ static func assemble(data: TreeData, parent: Node, spawn_position: Vector2) -> N
 			continue
 		var part := instance as Node2D
 		var part_data := part.get("part_data") as TreePartData
-		part.z_index = base_z(slot) + (part_data.z_offset if part_data != null else 0)
 		part.name = "%sPart" % TreePartData.slot_name(slot)
-		root.add_child(part)
+		ordered_parts.append([base_z(slot) + (part_data.z_offset if part_data != null else 0), part])
+	# Layered by child order, not z_index: a raised z_index lifts the part out of
+	# Main's y-sort, so the canopy would draw over a car parked in front of it.
+	ordered_parts.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
+	for entry in ordered_parts:
+		root.add_child(entry[1])
 
 	return root
 

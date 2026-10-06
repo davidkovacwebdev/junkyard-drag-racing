@@ -1,0 +1,94 @@
+extends Node
+## Frame cost with the player car parked at each landmark, then, at the worst
+## spot, the cost of each world group found by hiding them one at a time:
+##   godot res://tools/location_perf_probe.tscn -- [--zoom=1.0] [--inside=Farm,Junkyard] --no-save
+## `--inside` breaks those groups down child by child instead of touring.
+
+const MAIN := preload("res://scenes/world/main.tscn")
+const WARMUP_FRAMES := 30
+const SAMPLE_FRAMES := 90
+const SKIPPED := ["PlayerCar", "Gulls", "Tumbleweeds", "FishingBoat", "Trash"]
+
+var _world: Node
+var _player: Node2D
+
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+	Engine.max_fps = 0
+	_world = MAIN.instantiate()
+	add_child(_world)
+	_player = get_tree().get_first_node_in_group(PlayerCar.GROUP)
+	var camera: Camera2D = _player.get_node("Camera2D")
+	camera.set("zoom_speed", 1000.0)
+	var zoom := _zoom_arg()
+	camera.set("_target_zoom", zoom)
+	camera.zoom = Vector2(zoom, zoom)
+	var inside := _named_arg("--inside=")
+	if not inside.is_empty():
+		await _break_down(inside.split(","))
+		get_tree().quit()
+		return
+	var worst: Node2D = null
+	var worst_ms := 0.0
+	for spot in _landmarks():
+		_player.global_position = spot.global_position + Vector2(0.0, 300.0)
+		var ms := await _measure()
+		print("at %-24s ms=%.2f" % [spot.name, ms])
+		if ms > worst_ms:
+			worst_ms = ms
+			worst = spot
+	_player.global_position = worst.global_position + Vector2(0.0, 300.0)
+	print("--- groups at ", worst.name, " baseline ms=%.2f" % worst_ms)
+	for group in _groups():
+		group.visible = false
+		var ms := await _measure()
+		group.visible = true
+		print("hide %-28s saves ms=%.2f" % [group.name, worst_ms - ms])
+	get_tree().quit()
+
+func _measure() -> float:
+	for i in WARMUP_FRAMES:
+		await get_tree().process_frame
+	var start := Time.get_ticks_usec()
+	for i in SAMPLE_FRAMES:
+		await get_tree().process_frame
+	return (Time.get_ticks_usec() - start) / 1000.0 / SAMPLE_FRAMES
+
+func _landmarks() -> Array[Node2D]:
+	var found: Array[Node2D] = []
+	for parent: Node in [_world, _world.get_node("Sortables")]:
+		for child in parent.get_children():
+			if child is Node2D and child.get_child_count() > 0 and not child.name in SKIPPED and child.name != "Sortables" \
+					and not String(child.name).begins_with("ComposedTree") and not String(child.name).begins_with("House"):
+				found.append(child)
+	return found
+
+func _groups() -> Array[CanvasItem]:
+	var found: Array[CanvasItem] = []
+	for parent: Node in [_world, _world.get_node("Sortables")]:
+		for child in parent.get_children():
+			if child is CanvasItem and child != _player:
+				found.append(child)
+	return found
+
+func _break_down(names: PackedStringArray) -> void:
+	var baseline := await _measure()
+	print("--- baseline ms=%.2f" % baseline)
+	for name in names:
+		var group := _world.get_node("Sortables").get_node(name)
+		for child in group.find_children("*", "CanvasItem", false, false):
+			child.visible = false
+			var ms := await _measure()
+			child.visible = true
+			print("hide %s/%-24s saves ms=%.2f" % [name, child.name, baseline - ms])
+
+func _zoom_arg() -> float:
+	var value := _named_arg("--zoom=")
+	return value.to_float() if not value.is_empty() else 1.0
+
+func _named_arg(prefix: String) -> String:
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with(prefix):
+			return arg.trim_prefix(prefix)
+	return ""

@@ -29,6 +29,7 @@ const WAVE_COLUMNS := 4
 var _time: float = 0.0
 
 func _ready() -> void:
+	add_to_group(OffscreenCuller.GROUP)
 	if Engine.is_editor_hint():
 		return
 	var shape := RectangleShape2D.new()

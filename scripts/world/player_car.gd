@@ -181,6 +181,7 @@ var _holding_target: Object = null
 var _hold_progress: float = 0.0
 
 @onready var _visual: CarView = $Visual as CarView
+@onready var _collision: CollisionShape2D = $CollisionShape2D
 @onready var _interaction_zone: Area2D = $InteractionZone
 @onready var _tooltip_label: Label = $UI/TooltipLabel
 @onready var _hold_bar_bg: Control = $UI/HoldBarBg
@@ -260,6 +261,7 @@ func _ready() -> void:
 		_visual.audible_accessories = true
 		_visual.build_from(car)
 		_car_mass = _compute_car_mass(car)
+	_visual.fit_collision(_collision)
 	_setup_sounds(car)
 	# Coming back from a place (garage, drag strip race): reappear where we
 	# left the map instead of at the scene's default spawn.
@@ -383,7 +385,10 @@ func _physics_process(delta: float) -> void:
 		_facing_right = true
 	elif input_dir.x < 0.0:
 		_facing_right = false
-	_visual.scale.x = 1.0 if _facing_right else -1.0
+	var facing_scale := 1.0 if _facing_right else -1.0
+	if _visual.scale.x != facing_scale:
+		_visual.scale.x = facing_scale
+		_visual.mirror_collision(_collision)
 
 	# Compared against velocity as it stood BEFORE this frame's move_toward
 	# touches it — "the car was already heading this way" — against the

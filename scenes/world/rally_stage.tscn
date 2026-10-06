@@ -6,8 +6,10 @@
 [ext_resource type="PackedScene" path="res://scenes/race/race_rally.tscn" id="race"]
 
 [node name="RallyStage" type="Node2D"]
+y_sort_enabled = true
 
 [node name="Visual" type="Node2D" parent="."]
+z_index = -1
 script = ExtResource("1")
 
 [node name="Entrance" parent="." instance=ExtResource("2")]
@@ -15,6 +17,5 @@ position = Vector2(-1120, -110)
 display_name = "Rally"
 interior_scene = ExtResource("3")
 debug_race_scene = ExtResource("race")
-collision_height_fraction = 1.0
 race_scene_path = "res://scenes/race/race_rally.tscn"
 wall_color = Color(0.3, 0.44, 0.28, 1)

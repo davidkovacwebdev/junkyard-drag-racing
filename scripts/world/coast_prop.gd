@@ -49,6 +49,7 @@ const ROCK_DEGREES := 2.5
 var _time := 0.0
 
 func _ready() -> void:
+	add_to_group(OffscreenCuller.GROUP)
 	set_process(kind == Kind.BOAT)
 	if not Engine.is_editor_hint():
 		_build_collision()

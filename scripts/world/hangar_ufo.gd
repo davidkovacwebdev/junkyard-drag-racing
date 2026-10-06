@@ -32,6 +32,7 @@ var _hum: SustainedSound = null
 var _bob_phase := 0.0
 
 func _ready() -> void:
+	add_to_group(OffscreenCuller.GROUP)
 	_part = _find_part()
 	if _part == null or WorldState.is_claimed(CLAIM_ID):
 		display_name = ""

@@ -70,6 +70,7 @@
 [ext_resource type="Script" uid="uid://bu5uxu5bnirmt" path="res://scripts/world/story_director.gd" id="story_director"]
 [ext_resource type="Script" uid="uid://cbycrxwy4n85t" path="res://scripts/world/tumbleweed_spawner.gd" id="tumbleweed_spawner"]
 
+[ext_resource type="Script" path="res://scripts/world/offscreen_culler.gd" id="offscreen_culler"]
 [sub_resource type="Curve2D" id="Curve2D_688af"]
 _data = {
 "points": PackedVector2Array(0, 0, 0, 0, -11694, -6390, 0, 0, 0, 0, -10810, -2738, 0, 0, 0, 0, -11898, 1418, 0, 0, 0, 0, -11081, 3677, 0, 0, 0, 0, -10298, 2283, 0, 0, 0, 0, -9992, 956, 0, 0, 0, 0, -9414, 888, 0, 0, 0, 0, -8564, 1637, 0, 0, 0, 0, -8307, 2613, 0, 0, 0, 0, -9822, 4425, 0, 0, 0, 0, -8904, 4153, 0, 0, 0, 0, -8088, 5037, 0, 0, 0, 0, -10502, 9321, 0, 0, 0, 0, -8496, 8267, 0, 0, 0, 0, -7602, 8678, 0, 0, 0, 0, -5346, 9103, 0, 0, 0, 0, -7614, 12108, 0, 0, 0, 0, -5584, 13063, 0, 0, 0, 0, -2533, 10701, 0, 0, 0, 0, 917, 16437, 0, 0, 0, 0, 5625, 20635, 0, 0, 0, 0, 6474, 17504, 0, 0, 0, 0, 6429, 13431, 0, 0, 0, 0, 9824, 11530, 0, 0, 0, 0, 12284, 9205, 0, 0, 0, 0, 13872, 7507, 0, 0, 0, 0, 13598, 4714, 0, 0, 0, 0, 11353, 5262, 0, 0, 0, 0, 9217, 8055, 0, 0, 0, 0, 8912, 6222, 0, 0, 0, 0, 5821, 5707, 0, 0, 0, 0, 6479, 4183, 0, 0, 0, 0, 6692, 2395, 0, 0, 0, 0, 6767, 330, 0, 0, 0, 0, 15679, -915, 0, 0, 0, 0, 10616, -5426, 0, 0, 0, 0, 6149, -6112, 0, 0, 0, 0, -6780, -4272, 0, 0, 0, 0, -11249, -6725)
@@ -264,7 +265,7 @@ position = Vector2(-13324, 11126)
 curve = SubResource("Curve2D_hbyw3")
 
 [node name="Lonely Island" type="Path2D" parent="Terrain" unique_id=1925668722]
-position = Vector2(12150, 12700)
+position = Vector2(12664, 13673)
 curve = SubResource("Curve2D_lonely")
 
 [node name="Sharks" type="Node2D" parent="." unique_id=1392191221]
@@ -276,6 +277,7 @@ z_index = -955
 script = ExtResource("floating_trash_spawner")
 
 [node name="Roads" type="Node2D" parent="." unique_id=1253797938]
+z_index = -2
 script = ExtResource("4")
 mode = 1
 road_width = 180.0
@@ -336,36 +338,39 @@ script = ExtResource("12")
 [node name="Puddles" type="Node2D" parent="." unique_id=316629190]
 script = ExtResource("19_puddle")
 
-[node name="DragStrip" parent="." unique_id=903706534 instance=ExtResource("5")]
-position = Vector2(3200, 0)
-
-[node name="MinimapMarker" type="Node2D" parent="DragStrip" unique_id=238757149]
-script = ExtResource("21_marker")
-kind = 1
-
-[node name="RallyStage" parent="." unique_id=1400628117 instance=ExtResource("24_rally")]
-position = Vector2(7150, 1650)
-
-[node name="MinimapMarker" type="Node2D" parent="RallyStage" unique_id=1873546020]
-script = ExtResource("21_marker")
-kind = 7
-
-[node name="HillClimbSite" parent="." unique_id=1984118041 instance=ExtResource("25_hill_climb")]
-position = Vector2(7606, -3684)
-
-[node name="MinimapMarker" type="Node2D" parent="HillClimbSite" unique_id=1122873594]
-script = ExtResource("21_marker")
-kind = 8
-
-[node name="DerbyPit" parent="." unique_id=948857901 instance=ExtResource("26_derby")]
-position = Vector2(2373, -3973)
-
-[node name="MinimapMarker" type="Node2D" parent="DerbyPit" unique_id=52636212]
-script = ExtResource("21_marker")
-kind = 9
+[node name="OffscreenCuller" type="Node" parent="."]
+script = ExtResource("offscreen_culler")
 
 [node name="Sortables" type="Node2D" parent="." unique_id=58475017]
 y_sort_enabled = true
+
+[node name="DragStrip" parent="Sortables" unique_id=903706534 instance=ExtResource("5")]
+position = Vector2(3200, 0)
+
+[node name="MinimapMarker" type="Node2D" parent="Sortables/DragStrip" unique_id=238757149]
+script = ExtResource("21_marker")
+kind = 1
+
+[node name="RallyStage" parent="Sortables" unique_id=1400628117 instance=ExtResource("24_rally")]
+position = Vector2(7150, 1650)
+
+[node name="MinimapMarker" type="Node2D" parent="Sortables/RallyStage" unique_id=1873546020]
+script = ExtResource("21_marker")
+kind = 7
+
+[node name="HillClimbSite" parent="Sortables" unique_id=1984118041 instance=ExtResource("25_hill_climb")]
+position = Vector2(7606, -3684)
+
+[node name="MinimapMarker" type="Node2D" parent="Sortables/HillClimbSite" unique_id=1122873594]
+script = ExtResource("21_marker")
+kind = 8
+
+[node name="DerbyPit" parent="Sortables" unique_id=948857901 instance=ExtResource("26_derby")]
+position = Vector2(2373, -3973)
+
+[node name="MinimapMarker" type="Node2D" parent="Sortables/DerbyPit" unique_id=52636212]
+script = ExtResource("21_marker")
+kind = 9
 
 [node name="WestBridgeBarricade" type="StaticBody2D" parent="Sortables" unique_id=696091618]
 position = Vector2(-8571, 2002)
@@ -619,7 +624,7 @@ position = Vector2(-2820, 9120)
 position = Vector2(-7300, 4900)
 
 [node name="LonelyIsland" parent="Sortables" unique_id=668891349 instance=ExtResource("landmark_lonely_island")]
-position = Vector2(12150, 12700)
+position = Vector2(12664, 13673)
 
 [node name="Gulls" type="Node2D" parent="Sortables" unique_id=386723825]
 script = ExtResource("gull_spawner")

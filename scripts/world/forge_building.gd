@@ -28,13 +28,14 @@ var _time := 0.0
 
 func _ready() -> void:
 	super()
+	add_to_group(OffscreenCuller.GROUP)
 	if Engine.is_editor_hint():
 		return
 	var furnace := SustainedSound.new()
 	furnace.sound_name = &"furnace_loop"
 	furnace.base_volume_db = -8.0
 	furnace.fade_in_time = 1.0
-	furnace.position = MOUTH.get_center()
+	furnace.position = MOUTH.get_center() + art_origin()
 	furnace.max_distance = FURNACE_HEARING_RANGE
 	add_child(furnace)
 	furnace.set_active(true)
@@ -44,6 +45,7 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 func _draw() -> void:
+	draw_set_transform(art_origin())
 	var half := size / 2.0
 	draw_colored_polygon(PackedVector2Array([
 		Vector2(-half.x + 8.0, half.y - 10.0), Vector2(half.x + 6.0, half.y - 10.0),

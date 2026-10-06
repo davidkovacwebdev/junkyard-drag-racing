@@ -19,6 +19,7 @@ const DOOR := Rect2(-40.0, 20.0, 80.0, 80.0)
 const LOFT := Rect2(-18.0, -52.0, 36.0, 30.0)
 
 func _draw() -> void:
+	draw_set_transform(art_origin())
 	var half := size / 2.0
 	_draw_shadow(half)
 	_draw_walls(half)

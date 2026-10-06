@@ -58,12 +58,12 @@ func _draw() -> void:
 		_art.draw_colored_polygon(_road_band(hill_x + CREST_HALF_LENGTH, hill_x + CREST_HALF_LENGTH + DOWNSLOPE_LENGTH), DOWNSLOPE)
 	_art.draw_colored_polygon(_road_band(start_x - 8.0, start_x + 8.0), MARKING)
 	_draw_finish()
-	for x: float in FLAG_XS:
-		_draw_flag(Vector2(x, centre_y(x) - road_width * 0.5 - 30.0))
+	for base in _flag_bases():
+		_draw_flag(base)
 	for rect in _bale_rects():
 		_art.draw_rect(rect, HAY)
 		_art.draw_rect(Rect2(rect.end.x - 14.0, rect.position.y, 14.0, rect.size.y), HAY_SHADE)
-	FlatProps.draw_tire_stack(_art, Vector2(finish_x + 90.0, centre_y(finish_x) + road_width * 0.5 + 40.0), 3)
+	FlatProps.draw_tire_stack(_art, _tire_stack_base(), 3)
 	_draw_sign()
 	_art.commit(self)
 	_art.clear()
@@ -108,6 +108,15 @@ func _draw_finish() -> void:
 			_art.draw_rect(Rect2(finish_x - cell.x + column * cell.x, top + row * cell.y, cell.x, cell.y),
 					MARKING if light else UiPalette.INK)
 
+func _flag_bases() -> Array[Vector2]:
+	var bases: Array[Vector2] = []
+	for x: float in FLAG_XS:
+		bases.append(Vector2(x, centre_y(x) - road_width * 0.5 - 30.0))
+	return bases
+
+func _tire_stack_base() -> Vector2:
+	return Vector2(finish_x + 90.0, centre_y(finish_x) + road_width * 0.5 + 40.0)
+
 func _draw_flag(base: Vector2) -> void:
 	var pole_top := base + Vector2(-4.0, -70.0)
 	_art.draw_rect(Rect2(pole_top.x, pole_top.y, 8.0, 70.0), UiPalette.POST_GREY)
@@ -144,4 +153,8 @@ func _solid_rects() -> Array[Rect2]:
 	var rects := _bale_rects()
 	var board := _sign_board_rect()
 	rects.append(Rect2(board.position.x, board.end.y + SIGN_POST_HEIGHT - 16.0, board.size.x, 16.0))
+	for base in _flag_bases():
+		rects.append(Rect2(base.x - 10.0, base.y - 12.0, 20.0, 14.0))
+	var tires := _tire_stack_base()
+	rects.append(Rect2(tires.x - 18.0, tires.y - 14.0, 36.0, 20.0))
 	return rects
