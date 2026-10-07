@@ -89,7 +89,7 @@ const HEAP_OUTLINE: Array[Vector2] = [
 const HEAP_PEAK_INDEX := 5
 const MOUND_COLOR := Color(0.42, 0.34, 0.22, 1)
 
-const _JUNK_COLORS := [
+const JUNK_COLORS := [
 	Color(0.45, 0.4, 0.35, 1),
 	Color(0.55, 0.3, 0.2, 1),
 	Color(0.3, 0.3, 0.32, 1),
@@ -171,20 +171,25 @@ func _spawn_crane() -> void:
 	# so the claw hangs over the peak.
 	var track_half := crane.track_width * 0.5 * crane_scale
 	crane.position = Vector2(radius * HEAP_WIDTH_SHARE + crane_gap + track_half, 0.0)
-	crane.place_trolley((crane.position.x - _heap_outline()[HEAP_PEAK_INDEX].x) / crane_scale)
+	crane.place_trolley((crane.position.x - heap_outline(radius)[HEAP_PEAK_INDEX].x) / crane_scale)
 	if not Engine.is_editor_hint():
 		var tracks := Rect2(-crane.track_width * 0.5, -crane.track_height * 0.5, crane.track_width, crane.track_height * 0.5)
 		RoundedRectShape.add_solid(crane, tracks)
 
 ## The heap, standing on the node's origin (the ground line, which is also its
-## y-sort point): one lumpy mound, a darker right flank and a ground shadow.
+## y-sort point).
 func _spawn_mound(rng: RandomNumberGenerator) -> void:
-	var outline := _heap_outline()
-	var half_width := radius * HEAP_WIDTH_SHARE
+	build_mound(_art, radius, rng)
+
+## One lumpy mound, a darker right flank and a ground shadow, added to `parent`.
+## Shared with the yard interior's JunkyardPile so both heaps look the same.
+static func build_mound(parent: Node2D, heap_radius: float, rng: RandomNumberGenerator) -> void:
+	var outline := heap_outline(heap_radius)
+	var half_width := heap_radius * HEAP_WIDTH_SHARE
 	var shadow := Polygon2D.new()
 	shadow.color = UiPalette.SHADOW
 	shadow.polygon = FlatProps.octagon(Vector2(16.0, 2.0), half_width + 20.0, 24.0)
-	_art.add_child(shadow)
+	parent.add_child(shadow)
 	var mound := Polygon2D.new()
 	mound.color = MOUND_COLOR
 	var jittered := PackedVector2Array()
@@ -192,23 +197,25 @@ func _spawn_mound(rng: RandomNumberGenerator) -> void:
 		var lump := 0.0 if i == 0 or i == outline.size() - 1 else rng.randf_range(-6.0, 6.0)
 		jittered.append(outline[i] + Vector2(0.0, lump))
 	mound.polygon = jittered
-	_art.add_child(mound)
+	parent.add_child(mound)
 	var flank := Polygon2D.new()
 	flank.color = MOUND_COLOR.darkened(0.25)
 	var flank_points := jittered.slice(HEAP_PEAK_INDEX)
 	flank_points.append(Vector2(outline[HEAP_PEAK_INDEX].x + half_width * 0.25, 0.0))
 	flank.polygon = flank_points
-	_art.add_child(flank)
+	parent.add_child(flank)
 
-func _heap_outline() -> PackedVector2Array:
+## The heap's silhouette at `heap_radius`, standing on y = 0. Shared with the
+## yard interior's JunkyardPile so both heaps are the same shape.
+static func heap_outline(heap_radius: float) -> PackedVector2Array:
 	var points := PackedVector2Array()
 	for share in HEAP_OUTLINE:
-		points.append(Vector2(share.x * radius * HEAP_WIDTH_SHARE, -share.y * radius * HEAP_HEIGHT_SHARE))
+		points.append(Vector2(share.x * heap_radius * HEAP_WIDTH_SHARE, -share.y * heap_radius * HEAP_HEIGHT_SHARE))
 	return points
 
 ## A spot on the heap's face, kept clear of its edges.
 func _random_point_in_pile(rng: RandomNumberGenerator) -> Vector2:
-	var outline := _heap_outline()
+	var outline := heap_outline(radius)
 	var half_width := radius * HEAP_WIDTH_SHARE
 	for attempt in 12:
 		var point := Vector2(rng.randf_range(-half_width, half_width) * 0.8, -rng.randf_range(0.1, 0.85) * radius * HEAP_HEIGHT_SHARE)
@@ -229,20 +236,24 @@ func _spawn_junk_chunk(rng: RandomNumberGenerator) -> void:
 	chunk.position = _random_point_in_pile(rng)
 	chunk.rotation = rng.randf_range(0.0, TAU)
 
-	var size := Vector2(rng.randf_range(14.0, 30.0), rng.randf_range(8.0, 16.0))
-	var poly := PackedVector2Array([
-		Vector2(-size.x, -size.y), Vector2(size.x, -size.y),
-		Vector2(size.x * 0.8, size.y), Vector2(-size.x, size.y),
-	])
+	var poly := junk_chunk_polygon(rng)
 
 	var visual := Polygon2D.new()
 	visual.polygon = poly
-	visual.color = _JUNK_COLORS[rng.randi() % _JUNK_COLORS.size()]
+	visual.color = JUNK_COLORS[rng.randi() % JUNK_COLORS.size()]
 	chunk.add_child(visual)
 
 	var collision := CollisionPolygon2D.new()
 	collision.polygon = poly
 	chunk.add_child(collision)
+
+## A slab of scrap: a quad with one slanted side. Shared with JunkyardPile.
+static func junk_chunk_polygon(rng: RandomNumberGenerator) -> PackedVector2Array:
+	var size := Vector2(rng.randf_range(14.0, 30.0), rng.randf_range(8.0, 16.0))
+	return PackedVector2Array([
+		Vector2(-size.x, -size.y), Vector2(size.x, -size.y),
+		Vector2(size.x * 0.8, size.y), Vector2(-size.x, size.y),
+	])
 
 ## Real body/wheel/engine scenes pulled from the same catalog the
 ## garage browses, scattered like junk — the same parts you could equip

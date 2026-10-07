@@ -1,0 +1,43 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_wheel.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/wheel_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_anchor"]
+script = ExtResource("2")
+absorption = 0.1
+found_in_junk = false
+id = &"wheel_anchor"
+display_name = "Sunken Anchor"
+mass = 15.0
+durability = 140.0
+speed = 2.4
+material_type = 0
+impact_sound = &"anchor_clonk"
+
+[node name="WheelAnchor" type="RigidBody2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_anchor")
+
+[node name="Stock" type="Polygon2D" parent="."]
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-22, -34, 22, -35, 22, -26, -22, -25)
+
+[node name="Shank" type="Polygon2D" parent="."]
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-5, -28, 5, -28, 5, 24, -5, 24)
+
+[node name="Arms" type="Polygon2D" parent="."]
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-38, -8, -26, -2, -22, 8, -10, 16, 0, 18, 10, 16, 22, 8, 26, -2, 38, -8, 32, 12, 18, 26, 0, 32, -18, 26, -32, 12)
+
+[node name="ArmsShade" type="Polygon2D" parent="."]
+color = Color(0.22, 0.22, 0.24, 1)
+polygon = PackedVector2Array(-18, 26, -14, 21, 0, 25, 14, 21, 18, 26, 0, 32)
+
+[node name="Seaweed" type="Polygon2D" parent="."]
+color = Color(0.36, 0.5, 0.3, 1)
+polygon = PackedVector2Array(-19, -26, -12, -26, -10, -14, -14, -5, -19, -12)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(-22, -35, 22, -35, 38, -8, 32, 12, 18, 26, 0, 32, -18, 26, -32, 12, -38, -8)

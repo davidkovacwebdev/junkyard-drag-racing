@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/junkyard/scrap_dealer.gd" id="1_dealer"]
 [ext_resource type="Script" path="res://scripts/character/character_rig.gd" id="2_rig"]
-[ext_resource type="Resource" path="res://characters/punker.tres" id="3_punker"]
+[ext_resource type="Resource" path="res://characters/crane_vern.tres" id="3_vern"]
 [ext_resource type="PackedScene" path="res://scenes/ui/character_dialog.tscn" id="4_dialog"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_dealer"]
@@ -14,7 +14,7 @@ script = ExtResource("1_dealer")
 [node name="Character" type="Node2D" parent="."]
 scale = Vector2(0.55, 0.55)
 script = ExtResource("2_rig")
-character_data = ExtResource("3_punker")
+character_data = ExtResource("3_vern")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, -70)

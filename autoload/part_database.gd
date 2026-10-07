@@ -37,6 +37,7 @@ const _BODY_SCENES := [
 	"res://scenes/parts/bodies/body_trex_fossil.tscn",
 	"res://scenes/parts/bodies/body_cardboard_box.tscn",
 	"res://scenes/parts/bodies/body_ufo.tscn",
+	"res://scenes/parts/bodies/body_gondola.tscn",
 ]
 const _WHEEL_SCENES := [
 	"res://scenes/parts/wheels/wheel_standard.tscn",
@@ -73,6 +74,7 @@ const _WHEEL_SCENES := [
 	"res://scenes/parts/wheels/wheel_robot_leg.tscn",
 	"res://scenes/parts/wheels/wheel_tank_track.tscn",
 	"res://scenes/parts/wheels/wheel_helmet.tscn",
+	"res://scenes/parts/wheels/wheel_anchor.tscn",
 ]
 const _ENGINE_SCENES := [
 	"res://scenes/parts/engines/engine_v6.tscn",
@@ -119,6 +121,7 @@ const _ENGINE_SCENES := [
 	"res://scenes/parts/engines/engine_firework_rocket.tscn",
 	"res://scenes/parts/engines/engine_horse.tscn",
 	"res://scenes/parts/engines/engine_punker.tscn",
+	"res://scenes/parts/engines/engine_crane_operator.tscn",
 ]
 
 const _ACCESSORY_SCENES := [

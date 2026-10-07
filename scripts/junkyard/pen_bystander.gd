@@ -2,10 +2,12 @@ class_name PenBystander
 extends RigidBody2D
 ## Somebody standing out back next to the crane to watch the player dig.
 ##
-## The Scrap Dealer is fair game: what the claw hauls up is him, as an engine
-## part that pulls the car along on a rope (PunkerEngine, engine_punker.tscn).
-## The next time the player comes out to the pen, Old Mo is standing in his
-## spot, and Old Mo never lets the claw near him: he scoots out from under it
+## Vern, Grandpa's old crane buddy who runs the thing, is fair game: what the
+## claw hauls up is him, as an engine part that pulls the car along on a rope
+## (PunkerEngine, engine_crane_operator.tscn). From the next visit on a crane
+## worker is on shift in his spot, made up by CraneWorkerGenerator, and each
+## one the claw takes is replaced by a new one. Old Mo turns up too, off past
+## the drum, and never lets the claw near him: he scoots out from under it
 ## every time and has something to say about it.
 ##
 ## A catchable bystander joins the heap as one of its items
@@ -14,7 +16,8 @@ extends RigidBody2D
 ## (`is PenBystander`) and call `claim()`. Once claimed they never come back to
 ## the pen on that save (WorldState's claimed set, the same one the hangar's
 ## flying saucer uses). The man at the yard's counter stays where he is, so
-## there's still someone to sell scrap to.
+## there's still someone to sell scrap to. A generated worker's claim is his
+## place in line, so the next visit's worker is the next one along.
 ##
 ## A real body standing upright (rotation locked), heavy and flat-footed so a
 ## glancing shell barely shifts them, and they yelp when it does. An oil drum
@@ -43,7 +46,7 @@ const SPEECH_HOLD := 1.8
 ## gone. Also what `after_claim` on someone else waits for.
 @export var claim_id: String = ""
 ## Only standing here once this claim has been made on an earlier visit (Old
-## Mo waits for the Scrap Dealer to have been fished out). Empty: here from
+## Mo and the crane workers wait for Vern to have been fished out). Empty: here from
 ## the start.
 @export var after_claim: String = ""
 ## Whether the claw can take them at all. Off (Old Mo), they're never part of
@@ -51,6 +54,11 @@ const SPEECH_HOLD := 1.8
 @export var catchable: bool = true
 ## The engine part the claw hauls up, if catchable.
 @export_file("*.tscn") var engine_scene: String = ""
+## Made up on the spot (CraneWorkerGenerator) rather than set here: the next
+## crane worker in line, with his own claim, look, engine and caught line.
+@export var generated_worker: bool = false
+## One of these, said over their head, when a shell shoves them.
+@export var bump_lines: PackedStringArray = []
 ## How far forward they're bent standing still, radians.
 @export var stoop: float = 0.0
 ## What they say when a shell shoves them, and when the claw hauls them off.
@@ -92,6 +100,13 @@ var _speech_tween: Tween
 var _last_line: int = -1
 
 func _ready() -> void:
+	var worker_index := -1
+	if generated_worker:
+		worker_index = CraneWorkerGenerator.next_index()
+		claim_id = CraneWorkerGenerator.claim_id(worker_index)
+		character_data = CraneWorkerGenerator.worker(worker_index)
+		caught_line = CraneWorkerGenerator.caught_line(character_data)
+		bump_lines = PackedStringArray(CraneWorkerGenerator.BUMP_LINES)
 	# Already caught, or not their turn yet: someone else has the spot this
 	# visit. The pen is rebuilt on every visit, so a claim made today shows up
 	# the next time round.
@@ -123,11 +138,12 @@ func _ready() -> void:
 	body_entered.connect(_on_bumped)
 	_crane = get_node_or_null(crane_path) as CraneRig
 	if catchable:
-		part_data = _engine_data()
+		part_data = CraneWorkerGenerator.engine_part(worker_index, character_data) \
+				if generated_worker else _engine_data()
 		var heap := get_node_or_null(heap_path) as TrashHeap
 		if heap != null:
 			heap.add_item(self)
-	if not dodge_lines.is_empty():
+	if not dodge_lines.is_empty() or not bump_lines.is_empty():
 		_build_speech()
 
 func _physics_process(delta: float) -> void:
@@ -163,20 +179,20 @@ func _dodge() -> void:
 		target = position.x - away * dodge_distance
 	_dodge_target = clampf(target, min_x, max_x)
 	Sfx.play_at(dodge_sound, global_position, -4.0)
-	_say_something()
+	_say_something(dodge_lines)
 
-## A dodge line over their head, typed out in their own voice, then gone.
-func _say_something() -> void:
-	if _speech == null or _speech.is_typing():
+## A line over their head, typed out in their own voice, then gone.
+func _say_something(lines: PackedStringArray) -> void:
+	if _speech == null or _speech.is_typing() or lines.is_empty():
 		return
-	var pick := randi() % dodge_lines.size()
-	if dodge_lines.size() > 1 and pick == _last_line:
-		pick = (pick + 1) % dodge_lines.size()
+	var pick := randi() % lines.size()
+	if lines.size() > 1 and pick == _last_line:
+		pick = (pick + 1) % lines.size()
 	_last_line = pick
 	if _speech_tween != null:
 		_speech_tween.kill()
 	_speech_label.modulate.a = 1.0
-	_speech.speak(_speech_label, dodge_lines[pick], character_data)
+	_speech.speak(_speech_label, PlayerProfile.fill(lines[pick]), character_data)
 
 func _build_speech() -> void:
 	_speech_label = Label.new()
@@ -216,6 +232,7 @@ func _on_bumped(body: Node) -> void:
 		return
 	_yelp_cooldown = YELP_GAP
 	Sfx.play_at(yelp_sound, global_position + Vector2(0.0, -120.0), -4.0)
+	_say_something(bump_lines)
 
 ## The catalog's copy, so the part they turn into is the same one the garage
 ## browses; loaded fresh if the catalog doesn't have it.

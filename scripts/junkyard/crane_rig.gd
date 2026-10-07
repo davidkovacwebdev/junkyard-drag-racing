@@ -124,7 +124,7 @@ const SIDES: Array[float] = [-1.0, 1.0]
 ## How hard that nudge is, radians/s².
 @export var min_swing_push: float = 0.3
 
-## Heap items with a handle (a `grab_point()`, like the Scrap Dealer's head)
+## Heap items with a handle (a `grab_point()`, like Vern's head)
 ## count as held once the shut ring's centre is within this many claw radii of
 ## it, pinched or not.
 @export var handle_reach: float = 1.6

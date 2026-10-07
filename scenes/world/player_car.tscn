@@ -32,6 +32,9 @@ horse_gait_rate = 0.5
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_1")
 
+[node name="WalkerCollisionShape2D" type="CollisionShape2D" parent="."]
+disabled = true
+
 [node name="Headlights" type="Node2D" parent="."]
 script = ExtResource("8")
 

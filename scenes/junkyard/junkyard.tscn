@@ -73,8 +73,7 @@ position = Vector2(-620, 440)
 remember_position = false
 
 [node name="Pile" type="Node2D" parent="Yard"]
-y_sort_enabled = true
-position = Vector2(-380, 60)
+position = Vector2(-380, 260)
 script = ExtResource("2_pile")
 
 [node name="Crane" type="Node2D" parent="Yard"]

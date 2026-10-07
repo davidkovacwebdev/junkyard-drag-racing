@@ -52,6 +52,9 @@ var _engine_mount_local: Vector2 = Vector2.ZERO
 var _has_engine_mount: bool = false
 ## In this node's local space, see `fit_collision()`.
 var _footprint: Rect2 = _BARE_FOOTPRINT
+## The ground patch of a rope engine's walker (horse, runner), out in front of
+## the car. Empty when the engine has none.
+var _walker_footprint: Rect2 = Rect2()
 
 func _ready() -> void:
 	_ensure_fit()
@@ -134,15 +137,27 @@ func jiggle(amount: float = 120.0) -> void:
 ## Shapes `collision` (a shape on the body carrying this view) to the patch of
 ## ground the car stands on: a thin strip spanning whatever reaches the ground —
 ## wheels, legs, tracks, hooves, or the body itself when it sits lowest.
-## Accessories never count. Call again after a facing flip (`scale.x` = -1).
-func fit_collision(collision: CollisionShape2D) -> void:
+## Accessories never count. A rope engine's walker gets `walker_collision` to
+## itself, so the gap where the rope runs isn't a wall; without a walker that
+## shape is disabled. Call again after a facing flip (`scale.x` = -1).
+func fit_collision(collision: CollisionShape2D, walker_collision: CollisionShape2D = null) -> void:
 	collision.shape = RoundedRectShape.build(_footprint.size, _footprint.size.y * 0.5)
-	mirror_collision(collision)
+	if walker_collision != null:
+		var has_walker := _walker_footprint.has_area()
+		walker_collision.set_deferred(&"disabled", not has_walker)
+		if has_walker:
+			walker_collision.shape = RoundedRectShape.build(_walker_footprint.size, minf(_walker_footprint.size.x, _walker_footprint.size.y) * 0.5)
+	mirror_collision(collision, walker_collision)
 
-## Keeps a `fit_collision()` shape under the car after `scale.x` flips it.
-func mirror_collision(collision: CollisionShape2D) -> void:
-	var center := _footprint.get_center()
-	collision.position = Vector2(center.x * signf(scale.x), center.y)
+## Keeps `fit_collision()` shapes under the car after `scale.x` flips it.
+func mirror_collision(collision: CollisionShape2D, walker_collision: CollisionShape2D = null) -> void:
+	collision.position = _mirrored_center(_footprint)
+	if walker_collision != null and _walker_footprint.has_area():
+		walker_collision.position = _mirrored_center(_walker_footprint)
+
+func _mirrored_center(footprint: Rect2) -> Vector2:
+	var center := footprint.get_center()
+	return Vector2(center.x * signf(scale.x), center.y)
 
 ## Wheel mount positions in this node's local space (already fit-adjusted),
 ## so the garage can drop wheel zones right on top of them.
@@ -190,6 +205,7 @@ func _clear() -> void:
 	_engine_mount_raw = Vector2.ZERO
 	_engine_mount_local = Vector2.ZERO
 	_footprint = _BARE_FOOTPRINT
+	_walker_footprint = Rect2()
 
 func _instance_visual(part: PartData) -> Node2D:
 	var instance := PartFactory.instantiate(part)
@@ -218,11 +234,16 @@ func _apply_fit(raw_mounts: Array[Vector2]) -> void:
 	_fit.scale = Vector2(scale, scale)
 	_fit.position = -bounds.get_center() * scale
 	_footprint = _measure_footprint(bounds.size.x * scale)
+	_walker_footprint = _measure_walker_footprint()
 	if origin_on_ground:
-		# Centred on x too, so turning around mirrors the car in place instead of
-		# swinging its footprint into whatever it's parked against.
-		_fit.position -= Vector2(_footprint.get_center().x, _footprint.end.y)
-		_footprint.position = Vector2(-_footprint.size.x / 2.0, -_footprint.size.y)
+		# Centred on x too, walker included, so turning around mirrors the car
+		# in place instead of swinging its footprint into whatever it's parked
+		# against.
+		var whole := _footprint.merge(_walker_footprint) if _walker_footprint.has_area() else _footprint
+		var shift := -Vector2(whole.get_center().x, whole.end.y)
+		_fit.position += shift
+		_footprint.position += shift
+		_walker_footprint.position += shift
 
 	_mounts_local.clear()
 	for m in raw_mounts:
@@ -230,8 +251,9 @@ func _apply_fit(raw_mounts: Array[Vector2]) -> void:
 	_engine_mount_local = _fit.position + _engine_mount_raw * scale
 
 ## Spans the full width of every part that reaches the ground (each wheel, the
-## engine when it's a horse, the body when it sits lowest), not just the few
-## pixels where each one touches, so a big wheel is as solid as it looks.
+## body when it sits lowest), not just the few pixels where each one touches, so
+## a big wheel is as solid as it looks. A horse or runner out on its rope gets
+## its own, see `_measure_walker_footprint()`.
 func _measure_footprint(car_width: float) -> Rect2:
 	var part_bounds: Array[Rect2] = []
 	var ground_parts: Array[Node2D] = [_body]
@@ -260,14 +282,29 @@ func _measure_footprint(car_width: float) -> Rect2:
 	var depth := clampf(car_width * _FOOTPRINT_DEPTH_SHARE, _FOOTPRINT_DEPTH_MIN, _FOOTPRINT_DEPTH_MAX)
 	return Rect2(center_x - width / 2.0, ground_y - depth, width, depth)
 
-## Every Polygon2D vertex of one part, through `xform`, leaving out accessories
-## and the engine (a part of its own) when walking the body.
+## The walker's own art, as deep as the car's footprint and on the same ground
+## line, so the two shapes sit level.
+func _measure_walker_footprint() -> Rect2:
+	if _engine == null or not _engine.has_method("get_walker"):
+		return Rect2()
+	var walker := _engine.call("get_walker") as Node2D
+	var points := PackedVector2Array()
+	_collect_part_art(walker, get_global_transform().affine_inverse() * walker.get_global_transform(), points)
+	if points.is_empty():
+		return Rect2()
+	var art := _bounds_of(points)
+	var width := maxf(art.size.x, _FOOTPRINT_MIN_WIDTH)
+	return Rect2(art.get_center().x - width / 2.0, _footprint.position.y, width, _footprint.size.y)
+
+## Every Polygon2D vertex of one part, through `xform`, leaving out accessories,
+## the engine (a part of its own) when walking the body, and art hanging off
+## the part (a horse or runner out on its rope, measured on its own).
 func _collect_part_art(node: Node, xform: Transform2D, points: PackedVector2Array) -> void:
 	if node is Polygon2D and (node as Polygon2D).visible:
 		for vertex in (node as Polygon2D).polygon:
 			points.append(xform * vertex)
 	for child in node.get_children():
-		if child is CarAccessory or child == _engine or not child is Node2D:
+		if child is CarAccessory or child == _engine or not child is Node2D or child.is_in_group(PartScale.OUTRIGGER_GROUP):
 			continue
 		_collect_part_art(child, xform * (child as Node2D).get_transform(), points)
 

@@ -6,8 +6,10 @@ extends Node2D
 ## downslope past it), a RALLY board by the start line, orange stage flags, hay
 ## bales on the outside of the bends, and a checkered finish.
 ##
-## Drawn in `_draw()` from a few numbers like DragStrip, as one TriangleBatch.
-## The sign posts and hay bales are solid. @tool so it's visible in the editor.
+## Drawn from a few numbers like DragStrip. The road and hills are drawn on this
+## node, which sits below the car; the board, flags, bales and tyres are
+## standing pieces at their own ground points so they Y-sort against the car,
+## and their feet are solid. @tool so it's visible in the editor.
 
 @export var length: float = 2400.0
 @export var road_width: float = 200.0
@@ -43,6 +45,13 @@ const SIGN_POST_HEIGHT := 70.0
 var _art := TriangleBatch.new()
 
 func _ready() -> void:
+	for base in _flag_bases():
+		FlatProps.add_standing_piece(self, base, _draw_flag.bind(base))
+	for rect in _bale_rects():
+		FlatProps.add_standing_piece(self, Vector2(rect.get_center().x, rect.end.y), _draw_bale.bind(rect))
+	FlatProps.add_standing_piece(self, _tire_stack_base(), _draw_tire_stack)
+	var board := _sign_board_rect()
+	FlatProps.add_standing_piece(self, Vector2(board.get_center().x, board.end.y + SIGN_POST_HEIGHT), _draw_sign)
 	if Engine.is_editor_hint():
 		return
 	for rect in _solid_rects():
@@ -58,18 +67,8 @@ func _draw() -> void:
 		_art.draw_colored_polygon(_road_band(hill_x + CREST_HALF_LENGTH, hill_x + CREST_HALF_LENGTH + DOWNSLOPE_LENGTH), DOWNSLOPE)
 	_art.draw_colored_polygon(_road_band(start_x - 8.0, start_x + 8.0), MARKING)
 	_draw_finish()
-	for base in _flag_bases():
-		_draw_flag(base)
-	for rect in _bale_rects():
-		_art.draw_rect(rect, HAY)
-		_art.draw_rect(Rect2(rect.end.x - 14.0, rect.position.y, 14.0, rect.size.y), HAY_SHADE)
-	FlatProps.draw_tire_stack(_art, _tire_stack_base(), 3)
-	_draw_sign()
 	_art.commit(self)
 	_art.clear()
-	var board := _sign_board_rect()
-	draw_string(ThemeDB.fallback_font, board.position + Vector2(0.0, 40.0), "RALLY",
-			HORIZONTAL_ALIGNMENT_CENTER, board.size.x - 12.0, 36, UiPalette.DANGER_RED)
 
 ## The road's centre line at local x.
 func centre_y(x: float) -> float:
@@ -117,20 +116,32 @@ func _flag_bases() -> Array[Vector2]:
 func _tire_stack_base() -> Vector2:
 	return Vector2(finish_x + 90.0, centre_y(finish_x) + road_width * 0.5 + 40.0)
 
-func _draw_flag(base: Vector2) -> void:
+func _draw_flag(_canvas: Node2D, art: TriangleBatch, base: Vector2) -> void:
 	var pole_top := base + Vector2(-4.0, -70.0)
-	_art.draw_rect(Rect2(pole_top.x, pole_top.y, 8.0, 70.0), UiPalette.POST_GREY)
-	_art.draw_colored_polygon(PackedVector2Array([
+	art.draw_rect(Rect2(pole_top.x, pole_top.y, 8.0, 70.0), UiPalette.POST_GREY)
+	art.draw_colored_polygon(PackedVector2Array([
 		pole_top + Vector2(8.0, 0.0), pole_top + Vector2(46.0, 12.0), pole_top + Vector2(8.0, 26.0),
 	]), PENNANT)
 
-## The RALLY board on two posts (its lettering is drawn after the batch), just behind the start line on the far verge.
-func _draw_sign() -> void:
+func _draw_bale(_canvas: Node2D, art: TriangleBatch, rect: Rect2) -> void:
+	art.draw_rect(rect, HAY)
+	art.draw_rect(Rect2(rect.end.x - 14.0, rect.position.y, 14.0, rect.size.y), HAY_SHADE)
+
+func _draw_tire_stack(_canvas: Node2D, art: TriangleBatch) -> void:
+	FlatProps.draw_tire_stack(art, _tire_stack_base(), 3)
+
+## The RALLY board on two posts with its lettering on top, just behind the start
+## line on the far verge.
+func _draw_sign(canvas: Node2D, art: TriangleBatch) -> void:
 	var board := _sign_board_rect()
 	for post_x: float in [board.position.x + 22.0, board.end.x - 30.0]:
-		_art.draw_rect(Rect2(post_x, board.end.y, 8.0, SIGN_POST_HEIGHT), UiPalette.POST_GREY)
-	_art.draw_rect(board, SIGN_BOARD)
-	_art.draw_rect(Rect2(board.end.x - 12.0, board.position.y, 12.0, board.size.y), SIGN_BOARD.darkened(0.2))
+		art.draw_rect(Rect2(post_x, board.end.y, 8.0, SIGN_POST_HEIGHT), UiPalette.POST_GREY)
+	art.draw_rect(board, SIGN_BOARD)
+	art.draw_rect(Rect2(board.end.x - 12.0, board.position.y, 12.0, board.size.y), SIGN_BOARD.darkened(0.2))
+	art.commit(canvas)
+	art.clear()
+	canvas.draw_string(ThemeDB.fallback_font, board.position + Vector2(0.0, 40.0), "RALLY",
+			HORIZONTAL_ALIGNMENT_CENTER, board.size.x - 12.0, 36, UiPalette.DANGER_RED)
 
 func _sign_board_rect() -> Rect2:
 	var post_base := Vector2(start_x - 140.0, centre_y(start_x - 140.0) - road_width * 0.5 - 20.0)

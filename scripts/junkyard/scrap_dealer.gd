@@ -1,7 +1,8 @@
 class_name ScrapDealer
 extends StaticBody2D
-## The junkyard's buyer: the punker from the character creator, standing beside
-## the crane. Drive up to him and press E (or left-click) for the dialog,
+## The junkyard's buyer, who also runs the crane: Vern, Grandpa's old crane
+## buddy, or once the claw has had him, whichever crane worker is on shift
+## (CraneWorkerGenerator.current_operator(), the same guy standing in the pen). Drive up to him and press E (or left-click) for the dialog,
 ## which is where the two things worth doing at the yard live:
 ##
 ##   1. sell the whole scrap pile for cash,
@@ -23,12 +24,12 @@ extends StaticBody2D
 ## the click has an actual shape to hit — PlayerCar's click is a point query
 ## against the physics world, not a mouse-over test.
 ##
-## He doesn't carry a copy of the punker's parts: the `Character` child is a
-## CharacterRig pointed at res://characters/punker.tres, so editing that .tres
-## in the Character Creator changes this guy too.
+## He doesn't carry a copy of anyone's parts: the `Character` child is a
+## CharacterRig swapped to the current operator on ready, and his name is
+## theirs.
 ##
-## The crane is locked until Grandpa's "Claw Machine" quest: he's Grandpa's
-## guy, and he doesn't rent it to strangers. Talking to him with that quest in
+## The crane is locked until Grandpa's "Claw Machine" quest: it's Vern's
+## crane, Grandpa's old buddy, and he doesn't rent it to strangers. Talking to him with that quest in
 ## the log finishes it and opens the crane for good.
 ##
 ## The dialog is the standard CharacterDialog (scenes/ui/character_dialog.tscn)
@@ -57,7 +58,7 @@ extends StaticBody2D
 ## Said while the crane is still locked (no "Claw Machine" yet).
 @export var locked_line: String = "Buyin' scrap. The crane? Not for rent, pal. Not to strangers."
 ## Said when the player turns up with Grandpa's quest: the crane opens.
-@export var grandpa_sent_line: String = "Grandpa sent ya? Ha! That old drunk. Alright: $%d a go, crane's out back. Whatever the claw comes up with, it's yours."
+@export var grandpa_sent_line: String = "Eugen sent ya? Ha! That old drunk. Forty years we ran that crane together. Alright: $%d a go, crane's out back. Whatever the claw comes up with, it's yours."
 
 ## The quest that opens the crane.
 const CRANE_QUEST := &"crane_guy"
@@ -74,6 +75,9 @@ var _actor: Node2D = null
 @onready var _character: CharacterRig = $Character
 
 func _ready() -> void:
+	var operator := CraneWorkerGenerator.current_operator()
+	_character.set_character(operator)
+	display_name = operator.display_name
 	var popup := get_node_or_null("Popup") as Label
 	if popup != null:
 		_popup_home = popup.position

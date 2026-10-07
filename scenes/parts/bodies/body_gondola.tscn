@@ -1,0 +1,61 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_body.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/body_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_gondola"]
+script = ExtResource("2")
+color = Color(0.68, 0.3, 0.25, 1)
+found_in_junk = false
+id = &"body_gondola"
+display_name = "Cable Car Gondola"
+suspension_sag = 5.0
+suspension_travel = 12.0
+suspension_damping_ratio = 0.5
+suspension_wheel_protection = 0.35
+mass = 17.0
+durability = 135.0
+speed = 3.4
+material_type = 0
+impact_sound = &"gondola_clang"
+max_wheels = 2
+
+[node name="BodyGondola" type="RigidBody2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_gondola")
+
+[node name="Cabin" type="Polygon2D" parent="."]
+color = Color(0.68, 0.3, 0.25, 1)
+polygon = PackedVector2Array(-62, 16, -68, -60, -60, -76, 60, -78, 68, -62, 62, 16)
+
+[node name="Shade" type="Polygon2D" parent="."]
+color = Color(0.53, 0.23, 0.19, 1)
+polygon = PackedVector2Array(-63, 0, 63, 0, 62, 16, -62, 16)
+
+[node name="Window" type="Polygon2D" parent="."]
+color = Color(0.42, 0.55, 0.6, 1)
+polygon = PackedVector2Array(-56, -58, 56, -60, 57, -30, -55, -28)
+
+[node name="Roof" type="Polygon2D" parent="."]
+color = Color(0.55, 0.57, 0.58, 1)
+polygon = PackedVector2Array(-58, -76, 58, -78, 52, -88, -52, -86)
+
+[node name="Hanger" type="Polygon2D" parent="."]
+color = Color(0.42, 0.44, 0.46, 1)
+polygon = PackedVector2Array(12, -86, 24, -86, 36, -126, 26, -128)
+
+[node name="Grip" type="Polygon2D" parent="."]
+color = Color(0.3, 0.31, 0.33, 1)
+polygon = PackedVector2Array(18, -124, 50, -132, 52, -146, 20, -140)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(-62, 16, -68, -60, -60, -76, 60, -78, 68, -62, 62, 16)
+
+[node name="WheelMount0" type="Marker2D" parent="."]
+position = Vector2(-42, 16)
+
+[node name="WheelMount1" type="Marker2D" parent="."]
+position = Vector2(42, 16)
+
+[node name="EngineMount" type="Marker2D" parent="."]
+position = Vector2(-28, -86)
