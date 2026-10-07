@@ -1,0 +1,16 @@
+[gd_scene format=3]
+
+[node name="CarrotsIcon" type="Node2D"]
+rotation = 0.05
+
+[node name="Leaves" type="Polygon2D" parent="."]
+color = Color(0.36, 0.55, 0.26, 1)
+polygon = PackedVector2Array(-20, -30, -8, -16, -2, -32, 6, -16, 18, -28, 12, -10, -14, -10)
+
+[node name="CarrotBack" type="Polygon2D" parent="."]
+color = Color(0.8, 0.42, 0.14, 1)
+polygon = PackedVector2Array(-2, -14, 16, -12, 6, 30)
+
+[node name="CarrotFront" type="Polygon2D" parent="."]
+color = Color(0.9, 0.52, 0.18, 1)
+polygon = PackedVector2Array(-18, -14, 2, -12, -12, 28)

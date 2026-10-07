@@ -16,8 +16,13 @@ extends CanvasLayer
 
 const LAYER := 47
 const QUESTS_ROOT := "res://quests"
-const BOARD_SIZE := Vector2(820.0, 500.0)
+const BOARD_SIZE := Vector2(860.0, 600.0)
 const ROW_HEIGHT := 44.0
+## Gap between rows, so the tilted buttons' skirts don't run into the row
+## below.
+const ROW_GAP := 12.0
+## Room kept clear on the right of the rows for the scrollbar.
+const SCROLLBAR_GUTTER := 26.0
 const OVERLAY_ALPHA := 0.55
 
 var _enabled: bool = false
@@ -26,6 +31,7 @@ var _quests: Array[QuestData] = []
 
 var _root: Control
 var _rows: VBoxContainer
+var _scroll: ScrollContainer
 
 func _ready() -> void:
 	layer = LAYER
@@ -49,6 +55,7 @@ func open() -> void:
 	get_tree().paused = true
 	_quests = _load_quests()
 	_refresh()
+	_scroll.scroll_vertical = 0
 	_root.visible = true
 
 func close() -> void:
@@ -166,15 +173,18 @@ func _build() -> void:
 	hint.position = Vector2(BOARD_SIZE.x - 170.0, 24.0)
 	board.add_child(hint)
 
-	var scroll := ScrollContainer.new()
-	scroll.position = Vector2(24.0, 64.0)
-	scroll.size = Vector2(BOARD_SIZE.x - 48.0, BOARD_SIZE.y - 140.0)
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	board.add_child(scroll)
+	# Mouse wheel or the bar on the right scrolls the list; the rows stop
+	# short of the bar so it never sits on top of the Finish buttons.
+	_scroll = ScrollContainer.new()
+	_scroll.position = Vector2(24.0, 64.0)
+	_scroll.size = Vector2(BOARD_SIZE.x - 48.0, BOARD_SIZE.y - 148.0)
+	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_ALWAYS
+	board.add_child(_scroll)
 	_rows = VBoxContainer.new()
-	_rows.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_rows.add_theme_constant_override("separation", 6)
-	scroll.add_child(_rows)
+	_rows.custom_minimum_size = Vector2(_scroll.size.x - SCROLLBAR_GUTTER, 0.0)
+	_rows.add_theme_constant_override("separation", int(ROW_GAP))
+	_scroll.add_child(_rows)
 
 	var reset := _make_button("Reset all quests", 200.0, 7)
 	reset.position = Vector2(24.0, BOARD_SIZE.y - 64.0)
@@ -186,7 +196,10 @@ func _build() -> void:
 	board.add_child(finish_all)
 
 func _refresh() -> void:
+	# Freed right away (not queued) so the old rows don't sit in the list for
+	# a frame, doubling it up under the new ones.
 	for child in _rows.get_children():
+		_rows.remove_child(child)
 		child.queue_free()
 	for i in _quests.size():
 		_rows.add_child(_build_row(_quests[i], i))

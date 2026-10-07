@@ -16,6 +16,10 @@ extends Resource
 @export_multiline var description: String = ""
 ## A few flat polygons, authored around (0, 0) in a roughly 64 px box.
 @export var icon_scene: PackedScene
+## Played as it's bought, on top of the till (the Super Horn going off in
+## the shop). Empty: just the till.
+@export var buy_sound: StringName = &""
+@export var buy_sound_volume_db: float = -4.0
 
 @export_group("Using it")
 ## How many times it can be used from the trunk (1-6 or a double-click)

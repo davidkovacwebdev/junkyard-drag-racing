@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://items/carrots.tres" id="2_carrots"]
+[ext_resource type="Resource" path="res://items/tiger_paint.tres" id="3_paint"]
+[ext_resource type="Resource" path="res://quests/fence_for_tiger.tres" id="4_next"]
+[ext_resource type="Script" uid="uid://b4kssi28o6a3g" path="res://scripts/items/item_data.gd" id="5_item"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"tiger_supplies"
+title = "Shopping for Tiger"
+giver = "Grandpa"
+description = "Grandpa named the horse Tiger. Tiger wants carrots. Grandpa wants black and orange paint, \"to paint the fence\". You don't have a fence.
+
+Buy carrots and black & orange paint at the Shop and bring them to Grandpa."
+objective = "Buy carrots and black & orange paint at the Shop"
+objective_place = "Shop"
+follow_ups = Array[ExtResource("1_script")]([ExtResource("4_next")])
+item_goals = Array[ExtResource("5_item")]([ExtResource("2_carrots"), ExtResource("3_paint")])
+reminder_line = "Carrots and paint, {player}. Tiger's hungry and the fence ain't gonna paint itself."
+turn_in_cutscene = "res://cutscenes/grandpa_supplies.tres"

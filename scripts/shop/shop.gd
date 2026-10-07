@@ -36,8 +36,11 @@ const ITEMS_SHOWN := 3
 const SHELF_WIDTH_FRACTION := 0.8
 const TAG_COLOR := UiPalette.TRIM_OFF_WHITE
 const LISTED_TAG_COLOR := UiPalette.ACCENT_YELLOW
+## The longest an item's `buy_sound` goes off for when it's bought.
+const BUY_SOUND_SECONDS := 1.2
 
 @export var shopkeeper_name: String = "Shopkeeper"
+
 @export var stock: Array[ItemData] = []
 
 @export_group("Lines")
@@ -198,12 +201,25 @@ func _on_buy_pressed(item: ItemData) -> void:
 		_dialog.say(full_line)
 	elif Inventory.buy_item(item):
 		Sfx.play(&"cash_register", -4.0, 0.0)
+		if not item.buy_sound.is_empty():
+			_play_buy_sound(item.buy_sound, item.buy_sound_volume_db)
 		_dialog.say(bought_line)
 		_refresh_shelves()
 	else:
 		Sfx.play(&"denied", -6.0, 0.0)
 		_dialog.say(broke_line)
 	_show_stock(true)
+
+## A taste of what was just bought, cut off after `BUY_SOUND_SECONDS` (a
+## loop like the Super Horn would otherwise blare on forever).
+func _play_buy_sound(sound_name: StringName, volume_db: float) -> void:
+	var player := AudioStreamPlayer.new()
+	player.stream = Sfx.stream(sound_name)
+	player.bus = SoundLibrary.bus_for(sound_name)
+	player.volume_db = volume_db
+	add_child(player)
+	player.play()
+	get_tree().create_timer(BUY_SOUND_SECONDS).timeout.connect(player.queue_free)
 
 func _on_browse_pressed() -> void:
 	_dialog.say(browse_line)

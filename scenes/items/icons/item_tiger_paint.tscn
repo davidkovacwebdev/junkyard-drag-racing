@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[node name="TigerPaintIcon" type="Node2D"]
+rotation = -0.04
+
+[node name="Can" type="Polygon2D" parent="."]
+color = Color(0.64, 0.68, 0.74, 1)
+polygon = PackedVector2Array(-22, -18, 22, -18, 22, 28, -22, 28)
+
+[node name="Shade" type="Polygon2D" parent="."]
+color = Color(0.52, 0.56, 0.63, 1)
+polygon = PackedVector2Array(10, -18, 22, -18, 22, 28, 10, 28)
+
+[node name="BlackBand" type="Polygon2D" parent="."]
+color = Color(0.15, 0.14, 0.13, 1)
+polygon = PackedVector2Array(-22, 2, 22, -2, 22, 12, -22, 16)
+
+[node name="OrangeSpill" type="Polygon2D" parent="."]
+color = Color(0.9, 0.5, 0.14, 1)
+polygon = PackedVector2Array(-26, -26, 26, -26, 22, -18, 22, -6, 14, -6, 14, -18, -4, -18, -4, 0, -12, 0, -12, -18, -22, -18)

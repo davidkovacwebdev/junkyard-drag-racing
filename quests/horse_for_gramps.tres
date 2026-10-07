@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="QuestData" format=3 uid="uid://fu0i0p2n72lm"]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://quests/tiger_supplies.tres" id="2_next"]
+[ext_resource type="Script" uid="uid://b4kssi28o6a3g" path="res://scripts/items/item_data.gd" id="3_lnp8g"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"horse_for_gramps"
+title = "Giddy Up"
+giver = "Grandpa"
+description = "Grandpa's sad. Not crying, just sad. He's lonely, and using the wheelchair sucks.
+
+Go to the farm, buy him a horse from the Farmer, and bring it back."
+objective = "Buy a horse from the Farmer"
+objective_place = "Farm"
+follow_ups = Array[ExtResource("1_script")]([ExtResource("2_next")])
+start_cutscene = "res://cutscenes/grandpa_horse.tres"
+own_part_goal = "res://scenes/parts/engines/engine_horse.tscn"
+reminder_line = "A horse, {player}. From the farm. I ain't gettin' any less lonely."
+turn_in_cutscene = "res://cutscenes/grandpa_tiger.tres"

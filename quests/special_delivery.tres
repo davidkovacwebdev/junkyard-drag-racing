@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="QuestData" format=3 uid="uid://bqv8dio1q31uh"]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://items/grandpas_package.tres" id="2_package"]
+[ext_resource type="Resource" path="res://quests/derby_debut.tres" id="3_next"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"special_delivery"
+title = "Special Delivery"
+giver = "Grandpa"
+description = "Grandpa's waiting on a package. In this town the garbage truck also brings the mail (and the medicine, and the ambulance, and the coroner).
+
+Find the garbage truck. Ram it and lean on your horn next to it until his package falls off the back, then bring it to him. Grandpa's advice: improvise."
+objective = "Ram and honk at the garbage truck until the package falls off"
+objective_place = "Garbage Truck"
+follow_ups = Array[ExtResource("1_script")]([ExtResource("3_next")])
+start_cutscene = "res://cutscenes/grandpa_package.tres"
+item_goal = ExtResource("2_package")
+count_goal = 10
+count_label = "rams"
+horn_goal_seconds = 4.0
+reminder_line = "That truck ain't gonna dent itself, {player}. Ram it! Honk at it! Improvise!"
+turn_in_cutscene = "res://cutscenes/grandpa_package_report.tres"

@@ -18,6 +18,9 @@ const RALLY_PENNANT := Color(0.85, 0.45, 0.12)
 const HILL_ROCK := Color(0.45, 0.43, 0.41)
 const HILL_ROCK_SHADE := Color(0.37, 0.35, 0.34)
 const HILL_SNOW := Color(0.88, 0.89, 0.90)
+## The garbage truck's own greens (garbage_truck_body.tscn).
+const TRUCK_COLOR := Color(0.32, 0.46, 0.3)
+const TRUCK_SHADE := Color(0.25, 0.37, 0.24)
 const HOME_ICON_SIZE := 7.0
 const LANDMARK_ICON_SIZE := 6.0
 const PLAYER_ARROW_SIZE := 7.0
@@ -155,6 +158,20 @@ static func draw_landmark(canvas: CanvasItem, kind: MinimapMarker.Kind, at: Vect
 				at + Vector2(unit * 0.7, unit * 0.8), at + Vector2(unit * 0.35, unit * 0.8),
 			]), GraveyardProp.STONE_SHADE)
 			canvas.draw_colored_polygon(FlatProps.octagon(at + Vector2(0, unit * 0.8), unit, unit * 0.3), GraveyardProp.MOUND)
+		MinimapMarker.Kind.GARBAGE_TRUCK:
+			# The big green box, the cab in front of it, and the wheels under both.
+			canvas.draw_colored_polygon(PackedVector2Array([
+				at + Vector2(-unit, -unit * 0.8), at + Vector2(unit * 0.3, -unit * 0.9),
+				at + Vector2(unit * 0.3, unit * 0.4), at + Vector2(-unit, unit * 0.4),
+			]), TRUCK_COLOR)
+			canvas.draw_colored_polygon(PackedVector2Array([
+				at + Vector2(unit * 0.3, -unit * 0.3), at + Vector2(unit * 0.8, -unit * 0.3),
+				at + Vector2(unit * 1.1, unit * 0.1), at + Vector2(unit * 1.1, unit * 0.4), at + Vector2(unit * 0.3, unit * 0.4),
+			]), TRUCK_SHADE)
+			canvas.draw_colored_polygon(PackedVector2Array([
+				at + Vector2(-unit * 0.8, unit * 0.4), at + Vector2(unit * 0.9, unit * 0.4),
+				at + Vector2(unit * 0.9, unit * 1.0), at + Vector2(-unit * 0.8, unit * 1.0),
+			]), UiPalette.INK)
 
 static func draw_square(canvas: CanvasItem, at: Vector2, half_size: float, color: Color) -> void:
 	canvas.draw_colored_polygon(PackedVector2Array([

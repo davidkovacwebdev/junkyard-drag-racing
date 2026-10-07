@@ -22,6 +22,7 @@ const NAMES: Array[StringName] = [
 	&"shop_bell",
 	&"quest_complete",
 	&"beer_sip",
+	&"coffee_slurp",
 	&"grandpa_twitch",
 	&"grandpa_sob",
 	&"grandpa_hiccup",
@@ -39,6 +40,10 @@ const NAMES: Array[StringName] = [
 	&"cemetery_gate_creak",
 	&"funeral_bell",
 	&"wood_clonk",
+	&"fence_crack",
+	&"grandpa_sigh",
+	&"carrot_crunch",
+	&"paint_slosh",
 	&"bacon_sizzle",
 	&"chain_rattle",
 	&"trunk_open",
@@ -53,6 +58,7 @@ const NAMES: Array[StringName] = [
 	&"race_stalled",
 	&"results_fanfare",
 	&"horn_loop",
+	&"super_horn_loop",
 	&"tire_screech_loop",
 	&"bump",
 	&"collision",
@@ -153,6 +159,7 @@ const NAMES: Array[StringName] = [
 
 const LOOPING: Array[StringName] = [
 	&"horn_loop",
+	&"super_horn_loop",
 	&"tire_screech_loop",
 	&"rain_loop",
 	&"furnace_loop",
@@ -169,6 +176,7 @@ const CAR_SOUNDS: Array[StringName] = [
 	&"engine_stall",
 	&"backfire",
 	&"horn_loop",
+	&"super_horn_loop",
 	&"tire_screech_loop",
 	&"bump",
 	&"collision",
@@ -277,6 +285,7 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"shop_bell": return _shop_bell()
 		&"quest_complete": return _quest_complete()
 		&"beer_sip": return _beer_sip(rng)
+		&"coffee_slurp": return _coffee_slurp(rng)
 		&"grandpa_twitch": return _grandpa_twitch(rng)
 		&"grandpa_sob": return _grandpa_sob(rng)
 		&"grandpa_hiccup": return _grandpa_hiccup(rng)
@@ -294,6 +303,10 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"cemetery_gate_creak": return _cemetery_gate_creak(rng)
 		&"funeral_bell": return _funeral_bell(rng)
 		&"wood_clonk": return _wood_clonk(rng)
+		&"fence_crack": return _fence_crack(rng)
+		&"grandpa_sigh": return _grandpa_sigh(rng)
+		&"carrot_crunch": return _carrot_crunch(rng)
+		&"paint_slosh": return _paint_slosh(rng)
 		&"bacon_sizzle": return _bacon_sizzle(rng)
 		&"chain_rattle": return _chain_rattle(rng)
 		&"trunk_open": return _trunk_open(rng)
@@ -309,6 +322,7 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"race_stalled": return _race_stalled()
 		&"results_fanfare": return _results_fanfare()
 		&"horn_loop": return _horn_loop()
+		&"super_horn_loop": return _super_horn_loop(rng)
 		&"truck_honk": return _truck_honk()
 		&"tire_screech_loop": return _tire_screech_loop(rng)
 		&"bump": return _bump(rng)
@@ -498,6 +512,30 @@ static func _horn_loop() -> PackedFloat32Array:
 		amp = [[0.0, 1.0]],
 		fade = 0.0,
 	})
+
+## The shop's Super Horn: a whole train-horn chord over a sub-bass drone,
+## every voice a square, driven into a brick wall, then bit-crushed to 16
+## levels and held every third sample like a blown dollar-store speaker,
+## with a 7 Hz flutter and a bed of crackle. Every pitch is a whole number of
+## Hz and the crusher's hold divides the loop, so the 1 s seam lines up.
+static func _super_horn_loop(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var chord := Synth.tones(1.0, [[[0.0, 156.0]], [[0.0, 311.0]], [[0.0, 370.0]],
+			[[0.0, 466.0]], [[0.0, 554.0]]], {
+		square = 1.0,
+		amp = [[0.0, 1.0]],
+		fade = 0.0,
+	})
+	var out := Synth.silence(1.0)
+	var held := 0.0
+	for i in out.size():
+		var t := float(i) / Synth.SAMPLE_RATE
+		var flutter := 0.85 + 0.15 * sin(TAU * 7.0 * t)
+		var crackle := rng.randf_range(-0.25, 0.25)
+		var x := Synth.softclip((chord[i] * 6.0 + crackle) * flutter, 14.0)
+		if i % 3 == 0:
+			held = roundf(clampf(x, -1.0, 1.0) * 8.0) / 8.0
+		out[i] = held
+	return Synth.finish(out, 0.98, 0.0)
 
 ## Pitched rubber squeal with a wandering pitch, a second tyre chirping above
 ## it, stick-slip chatter and a little scrub noise underneath. Every wobble is a
@@ -1045,6 +1083,23 @@ static func _beer_sip(rng: RandomNumberGenerator) -> PackedFloat32Array:
 	}), 0.3, 0.5)
 	return Synth.finish(out, 0.6)
 
+## Slurping coffee that's too hot: air sucked in over it in a thin, rising
+## hiss that burbles twice, then a low, contented "ahh". Higher and airier
+## than the beer sip, so the two never sound alike.
+static func _coffee_slurp(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.9)
+	Synth.mix_into(out, Synth.noise_sweep(0.42, {
+		freq = [[0.0, 2200.0], [0.3, 3600.0], [0.42, 3000.0]],
+		q = [[0.0, 6.0]],
+		amp = [[0.0, 0.0], [0.05, 0.5], [0.12, 0.25], [0.18, 0.7], [0.26, 0.3], [0.34, 0.6], [0.42, 0.0]],
+	}, rng), 0.0, 0.7)
+	Synth.mix_into(out, Synth.tones(0.38, [[[0.0, 150.0], [0.38, 118.0]]], {
+		square = 0.2,
+		tremolo = [5.0, 0.2],
+		amp = [[0.0, 0.0], [0.06, 0.8], [0.28, 0.5], [0.38, 0.0]],
+	}), 0.48, 0.45)
+	return Synth.finish(out, 0.55)
+
 ## A fit coming on: a jittery, stuttering buzz, like a shorting wire.
 static func _grandpa_twitch(rng: RandomNumberGenerator) -> PackedFloat32Array:
 	var out := Synth.silence(0.6)
@@ -1323,6 +1378,63 @@ static func _wood_clonk(rng: RandomNumberGenerator) -> PackedFloat32Array:
 		out = Synth.mix_into(out, _metal_ring(0.06, rng.randf_range(3000.0, 4200.0), 16.0, 0.015, rng),
 				0.04 + i * 0.05, 0.2)
 	return Synth.finish(out, 0.6)
+
+## A piece of fence giving way: a hard wooden thud, a dry splintering crack
+## that tears apart in a burst of snaps, and the loose rail clattering down.
+static func _fence_crack(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.9)
+	out = Synth.mix_into(out, Synth.thump(0.2, 800.0, 0.002, 0.07, rng), 0.0, 0.9)
+	out = Synth.mix_into(out, Synth.noise_sweep(0.3, {
+		freq = [[0.0, 2600.0], [0.3, 1400.0]],
+		q = [[0.0, 2.5]],
+		amp = [[0.0, 0.0], [0.01, 1.0], [0.12, 0.5], [0.3, 0.0]],
+	}, rng), 0.04, 0.7)
+	for i in 7:
+		out = Synth.mix_into(out, Synth.thump(0.04, rng.randf_range(2200.0, 3600.0), 0.001, 0.01, rng),
+				0.05 + i * rng.randf_range(0.02, 0.04), 0.5)
+	out = Synth.mix_into(out, _wood_clonk(rng), 0.42, 0.6)
+	return Synth.finish(out, 0.7)
+
+## An old man's long, sad sigh: a breathy exhale that sags in pitch, with a
+## low, quavering "hhhmm" hummed under the end of it.
+static func _grandpa_sigh(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(1.4)
+	out = Synth.mix_into(out, Synth.noise_sweep(1.1, {
+		freq = [[0.0, 1300.0], [1.1, 650.0]],
+		q = [[0.0, 2.0]],
+		amp = [[0.0, 0.0], [0.15, 0.8], [0.7, 0.5], [1.1, 0.0]],
+	}, rng), 0.0, 0.6)
+	out = Synth.mix_into(out, Synth.tones(0.8, [[[0.0, 120.0], [0.8, 92.0]]], {
+		square = 0.25,
+		tremolo = [6.0, 0.35],
+		amp = [[0.0, 0.0], [0.15, 0.7], [0.6, 0.5], [0.8, 0.0]],
+	}), 0.5, 0.45)
+	return Synth.finish(out, 0.55)
+
+## A horse biting into a carrot: a crisp snap and two wet, crunchy chews.
+static func _carrot_crunch(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.6)
+	for i in 3:
+		var at := i * 0.17
+		out = Synth.mix_into(out, Synth.noise_sweep(0.09, {
+			freq = [[0.0, 3400.0 - i * 500.0], [0.09, 1800.0]],
+			q = [[0.0, 1.4]],
+			amp = [[0.0, 0.0], [0.004, 1.0], [0.04, 0.4], [0.09, 0.0]],
+		}, rng), at, 0.8 if i == 0 else 0.55)
+		out = Synth.mix_into(out, Synth.thump(0.06, 500.0, 0.002, 0.02, rng), at, 0.4)
+	return Synth.finish(out, 0.6)
+
+## A paint can jostled: a tinny clank from the handle and a thick, gloopy
+## slosh rolling around inside it.
+static func _paint_slosh(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.7)
+	out = Synth.mix_into(out, _metal_ring(0.15, 1900.0, 12.0, 0.02, rng), 0.0, 0.4)
+	out = Synth.mix_into(out, Synth.noise_sweep(0.55, {
+		freq = [[0.0, 380.0], [0.2, 700.0], [0.4, 300.0], [0.55, 450.0]],
+		q = [[0.0, 5.0]],
+		amp = [[0.0, 0.0], [0.08, 0.8], [0.25, 0.3], [0.38, 0.7], [0.55, 0.0]],
+	}, rng), 0.05, 0.8)
+	return Synth.finish(out, 0.55)
 
 ## Bacon in a hot pan: a crackly bed of fizz with a few fat pops spitting
 ## out of it.

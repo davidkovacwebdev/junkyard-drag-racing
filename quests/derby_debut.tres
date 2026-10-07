@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="QuestData" format=3 uid="uid://b0hrnatyg78xi"]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://quests/horse_for_gramps.tres" id="2_next"]
+[ext_resource type="Script" uid="uid://b4kssi28o6a3g" path="res://scripts/items/item_data.gd" id="2_ymmch"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"derby_debut"
+title = "Wrap It Up"
+giver = "Grandpa"
+description = "Grandpa handed you a roll of bubble wrap and told you to wrap your car in it. It's waiting in the garage with your spare parts.
+
+The Demolition Derby is open. Go enter a race there and make Gramps proud, then let him know how it went."
+objective = "Enter a race at the Demolition Derby"
+objective_place = "Demolition Derby"
+unlocks = Array[ExtResource("1_script")]([ExtResource("2_next")])
+race_goal_venue = "Demolition Derby"
+reminder_line = "Derby, {player}. Wrap that heap up and go smash somethin'."
+turn_in_cutscene = "res://cutscenes/grandpa_derby_report.tres"

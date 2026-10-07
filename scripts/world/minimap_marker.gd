@@ -17,9 +17,14 @@ enum Kind {
 	HILL_CLIMB,
 	DERBY,
 	GRAVEYARD,
+	GARBAGE_TRUCK,
 }
 
 @export var kind: Kind = Kind.HOME
+## The name quests use for this place, for one that has no `display_name`
+## to carry it (the garbage truck: a `display_name` would make the car offer
+## to talk to it). Empty: the landmark's own, see `place_name()`.
+@export var place_name_override: String = ""
 
 func _ready() -> void:
 	add_to_group(GROUP)
@@ -33,6 +38,8 @@ func _ready() -> void:
 ## `objective_place`): the landmark's own `display_name`, or, for a landmark
 ## that keeps it on a child (a venue's Entrance booth), that child's.
 func place_name() -> String:
+	if not place_name_override.is_empty():
+		return place_name_override
 	var named := _named_node()
 	return String(named.get("display_name")) if named != null else ""
 

@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="QuestData" format=3 uid="uid://sp08ogy0x6rn"]
 
 [ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://quests/special_delivery.tres" id="2_next"]
 
 [resource]
 script = ExtResource("1_script")
@@ -12,6 +13,7 @@ description = "A new rally track has opened, and Grandpa gave you his precious h
 Go enter a race at the Rally, then let Grandpa know how it went."
 objective = "Enter a race at the Rally"
 objective_place = "Rally"
+unlocks = Array[ExtResource("1_script")]([ExtResource("2_next")])
 start_cutscene = "res://cutscenes/grandpa_helmet.tres"
 race_goal_venue = "Rally"
 reminder_line = "Rally's waitin', {player}. Helmet's optional. Always was."

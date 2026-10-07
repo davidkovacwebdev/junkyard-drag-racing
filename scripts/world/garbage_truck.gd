@@ -20,6 +20,13 @@ extends CharacterBody2D
 ## once let go. `collision_mask = 1` so it's blocked by the same world
 ## obstacles the player is (buildings, props, the shore) as well as the
 ## player's car itself, which also sits on layer 1.
+##
+## It also carries the town's mail. During "Special Delivery" Grandpa's
+## package is on board: every hard ram counts toward the quest's
+## `count_goal`, and every second the player leans on the horn nearby
+## toward its `horn_goal_seconds`. Once both are done the package falls off
+## the back (an ItemPickup). While that's on, the truck shows on the map as "Garbage
+## Truck", the quest's `objective_place`.
 
 @export var speed: float = 260.0
 ## Junction radius: when the road it's on runs out, any other road with an
@@ -93,6 +100,20 @@ extends CharacterBody2D
 @export var honk_min_impact_speed: float = 120.0
 @export var honk_off_route_distance: float = 110.0
 
+@export_group("Grandpa's package")
+## A ram only counts toward knocking the package loose when the car hits
+## the truck at least this fast.
+@export var ram_min_speed: float = 140.0
+## Rams closer together than this count once, so one crunch isn't three.
+@export var ram_cooldown: float = 0.6
+## Honking only counts with the car at most this far from the truck.
+@export var horn_range: float = 450.0
+
+const PACKAGE_QUEST := preload("res://quests/special_delivery.tres")
+const PACKAGE := preload("res://items/grandpas_package.tres")
+## Where the hit count floats up from, above the truck's box.
+const RAM_TEXT_LIFT := 150.0
+
 @onready var _visual: CarView = $Visual as CarView
 
 var _road_network: RoadNetwork = null
@@ -123,6 +144,10 @@ var _drop_timer: float = 0.0
 var _honk_timer: float = 0.0
 var _in_contact_last_frame: bool = false
 var _in_contact_this_frame: bool = false
+var _ram_timer: float = 0.0
+var _package_orb: ItemPickup = null
+var _marker: MinimapMarker = null
+var _player_car: PlayerCar = null
 
 func _ready() -> void:
 	_rng.randomize()
@@ -179,6 +204,9 @@ func _physics_process(delta: float) -> void:
 	if _collect_timer <= 0.0:
 		_collect_timer = collect_check_interval
 		_try_collect_nearby_bin()
+		_update_marker()
+
+	_count_horn(delta)
 
 	_drop_timer -= delta
 	if _drop_timer <= 0.0:
@@ -187,6 +215,7 @@ func _physics_process(delta: float) -> void:
 
 func _advance_along_road(delta: float) -> void:
 	_honk_timer -= delta
+	_ram_timer -= delta
 	_in_contact_last_frame = _in_contact_this_frame
 	_in_contact_this_frame = false
 
@@ -298,12 +327,111 @@ func set_contact_push(pressing_velocity: Vector2, contact_normal: Vector2, other
 	var gap := push_speed - velocity.dot(push_dir)
 	if gap <= 0.0:
 		return
+	if not _in_contact_last_frame and gap >= ram_min_speed:
+		_count_ram()
 	var share := other_mass / (other_mass + mass)
 	var step := share if not _in_contact_last_frame \
 			else 1.0 - exp(-push_response * share * get_physics_process_delta_time())
 	velocity += push_dir * gap * step
 	if not _in_contact_last_frame and gap * share >= honk_min_impact_speed:
 		_try_honk()
+
+## Whether Grandpa's package is still on board and the player is after it.
+func _wants_package() -> bool:
+	var id := PACKAGE_QUEST.id
+	return Quests.has_quest(id) and not Quests.is_ready(id) \
+			and not Inventory.has_item(PACKAGE.id) and not is_instance_valid(_package_orb)
+
+## A hard ram while the package is on board: one more toward the quest's
+## count, floated up over the truck. Once the rams are all in, more of them
+## just nag the player to honk.
+func _count_ram() -> void:
+	if _ram_timer > 0.0 or not _wants_package():
+		return
+	_ram_timer = ram_cooldown
+	var id := PACKAGE_QUEST.id
+	var goal := PACKAGE_QUEST.count_goal
+	Sfx.play_at(&"car_whack", global_position, -4.0, 0.08)
+	if Quests.count_of(id) >= goal:
+		# Both done already (a reload since): the package falls off now.
+		if not _try_drop_package():
+			_float_text("Now honk at it!")
+		return
+	var hits := Quests.add_count(id)
+	if not _try_drop_package():
+		_float_text("%d / %d" % [hits, goal] if hits < goal else "Now honk at it!")
+
+## The player leaning on the horn near the truck while the package is on
+## board: the seconds add up toward the quest's horn goal, a count floats up
+## each whole second, and the truck honks back at the end.
+func _count_horn(delta: float) -> void:
+	if not is_instance_valid(_player_car):
+		_player_car = get_tree().get_first_node_in_group(PlayerCar.GROUP) as PlayerCar
+	if _player_car == null or not _player_car.is_honking() \
+			or _player_car.global_position.distance_to(global_position) > horn_range:
+		return
+	var id := PACKAGE_QUEST.id
+	var goal := PACKAGE_QUEST.horn_goal_seconds
+	var before := Quests.horn_time_of(id)
+	if before >= goal or not _wants_package():
+		return
+	var after := Quests.add_horn_time(id, delta)
+	if floori(after) == floori(before):
+		return
+	if after < goal:
+		_float_text("Honk %d / %d" % [floori(after), int(goal)])
+		return
+	# Fed up, the truck honks right back.
+	_honk_timer = 0.0
+	_try_honk()
+	if not _try_drop_package():
+		_float_text("Now ram it!")
+
+## Drops the package once the quest's rams and honking are both done.
+func _try_drop_package() -> bool:
+	var id := PACKAGE_QUEST.id
+	if Quests.count_of(id) < PACKAGE_QUEST.count_goal \
+			or Quests.horn_time_of(id) < PACKAGE_QUEST.horn_goal_seconds:
+		return false
+	_drop_package()
+	_float_text("Something fell off!")
+	return true
+
+func _float_text(text: String) -> void:
+	var parent := get_parent()
+	if parent != null:
+		Pickup.spawn_callout(parent, global_position + Vector2(0.0, -RAM_TEXT_LIFT), text)
+
+## Grandpa's package flies off the back of the box onto the road. It waits
+## there however long the player takes (no fading away with the quest item).
+func _drop_package() -> void:
+	var parent := get_parent()
+	if parent == null:
+		return
+	var orb := ItemPickup.new()
+	orb.configure(PACKAGE)
+	orb.persistent = true
+	parent.add_child(orb)
+	var back := -_last_move_dir if _last_move_dir != Vector2.ZERO else Vector2.LEFT
+	orb.launch(global_position + Vector2(0.0, -90.0), global_position + back * 170.0, 70.0, 0.55)
+	_package_orb = orb
+	Sfx.play_at(&"cardboard_crumple", global_position, -2.0, 0.05)
+	_honk_timer = 0.0
+	_try_honk()
+
+## Puts the truck on the map (as the quest's "Garbage Truck") while the
+## player is hunting it for the package, and takes it off again after.
+func _update_marker() -> void:
+	var wanted := _wants_package()
+	if wanted and _marker == null:
+		_marker = MinimapMarker.new()
+		_marker.kind = MinimapMarker.Kind.GARBAGE_TRUCK
+		_marker.place_name_override = "Garbage Truck"
+		add_child(_marker)
+	elif not wanted and _marker != null:
+		_marker.remove_from_group(MinimapMarker.GROUP)
+		_marker.queue_free()
+		_marker = null
 
 func _try_honk() -> void:
 	if _honk_timer > 0.0:

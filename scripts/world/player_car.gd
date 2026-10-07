@@ -13,6 +13,8 @@ extends CharacterBody2D
 ## world scene — the `DevMenu` autoload, say — finds the car to put things next
 ## to, without guessing at node names or tree shape.
 const GROUP := &"player"
+## The shop item that swaps in the Super Horn (items/super_horn.tres).
+const SUPER_HORN := &"super_horn"
 
 @export var max_speed: float = 420.0
 @export var acceleration: float = 1800.0
@@ -107,6 +109,9 @@ const GROUP := &"player"
 @export var collision_contact_friction: float = 2400.0
 @export var engine_volume_db: float = -12.0
 @export var horn_volume_db: float = -6.0
+## The Super Horn from the shop (owned in the trunk): its blown-out air horn
+## replaces whatever horn the car has, at a level way out of proportion.
+@export var super_horn_volume_db: float = 6.0
 @export var bump_volume_db: float = -6.0
 @export var tire_screech_volume_db: float = -12.0
 
@@ -213,6 +218,8 @@ var _skid_last_stamp: Array = []
 ## Null when the car has no engine — then it rolls around in silence.
 var _engine_sound: EngineSound = null
 var _horn: SustainedSound
+## Whether `_horn` is the Super Horn, so buying or losing it swaps it live.
+var _super_horn_on: bool = false
 var _tire_screech: SustainedSound
 var _bump_cooldown: float = 0.0
 var _bump_sound: StringName = &"bump"
@@ -309,6 +316,10 @@ func set_towed(towed: bool) -> void:
 
 ## Every drive/interact key goes through here, so a cutscene can take the
 ## wheel just by being active.
+## Whether the horn is blaring right now (H held).
+func is_honking() -> bool:
+	return _horn != null and _is_key_held(KEY_H)
+
 func _is_key_held(keycode: Key) -> bool:
 	return not Cutscenes.is_active() and Input.is_physical_key_pressed(keycode)
 
@@ -464,6 +475,7 @@ func _physics_process(delta: float) -> void:
 	var impact_speed := 0.0 if _is_touching_shore() else (velocity_before_move - velocity).length()
 	if impact_speed > bump_min_impact_speed:
 		velocity *= hard_hit_speed_kept
+		_notify_rammed(impact_speed)
 	elif get_slide_collision_count() > 0 and input_dir != Vector2.ZERO:
 		# A softer, glancing touch never crosses the hard-stop threshold above
 		# in any single frame, but it's still in contact — sliding along an
@@ -537,6 +549,17 @@ func _notify_garbage_truck_contact(pressing_velocity: Vector2) -> void:
 			truck.set_contact_push(pressing_velocity, collision.get_normal(), _car_mass)
 			return
 
+## A hard hit: anything the car hit that has a duck-typed
+## `car_rammed(car, impact_speed)` hears about it (a farm fence counting the
+## hits for "Fenced In"), once per thing per hit.
+func _notify_rammed(impact_speed: float) -> void:
+	var told: Array[Object] = []
+	for i in get_slide_collision_count():
+		var collider := get_slide_collision(i).get_collider()
+		if collider != null and collider.has_method(&"car_rammed") and not told.has(collider):
+			told.append(collider)
+			collider.call(&"car_rammed", self, impact_speed)
+
 func _as_garbage_truck(collider: Object) -> GarbageTruck:
 	var node := collider as Node
 	while node != null:
@@ -584,11 +607,22 @@ func _setup_sounds(car: CarModelData) -> void:
 			Sfx.play(car.engine.start_sound, -6.0, 0.0)
 			_engine_sound.start_up(0.35)
 	_engine_started_this_session = true
-	var horn_sound := car.accessory_sound(&"horn_sound", &"horn_loop") if car != null else &"horn_loop"
-	_horn = _add_sustained_sound(horn_sound, horn_volume_db)
+	_build_horn(car)
+	_tire_screech = _add_sustained_sound(&"tire_screech_loop", tire_screech_volume_db)
+
+## The car's horn: the Super Horn when the player owns it, otherwise an
+## accessory's (the siren) or the plain one.
+func _build_horn(car: CarModelData) -> void:
+	if _horn != null:
+		_horn.queue_free()
+	_super_horn_on = Inventory.has_item(SUPER_HORN)
+	if _super_horn_on:
+		_horn = _add_sustained_sound(&"super_horn_loop", super_horn_volume_db)
+	else:
+		var horn_sound := car.accessory_sound(&"horn_sound", &"horn_loop") if car != null else &"horn_loop"
+		_horn = _add_sustained_sound(horn_sound, horn_volume_db)
 	_horn.min_on_time = 0.18
 	_horn.restart_on_start = true
-	_tire_screech = _add_sustained_sound(&"tire_screech_loop", tire_screech_volume_db)
 
 func _add_sustained_sound(sound_name: StringName, volume_db: float) -> SustainedSound:
 	var sound := SustainedSound.new()
@@ -604,6 +638,8 @@ func _update_sounds(delta: float, input_dir: Vector2, skidding: bool, impact_spe
 	if _engine_sound != null:
 		_engine_sound.rpm = 1.0 - exp(-velocity.length() / max_speed * 1.2)
 		_engine_sound.throttle = 1.0 if input_dir != Vector2.ZERO else 0.0
+	if Inventory.has_item(SUPER_HORN) != _super_horn_on:
+		_build_horn(Inventory.get_selected_car())
 	_horn.set_active(_is_key_held(KEY_H))
 	_tire_screech.set_level(clampf(velocity.length() / max_speed, 0.4, 1.0) if skidding else 0.0)
 

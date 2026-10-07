@@ -52,12 +52,34 @@ extends Resource
 @export var hand_over_scrap: bool = true
 ## Ready once the player owns this item (it's in the trunk).
 @export var item_goal: ItemData
+## Ready once the player also owns every one of these items (alongside
+## `item_goal`, for an errand with more than one thing on the list).
+@export var item_goals: Array[ItemData] = []
+## Ready once the player owns this car part (its part scene), loose in the
+## spare parts or fitted to a car.
+@export_file("*.tscn") var own_part_goal: String = ""
+## The giver takes the `own_part_goal` part when it's handed in (off the car
+## too, which gets the starter part back in that slot).
+@export var hand_over_part: bool = true
 ## Ready once this car part (its part scene) is fitted to one of the
 ## player's cars in the garage.
 @export_file("*.tscn") var fit_part_goal: String = ""
 ## Ready once the player has driven a race (won or lost) at the venue with
 ## this display name ("Drag Strip"). The quest's note becomes "won" or "lost".
 @export var race_goal_venue: String = ""
+## Something code counts up with `Quests.add_count()` (rams on the garbage
+## truck, say), shown on the tracker as "(3 / 10)". It isn't a goal by
+## itself: the code doing the counting decides what reaching it does. 0: no
+## count.
+@export var count_goal: int = 0
+## What the count is of, after it on the tracker ("3 / 10 rams"). Empty:
+## just the numbers.
+@export var count_label: String = ""
+## Seconds of honking the horn this quest wants, added up by code with
+## `Quests.add_horn_time()` (at the garbage truck, say) and shown on the
+## tracker. Like `count_goal`, the code doing the adding decides what
+## reaching it does. 0: none.
+@export var horn_goal_seconds: float = 0.0
 ## The giver takes the `item_goal` out of the trunk when it's handed in.
 @export var hand_over_item: bool = true
 

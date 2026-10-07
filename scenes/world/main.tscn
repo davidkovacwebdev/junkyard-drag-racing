@@ -482,6 +482,7 @@ position = Vector2(895, 5545)
 [node name="MinimapMarker" type="Node2D" parent="Sortables/Farm" unique_id=1099980425]
 script = ExtResource("21_marker")
 kind = 4
+place_name_override = "Farm"
 
 [node name="ScrapForge" parent="Sortables" unique_id=271006383 instance=ExtResource("23_forge")]
 position = Vector2(6813, -822)

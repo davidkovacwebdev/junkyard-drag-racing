@@ -31,10 +31,17 @@ const LEAD_SEGMENTS := 10
 const LEAD_WIDTH := 3.0
 const LEAD_SAG_IDLE := 18.0
 const LEAD_SAG_PULLING := 2.0
+## Grazing: how far the head dips, and the quick little nods as it chews.
+const GRAZE_DIP := 1.3
+const GRAZE_CHEWS := 7.0
+const GRAZE_CHEW_NOD := 0.07
 
 ## Scales how fast the legs cycle for the distance covered. The map car sets
 ## this below 1 so the shrunk horse doesn't scurry.
 var gait_rate := 1.0
+## Head down at the ground, chewing (Grandpa's Tiger at his carrots), instead
+## of the idle nod. Only while standing still.
+var grazing := false
 
 @onready var _harness: Node2D = $Harness
 @onready var _lead: Polygon2D = $Harness/Lead
@@ -135,6 +142,8 @@ func _animate_body() -> void:
 	_torso.position.y = bounce + breathing
 	var idle_nod := sin(_idle_time * 0.7) * 0.06
 	var trot_nod := sin(_gait_phase * 2.0) * 0.08
+	if grazing:
+		idle_nod = GRAZE_DIP + sin(_idle_time * GRAZE_CHEWS) * GRAZE_CHEW_NOD
 	_neck.rotation = lerpf(idle_nod, trot_nod, _gait_blend)
 	var swish := sin(_idle_time * 1.6) * 0.18
 	_tail.rotation = lerpf(swish, 0.9 + sin(_gait_phase * 2.0) * 0.1, _gait_blend)

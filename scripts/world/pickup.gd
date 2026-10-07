@@ -50,6 +50,11 @@ const FADE_TIME := 4.0
 const POPUP_RISE := 42.0
 const POPUP_LIFETIME := 1.05
 const POPUP_WIDTH := 260.0
+## Quest callouts (rams on the garbage truck, hits on the farm fence): big
+## and red with a light edge, so they read in the chaos on road or grass.
+const CALLOUT_SIZE := 52
+const CALLOUT_COLOR := Color(0.95, 0.27, 0.2, 1.0)
+const CALLOUT_OUTLINE := Color(1.0, 0.93, 0.82, 1.0)
 
 ## Opt out of `LIFETIME`'s cleanup. Set by the dev menu (see `DevMenu`): loot
 ## spawned on purpose is there to be tested against, not to quietly evaporate
@@ -232,11 +237,16 @@ func _spawn_float_text(text: String) -> void:
 	spawn_float_text(parent, global_position + Vector2(0.0, -HOVER - ORB_RADIUS - 42.0),
 			text, text_color, text_outline_color)
 
+## A big red quest callout ("3 / 10") drifting up from `at`, like
+## `spawn_float_text()`.
+static func spawn_callout(parent: Node, at: Vector2, text: String) -> void:
+	spawn_float_text(parent, at, text, CALLOUT_COLOR, CALLOUT_OUTLINE, CALLOUT_SIZE)
+
 ## A line of text that drifts up from `at` (its centre) and fades, parented to
 ## `parent`. Shared with anything else that hands over loot without an orb.
 static func spawn_float_text(parent: Node, at: Vector2, text: String,
 		color: Color = Color(1.0, 0.97, 0.85, 1.0),
-		outline_color: Color = Color(0.08, 0.07, 0.05, 1.0)) -> void:
+		outline_color: Color = Color(0.08, 0.07, 0.05, 1.0), font_size: int = 18) -> void:
 	var label := Label.new()
 	label.text = text
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -244,13 +254,15 @@ static func spawn_float_text(parent: Node, at: Vector2, text: String,
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	label.add_theme_color_override("font_color", color)
 	label.add_theme_color_override("font_outline_color", outline_color)
-	label.add_theme_constant_override("outline_size", 5)
-	label.add_theme_font_size_override("font_size", 18)
-	label.size = Vector2(POPUP_WIDTH, 28.0)
+	# The outline and box grow with the text, so big callouts stay readable.
+	var grow := font_size / 18.0
+	label.add_theme_constant_override("outline_size", roundi(5 * grow))
+	label.add_theme_font_size_override("font_size", font_size)
+	label.size = Vector2(POPUP_WIDTH * grow, 28.0 * grow)
 	label.z_as_relative = false
 	label.z_index = 40
 	parent.add_child(label)
-	label.global_position = at - Vector2(POPUP_WIDTH * 0.5, 0.0)
+	label.global_position = at - Vector2(label.size.x * 0.5, 0.0)
 	var tween := label.create_tween()
 	tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	tween.tween_property(label, "global_position:y",

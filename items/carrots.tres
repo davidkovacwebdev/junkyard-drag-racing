@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" uid="uid://b4kssi28o6a3g" path="res://scripts/items/item_data.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/items/icons/item_carrots.tscn" id="2_icon"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"carrots"
+display_name = "Carrots"
+price = 10
+description = "A bunch of carrots. Good for your eyes, great for horses. Some of 'em even grew in dirt."
+icon_scene = ExtResource("2_icon")
+buy_sound = &"carrot_crunch"

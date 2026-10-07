@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="QuestData" format=3 uid="uid://dhqj2oovihm2s"]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://items/fence_piece.tres" id="2_fence"]
+[ext_resource type="Script" uid="uid://b4kssi28o6a3g" path="res://scripts/items/item_data.gd" id="3_ua7lf"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"fence_for_tiger"
+title = "Fenced In"
+giver = "Grandpa"
+description = "Grandpa has his carrots and his paint, and now he wants a fence to paint. Where from? \"I dunno, I know a farm has one.\"
+
+Ram the farm's fence until a piece of it comes loose, then bring it to Grandpa."
+objective = "Ram the farm's fence until a piece comes loose"
+objective_place = "Farm"
+item_goal = ExtResource("2_fence")
+count_goal = 10
+count_label = "hits"
+reminder_line = "Fence, {player}. The farm's got plenty. They won't miss a bit."
+turn_in_cutscene = "res://cutscenes/grandpa_painted_tiger.tres"

@@ -1,0 +1,15 @@
+[gd_scene format=3]
+
+[node name="CoffeeMug" type="Node2D"]
+
+[node name="Body" type="Polygon2D" parent="."]
+color = Color(0.86, 0.84, 0.76, 1)
+polygon = PackedVector2Array(25, -139, 50, -140, 49, -96, 26, -96)
+
+[node name="Shade" type="Polygon2D" parent="."]
+color = Color(0.72, 0.7, 0.63, 1)
+polygon = PackedVector2Array(42, -140, 50, -140, 49, -96, 42, -96)
+
+[node name="Handle" type="Polygon2D" parent="."]
+color = Color(0.72, 0.7, 0.63, 1)
+polygon = PackedVector2Array(49, -132, 63, -132, 63, -105, 49, -105, 49, -112, 56, -112, 56, -125, 49, -125)

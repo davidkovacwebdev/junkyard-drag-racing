@@ -23,6 +23,10 @@ const TOAST_SECONDS := 3.5
 ## How long a card stays up when more are waiting behind it.
 const TOAST_SECONDS_BUSY := 1.8
 const OVERLAY_ALPHA := 0.5
+## The tracker board's height with a one- or two-line objective, and the gap
+## kept under the objective's last line when it wraps onto more.
+const TRACKER_MIN_HEIGHT := 86.0
+const TRACKER_BOTTOM_MARGIN := 14.0
 
 var _open: bool = false
 
@@ -293,7 +297,7 @@ func _on_track_pressed() -> void:
 func _build_tracker() -> void:
 	_tracker = _make_board(UiPalette.CARDBOARD_BASE, UiPalette.CARDBOARD_SHADE, UiPalette.CARDBOARD_DARK, -1.0, 161, false)
 	_tracker.position = Vector2(20.0, 18.0)
-	_tracker.size = Vector2(320.0, 86.0)
+	_tracker.size = Vector2(320.0, TRACKER_MIN_HEIGHT)
 	_tracker.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_tracker.visible = false
 	add_child(_tracker)
@@ -313,7 +317,17 @@ func _refresh_tracker() -> void:
 	if quest == null:
 		return
 	_tracker_title.text = quest.title
-	_tracker_objective.text = Quests.objective_text(quest)
+	var objective := Quests.objective_text(quest)
+	if _tracker_objective.text == objective:
+		return
+	_tracker_objective.text = objective
+	# The board grows (and shrinks) to fit however many lines the objective
+	# wraps onto, so a long one never runs off its bottom edge.
+	var lines := maxi(_tracker_objective.get_line_count(), 1)
+	var text_height := lines * _tracker_objective.get_line_height() \
+			+ (lines - 1) * _tracker_objective.get_theme_constant("line_spacing")
+	_tracker_objective.size.y = text_height
+	_tracker.size.y = maxf(TRACKER_MIN_HEIGHT, _tracker_objective.position.y + text_height + TRACKER_BOTTOM_MARGIN)
 
 func _build_toast() -> void:
 	_toast = _make_board(UiPalette.SURFACE_BASE, UiPalette.SURFACE_SHADE, UiPalette.SURFACE_DARK, 1.0, 171, false)

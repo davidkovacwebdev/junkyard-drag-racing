@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" uid="uid://b4kssi28o6a3g" path="res://scripts/items/item_data.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/items/icons/item_super_horn.tscn" id="2_icon"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"super_horn"
+display_name = "Super Horn"
+price = 150
+description = "A stadium air horn wired straight into your car's horn button. Blows windows out, ears too. Keep it in the trunk and H does the rest. No refunds, I'm already deaf."
+icon_scene = ExtResource("2_icon")
+buy_sound = &"super_horn_loop"
+buy_sound_volume_db = 6.0

@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" uid="uid://b4kssi28o6a3g" path="res://scripts/items/item_data.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/items/icons/item_fence_piece.tscn" id="2_icon"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"fence_piece"
+display_name = "Fence"
+price = 0
+description = "A piece of the farm's fence, rammed loose. Posts, rails and a few splinters. Grandpa wanted it."
+icon_scene = ExtResource("2_icon")

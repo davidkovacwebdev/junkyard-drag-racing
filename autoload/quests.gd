@@ -42,18 +42,23 @@ var tracked: QuestData = null
 ## up, say), for the giver's lines: `{part}` in a quest's lines becomes it.
 ## Kept after the quest is finished.
 var notes: Dictionary = {}
+## Quest id -> how far its `count_goal` has been counted (see `add_count()`).
+var counts: Dictionary = {}
+## Quest id -> seconds of horn honked toward its `horn_goal_seconds`.
+var horn_times: Dictionary = {}
 
 func _process(_delta: float) -> void:
 	# Iterate a copy: finishing a quest takes it out of `active`.
 	for quest: QuestData in active.duplicate():
 		if quest.scrap_goal <= 0 and quest.money_goal <= 0 and quest.item_goal == null \
-				and quest.fit_part_goal.is_empty():
+				and quest.fit_part_goal.is_empty() and quest.item_goals.is_empty() \
+				and quest.own_part_goal.is_empty():
 			continue
 		var met := _goal_reached(quest)
 		if met and not is_ready(quest.id):
 			goal_met(quest.id)
 		elif not met and is_ready(quest.id) and (hands_over_scrap(quest) or hands_over_item(quest) \
-				or quest.money_goal > 0):
+				or hands_over_part(quest) or quest.money_goal > 0):
 			# Sold, spent or lost it before handing it in: back to the goal.
 			ready_ids.erase(quest.id)
 
@@ -65,6 +70,11 @@ func _goal_reached(quest: QuestData) -> bool:
 	if quest.item_goal != null and not Inventory.has_item(quest.item_goal.id):
 		return false
 	if not quest.fit_part_goal.is_empty() and not _part_fitted(quest.fit_part_goal):
+		return false
+	for item in quest.item_goals:
+		if item != null and not Inventory.has_item(item.id):
+			return false
+	if not quest.own_part_goal.is_empty() and not Inventory.owns_part(catalog_part(quest.own_part_goal)):
 		return false
 	return true
 
@@ -91,6 +101,8 @@ func reset() -> void:
 	ready_ids.clear()
 	available.clear()
 	notes.clear()
+	counts.clear()
+	horn_times.clear()
 	available_changed.emit()
 	tracked = null
 	tracked_changed.emit(null)
@@ -135,7 +147,10 @@ func turn_in(id: StringName) -> int:
 	if hands_over_scrap(quest):
 		Inventory.scrap -= quest.scrap_goal
 	if hands_over_item(quest):
-		Inventory.remove_item(quest.item_goal.id)
+		for item in goal_items(quest):
+			Inventory.remove_item(item.id)
+	if hands_over_part(quest):
+		Inventory.take_part_away(catalog_part(quest.own_part_goal))
 	return complete(id)
 
 ## Finishes the quest and pays its reward, whatever state it was in. Returns
@@ -170,9 +185,31 @@ func complete(id: StringName) -> int:
 static func hands_over_scrap(quest: QuestData) -> bool:
 	return quest.scrap_goal > 0 and quest.hand_over_scrap and quest.return_to_giver
 
-## Whether handing `quest` in takes its item goal out of the trunk.
+## Whether handing `quest` in takes its item goals out of the trunk.
 static func hands_over_item(quest: QuestData) -> bool:
-	return quest.item_goal != null and quest.hand_over_item and quest.return_to_giver
+	return not goal_items(quest).is_empty() and quest.hand_over_item and quest.return_to_giver
+
+## Every item `quest` wants: its `item_goal` and its `item_goals`.
+static func goal_items(quest: QuestData) -> Array[ItemData]:
+	var items: Array[ItemData] = []
+	if quest.item_goal != null:
+		items.append(quest.item_goal)
+	for item in quest.item_goals:
+		if item != null:
+			items.append(item)
+	return items
+
+## Whether handing `quest` in takes its `own_part_goal` part off the player.
+static func hands_over_part(quest: QuestData) -> bool:
+	return not quest.own_part_goal.is_empty() and quest.hand_over_part and quest.return_to_giver
+
+## The catalogue entry for the part in `scene_path`, or null.
+static func catalog_part(scene_path: String) -> PartData:
+	for list: Array in [PartDatabase.bodies, PartDatabase.engines, PartDatabase.wheels, PartDatabase.accessories]:
+		for part: PartData in list:
+			if part.scene_path == scene_path:
+				return part
+	return null
 
 ## Unlocked quests `giver_name` has waiting for the player, oldest first.
 func available_from(giver_name: String) -> Array[QuestData]:
@@ -186,11 +223,7 @@ func available_from(giver_name: String) -> Array[QuestData]:
 static func reward_part_data(quest: QuestData) -> PartData:
 	if quest == null or quest.reward_part.is_empty():
 		return null
-	for list: Array in [PartDatabase.bodies, PartDatabase.engines, PartDatabase.wheels, PartDatabase.accessories]:
-		for part: PartData in list:
-			if part.scene_path == quest.reward_part:
-				return part
-	return null
+	return catalog_part(quest.reward_part)
 
 ## What finishing `quest` pays, for the journal and cards ("$50 + Old
 ## Generator"), or "" when it pays nothing.
@@ -214,6 +247,23 @@ func race_finished(venue: String, won: bool) -> void:
 ## Remembers how `id`'s goal was met (see `notes`).
 func set_note(id: StringName, text: String) -> void:
 	notes[id] = text
+
+## Counts one more toward `id`'s `count_goal` and returns the new count.
+func add_count(id: StringName) -> int:
+	counts[id] = int(counts.get(id, 0)) + 1
+	return counts[id]
+
+func count_of(id: StringName) -> int:
+	return int(counts.get(id, 0))
+
+## Adds `seconds` of honking toward `id`'s `horn_goal_seconds` and returns
+## the new total.
+func add_horn_time(id: StringName, seconds: float) -> float:
+	horn_times[id] = horn_time_of(id) + seconds
+	return horn_times[id]
+
+func horn_time_of(id: StringName) -> float:
+	return float(horn_times.get(id, 0.0))
 
 ## Whether `quest`'s goal was met with nothing to show for it, so its giver
 ## should say its `empty_handed_line`.
@@ -260,18 +310,33 @@ func objective_text(quest: QuestData) -> String:
 		if hands_over_scrap(quest):
 			return "Bring the %d scrap back to %s" % [quest.scrap_goal, quest.giver]
 		if hands_over_item(quest):
-			return "Bring the %s back to %s" % [quest.item_goal.display_name, quest.giver]
+			var names := PackedStringArray(goal_items(quest).map(func(item: ItemData) -> String: return item.display_name))
+			return "Bring the %s back to %s" % [" and the ".join(names), quest.giver]
+		if hands_over_part(quest):
+			var part := catalog_part(quest.own_part_goal)
+			return "Bring the %s back to %s" % [part.display_name if part != null else "part", quest.giver]
 		return "Go back to %s" % quest.giver
 	var text := PlayerProfile.fill(quest.objective)
-	var counts: PackedStringArray = []
+	var bits: PackedStringArray = []
+	if quest.count_goal > 0:
+		var count := "%d / %d" % [mini(count_of(quest.id), quest.count_goal), quest.count_goal]
+		bits.append(count + " " + quest.count_label if not quest.count_label.is_empty() else count)
+	if quest.item_goals.size() > 0:
+		var items := goal_items(quest)
+		var owned := items.filter(func(item: ItemData) -> bool: return Inventory.has_item(item.id)).size()
+		bits.append("%d / %d bought" % [owned, items.size()])
+	if quest.horn_goal_seconds > 0.0:
+		# Whole seconds, rounded down, so it only ticks over once each is done.
+		bits.append("%d / %d s honked" % [int(minf(horn_time_of(quest.id), quest.horn_goal_seconds)),
+				int(quest.horn_goal_seconds)])
 	if quest.money_goal > 0:
-		counts.append("$%d / $%d" % [mini(Inventory.money, quest.money_goal), quest.money_goal])
+		bits.append("$%d / $%d" % [mini(Inventory.money, quest.money_goal), quest.money_goal])
 	if quest.scrap_goal > 0:
 		# Alone it's just "12 / 20"; next to cash it says what it counts.
 		var scrap := "%d / %d" % [mini(Inventory.scrap, quest.scrap_goal), quest.scrap_goal]
-		counts.append(scrap + " scrap" if quest.money_goal > 0 else scrap)
-	if not counts.is_empty():
-		text += " (%s)" % ", ".join(counts)
+		bits.append(scrap + " scrap" if quest.money_goal > 0 else scrap)
+	if not bits.is_empty():
+		text += " (%s)" % ", ".join(bits)
 	return text
 
 ## The name of whatever the tracked quest sends the player to right now,
@@ -301,8 +366,11 @@ func tracked_target_position() -> Vector2:
 ## For SaveSystem: putting a saved log back.
 func restore(saved_active: Array[QuestData], saved_completed: Array[QuestData],
 		saved_ready: Array[StringName], saved_available: Array[QuestData],
-		saved_tracked: QuestData, saved_notes: Dictionary = {}) -> void:
+		saved_tracked: QuestData, saved_notes: Dictionary = {}, saved_counts: Dictionary = {},
+		saved_horn_times: Dictionary = {}) -> void:
 	notes = saved_notes.duplicate()
+	counts = saved_counts.duplicate()
+	horn_times = saved_horn_times.duplicate()
 	active = saved_active.duplicate()
 	completed = saved_completed.duplicate()
 	ready_ids = saved_ready.duplicate()

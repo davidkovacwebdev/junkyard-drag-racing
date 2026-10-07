@@ -142,6 +142,8 @@ func _snapshot() -> SaveData:
 	data.quests_ready = Quests.ready_ids.duplicate()
 	data.quests_available = Quests.available.duplicate()
 	data.quest_notes = Quests.notes.duplicate()
+	data.quest_counts = Quests.counts.duplicate()
+	data.quest_horn_times = Quests.horn_times.duplicate()
 	return data
 
 func _write_save(data: SaveData, slot: int) -> void:
@@ -196,7 +198,8 @@ func load_game() -> bool:
 	PlayerProfile.player_name = data.player_name
 	PlayerProfile.character = data.player_character
 	Quests.restore(data.quests_active, data.quests_completed, data.quests_ready,
-			data.quests_available, data.tracked_quest, data.quest_notes)
+			data.quests_available, data.tracked_quest, data.quest_notes, data.quest_counts,
+			data.quest_horn_times)
 	return true
 
 ## Called by New Game so starting over doesn't leave a stale save

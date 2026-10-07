@@ -71,6 +71,15 @@ const EYES_CENTER := Vector2(0.0, -214.0)
 const LAUGH_LEAN := 0.12
 const LAUGH_BOUNCES_PER_SECOND := 7.0
 const LAUGH_PIXELS := 5.0
+## Tiger, his horse (see GrandpaHorse), stands this far from him: off his
+## other side from where the player walks up, by the house wall and clear of
+## where the car parks.
+const TIGER_OFFSET := Vector2(-190.0, -55.0)
+## A sad sigh: he sags forward this far and sinks this much.
+const SIGH_LEAN := 0.08
+const SIGH_SINK := 5.0
+## The beer bottle's polygons in his torso (torso_overalls.tscn).
+const BOTTLE_PARTS := ["Bottle", "BottleCap", "Label"]
 
 ## Which way he's turned. The wrench is in his left hand, so facing left
 ## puts it on his right-hand side of the screen.
@@ -89,10 +98,14 @@ const LAUGH_PIXELS := 5.0
 @export var default_turn_in_line: String = "About time."
 
 var actor: CutsceneActor
+## His horse, once he has one (hidden until then). Cutscenes bring it on.
+var tiger: GrandpaHorse
 ## What the minimap draws his head from.
 var character_data: CharacterData = CHARACTER
 
 var _wrench: Node2D
+## What he holds instead of the beer, if anything (see `hold_instead_of_beer()`).
+var _held: Node2D = null
 var _new_wrench: Node2D
 var _next_sip: float = 2.0
 var _swing: Tween
@@ -128,6 +141,10 @@ func _ready() -> void:
 	add_child(collision)
 	_dialog = DIALOG_SCENE.instantiate()
 	add_child(_dialog)
+	# A sibling, so it Y-sorts against him and the car on its own.
+	tiger = GrandpaHorse.new()
+	tiger.position = position + TIGER_OFFSET
+	get_parent().add_child.call_deferred(tiger)
 
 func _process(delta: float) -> void:
 	if _dialog.is_open():
@@ -253,13 +270,14 @@ func show_wrench(visible_now: bool) -> void:
 	_wrench.visible = visible_now
 	_new_wrench.visible = false
 
-## Leans back in the chair for a slurp of beer, and settles again.
-func sip(volume_db: float = SIP_VOLUME_DB) -> Tween:
+## Leans back in the chair for a slurp of beer (or whatever `sound` says
+## he's drinking), and settles again.
+func sip(volume_db: float = SIP_VOLUME_DB, sound: StringName = &"beer_sip") -> Tween:
 	var lean := SIP_LEAN * (1.0 if facing_right else -1.0)
 	_restart_move()
 	_move.tween_property(actor, "rotation", -lean, 0.35).set_ease(Tween.EASE_OUT)
 	_move.tween_callback(func() -> void:
-		Sfx.play_at(&"beer_sip", global_position, volume_db, 0.08))
+		Sfx.play_at(sound, global_position, volume_db, 0.08))
 	_move.tween_interval(0.55)
 	_move.tween_property(actor, "rotation", 0.0, 0.3).set_ease(Tween.EASE_IN_OUT)
 	return _move
@@ -362,6 +380,24 @@ func roll_to(offset: Vector2, seconds: float = 0.8) -> Tween:
 		_move.tween_callback(actor.face.bind(facing_right))
 	return _move
 
+## Swaps the beer bottle in his right hand for `prop` (a coffee mug, drawn in
+## the torso's space), or puts the bottle back with null.
+func hold_instead_of_beer(prop: Node2D) -> void:
+	var bottle := actor.find_child("Bottle", true, false) as Node2D
+	if bottle == null:
+		return
+	for part_name in BOTTLE_PARTS:
+		var part := bottle.get_parent().get_node_or_null(NodePath(part_name)) as CanvasItem
+		if part != null:
+			part.visible = prop == null
+	if is_instance_valid(_held):
+		_held.queue_free()
+	_held = prop
+	if prop != null:
+		bottle.get_parent().add_child(prop)
+		# In front of the bottle's spot but still behind his hand.
+		bottle.get_parent().move_child(prop, bottle.get_index())
+
 ## The middle of the little trans flag on his wheelchair's pole, in the
 ## world (the Drag Queen's flag, which the player has to kiss).
 func trans_flag_position() -> Vector2:
@@ -397,6 +433,19 @@ func widen_eyes(seconds: float = 1.6, volume_db: float = -4.0) -> Tween:
 	pop.tween_interval(seconds)
 	pop.tween_property(eyes, "scale", Vector2.ONE, 0.2)
 	pop.parallel().tween_property(eyes, "position", rest, 0.2)
+	return _move
+
+## A long, sad sigh: he sags forward in the chair, holds it, and slowly
+## straightens up again.
+func sigh(volume_db: float = -6.0) -> Tween:
+	_restart_move()
+	Sfx.play_at(&"grandpa_sigh", global_position, volume_db, 0.04)
+	var lean := SIGH_LEAN * (1.0 if facing_right else -1.0)
+	_move.tween_property(actor, "rotation", lean, 0.6).set_ease(Tween.EASE_OUT)
+	_move.parallel().tween_property(actor, "position:y", SIGH_SINK, 0.6).set_ease(Tween.EASE_OUT)
+	_move.tween_interval(0.8)
+	_move.tween_property(actor, "rotation", 0.0, 0.9).set_ease(Tween.EASE_IN_OUT)
+	_move.parallel().tween_property(actor, "position:y", 0.0, 0.9).set_ease(Tween.EASE_IN_OUT)
 	return _move
 
 ## A drunk "hic!": a little jump in the chair.

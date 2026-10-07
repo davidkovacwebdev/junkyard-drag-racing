@@ -15,6 +15,7 @@ script = ExtResource("1")
 [node name="Entrance" parent="." instance=ExtResource("2")]
 position = Vector2(-820, 320)
 display_name = "Demolition Derby"
+opens_with_quest = &"derby_debut"
 interior_scene = ExtResource("3")
 debug_race_scene = ExtResource("race")
 race_scene_path = "res://scenes/race/race_derby.tscn"

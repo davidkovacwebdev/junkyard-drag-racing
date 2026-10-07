@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[node name="FencePieceIcon" type="Node2D"]
+rotation = -0.08
+
+[node name="PostLeft" type="Polygon2D" parent="."]
+color = Color(0.5, 0.36, 0.22, 1)
+polygon = PackedVector2Array(-26, -28, -16, -28, -16, 28, -26, 28)
+
+[node name="PostRight" type="Polygon2D" parent="."]
+color = Color(0.5, 0.36, 0.22, 1)
+polygon = PackedVector2Array(16, -24, 26, -24, 26, 28, 16, 28)
+
+[node name="RailTop" type="Polygon2D" parent="."]
+color = Color(0.6, 0.44, 0.27, 1)
+polygon = PackedVector2Array(-30, -18, 30, -14, 30, -5, -30, -9)
+
+[node name="RailBottom" type="Polygon2D" parent="."]
+color = Color(0.6, 0.44, 0.27, 1)
+polygon = PackedVector2Array(-30, 6, 8, 8, 2, 16, -30, 15)

@@ -12,6 +12,9 @@
 [ext_resource type="Script" path="res://scripts/items/item_data.gd" id="10_item"]
 [ext_resource type="Resource" path="res://items/six_pack.tres" id="11_six_pack"]
 [ext_resource type="Resource" path="res://items/chains.tres" id="12_chains"]
+[ext_resource type="Resource" path="res://items/super_horn.tres" id="13_super_horn"]
+[ext_resource type="Resource" path="res://items/carrots.tres" id="14_carrots"]
+[ext_resource type="Resource" path="res://items/tiger_paint.tres" id="15_tiger_paint"]
 
 [node name="Shop" type="Control"]
 layout_mode = 3
@@ -21,7 +24,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_shop")
-stock = Array[ExtResource("10_item")]([ExtResource("6_wrench"), ExtResource("7_gps"), ExtResource("8_binoculars"), ExtResource("9_map"), ExtResource("11_six_pack"), ExtResource("12_chains")])
+stock = Array[ExtResource("10_item")]([ExtResource("6_wrench"), ExtResource("7_gps"), ExtResource("8_binoculars"), ExtResource("9_map"), ExtResource("11_six_pack"), ExtResource("12_chains"), ExtResource("13_super_horn"), ExtResource("14_carrots"), ExtResource("15_tiger_paint")])
 
 [node name="Background" type="Control" parent="."]
 layout_mode = 1

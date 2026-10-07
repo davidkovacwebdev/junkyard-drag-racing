@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" uid="uid://b4kssi28o6a3g" path="res://scripts/items/item_data.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/items/icons/item_tiger_paint.tscn" id="2_icon"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"tiger_paint"
+display_name = "Black & Orange Paint"
+price = 40
+description = "Orange paint and black paint in one can, mixed by somebody who should not have. Stir it and you get stripes. Mostly."
+icon_scene = ExtResource("2_icon")
+buy_sound = &"paint_slosh"

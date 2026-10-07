@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" uid="uid://b4kssi28o6a3g" path="res://scripts/items/item_data.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/items/icons/item_package.tscn" id="2_icon"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"grandpas_package"
+display_name = "Package"
+description = "Grandpa's package, knocked off the back of the garbage truck. It sloshes."
+icon_scene = ExtResource("2_icon")

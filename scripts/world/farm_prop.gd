@@ -5,6 +5,10 @@ extends StaticBody2D
 ## trough, a scarecrow, the roadside sign or the dirt yard under it all. Flat polygons only,
 ## drawn in _draw(), origin on the ground (like trees) so it Y-sorts against the
 ## car. The collision footprint hugs the ground and is built at runtime.
+##
+## During Grandpa's "Fenced In" every fence run counts the car's hard rams
+## (PlayerCar's `car_rammed()`) toward the quest's `count_goal`, and the last
+## one knocks a piece of fence loose (an ItemPickup) for the player to take.
 
 enum Kind { FENCE, HAY_BALE, WINDMILL, TROUGH, SIGN, YARD, SCARECROW }
 
@@ -55,7 +59,19 @@ const WINDMILL_BLADES := 4
 const WINDMILL_BLADE_LENGTH := 44.0
 const WINDMILL_SPIN := 1.4
 
+const FENCE_QUEST := preload("res://quests/fence_for_tiger.tres")
+const FENCE_PIECE := preload("res://items/fence_piece.tres")
+## Rams closer together than this count once, so one crunch isn't three.
+const RAM_COOLDOWN_MS := 600
+## Where the hit count floats up from, above the car.
+const RAM_TEXT_LIFT := 150.0
+
+## The loose piece of fence lying about, shared by every fence run so only
+## one is ever out at a time.
+static var _fence_orb: ItemPickup = null
+
 var _blade_angle := 0.0
+var _last_ram_ms := -100000
 
 func _ready() -> void:
 	add_to_group(OffscreenCuller.GROUP)
@@ -67,6 +83,61 @@ func _process(delta: float) -> void:
 	if kind == Kind.WINDMILL:
 		_blade_angle = wrapf(_blade_angle + WINDMILL_SPIN * delta, 0.0, TAU)
 		queue_redraw()
+
+## The player's car hit this hard (see PlayerCar). Only a fence cares, and
+## only while "Fenced In" wants a piece of it.
+func car_rammed(car: Node2D, _impact_speed: float) -> void:
+	if kind != Kind.FENCE or not _wants_fence():
+		return
+	var now := Time.get_ticks_msec()
+	if now - _last_ram_ms < RAM_COOLDOWN_MS:
+		return
+	_last_ram_ms = now
+	var id := FENCE_QUEST.id
+	var goal := FENCE_QUEST.count_goal
+	var hits := Quests.add_count(id)
+	Sfx.play_at(&"wood_clonk", car.global_position, -2.0, 0.1)
+	_shudder()
+	var text_at := car.global_position + Vector2(0.0, -RAM_TEXT_LIFT)
+	if hits < goal:
+		Pickup.spawn_callout(get_parent(), text_at, "%d / %d" % [hits, goal])
+		return
+	_knock_piece_loose(car)
+	Pickup.spawn_callout(get_parent(), text_at, "A piece came loose!")
+
+static func _wants_fence() -> bool:
+	var id := FENCE_QUEST.id
+	return Quests.has_quest(id) and not Quests.is_ready(id) \
+			and not Inventory.has_item(FENCE_PIECE.id) and not is_instance_valid(_fence_orb)
+
+## A splintering crack, and a chunk of fence lands on the car's side of the
+## run, where it waits however long the player takes.
+func _knock_piece_loose(car: Node2D) -> void:
+	var on_fence := _closest_point(car.global_position)
+	var away := (car.global_position - on_fence)
+	away = away.normalized() if away.length() > 1.0 else Vector2.DOWN
+	var orb := ItemPickup.new()
+	orb.configure(FENCE_PIECE)
+	orb.persistent = true
+	get_parent().add_child(orb)
+	orb.launch(on_fence + Vector2(0.0, -40.0), car.global_position + away * 110.0, 60.0, 0.5)
+	_fence_orb = orb
+	Sfx.play_at(&"fence_crack", on_fence, -2.0, 0.05)
+
+## The nearest point of this fence run to `world_point`, in world space.
+func _closest_point(world_point: Vector2) -> Vector2:
+	var local := to_local(world_point)
+	var along := Vector2(0.0, clampf(local.y, 0.0, length)) if vertical \
+			else Vector2(clampf(local.x, 0.0, length), 0.0)
+	return to_global(along)
+
+## The whole run rattles for a moment from the hit.
+func _shudder() -> void:
+	var home := position
+	var tween := create_tween()
+	for offset: Vector2 in [Vector2(3.0, -2.0), Vector2(-3.0, 1.0), Vector2(2.0, 0.0)]:
+		tween.tween_property(self, "position", home + offset, 0.04)
+	tween.tween_property(self, "position", home, 0.05)
 
 func _build_collision() -> void:
 	var footprint := Rect2()

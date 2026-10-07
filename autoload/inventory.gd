@@ -132,6 +132,34 @@ func detach_part(part: PartData) -> PartHome:
 			return home
 	return null
 
+## Takes ONE owned copy of `part` away for good (a quest giver keeping it).
+## Off a car, the slot gets the starter car's part back so the car still
+## runs (an accessory spot is just left empty), and the map car is rebuilt
+## if it's the one driving. False when the player owns no copy.
+func take_part_away(part: PartData) -> bool:
+	var home := detach_part(part)
+	if home == null:
+		return false
+	if home.car == null:
+		return true
+	var stand_in: PartData = null
+	match home.slot:
+		PartHome.SLOT_BODY:
+			stand_in = _catalog_copy(PartDatabase.bodies, STARTER_BODY)
+		PartHome.SLOT_ENGINE:
+			stand_in = _catalog_copy(PartDatabase.engines, STARTER_ENGINE)
+		PartHome.SLOT_ACCESSORY:
+			pass
+		_:
+			stand_in = _catalog_copy(PartDatabase.wheels, STARTER_WHEEL)
+	if stand_in != null:
+		give_part(home, stand_in)
+	if home.car == get_selected_car():
+		var car := get_tree().get_first_node_in_group(PlayerCar.GROUP) as PlayerCar
+		if car != null:
+			car.refresh_parts()
+	return true
+
 ## Put `part` back where a `detach_part()` took its copy from: the car slot it
 ## was yanked out of, or the spare stash. This is what makes an equip a swap —
 ## the part leaving a slot lands exactly where the incoming one came from, so
