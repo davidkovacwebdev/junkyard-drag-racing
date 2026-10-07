@@ -19,6 +19,8 @@ extends Camera2D
 
 const DEFAULT_ZOOM := 0.8
 const BINOCULARS_MIN_ZOOM := 0.25
+const TRAVELER_ZOOM := 0.1
+const TRAVELER_MIN_ZOOM := 0.03
 
 @export var zoom_step: float = 1.15
 @export var max_zoom: float = 2.5
@@ -38,6 +40,8 @@ const BINOCULARS_MIN_ZOOM := 0.25
 @export var look_ahead_speed: float = 1.2
 
 var _target_zoom: float = DEFAULT_ZOOM
+## 0 outside traveler mode (see PlayerCar.set_traveling).
+var _traveler_zoom: float = 0.0
 var _car: CharacterBody2D
 
 func _ready() -> void:
@@ -71,7 +75,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		_zoom_by(event.factor)
 		get_viewport().set_input_as_handled()
 
+func set_traveler(traveling: bool) -> void:
+	_traveler_zoom = TRAVELER_ZOOM if traveling else 0.0
+
 func _zoom_by(factor: float) -> void:
+	if _traveler_zoom > 0.0:
+		_traveler_zoom = clampf(_traveler_zoom * factor, TRAVELER_MIN_ZOOM, max_zoom)
+		return
 	var previous_zoom := _target_zoom
 	_target_zoom = clampf(_target_zoom * factor, _min_zoom(), max_zoom)
 	WorldState.camera_zoom = _target_zoom
@@ -87,10 +97,11 @@ func _process(delta: float) -> void:
 
 func _update_zoom(delta: float) -> void:
 	_target_zoom = maxf(_target_zoom, _min_zoom())
+	var goal := _traveler_zoom if _traveler_zoom > 0.0 else _target_zoom
 	var current := zoom.x
-	if is_equal_approx(current, _target_zoom):
+	if is_equal_approx(current, goal):
 		return
-	var next := lerpf(current, _target_zoom, clampf(zoom_speed * delta, 0.0, 1.0))
+	var next := lerpf(current, goal, clampf(zoom_speed * delta, 0.0, 1.0))
 	# Both axes together — unequal zoom would stretch the view.
 	zoom = Vector2(next, next)
 

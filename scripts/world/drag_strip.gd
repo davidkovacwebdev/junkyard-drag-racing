@@ -8,9 +8,11 @@ extends Node2D
 ## sparse crowd, a scoreboard, and tyre/drum clutter in the pits.
 ##
 ## Everything is drawn in `_draw()` from a few numbers and a fixed seed, so it
-## looks the same every launch. Structures you'd crash into (bleachers, tyre
-## wall, pit clutter) get a solid footprint at runtime. @tool so it's visible
-## in the 2D editor too.
+## looks the same every launch. The ground is drawn on this node, which sits
+## below the car; everything standing up (bleachers, barriers, poles, tyres,
+## scoreboard) is a standing piece at its own ground point so it Y-sorts against
+## the car, and gets a solid footprint at runtime. @tool so it's visible in the
+## 2D editor too.
 
 @export var length: float = 2800.0
 @export var width: float = 360.0
@@ -65,6 +67,7 @@ var _art := TriangleBatch.new()
 
 func _ready() -> void:
 	_update_extent()
+	_add_standing_pieces()
 	if Engine.is_editor_hint():
 		return
 	for rect in _solid_rects():
@@ -77,20 +80,26 @@ func _draw() -> void:
 	_art.clear()
 	_draw_ground(rng)
 	_draw_markings()
-	_draw_grandstand(rng)
-	_draw_scoreboard()
-	_draw_barrier_row(_barrier_row_ys()[0])
-	_draw_timing_pole(_timing_pole_bases()[0])
-	_draw_tire_wall()
-	_draw_light_tree(_light_tree_base())
-	_draw_barrier_row(_barrier_row_ys()[1])
-	_draw_timing_pole(_timing_pole_bases()[1])
-	_draw_pit_clutter(rng)
-	_flush_art()
-
-func _flush_art() -> void:
 	_art.commit(self)
 	_art.clear()
+
+func _add_standing_pieces() -> void:
+	var stand := _grandstand_rect()
+	FlatProps.add_standing_piece(self, Vector2(stand.get_center().x, stand.end.y), _draw_grandstand)
+	FlatProps.add_standing_piece(self, _scoreboard_base(), _draw_scoreboard)
+	var span := _barrier_range()
+	for base_y in _barrier_row_ys():
+		FlatProps.add_standing_piece(self, Vector2((span.x + span.y) * 0.5, base_y), _draw_barrier_row.bind(base_y))
+	for base in _timing_pole_bases():
+		FlatProps.add_standing_piece(self, base, _draw_timing_pole.bind(base))
+	var light_tree := _light_tree_base()
+	FlatProps.add_standing_piece(self, light_tree, _draw_light_tree.bind(light_tree))
+	var tire_bases := _tire_wall_bases()
+	for i in tire_bases.size():
+		FlatProps.add_standing_piece(self, tire_bases[i], _draw_tire_wall_stack.bind(tire_bases[i], 2 + i % 2))
+	var spots := _pit_spots()
+	for i in spots.size():
+		FlatProps.add_standing_piece(self, spots[i] + Vector2(0.0, 2.0), _draw_pit_clutter.bind(spots[i], i))
 
 func _update_extent() -> void:
 	_half_len = length / 2.0
@@ -155,7 +164,7 @@ func _barrier_range() -> Vector2:
 
 ## A run of jersey barriers, alternating bare concrete and faded red paint.
 ## `base_y` is the bottom of the front face.
-func _draw_barrier_row(base_y: float) -> void:
+func _draw_barrier_row(_canvas: Node2D, art: TriangleBatch, base_y: float) -> void:
 	var span := _barrier_range()
 	var x := span.x
 	var index := 0
@@ -163,24 +172,27 @@ func _draw_barrier_row(base_y: float) -> void:
 		var x_end := minf(x + BARRIER_SEGMENT, span.y)
 		var painted := index % 2 == 1
 		var face_top := base_y - BARRIER_FACE_H
-		_art.draw_colored_polygon(PackedVector2Array([
+		art.draw_colored_polygon(PackedVector2Array([
 			Vector2(x + 3.0, face_top - BARRIER_TOP_H), Vector2(x_end - 3.0, face_top - BARRIER_TOP_H),
 			Vector2(x_end, face_top), Vector2(x, face_top),
 		]), PAINT_RED_TOP if painted else CONCRETE_TOP)
-		_art.draw_rect(Rect2(x, face_top, x_end - x, BARRIER_FACE_H), PAINT_RED if painted else CONCRETE)
+		art.draw_rect(Rect2(x, face_top, x_end - x, BARRIER_FACE_H), PAINT_RED if painted else CONCRETE)
 		x = x_end + BARRIER_GAP
 		index += 1
 
 ## Stacked tyres across the shutdown end, so an overshooting car has
 ## something softer than a wall to hit.
-func _draw_tire_wall() -> void:
+func _tire_wall_bases() -> Array[Vector2]:
+	var bases: Array[Vector2] = []
 	var x := _half_len + 26.0
 	var y := -_half_w - 10.0
-	var index := 0
 	while y <= _half_w + 10.0:
-		FlatProps.draw_tire_stack(_art, Vector2(x + (6.0 if index % 2 == 1 else 0.0), y), 2 + index % 2)
+		bases.append(Vector2(x + (6.0 if bases.size() % 2 == 1 else 0.0), y))
 		y += TIRE_SPACING
-		index += 1
+	return bases
+
+func _draw_tire_wall_stack(_canvas: Node2D, art: TriangleBatch, base: Vector2, count: int) -> void:
+	FlatProps.draw_tire_stack(art, base, count)
 
 func _grandstand_rect() -> Rect2:
 	var front_y := -_half_w - 40.0
@@ -189,36 +201,38 @@ func _grandstand_rect() -> Rect2:
 
 ## Wooden bleachers facing the finish, drawn back row first so each row sits in
 ## front of the one behind it, with a sparse crowd and a yellow banner.
-func _draw_grandstand(rng: RandomNumberGenerator) -> void:
+func _draw_grandstand(_canvas: Node2D, art: TriangleBatch) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = art_seed
 	var stand := _grandstand_rect()
 	var front_y := stand.end.y
-	_art.draw_colored_polygon(PackedVector2Array([
+	art.draw_colored_polygon(PackedVector2Array([
 		Vector2(stand.position.x + 6.0, front_y - 20.0), Vector2(stand.end.x, front_y - 20.0),
 		Vector2(stand.end.x + 10.0, front_y + 8.0), Vector2(stand.position.x + 16.0, front_y + 8.0),
 	]), UiPalette.SHADOW)
 	for row in range(STAND_ROWS - 1, -1, -1):
 		var riser_bottom := front_y - row * STAND_ROW_DEPTH
 		var riser_top := riser_bottom - STAND_RISER_H
-		_art.draw_rect(Rect2(stand.position.x, riser_top - STAND_PLANK_H, stand.size.x, STAND_PLANK_H), WOOD_PLANK)
-		_art.draw_rect(Rect2(stand.position.x, riser_top, stand.size.x, STAND_RISER_H), WOOD_RISER)
+		art.draw_rect(Rect2(stand.position.x, riser_top - STAND_PLANK_H, stand.size.x, STAND_PLANK_H), WOOD_PLANK)
+		art.draw_rect(Rect2(stand.position.x, riser_top, stand.size.x, STAND_RISER_H), WOOD_RISER)
 		if row > 0:
-			_draw_crowd_row(stand, riser_bottom - STAND_ROW_DEPTH, rng)
-	_art.draw_rect(Rect2(stand.end.x - 14.0, stand.position.y, 14.0, stand.size.y), WOOD_SHADE)
-	_art.draw_rect(Rect2(stand.position.x + 180.0, front_y - STAND_RISER_H + 2.0, 260.0, STAND_RISER_H - 4.0), UiPalette.ACCENT_YELLOW)
+			_draw_crowd_row(art, stand, riser_bottom, rng)
+	art.draw_rect(Rect2(stand.end.x - 14.0, stand.position.y, 14.0, stand.size.y), WOOD_SHADE)
+	art.draw_rect(Rect2(stand.position.x + 180.0, front_y - STAND_RISER_H + 2.0, 260.0, STAND_RISER_H - 4.0), UiPalette.ACCENT_YELLOW)
 
 ## Seated spectators on one row's plank: a torso slab with a head on top.
 ## `seat_y` is the front edge of the plank they sit on.
-func _draw_crowd_row(stand: Rect2, seat_y: float, rng: RandomNumberGenerator) -> void:
+func _draw_crowd_row(art: TriangleBatch, stand: Rect2, seat_y: float, rng: RandomNumberGenerator) -> void:
 	var x := stand.position.x + rng.randf_range(20.0, 70.0)
 	while x < stand.end.x - 40.0:
 		var shirt: Color = CROWD_SHIRTS[rng.randi() % CROWD_SHIRTS.size()]
 		var skin: Color = CROWD_SKIN[rng.randi() % CROWD_SKIN.size()]
 		var torso_top := seat_y - STAND_RISER_H - 18.0
-		_art.draw_colored_polygon(PackedVector2Array([
+		art.draw_colored_polygon(PackedVector2Array([
 			Vector2(x - 9.0, seat_y - STAND_RISER_H + 2.0), Vector2(x + 9.0, seat_y - STAND_RISER_H + 2.0),
 			Vector2(x + 7.0, torso_top), Vector2(x - 7.0, torso_top),
 		]), shirt)
-		_art.draw_rect(Rect2(x - 6.0, torso_top - 12.0, 12.0, 12.0), skin)
+		art.draw_rect(Rect2(x - 6.0, torso_top - 12.0, 12.0, 12.0), skin)
 		x += rng.randf_range(60.0, 140.0)
 
 ## Scoreboard on two posts behind the strip near the start, showing a run time
@@ -226,33 +240,34 @@ func _draw_crowd_row(stand: Rect2, seat_y: float, rng: RandomNumberGenerator) ->
 func _scoreboard_base() -> Vector2:
 	return Vector2(start_x + 460.0, -_half_w - 44.0)
 
-func _draw_scoreboard() -> void:
+func _draw_scoreboard(canvas: Node2D, art: TriangleBatch) -> void:
 	var base := _scoreboard_base()
 	var board := Rect2(base.x - 80.0, base.y - 130.0, 160.0, 64.0)
-	_art.draw_colored_polygon(FlatProps.octagon(base + Vector2(10.0, 2.0), 90.0, 8.0), UiPalette.SHADOW)
+	art.draw_colored_polygon(FlatProps.octagon(base + Vector2(10.0, 2.0), 90.0, 8.0), UiPalette.SHADOW)
 	for post_x: float in [board.position.x + 20.0, board.end.x - 26.0]:
-		_art.draw_rect(Rect2(post_x, board.end.y, 6.0, base.y - board.end.y), UiPalette.POST_GREY)
-	_art.draw_rect(board, UiPalette.INK)
-	_art.draw_rect(Rect2(board.end.x - 10.0, board.position.y, 10.0, board.size.y), UiPalette.VOID)
+		art.draw_rect(Rect2(post_x, board.end.y, 6.0, base.y - board.end.y), UiPalette.POST_GREY)
+	art.draw_rect(board, UiPalette.INK)
+	art.draw_rect(Rect2(board.end.x - 10.0, board.position.y, 10.0, board.size.y), UiPalette.VOID)
 	# The lettering sits on top of the board, so everything so far goes out first.
-	_flush_art()
+	art.commit(canvas)
+	art.clear()
 	var font := ThemeDB.fallback_font
-	draw_string(font, Vector2(board.position.x + 10.0, board.position.y + 44.0), "13.37", HORIZONTAL_ALIGNMENT_CENTER, board.size.x - 20.0, 30, UiPalette.ACCENT_YELLOW)
+	canvas.draw_string(font, Vector2(board.position.x + 10.0, board.position.y + 44.0), "13.37", HORIZONTAL_ALIGNMENT_CENTER, board.size.x - 20.0, 30, UiPalette.ACCENT_YELLOW)
 
 ## The staging "christmas tree" between the lanes: a post with a light box
 ## carrying two amber lights over a green.
-func _draw_light_tree(base: Vector2) -> void:
-	_art.draw_colored_polygon(FlatProps.octagon(base + Vector2(6.0, 2.0), 18.0, 6.0), UiPalette.SHADOW)
-	_art.draw_rect(Rect2(base.x - 3.0, base.y - 70.0, 6.0, 70.0), UiPalette.POST_GREY)
+func _draw_light_tree(_canvas: Node2D, art: TriangleBatch, base: Vector2) -> void:
+	art.draw_colored_polygon(FlatProps.octagon(base + Vector2(6.0, 2.0), 18.0, 6.0), UiPalette.SHADOW)
+	art.draw_rect(Rect2(base.x - 3.0, base.y - 70.0, 6.0, 70.0), UiPalette.POST_GREY)
 	var box := Rect2(base.x - 12.0, base.y - 116.0, 24.0, 48.0)
-	_art.draw_rect(box, UiPalette.INK)
+	art.draw_rect(box, UiPalette.INK)
 	for row in 3:
-		_art.draw_rect(Rect2(box.position.x + 6.0, box.position.y + 5.0 + row * 14.0, 12.0, 10.0), LIGHT_GREEN if row == 2 else LIGHT_AMBER)
+		art.draw_rect(Rect2(box.position.x + 6.0, box.position.y + 5.0 + row * 14.0, 12.0, 10.0), LIGHT_GREEN if row == 2 else LIGHT_AMBER)
 
-func _draw_timing_pole(base: Vector2) -> void:
-	_art.draw_rect(Rect2(base.x - 2.5, base.y - 64.0, 5.0, 64.0), UiPalette.POST_GREY)
-	_art.draw_rect(Rect2(base.x - 8.0, base.y - 76.0, 16.0, 14.0), UiPalette.INK)
-	_art.draw_colored_polygon(FlatProps.octagon(Vector2(base.x - 1.0, base.y - 69.0), 3.5, 3.5), UiPalette.DANGER_RED)
+func _draw_timing_pole(_canvas: Node2D, art: TriangleBatch, base: Vector2) -> void:
+	art.draw_rect(Rect2(base.x - 2.5, base.y - 64.0, 5.0, 64.0), UiPalette.POST_GREY)
+	art.draw_rect(Rect2(base.x - 8.0, base.y - 76.0, 16.0, 14.0), UiPalette.INK)
+	art.draw_colored_polygon(FlatProps.octagon(Vector2(base.x - 1.0, base.y - 69.0), 3.5, 3.5), UiPalette.DANGER_RED)
 
 func _pit_spots() -> Array[Vector2]:
 	return [
@@ -261,11 +276,10 @@ func _pit_spots() -> Array[Vector2]:
 		Vector2(finish_x - 260.0, _half_w + 112.0),
 	]
 
-## Little heaps of spare tyres and oil drums along the pit side.
-func _draw_pit_clutter(rng: RandomNumberGenerator) -> void:
-	for spot in _pit_spots():
-		FlatProps.draw_tire_stack(_art, spot + Vector2(-20.0, 0.0), rng.randi_range(2, 3))
-		FlatProps.draw_drum(_art, spot + Vector2(30.0, 2.0), DRUM_COLORS[rng.randi() % DRUM_COLORS.size()])
+## A little heap of spare tyres and an oil drum on the pit side.
+func _draw_pit_clutter(_canvas: Node2D, art: TriangleBatch, spot: Vector2, index: int) -> void:
+	FlatProps.draw_tire_stack(art, spot + Vector2(-20.0, 0.0), 2 + index % 2)
+	FlatProps.draw_drum(art, spot + Vector2(30.0, 2.0), DRUM_COLORS[(art_seed + index) % DRUM_COLORS.size()])
 
 # --- Collision -----------------------------------------------------------------
 

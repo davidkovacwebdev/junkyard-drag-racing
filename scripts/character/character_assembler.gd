@@ -59,6 +59,19 @@ static func assemble(data: CharacterData, parent: Node, spawn_position: Vector2)
 
 	return root
 
+## Swaps an assembled character's slot z_indexes for child order, for a
+## character out in a Y-sorted world: a raised z_index lifts the parts out of
+## the sort, so they'd draw over a house the character stands behind.
+static func layer_by_child_order(root: Node2D) -> void:
+	var parts: Array[Node2D] = []
+	for child in root.get_children():
+		if child is Node2D:
+			parts.append(child)
+	parts.sort_custom(func(a: Node2D, b: Node2D) -> bool: return a.z_index < b.z_index)
+	for i in parts.size():
+		root.move_child(parts[i], i)
+		parts[i].z_index = 0
+
 static func _root_name(data: CharacterData) -> String:
 	if data != null:
 		var trimmed := data.display_name.strip_edges()

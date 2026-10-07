@@ -3,6 +3,8 @@
 [ext_resource type="Script" path="res://scripts/world/shipwreck.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/world/coast_prop.gd" id="2"]
 [ext_resource type="Script" path="res://scripts/audio/ambient_call.gd" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/world/part_pickup.tscn" id="pickup"]
+[ext_resource type="Script" path="res://scripts/world/hidden_part_pickup.gd" id="hidden_pickup"]
 
 [node name="ShipwreckCove" type="Node2D"]
 y_sort_enabled = true
@@ -37,3 +39,11 @@ volume_db = -14.0
 script = ExtResource("3")
 sound_name = &"gull_cry"
 interval_range = Vector2(10, 22)
+
+[node name="SunkenAnchor" parent="." instance=ExtResource("pickup")]
+position = Vector2(-140, 90)
+script = ExtResource("hidden_pickup")
+part_id = &"wheel_anchor"
+claim_id = "shipwreck_anchor"
+found_sound = &"chain_rattle"
+submerged = true

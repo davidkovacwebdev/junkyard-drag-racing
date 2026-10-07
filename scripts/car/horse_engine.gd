@@ -81,6 +81,11 @@ func set_hitched(hitched: bool) -> void:
 
 ## Walk the horse out in front of `body` and stand it on the ground, upright
 ## relative to the body. Called by CarBody.place_engine().
+## The horse on its own, without the rope: CarView gives it its own collision
+## shape apart from the car's.
+func get_walker() -> Node2D:
+	return _horse
+
 func attach_to_body(body: CarBody) -> void:
 	var nose := -INF
 	var ground := -INF

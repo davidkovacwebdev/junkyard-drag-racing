@@ -213,7 +213,7 @@ func take(item: Node2D) -> void:
 		item.remove_from_group(ITEM_GROUP)
 
 ## Count something that wasn't tipped in as part of the heap, so the claw can
-## grab it like any other piece (the Scrap Dealer standing by the crane, see
+## grab it like any other piece (Vern standing by the crane, see
 ## PenBystander). It has to carry its own `part_data`.
 func add_item(body: RigidBody2D) -> void:
 	body.add_to_group(ITEM_GROUP)

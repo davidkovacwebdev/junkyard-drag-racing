@@ -10,10 +10,10 @@ title = "Claw Machine"
 giver = "Grandpa"
 description = "Found Grandpa drunk and crying in his wheelchair. Without his legs he can't feel the thrill of the crane no more.
 
-But he knows a guy at the crane: for 100 quids a go, he'll let you work it like a claw machine and fish for parts. Whatever you pull out, you keep. He slipped you the first hundred himself.
+But he knows a guy at the crane: Vern, his old crane buddy. For 100 quids a go, Vern'll let you work it like a claw machine and fish for parts. Whatever you pull out, you keep. He slipped you the first hundred himself.
 
-Drive to the junkyard and talk to the Scrap Dealer."
-objective = "Talk to Grandpa's guy at the junkyard crane"
+Drive to the junkyard and find Vern at the counter."
+objective = "Talk to Vern at the junkyard"
 objective_place = "Junkyard"
 follow_ups = Array[ExtResource("1_script")]([ExtResource("2_next")])
 start_cutscene = "res://cutscenes/grandpa_crane.tres"

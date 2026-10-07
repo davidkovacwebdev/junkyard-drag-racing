@@ -1,9 +1,11 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/hill_climb_site.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/world/registration_booth.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/race/drag_strip_menu.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://scenes/race/race_hill_climb.tscn" id="race"]
+[ext_resource type="PackedScene" path="res://scenes/world/part_pickup.tscn" id="pickup"]
+[ext_resource type="Script" path="res://scripts/world/hidden_part_pickup.gd" id="hidden_pickup"]
 
 [node name="HillClimbSite" type="Node2D"]
 y_sort_enabled = true
@@ -23,3 +25,10 @@ course = 1
 rules_line = "Highest up the hill wins. Weak heaps roll back down."
 wall_color = Color(0.36, 0.38, 0.45, 1)
 opens_with_quest = &"hill_climb_debut"
+
+[node name="HiddenGondola" parent="." instance=ExtResource("pickup")]
+position = Vector2(380, 200)
+script = ExtResource("hidden_pickup")
+part_id = &"body_gondola"
+claim_id = "hill_climb_gondola"
+found_sound = &"gondola_bell"

@@ -115,6 +115,14 @@ const SUPER_HORN := &"super_horn"
 @export var bump_volume_db: float = -6.0
 @export var tire_screech_volume_db: float = -12.0
 
+## Traveler mode (debug, F6 via DevMenu): flies over everything at this speed,
+## Shift multiplying it, then lands on the nearest clear dry spot.
+@export var traveler_speed: float = 5000.0
+@export var traveler_sprint_multiplier: float = 4.0
+## Ring spacing and reach of the search for a clear spot to land on.
+@export var traveler_landing_step: float = 40.0
+@export var traveler_landing_reach: float = 3000.0
+
 @export_group("Drunk")
 ## Drunk (see the `Drunk` autoload), the car wanders off the line it's
 ## driven along: at full drunkenness by up to this share of its top speed,
@@ -195,6 +203,7 @@ const SCENE_HINT_LIFT := 44.0
 
 @onready var _visual: CarView = $Visual as CarView
 @onready var _collision: CollisionShape2D = $CollisionShape2D
+@onready var _walker_collision: CollisionShape2D = $WalkerCollisionShape2D
 @onready var _interaction_zone: Area2D = $InteractionZone
 @onready var _tooltip_label: Label = $UI/TooltipLabel
 @onready var _hold_bar_bg: Control = $UI/HoldBarBg
@@ -248,6 +257,8 @@ var _tow_called: bool = false
 ## The puke shake, kept apart so the sink offset can sit on top of it.
 var _visual_shake: Vector2 = Vector2.ZERO
 var _default_collision_mask: int = 1
+var _default_collision_layer: int = 1
+var _traveling: bool = false
 
 const TOW_RESCUE := preload("res://cutscenes/tow_truck_rescue.tres")
 const SCRAP_PICKUP := preload("res://scenes/world/scrap_pickup.tscn")
@@ -263,7 +274,7 @@ func refresh_parts() -> void:
 		return
 	_visual.build_from(car)
 	_car_mass = _compute_car_mass(car)
-	_visual.fit_collision(_collision)
+	_visual.fit_collision(_collision, _walker_collision)
 
 func _ready() -> void:
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
@@ -279,6 +290,7 @@ func _ready() -> void:
 	move_child(_water_line, _visual.get_index())
 	_water_line.hold(_visual)
 	_default_collision_mask = collision_mask
+	_default_collision_layer = collision_layer
 	Inventory.set_use_check(&"fish", _fishing_blocked_reason)
 	Inventory.item_used.connect(_on_item_used)
 	var car := Inventory.get_selected_car()
@@ -286,7 +298,7 @@ func _ready() -> void:
 		_visual.audible_accessories = true
 		_visual.build_from(car)
 		_car_mass = _compute_car_mass(car)
-	_visual.fit_collision(_collision)
+	_visual.fit_collision(_collision, _walker_collision)
 	_setup_sounds(car)
 	# Coming back from a place (garage, drag strip race): reappear where we
 	# left the map instead of at the scene's default spawn.
@@ -379,7 +391,28 @@ func _clicked_interactable(point: Vector2) -> Object:
 			node = node.get_parent()
 	return null
 
-func _physics_process(delta: float) -> void:
+func is_traveling() -> bool:
+	return _traveling
+
+func set_traveling(traveling: bool) -> void:
+	if traveling == _traveling:
+		return
+	_traveling = traveling
+	velocity = Vector2.ZERO
+	var camera := get_node_or_null(^"Camera2D") as WorldCamera
+	if camera != null:
+		camera.set_traveler(traveling)
+	if traveling:
+		collision_layer = 0
+		collision_mask = 0
+		Sfx.play(&"cutscene_whoosh", -4.0, 0.03).pitch_scale *= 0.7
+		return
+	global_position = _find_landing_spot(global_position)
+	collision_layer = _default_collision_layer
+	collision_mask = _default_collision_mask
+	Sfx.play(&"gravel_crunch", -2.0, 0.05)
+
+func _read_input_dir() -> Vector2:
 	var input_dir := Vector2.ZERO
 	if _is_key_held(KEY_A) or _is_key_held(KEY_LEFT):
 		input_dir.x -= 1.0
@@ -389,6 +422,56 @@ func _physics_process(delta: float) -> void:
 		input_dir.y -= 1.0
 	if _is_key_held(KEY_S) or _is_key_held(KEY_DOWN):
 		input_dir.y += 1.0
+	return input_dir
+
+func _travel(delta: float) -> void:
+	var input_dir := _read_input_dir()
+	if input_dir.x != 0.0 and _facing_right != (input_dir.x > 0.0):
+		_facing_right = input_dir.x > 0.0
+		_visual.scale.x = 1.0 if _facing_right else -1.0
+		_visual.mirror_collision(_collision, _walker_collision)
+	var speed := traveler_speed * (traveler_sprint_multiplier if _is_key_held(KEY_SHIFT) else 1.0)
+	velocity = input_dir.normalized() * speed
+	global_position += velocity * delta
+	if remember_position:
+		WorldState.remember_player(global_position)
+
+## Nearest spot, in widening rings around `origin`, where the car's shapes
+## overlap nothing they would collide with and it isn't out at sea.
+func _find_landing_spot(origin: Vector2) -> Vector2:
+	var radius := 0.0
+	while radius <= traveler_landing_reach:
+		var samples := 1 if radius == 0.0 else maxi(8, int(TAU * radius / traveler_landing_step))
+		for i in samples:
+			var candidate := origin + Vector2.RIGHT.rotated(TAU * i / samples) * radius
+			if _terrain != null and _terrain.is_in_water(_terrain.to_local(candidate)):
+				continue
+			if _is_spot_clear(candidate):
+				return candidate
+		radius += traveler_landing_step
+	return origin
+
+func _is_spot_clear(spot: Vector2) -> bool:
+	var space := get_world_2d().direct_space_state
+	for shape_node in [_collision, _walker_collision]:
+		if shape_node.disabled or shape_node.shape == null:
+			continue
+		var query := PhysicsShapeQueryParameters2D.new()
+		query.shape = shape_node.shape
+		query.collision_mask = _default_collision_mask
+		query.exclude = [get_rid()]
+		var shape_offset: Transform2D = shape_node.global_transform
+		shape_offset.origin += spot - global_position
+		query.transform = shape_offset
+		if not space.intersect_shape(query, 1).is_empty():
+			return false
+	return true
+
+func _physics_process(delta: float) -> void:
+	if _traveling:
+		_travel(delta)
+		return
+	var input_dir := _read_input_dir()
 
 	_update_puke(delta)
 	if _puke_left > 0.0:
@@ -417,7 +500,7 @@ func _physics_process(delta: float) -> void:
 	var facing_scale := 1.0 if _facing_right else -1.0
 	if _visual.scale.x != facing_scale:
 		_visual.scale.x = facing_scale
-		_visual.mirror_collision(_collision)
+		_visual.mirror_collision(_collision, _walker_collision)
 
 	# Compared against velocity as it stood BEFORE this frame's move_toward
 	# touches it — "the car was already heading this way" — against the

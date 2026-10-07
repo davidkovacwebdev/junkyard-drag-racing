@@ -54,21 +54,14 @@ var _art := TriangleBatch.new()
 
 func _ready() -> void:
 	for boulder in BOULDERS:
-		_add_piece(Vector2(boulder.x, boulder.y), _draw_boulder.bind(boulder.z))
-	_add_piece(BOARD_BASE, _draw_board)
+		FlatProps.add_standing_piece(self, Vector2(boulder.x, boulder.y), _draw_boulder.bind(boulder))
+	FlatProps.add_standing_piece(self, BOARD_BASE, _draw_board)
 	if Engine.is_editor_hint():
 		return
 	RoundedRectShape.add_solid(self, Rect2(-HALF_WIDTH * 0.95, -FOOT_DEPTH, HALF_WIDTH * 1.9, FOOT_DEPTH))
 	for boulder in BOULDERS:
 		RoundedRectShape.add_solid(self, Rect2(boulder.x - boulder.z, boulder.y - boulder.z * 0.4, boulder.z * 2.0, boulder.z * 0.4))
 	RoundedRectShape.add_solid(self, Rect2(BOARD_BASE.x - BOARD_SIZE.x * 0.5, BOARD_BASE.y - 16.0, BOARD_SIZE.x, 16.0))
-
-## A child canvas standing at `ground`, drawn by `drawer(canvas, ...bound)`.
-func _add_piece(ground: Vector2, drawer: Callable) -> void:
-	var piece := Node2D.new()
-	piece.position = ground
-	piece.draw.connect(func() -> void: drawer.call(piece))
-	add_child(piece)
 
 func _draw() -> void:
 	_art.clear()
@@ -96,17 +89,21 @@ static func _scaled(shares: Array[Vector2]) -> PackedVector2Array:
 	return points
 
 ## A squat rock sitting on its ground point, with a shaded lower right.
-func _draw_boulder(canvas: Node2D, radius: float) -> void:
-	canvas.draw_colored_polygon(FlatProps.octagon(Vector2(radius * 0.2, 2.0), radius * 1.1, radius * 0.25), UiPalette.SHADOW)
-	canvas.draw_colored_polygon(FlatProps.octagon(Vector2(0.0, -radius * 0.6), radius, radius * 0.65), ROCK)
-	canvas.draw_colored_polygon(FlatProps.octagon(Vector2(radius * 0.3, -radius * 0.4), radius * 0.6, radius * 0.4), ROCK_SHADE)
+func _draw_boulder(_canvas: Node2D, art: TriangleBatch, boulder: Vector3) -> void:
+	var ground := Vector2(boulder.x, boulder.y)
+	var radius := boulder.z
+	art.draw_colored_polygon(FlatProps.octagon(ground + Vector2(radius * 0.2, 2.0), radius * 1.1, radius * 0.25), UiPalette.SHADOW)
+	art.draw_colored_polygon(FlatProps.octagon(ground + Vector2(0.0, -radius * 0.6), radius, radius * 0.65), ROCK)
+	art.draw_colored_polygon(FlatProps.octagon(ground + Vector2(radius * 0.3, -radius * 0.4), radius * 0.6, radius * 0.4), ROCK_SHADE)
 
 ## The HILL CLIMB board on two posts, its lettering on top.
-func _draw_board(canvas: Node2D) -> void:
-	var board := Rect2(-BOARD_SIZE.x * 0.5, -BOARD_POST_HEIGHT - BOARD_SIZE.y, BOARD_SIZE.x, BOARD_SIZE.y)
+func _draw_board(canvas: Node2D, art: TriangleBatch) -> void:
+	var board := Rect2(BOARD_BASE.x - BOARD_SIZE.x * 0.5, BOARD_BASE.y - BOARD_POST_HEIGHT - BOARD_SIZE.y, BOARD_SIZE.x, BOARD_SIZE.y)
 	for post_x: float in [board.position.x + 30.0, board.end.x - 38.0]:
-		canvas.draw_rect(Rect2(post_x, board.end.y, 8.0, BOARD_POST_HEIGHT), UiPalette.POST_GREY)
-	canvas.draw_rect(board, BOARD)
-	canvas.draw_rect(Rect2(board.end.x - 12.0, board.position.y, 12.0, board.size.y), BOARD.darkened(0.2))
+		art.draw_rect(Rect2(post_x, board.end.y, 8.0, BOARD_POST_HEIGHT), UiPalette.POST_GREY)
+	art.draw_rect(board, BOARD)
+	art.draw_rect(Rect2(board.end.x - 12.0, board.position.y, 12.0, board.size.y), BOARD.darkened(0.2))
+	art.commit(canvas)
+	art.clear()
 	canvas.draw_string(ThemeDB.fallback_font, board.position + Vector2(0.0, 46.0), "HILL CLIMB",
 			HORIZONTAL_ALIGNMENT_CENTER, board.size.x - 12.0, 34, UiPalette.DANGER_RED)

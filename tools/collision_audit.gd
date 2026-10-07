@@ -31,7 +31,7 @@ func _ready() -> void:
 		var save := ResourceLoader.load("user://save_%s.tres" % slot, "", ResourceLoader.CACHE_MODE_IGNORE)
 		var view := player.find_child("Visual", true, false) as CarView
 		view.build_from(save.get("owned_cars")[0])
-		view.fit_collision(player.get_node("CollisionShape2D"))
+		view.fit_collision(player.get_node("CollisionShape2D"), player.get_node("WalkerCollisionShape2D"))
 	_camera = Camera2D.new()
 	_camera.zoom = Vector2.ONE * _zoom_arg()
 	world.add_child(_camera)

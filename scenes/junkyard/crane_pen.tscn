@@ -5,7 +5,7 @@
 [ext_resource type="Script" uid="uid://bi7kibijyg4jw" path="res://scripts/junkyard/trash_heap.gd" id="3_heap"]
 [ext_resource type="PackedScene" path="res://scenes/ui/back_button.tscn" id="4_back"]
 [ext_resource type="Script" path="res://scripts/junkyard/pen_bystander.gd" id="5_bystander"]
-[ext_resource type="Resource" path="res://characters/punker.tres" id="7_punker"]
+[ext_resource type="Resource" path="res://characters/crane_vern.tres" id="7_vern"]
 [ext_resource type="Resource" path="res://characters/old_mo.tres" id="8_old_mo"]
 [ext_resource type="Script" path="res://scripts/junkyard/oil_drum_prop.gd" id="6_drum"]
 
@@ -59,24 +59,35 @@ claw_thickness = 12.0
 position = Vector2(0, -65)
 shape = SubResource("RectangleShape2D_crane_base")
 
-[node name="Punker" type="RigidBody2D" parent="Yard"]
+[node name="Vern" type="RigidBody2D" parent="Yard"]
 position = Vector2(640, 0)
 script = ExtResource("5_bystander")
-character_data = ExtResource("7_punker")
-engine_scene = "res://scenes/parts/engines/engine_punker.tscn"
-claim_id = "crane_pen_punker"
-caught_line = "You hauled the Scrap Dealer out of the yard! He's in your garage now as an engine. He says he'll pull the car if you feed him."
+character_data = ExtResource("7_vern")
+claim_id = "crane_pen_vern"
+engine_scene = "res://scenes/parts/engines/engine_crane_operator.tscn"
+yelp_sound = &"crane_worker_yelp"
+bump_lines = PackedStringArray("Easy on my claw, kid!", "Hey! I'm the operator, not the merchandise!", "Eugen never swung it this bad, and he was drunk!", "Swing it slow, {player}. Slow!")
+caught_line = "You hauled Vern out of his own crane pen! He's in your garage now as an engine. Grandpa's gonna laugh himself sober."
+
+[node name="CraneWorker" type="RigidBody2D" parent="Yard"]
+position = Vector2(640, 0)
+script = ExtResource("5_bystander")
+after_claim = "crane_pen_vern"
+generated_worker = true
+yelp_sound = &"crane_worker_yelp"
 
 [node name="OldMo" type="RigidBody2D" parent="Yard"]
-position = Vector2(640, 0)
+position = Vector2(960, 0)
 script = ExtResource("5_bystander")
 character_data = ExtResource("8_old_mo")
 claim_id = "crane_pen_old_mo"
-after_claim = "crane_pen_punker"
+after_claim = "crane_pen_vern"
 catchable = false
 stoop = 0.14
 yelp_sound = &"oldmo_wheeze"
 dodges = true
+min_x = 880.0
+max_x = 1040.0
 dodge_lines = PackedStringArray("Hey, watch out!", "Hey, I thought old man Eugen taught you better!", "Too slow, sonny!", "Heh! Missed me!", "These slippers are faster than they look!", "I've dodged worse than you in the war!")
 
 [node name="Drum" type="StaticBody2D" parent="Yard"]

@@ -6,7 +6,8 @@ extends CanvasLayer
 ## F1 toggles it, from any scene, Ctrl+M adds money, P stocks the spare stash with
 ## every part, F2 plays the demo cutscene, F3 replays Grandpa's opening scene and
 ## F4 shows part durability bars in races (DurabilityOverlay), F5 puts the
-## flying saucer (and its alien) back in the desert hangar. The rows are the very same `PartSlot` the
+## flying saucer (and its alien) back in the desert hangar, F6 toggles traveler
+## mode (fly over everything, zoomed far out, land on exit). The rows are the very same `PartSlot` the
 ## garage uses, so a part looks and reads identically in both places; clicking
 ## one drops that part on the ground as a real `PartPickup` beside the car. A dev
 ## spawn is not special-cased anywhere downstream - it is collected, copied and
@@ -161,6 +162,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		KEY_F3:
 			_replay_opening()
 			get_viewport().set_input_as_handled()
+		KEY_F6:
+			_toggle_traveler_mode()
+			get_viewport().set_input_as_handled()
 
 ## Needs the open world, where StoryDirector and Grandpa live.
 func _replay_opening() -> void:
@@ -169,6 +173,12 @@ func _replay_opening() -> void:
 		_set_status("Grandpa's opening only replays in the open world.")
 		return
 	director.replay_opening()
+
+func _toggle_traveler_mode() -> void:
+	var car := get_tree().get_first_node_in_group(PlayerCar.GROUP) as PlayerCar
+	if car == null or Cutscenes.is_active():
+		return
+	car.set_traveling(not car.is_traveling())
 
 func _restock_hangar() -> void:
 	WorldState.unclaim(HangarUfo.CLAIM_ID)

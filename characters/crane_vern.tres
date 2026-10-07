@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_data.gd" id="1_data"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/legs/legs_cargo.tscn" id="2_legs"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/boots/boots_steel.tscn" id="3_boots"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/torsos/torso_hazmat.tscn" id="4_torso"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/heads/head_jaw.tscn" id="5_head"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/hairs/hair_balding.tscn" id="6_hair"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/eyes/eyes_squint.tscn" id="7_eyes"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/accessories/acc_moustache.tscn" id="8_moustache"]
+
+[resource]
+script = ExtResource("1_data")
+display_name = "Vern"
+legs_scene = ExtResource("2_legs")
+boots_scene = ExtResource("3_boots")
+torso_scene = ExtResource("4_torso")
+head_scene = ExtResource("5_head")
+hair_scene = ExtResource("6_hair")
+eyes_scene = ExtResource("7_eyes")
+accessory_scene = ExtResource("8_moustache")
+voice_pitch_hz = 92.0
+voice_throat = 0.82
+voice_rasp = 0.85
+voice_wobble = 0.4
+idle_lines = PackedStringArray("Buyin' scrap. Or take the crane out back and dig for somethin' better yourself.", "Eugen and me ran that crane forty years. Now look at him. Look at ME.", "Your grandpa owes me twenty bucks. Tell him I said so.", "Swing it slow out there, {player}. Slow!", "Scrap's scrap. I don't ask where it came from.")

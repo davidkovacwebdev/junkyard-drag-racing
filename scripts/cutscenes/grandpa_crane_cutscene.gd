@@ -28,7 +28,7 @@ const GRANDPA := preload("res://characters/grandpa.tres")
 @export var player_line: String = "What about the crane?"
 ## Said with a wink, sobered up just enough.
 @export_multiline var wink_lines: PackedStringArray = [
-	"I know a guy at the crane.",
+	"I know a guy at the crane. Vern. We ran that crane together for forty years.",
 	"For 100 quids he'll let you use the crane like a claw machine. You know, to fish for parts?",
 	"He'll let you keep the part. *hic*",
 	"Here. A hundred quid, on me. Go fish ol' Grandpa somethin' nice.",

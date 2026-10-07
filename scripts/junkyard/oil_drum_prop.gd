@@ -2,7 +2,7 @@ class_name OilDrumProp
 extends StaticBody2D
 ## A single oil drum standing on the ground, solid: the stock FlatProps drum
 ## with a box to bump into. Origin at its foot, so it Y-sorts like any prop.
-## The crane pen stands one behind the Scrap Dealer so the claw can't shove him
+## The crane pen stands one behind the crane operator so the claw can't shove him
 ## off past the end of its rail.
 
 @export var color: Color = UiPalette.RUST.darkened(0.1)

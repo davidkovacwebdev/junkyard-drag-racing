@@ -1,9 +1,9 @@
 class_name FlatProps
 extends RefCounted
 ## Small flat-polygon shapes and props shared by the hand-drawn landmarks
-## (DragStrip, RampEvent): tyre stacks, oil drums and the basic shapes they are
-## cut from. Everything draws into the given canvas in its local space; a
-## TriangleBatch works as the canvas too.
+## (DragStrip, RampEvent): tyre stacks, oil drums, the basic shapes they are
+## cut from, and standing pieces that Y-sort on their own. Everything draws into
+## the given canvas in its local space; a TriangleBatch works as the canvas too.
 
 const RUBBER_SIDE := Color(0.14, 0.14, 0.14)
 const RUBBER_TOP := Color(0.22, 0.22, 0.21)
@@ -47,3 +47,23 @@ static func octagon(center: Vector2, rx: float, ry: float) -> PackedVector2Array
 		var angle := TAU * (float(i) + 0.5) / 8.0
 		points.append(center + Vector2(cos(angle) * rx, sin(angle) * ry))
 	return points
+
+## A child canvas of `parent` standing at `ground` (where the thing meets the
+## ground), so it Y-sorts against the car on its own instead of with the whole
+## landmark. `parent` needs `y_sort_enabled`. `drawer(canvas, batch)` draws in
+## `parent`'s space; the batch is committed after it, so lettering that must sit
+## on top commits the batch itself first. Absolute z 0, so pieces stand with the
+## car even when `parent` is a ground layer below it. Added with no owner, so it
+## is never saved into the scene.
+static func add_standing_piece(parent: Node2D, ground: Vector2, drawer: Callable) -> void:
+	var piece := Node2D.new()
+	piece.position = ground
+	piece.z_as_relative = false
+	var batch := TriangleBatch.new()
+	piece.draw.connect(func() -> void:
+		piece.draw_set_transform(-ground)
+		batch.clear()
+		drawer.call(piece, batch)
+		batch.commit(piece)
+		batch.clear())
+	parent.add_child(piece)

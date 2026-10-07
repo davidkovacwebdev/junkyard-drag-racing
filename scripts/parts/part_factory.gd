@@ -19,8 +19,9 @@ static func instantiate(part: PartData) -> Node2D:
 	if not (instance is Node2D):
 		instance.free()
 		return null
+	# A forged part and a runner engine both carry their own look on the data.
+	if (part.forge != null or part is RunnerEnginePartData) and "part_data" in instance:
+		instance.set("part_data", part)
 	if part.forge != null:
-		if "part_data" in instance:
-			instance.set("part_data", part)
 		part.forge.apply_to(instance)
 	return instance as Node2D
