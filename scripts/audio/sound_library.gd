@@ -157,6 +157,7 @@ const NAMES: Array[StringName] = [
 	&"wing_flutter",
 	&"tumbleweed_crunch",
 	&"dog_bark",
+	&"dog_lick",
 	&"chicken_cluck",
 	&"chicken_squawk",
 	&"boat_putter_loop",
@@ -428,6 +429,7 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"wing_flutter": return _wing_flutter(rng)
 		&"tumbleweed_crunch": return _tumbleweed_crunch(rng)
 		&"dog_bark": return _dog_bark(rng)
+		&"dog_lick": return _dog_lick(rng)
 		&"chicken_cluck": return _chicken_cluck(rng)
 		&"chicken_squawk": return _chicken_squawk(rng)
 		&"boat_putter_loop": return _boat_putter_loop(rng)
@@ -2489,6 +2491,19 @@ static func _dog_bark(rng: RandomNumberGenerator) -> PackedFloat32Array:
 		}, rng)
 		return Synth.mix_into(voice, breath, 0.0, 0.5)
 	return Synth.finish(Synth.concat([ruff.call(0.14, 330.0), Synth.silence(0.09), ruff.call(0.18, 300.0)]), 0.65)
+
+## A dog lapping something up: two quick, wet slurps (a rising, bubbly
+## band of noise each) and a little tongue smack.
+static func _dog_lick(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.36)
+	for i in 2:
+		out = Synth.mix_into(out, Synth.noise_sweep(0.11, {
+			freq = [[0.0, 600.0 + i * 150.0], [0.11, 1700.0 + i * 200.0]],
+			q = [[0.0, 4.0]],
+			amp = [[0.0, 0.0], [0.015, 1.0], [0.07, 0.6], [0.11, 0.0]],
+		}, rng), i * 0.13, 0.8)
+	out = Synth.mix_into(out, Synth.thump(0.05, 1400.0, 0.001, 0.012, rng), 0.27, 0.5)
+	return Synth.finish(out, 0.55)
 
 ## A chicken scurrying off: three quick, nasal "bok"s.
 static func _chicken_cluck(rng: RandomNumberGenerator) -> PackedFloat32Array:

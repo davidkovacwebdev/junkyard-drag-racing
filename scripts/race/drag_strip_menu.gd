@@ -64,8 +64,12 @@ var _car_index: int = 0
 var _bet_amount: int = 0
 var _bet_field: Array[Dictionary] = []
 var _bet_field_names: Array[String] = []
+## The driver name on each bet card, in field order.
+var _bet_driver_names: Array[String] = []
 var _bet_pick_index: int = -1
 var _bet_cards: Array[Node] = []
+## Which bet card is Roge Roger's, or -1 when he isn't in the field.
+var _roger_index: int = -1
 var _clerk_speech := SpeechPlayer.new()
 var _clerk_rest := Vector2.ZERO
 var _clerk_scale := Vector2.ONE
@@ -101,6 +105,10 @@ func _resolve_pending_bet() -> bool:
 	if RaceProgression.last_ai_race_winner.is_empty():
 		return false
 	var won := RaceProgression.last_ai_race_winner == RaceProgression.last_bet_car_name
+	var on_roger := RaceProgression.last_bet_on_roger
+	if on_roger:
+		Quests.set_note(RaceProgression.ROGER_QUEST, "won" if won else "lost")
+		Quests.goal_met(RaceProgression.ROGER_QUEST)
 	if won:
 		var payout := RaceProgression.last_bet_amount * BET_WIN_MULTIPLIER
 		Inventory.money += payout
@@ -110,11 +118,13 @@ func _resolve_pending_bet() -> bool:
 	else:
 		Sfx.play(&"denied", -6.0)
 		_flash_info("Your car lost the bet.")
-		_clerk_says("Tough luck. House keeps the stake.")
+		_clerk_says("Roge Roger? HA! Ya might as well've burned it." if on_roger
+				else "Tough luck. House keeps the stake.")
 	RaceProgression.last_ai_race_winner = ""
 	RaceProgression.last_ai_race_field_names = []
 	RaceProgression.last_bet_amount = 0
 	RaceProgression.last_bet_car_name = ""
+	RaceProgression.last_bet_on_roger = false
 	return true
 
 func _flash_info(text: String) -> void:
@@ -156,7 +166,8 @@ func _show_page(page: Page) -> void:
 			_clerk_says("How much ya puttin' down? Pays %dx." % BET_WIN_MULTIPLIER)
 		Page.BET_PICK:
 			_title_label.text = "Back a Car to Win"
-			_clerk_says("Pick a winner. No refunds.")
+			_clerk_says("Pick a winner. That's Roge Roger in there, if ya can believe it." if _roger_index >= 0
+					else "Pick a winner. No refunds.")
 
 func _on_tier_pressed(index: int) -> void:
 	_tier = TIERS[index]
@@ -216,6 +227,7 @@ func _on_race_pressed() -> void:
 	RaceProgression.pending_include_player = true
 	RaceProgression.pending_entry_fee = fee
 	RaceProgression.pending_bet_field = []
+	RaceProgression.pending_bet_names = []
 	SceneLoader.change_scene(RaceProgression.menu_race_scene)
 
 func _on_bet_amount_pressed(index: int) -> void:
@@ -241,6 +253,13 @@ func _roll_bet_field() -> void:
 		card.queue_free()
 	_bet_cards.clear()
 	var names := NameGen.random_names(_bet_field.size())
+	# Roge Roger takes one lane, in his hopeless car.
+	_roger_index = -1
+	if RaceProgression.roger_is_racing(_tier, RaceProgression.menu_venue_name):
+		_roger_index = randi() % _bet_field.size()
+		_bet_field[_roger_index] = RaceProgression.roger_spec()
+		names[_roger_index] = RaceProgression.ROGER_NAME
+	_bet_driver_names = names
 	_bet_pick_index = -1
 	_bet_confirm_button.disabled = true
 	for i in _bet_field.size():
@@ -274,6 +293,8 @@ func _on_bet_confirm_pressed() -> void:
 	RaceProgression.pending_include_player = false
 	RaceProgression.pending_entry_fee = 0
 	RaceProgression.pending_bet_field = _bet_field
+	RaceProgression.pending_bet_names = _bet_driver_names
 	RaceProgression.last_bet_amount = _bet_amount
 	RaceProgression.last_bet_car_name = _bet_field_names[_bet_pick_index]
+	RaceProgression.last_bet_on_roger = _bet_pick_index == _roger_index
 	SceneLoader.change_scene(RaceProgression.menu_race_scene)

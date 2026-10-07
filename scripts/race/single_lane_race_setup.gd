@@ -341,6 +341,9 @@ func _ready() -> void:
 			var car_name := RaceSignup.rival_car_name(lane, rival)
 			_register_car(car_name, lane, car, race_controller, camera_targets)
 			_signup.field_car_names.append(car_name)
+			var driver := _signup.bet_driver_name(lane)
+			if race_controller != null and not driver.is_empty():
+				race_controller.driver_names[car_name] = driver
 			lane += 1
 		_signup.hook_up(race_controller)
 

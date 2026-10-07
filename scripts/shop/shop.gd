@@ -4,11 +4,11 @@ extends Control
 ## The bell over the door rings as the player walks in and he greets them
 ## straight away.
 ##
-## Pick an item to hear his pitch for it, then buy it or look at something
-## else. The dialog lists `ITEMS_SHOWN` items at a time: "More Stuff", the
-## mouse wheel or the arrow keys scroll through the rest, and the shelf
-## lights up the price tags of the ones being listed. Leaving (the Leave option, or Esc) drops the player back outside
-## the door, like every other building.
+## The stock is laid out as a grid of cards (ShopItemCard) under his speech
+## board, like the garage's parts: pick one (click it, or its number key) to
+## hear his pitch for it, then buy it or look at something else. Leaving
+## (the Leave button, or Esc) drops the player back outside the door, like
+## every other building.
 ##
 ## What's for sale is `stock`, a list of ItemData set in the inspector on
 ## scenes/shop/shop.tscn; each item's name, price and pitch live on its own
@@ -29,13 +29,17 @@ const PREVIEW_INSET := Vector2(-80.0, -86.0)
 const PREVIEW_SCALE := 1.5
 ## Just above CharacterDialog's own layer, so the preview sits on its board.
 const PREVIEW_LAYER := 5
-## How many items the dialog lists at once (plus More Stuff and Leave), so
-## the options never run off the bottom of the screen.
-const ITEMS_SHOWN := 3
 ## The shelf keeps a margin either side when the stock grows.
 const SHELF_WIDTH_FRACTION := 0.8
 const TAG_COLOR := UiPalette.TRIM_OFF_WHITE
-const LISTED_TAG_COLOR := UiPalette.ACCENT_YELLOW
+## The card grid sits where the dialog's options would, under the speech
+## board and left of the shopkeeper (screen fractions), with the Leave
+## button under it. It scrolls once the stock outgrows it.
+const GRID_RECT := Rect2(0.04, 0.47, 0.57, 0.405)
+const GRID_COLUMNS := 5
+const GRID_GAP := 8
+const LEAVE_POSITION := Vector2(0.04, 0.89)
+const LEAVE_SIZE := Vector2(150.0, 46.0)
 ## The longest an item's `buy_sound` goes off for when it's bought.
 const BUY_SOUND_SECONDS := 1.2
 
@@ -54,12 +58,13 @@ const BUY_SOUND_SECONDS := 1.2
 var _leaving: bool = false
 var _shelf_icons: Dictionary = {}  # item id -> Node2D
 var _shelf_tags: Dictionary = {}  # item id -> Label
-## Where in the stock the dialog's list starts.
-var _first_listed: int = 0
-## The item list is up (not an item's pitch), so scrolling moves it.
+## The card grid is up (not an item's pitch).
 var _browsing: bool = false
 var _preview_layer: CanvasLayer
 var _preview: Node2D = null
+var _grid_root: Control
+var _grid: GridContainer
+var _cards: Array[ShopItemCard] = []
 
 @onready var _dialog: CharacterDialog = $Dialog
 @onready var _goods: Control = $Content/Goods
@@ -69,6 +74,7 @@ func _ready() -> void:
 	_preview_layer = CanvasLayer.new()
 	_preview_layer.layer = PREVIEW_LAYER
 	add_child(_preview_layer)
+	_build_grid()
 	_dialog.closed.connect(_leave)
 	Sfx.play(&"shop_bell", -6.0, 0.02)
 	_greet.call_deferred()
@@ -108,13 +114,6 @@ func _stock_shelves() -> void:
 func _refresh_shelves() -> void:
 	for id in _shelf_icons:
 		(_shelf_icons[id] as Node2D).modulate.a = SOLD_ALPHA if Inventory.has_item(id) else 1.0
-	var listed: Array[ItemData] = []
-	if _browsing:
-		listed = _listed_items()
-	for id in _shelf_tags:
-		var is_listed := listed.any(func(item: ItemData) -> bool: return item.id == id)
-		(_shelf_tags[id] as Label).add_theme_color_override("font_color",
-				LISTED_TAG_COLOR if is_listed else TAG_COLOR)
 
 func _for_sale() -> Array[ItemData]:
 	var items: Array[ItemData] = []
@@ -123,67 +122,80 @@ func _for_sale() -> Array[ItemData]:
 			items.append(item)
 	return items
 
-## The items the dialog is listing right now, wrapping round the end of
-## the stock.
-func _listed_items() -> Array[ItemData]:
-	var items := _for_sale()
-	var listed: Array[ItemData] = []
-	for i in mini(ITEMS_SHOWN, items.size()):
-		listed.append(items[(_first_listed + i) % items.size()])
-	return listed
+## The grid of cards and the Leave button under it, on the preview's layer
+## so they sit on top of the dialog. Hidden while an item's being pitched.
+func _build_grid() -> void:
+	_grid_root = Control.new()
+	_grid_root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_grid_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_grid_root.visible = false
+	_preview_layer.add_child(_grid_root)
+	var scroll := ScrollContainer.new()
+	scroll.anchor_left = GRID_RECT.position.x
+	scroll.anchor_top = GRID_RECT.position.y
+	scroll.anchor_right = GRID_RECT.end.x
+	scroll.anchor_bottom = GRID_RECT.end.y
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_grid_root.add_child(scroll)
+	_grid = GridContainer.new()
+	_grid.columns = GRID_COLUMNS
+	_grid.add_theme_constant_override("h_separation", GRID_GAP)
+	_grid.add_theme_constant_override("v_separation", GRID_GAP)
+	scroll.add_child(_grid)
+	for item in _for_sale():
+		var card := ShopItemCard.new()
+		card.setup(item, false)
+		card.pressed.connect(_on_item_picked.bind(item))
+		_grid.add_child(card)
+		_cards.append(card)
+	var leave := ScrapButton.new()
+	leave.text = "Leave"
+	leave.font_size = 20
+	leave.tilt_degrees = -1.0
+	leave.jitter_seed = 77
+	leave.anchor_left = LEAVE_POSITION.x
+	leave.anchor_top = LEAVE_POSITION.y
+	leave.anchor_right = LEAVE_POSITION.x
+	leave.anchor_bottom = LEAVE_POSITION.y
+	leave.offset_right = LEAVE_SIZE.x
+	leave.offset_bottom = LEAVE_SIZE.y
+	leave.pressed.connect(_dialog.close)
+	_grid_root.add_child(leave)
 
-## The main menu of the dialog: a few items, More Stuff when there's more
-## than fits, and Leave.
-func _show_stock(animate: bool = false) -> void:
+## Browsing: the dialog's own options give way to the card grid.
+func _show_stock(_animate: bool = false) -> void:
 	_browsing = true
 	_show_preview(null)
-	var options: Array = []
-	for item in _listed_items():
-		var owned := Inventory.has_item(item.id)
-		var label := "%s  -  $%d" % [item.display_name, item.price]
-		if owned:
-			label = "%s  (yours)" % item.display_name
-		options.append(CharacterDialog.Option.new(label, _on_item_picked.bind(item), owned))
-	if _for_sale().size() > ITEMS_SHOWN:
-		options.append(CharacterDialog.Option.new("More Stuff >", _scroll.bind(ITEMS_SHOWN)))
-	options.append(CharacterDialog.Option.new("Leave", _dialog.close))
-	_dialog.set_options(options, animate)
+	_dialog.set_options([], false)
+	for card in _cards:
+		card.setup(card.item, Inventory.has_item(card.item.id))
+	_grid_root.visible = true
 	_show_wallet()
 	_refresh_shelves()
 
-## Moves the list `steps` items along the stock (back with a negative),
-## relabelling the buttons in place.
-func _scroll(steps: int) -> void:
-	var count := _for_sale().size()
-	if count <= ITEMS_SHOWN:
-		return
-	_first_listed = posmod(_first_listed + steps, count)
-	Sfx.play(&"ui_hover", -8.0, 0.05)
-	_show_stock(false)
+## The Leave button and Esc both close the dialog; the grid goes the moment
+## it starts closing, not after it has slid away.
+func _process(_delta: float) -> void:
+	if _grid_root.visible and not _dialog.is_open():
+		_grid_root.visible = false
 
-## The mouse wheel and arrow keys scroll the list while it's up.
+## Number keys pick the card with that number while the grid is up.
 func _input(event: InputEvent) -> void:
-	if not _browsing or not _dialog.is_open():
+	if not _browsing or not _dialog.is_open() or not event is InputEventKey \
+			or not event.pressed or event.echo:
 		return
-	var steps := 0
-	if event is InputEventMouseButton and event.pressed:
-		match event.button_index:
-			MOUSE_BUTTON_WHEEL_UP:
-				steps = -1
-			MOUSE_BUTTON_WHEEL_DOWN:
-				steps = 1
-	elif event is InputEventKey and event.pressed:
-		match event.keycode:
-			KEY_UP, KEY_LEFT:
-				steps = -1
-			KEY_DOWN, KEY_RIGHT:
-				steps = 1
-	if steps != 0:
-		get_viewport().set_input_as_handled()
-		_scroll(steps)
+	var index: int = event.keycode - KEY_1
+	if index < 0 or index >= mini(_cards.size(), 9):
+		return
+	get_viewport().set_input_as_handled()
+	var card := _cards[index]
+	if not card.owned:
+		Sfx.play(&"ui_click", -8.0)
+		_on_item_picked(card.item)
 
 func _on_item_picked(item: ItemData) -> void:
 	_browsing = false
+	_grid_root.visible = false
 	_refresh_shelves()
 	_dialog.say(item.description)
 	_show_preview(item)
@@ -241,15 +253,13 @@ func _show_preview(item: ItemData) -> void:
 	tween.tween_property(_preview, "scale", Vector2.ONE * PREVIEW_SCALE, 0.3)
 
 func _show_wallet() -> void:
-	var note := "You have $%d" % Inventory.money
-	if _browsing and _for_sale().size() > ITEMS_SHOWN:
-		note += "      Scroll or arrow keys for more"
-	_dialog.set_note(note)
+	_dialog.set_note("You have $%d" % Inventory.money)
 
 func _leave() -> void:
 	if _leaving:
 		return
 	_leaving = true
 	_show_preview(null)
+	_grid_root.visible = false
 	SaveSystem.save_game()
 	SceneLoader.change_scene(WORLD_SCENE)

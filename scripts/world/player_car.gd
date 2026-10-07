@@ -136,6 +136,8 @@ const SUPER_HORN := &"super_horn"
 @export var puke_splat_delay: float = 1.3
 @export var puke_shake_pixels: float = 3.0
 @export var puke_volume_db: float = -2.0
+## Chance a stray dog (PukeDog) turns up to lick the puddle up.
+@export_range(0.0, 1.0) var puke_dog_chance: float = 0.2
 
 @export_group("Wading")
 ## Off the sand the car bogs down: top speed is cut to this share, falling to
@@ -911,6 +913,8 @@ func _spawn_puke_puddle() -> void:
 	else:
 		puddle.z_index = -1
 		get_parent().add_child(puddle)
+	if randf() < puke_dog_chance:
+		PukeDog.send_to(puddle, get_parent())
 
 ## How far the wheels turn this frame, in world pixels. The wheels roll on the
 ## car's total travel — the vertical component included — so driving up or

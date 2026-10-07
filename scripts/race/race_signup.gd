@@ -15,6 +15,8 @@ var tier := -1
 var car_index := -1
 var include_player := true
 var bet_field: Array[Dictionary] = []
+## The bet cards' driver names, in `bet_field` order (empty if not a bet).
+var bet_driver_names: Array[String] = []
 var entry_fee := 0
 ## The name the player's car races under; empty when it isn't racing.
 var player_car_name := ""
@@ -28,12 +30,14 @@ static func take_pending() -> RaceSignup:
 	signup.car_index = RaceProgression.pending_car_index
 	signup.include_player = RaceProgression.pending_include_player
 	signup.bet_field = RaceProgression.pending_bet_field
+	signup.bet_driver_names = RaceProgression.pending_bet_names
 	signup.entry_fee = RaceProgression.pending_entry_fee
 	RaceProgression.pending_tier = -1
 	RaceProgression.pending_car_index = -1
 	RaceProgression.pending_include_player = true
 	RaceProgression.pending_entry_fee = 0
 	RaceProgression.pending_bet_field = []
+	RaceProgression.pending_bet_names = []
 	return signup
 
 ## The car the player drives, or null on a bet race.
@@ -54,6 +58,10 @@ func rival_specs(count: int, course: RaceProgression.Course) -> Array[Dictionary
 	if tier <= 0 and course == RaceProgression.Course.DRAG:
 		return RaceProgression.pick_rivals(count)
 	return RaceProgression.pick_rivals_for_tier(count, maxi(tier, 1), course)
+
+## The driver the bet card in `slot` showed, or "" when there was none.
+func bet_driver_name(slot: int) -> String:
+	return bet_driver_names[slot] if slot >= 0 and slot < bet_driver_names.size() else ""
 
 ## DragStripMenu names its bet cards the same way, so the bet matches the car.
 static func rival_car_name(slot: int, rival: Dictionary) -> String:

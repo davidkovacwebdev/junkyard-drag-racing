@@ -76,6 +76,9 @@ var pending_entry_fee: int = 0
 ## bet against — reused as-is (not re-rolled) so the car bet on is the
 ## actual car that races. Empty means "roll a fresh field the normal way".
 var pending_bet_field: Array[Dictionary] = []
+## The driver names the bet cards showed, in the same order as
+## `pending_bet_field`, so the results board names the same drivers.
+var pending_bet_names: Array[String] = []
 
 ## Written by single_lane_race_setup.gd once a spectator-only (no player)
 ## race finishes, so DragStripMenu can resolve the bet when the scene
@@ -91,6 +94,18 @@ var last_ai_race_field_names: Array[String] = []
 ## `last_ai_race_field_names`.
 var last_bet_amount: int = 0
 var last_bet_car_name: String = ""
+## Whether that bet was on Roge Roger (see `roger_spec()`), for Grandpa's
+## "Sure Thing" quest.
+var last_bet_on_roger: bool = false
+
+## Roge Roger: back in town and racing in the top division, in a car that
+## belongs at the bottom of it. While Grandpa's "Sure Thing" is on, he's one
+## of the cars in the top tier's bet field at the Drag Strip (see
+## DragStripMenu).
+const ROGER_NAME := "Roge Roger"
+const ROGER_QUEST := &"roge_roger_bet"
+const ROGER_TIER := 4
+const ROGER_VENUE := "Drag Strip"
 
 ## Which race the shared pre-race menu (DragStripMenu) sends the player into,
 ## and the venue name it shows. Set by the RegistrationBooth they walked into,
@@ -168,6 +183,20 @@ static func _accessory_share_for_par(par: float, tier_pars: Dictionary) -> float
 
 static func _tier_pars(course: Course) -> Dictionary:
 	return HILL_TIER_PAR_TIMES if course == Course.HILL else TIER_PAR_TIMES
+
+## Roge Roger's car: always the same one, the roster car timed closest to
+## the bottom tier's par (no extras), so he's hopelessly outclassed.
+func roger_spec() -> Dictionary:
+	var roster: Array[Dictionary] = _rosters[Course.DRAG]
+	var plain := roster.filter(func(entry: Dictionary) -> bool:
+		return Array(entry.get("accessories", [])).is_empty())
+	return _pick_in_window(plain, TIER_PAR_TIMES[1], TIER_PAR_TIMES[1], TIER_PAR_TIMES[1], false) \
+			if not plain.is_empty() else roster[0]
+
+## Whether Roge Roger turns up in `tier`'s bet field at `venue` right now.
+func roger_is_racing(tier: int, venue: String) -> bool:
+	return tier == ROGER_TIER and venue == ROGER_VENUE \
+			and Quests.has_quest(ROGER_QUEST) and not Quests.is_ready(ROGER_QUEST)
 
 ## The full car a rival spec describes, built from throwaway PartData loads
 ## of its scene paths: what the bet card shows and what races.

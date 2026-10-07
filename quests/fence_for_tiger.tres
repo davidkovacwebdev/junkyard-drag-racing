@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
 [ext_resource type="Resource" path="res://items/fence_piece.tres" id="2_fence"]
+[ext_resource type="Resource" path="res://quests/roge_roger_bet.tres" id="3_next"]
 [ext_resource type="Script" uid="uid://b4kssi28o6a3g" path="res://scripts/items/item_data.gd" id="3_ua7lf"]
 
 [resource]
@@ -14,6 +15,7 @@ description = "Grandpa has his carrots and his paint, and now he wants a fence t
 Ram the farm's fence until a piece of it comes loose, then bring it to Grandpa."
 objective = "Ram the farm's fence until a piece comes loose"
 objective_place = "Farm"
+unlocks = Array[ExtResource("1_script")]([ExtResource("3_next")])
 item_goal = ExtResource("2_fence")
 count_goal = 10
 count_label = "hits"

@@ -89,6 +89,10 @@ const DEFAULT_EXIT_SCENE := "res://scenes/world/main.tscn"
 
 var camera: CameraFollow
 var _entries: Array[Dictionary] = []
+## Registered car name -> the driver the results board names, for cars the
+## player already knows by name (the bet cards' drivers). Anyone else gets a
+## random placeholder name.
+var driver_names: Dictionary = {}
 var _elapsed := 0.0
 var _race_over := false
 var _winner_name := ""
@@ -346,8 +350,9 @@ func _compute_standings(force_player_last: bool = false) -> Array[Dictionary]:
 	return standings
 
 ## Top 3 standings turned into what ResultsScreen actually shows: the
-## player's own entry stays "Player", every AI car gets a random, distinct
-## placeholder driver name (see name_gen.gd) picked fresh each race.
+## player's own entry stays "Player", an AI car in `driver_names` keeps that
+## name, and every other one gets a random, distinct placeholder driver name
+## (see name_gen.gd) picked fresh each race.
 func _build_results_data(standings: Array[Dictionary]) -> Array[Dictionary]:
 	var top := standings.slice(0, mini(3, standings.size()))
 	var ai_count := 0
@@ -361,6 +366,8 @@ func _build_results_data(standings: Array[Dictionary]) -> Array[Dictionary]:
 		var display_name: String
 		if (entry["name"] as String).begins_with("Player_"):
 			display_name = "Player"
+		elif driver_names.has(entry["name"]):
+			display_name = driver_names[entry["name"]]
 		else:
 			display_name = random_names[name_i]
 			name_i += 1

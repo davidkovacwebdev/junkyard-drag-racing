@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"roge_roger_bet"
+title = "Sure Thing"
+giver = "Grandpa"
+description = "Roge Roger is back in town (or Roger Roge, Grandpa can't decide). He races in the top division and he's \"almost as good as the Drag Queen\". Grandpa gave you $100 to bet on him. It's a sure win, he says. He's already planning the beer.
+
+At the Drag Strip, pick the Chop Shop tier, choose Bet and back Roge Roger. Then tell Grandpa how it went."
+objective = "Bet on Roge Roger in the Chop Shop tier at the Drag Strip"
+objective_place = "Drag Strip"
+start_cutscene = "res://cutscenes/grandpa_roge.tres"
+start_money = 100
+reminder_line = "Roge Roger, {player}! Top division! Put the money on Roge!"
+turn_in_cutscene = "res://cutscenes/grandpa_roge_report.tres"
