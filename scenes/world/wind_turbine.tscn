@@ -1,0 +1,15 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/world/wind_turbine.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/audio/ambient_call.gd" id="2"]
+
+[node name="WindTurbine" type="StaticBody2D"]
+script = ExtResource("1")
+
+[node name="Ambient" type="AudioStreamPlayer2D" parent="."]
+position = Vector2(0, -150)
+max_distance = 1100.0
+volume_db = -16.0
+script = ExtResource("2")
+sound_name = &"turbine_whoosh"
+interval_range = Vector2(3, 6)

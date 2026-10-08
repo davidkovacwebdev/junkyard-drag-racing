@@ -26,6 +26,7 @@ const WORLD_SHOTS := [
 	{"name": "shipwreck", "scene": "res://scenes/world/shipwreck.tscn", "zoom": 1.0},
 	{"name": "oil_rig", "scene": "res://scenes/world/oil_rig.tscn", "zoom": 1.0},
 	{"name": "lonely_island", "scene": "res://scenes/world/lonely_island.tscn", "zoom": 1.1},
+	{"name": "bigfoot_woods", "scene": "res://scenes/world/bigfoot_woods.tscn", "zoom": 0.45},
 ]
 
 const PROP_ROW := [
@@ -36,6 +37,10 @@ const PROP_ROW := [
 	"res://scenes/world/trash_bin.tscn",
 	"res://scenes/world/scrap_pickup.tscn",
 	"res://scenes/world/part_pickup.tscn",
+	"res://scenes/world/boulder.tscn",
+	"res://scenes/world/old_windmill.tscn",
+	"res://scenes/world/wind_turbine.tscn",
+	"res://scenes/world/whale_skeleton.tscn",
 ]
 
 const SCREEN_SHOTS := [
@@ -176,7 +181,7 @@ func _shoot_houses_and_trees() -> void:
 		house.building_data = _random_building(parts_by_slot, rng)
 		house.position = Vector2(-900 + i * 420, 0)
 		holder.add_child(house)
-	var tree_names := ["oak", "pine", "birch", "palm", "spruce", "dead_tree"]
+	var tree_names := ["oak", "pine", "birch", "palm", "spruce", "dead_tree", "cactus"]
 	for i in tree_names.size():
 		var tree: ComposedTree = load("res://scenes/world/composed_tree.tscn").instantiate()
 		tree.tree_data = load("res://trees/%s.tres" % tree_names[i])

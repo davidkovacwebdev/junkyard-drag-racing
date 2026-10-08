@@ -92,6 +92,7 @@ func _assemble() -> void:
 	# The node's new origin is the ground line, where every part's own
 	# building-space origin (y=0) expects to land.
 	_art = BuildingAssembler.assemble(building_data, self, Vector2.ZERO)
+	PolygonBaker.bake(_art)
 
 ## Drop the currently assembled art, if any. Uses `free()` rather than
 ## `queue_free()` so a re-assemble in the same frame can't briefly show both.

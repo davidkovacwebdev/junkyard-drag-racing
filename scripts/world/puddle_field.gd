@@ -192,12 +192,14 @@ func _build_index() -> void:
 func _draw() -> void:
 	if _fade <= 0.01:
 		return
+	var batch := TriangleBatch.new()
 	for puddle in _puddles:
-		_draw_puddle(puddle)
+		_draw_puddle(puddle, batch)
+	batch.commit(self)
 
 ## One flat water blob plus one flat highlight, both authored the same way the
 ## houses and trees are: solid fills, no outlines.
-func _draw_puddle(puddle: Dictionary) -> void:
+func _draw_puddle(puddle: Dictionary, batch: TriangleBatch) -> void:
 	var pos: Vector2 = puddle["pos"]
 	var radius: float = puddle["radius"]
 	var squash: float = puddle["squash"]
@@ -215,7 +217,7 @@ func _draw_puddle(puddle: Dictionary) -> void:
 		body[i] = pos + local.rotated(angle)
 	var fill := water_color
 	fill.a *= _fade
-	draw_colored_polygon(body, fill)
+	batch.draw_colored_polygon(body, fill)
 
 	# A single elongated streak offset to one side, reading as the sky
 	# reflected in the water. Deliberately off-centre — a concentric lighter
@@ -228,7 +230,7 @@ func _draw_puddle(puddle: Dictionary) -> void:
 		sheen[i] = pos + (local + Vector2(-radius * 0.26, -radius * squash * 0.3)).rotated(angle)
 	var gloss := sheen_color
 	gloss.a *= _fade
-	draw_colored_polygon(sheen, gloss)
+	batch.draw_colored_polygon(sheen, gloss)
 
 func _too_close(spot: Vector2, placed: Array[Vector2]) -> bool:
 	for other in placed:

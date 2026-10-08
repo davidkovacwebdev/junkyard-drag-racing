@@ -66,6 +66,8 @@ func _assemble() -> void:
 		collision.position = Vector2(0.0, -collision_height / 2.0)
 
 	_art = TreeAssembler.assemble(tree_data, self, Vector2.ZERO)
+	if not Engine.is_editor_hint():
+		PolygonBaker.bake(_art)
 	_mirror()
 
 ## Flip the art to match `flip_h`. Separate from `_assemble()` so toggling the

@@ -1,0 +1,109 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/world/bigfoot_woods.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/world/composed_tree.tscn" id="tree"]
+[ext_resource type="Resource" path="res://trees/spruce.tres" id="spruce"]
+[ext_resource type="Resource" path="res://trees/pine.tres" id="pine"]
+[ext_resource type="PackedScene" path="res://scenes/world/part_pickup.tscn" id="pickup"]
+[ext_resource type="Script" path="res://scripts/world/hidden_part_pickup.gd" id="hidden_pickup"]
+
+[node name="BigfootWoods" type="Node2D"]
+y_sort_enabled = true
+script = ExtResource("1")
+cross_path = PackedVector2Array(-80, -660, -20, -250, 30, 170)
+flee_path = PackedVector2Array(260, 480, 560, 760, 820, 1080, 1100, 1500)
+leg_drop_index = 2
+
+[node name="Footprints" type="Node2D" parent="."]
+z_index = -1
+
+[node name="Tree01" parent="." instance=ExtResource("tree")]
+position = Vector2(-760, -520)
+tree_data = ExtResource("pine")
+
+[node name="Tree02" parent="." instance=ExtResource("tree")]
+position = Vector2(-520, -760)
+tree_data = ExtResource("spruce")
+
+[node name="Tree03" parent="." instance=ExtResource("tree")]
+position = Vector2(-330, -480)
+tree_data = ExtResource("spruce")
+
+[node name="Tree04" parent="." instance=ExtResource("tree")]
+position = Vector2(-240, -940)
+tree_data = ExtResource("pine")
+
+[node name="Tree05" parent="." instance=ExtResource("tree")]
+position = Vector2(260, -460)
+tree_data = ExtResource("spruce")
+
+[node name="Tree06" parent="." instance=ExtResource("tree")]
+position = Vector2(420, -800)
+tree_data = ExtResource("spruce")
+
+[node name="Tree07" parent="." instance=ExtResource("tree")]
+position = Vector2(660, -420)
+tree_data = ExtResource("pine")
+
+[node name="Tree08" parent="." instance=ExtResource("tree")]
+position = Vector2(900, -660)
+tree_data = ExtResource("spruce")
+
+[node name="Tree09" parent="." instance=ExtResource("tree")]
+position = Vector2(60, -1040)
+tree_data = ExtResource("spruce")
+
+[node name="Tree10" parent="." instance=ExtResource("tree")]
+position = Vector2(-600, 420)
+tree_data = ExtResource("pine")
+
+[node name="Tree11" parent="." instance=ExtResource("tree")]
+position = Vector2(-380, 720)
+tree_data = ExtResource("spruce")
+
+[node name="Tree12" parent="." instance=ExtResource("tree")]
+position = Vector2(-120, 520)
+tree_data = ExtResource("spruce")
+
+[node name="Tree13" parent="." instance=ExtResource("tree")]
+position = Vector2(-700, 1000)
+tree_data = ExtResource("pine")
+
+[node name="Tree14" parent="." instance=ExtResource("tree")]
+position = Vector2(-300, 1150)
+tree_data = ExtResource("spruce")
+
+[node name="Tree15" parent="." instance=ExtResource("tree")]
+position = Vector2(500, 320)
+tree_data = ExtResource("spruce")
+
+[node name="Tree16" parent="." instance=ExtResource("tree")]
+position = Vector2(160, 920)
+tree_data = ExtResource("pine")
+
+[node name="Tree17" parent="." instance=ExtResource("tree")]
+position = Vector2(440, 1180)
+tree_data = ExtResource("spruce")
+
+[node name="Tree18" parent="." instance=ExtResource("tree")]
+position = Vector2(780, 580)
+tree_data = ExtResource("spruce")
+
+[node name="Tree19" parent="." instance=ExtResource("tree")]
+position = Vector2(1000, 880)
+tree_data = ExtResource("pine")
+
+[node name="Tree20" parent="." instance=ExtResource("tree")]
+position = Vector2(1220, 1150)
+tree_data = ExtResource("spruce")
+
+[node name="Tree21" parent="." instance=ExtResource("tree")]
+position = Vector2(620, 1380)
+tree_data = ExtResource("spruce")
+
+[node name="BigfootLeg" parent="." instance=ExtResource("pickup")]
+position = Vector2(820, 1080)
+script = ExtResource("hidden_pickup")
+part_id = &"wheel_bigfoot_leg"
+claim_id = "bigfoot_leg"
+found_sound = &"bigfoot_howl"

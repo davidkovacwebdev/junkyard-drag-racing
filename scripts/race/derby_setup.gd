@@ -7,8 +7,10 @@ extends Node2D
 ##
 ## A car is out when its body breaks, it lies on its roof, it loses every
 ## wheel, or it sits still too long. The last car running wins; at the time
-## limit the healthiest survivor does (RaceController.leader_wins_at_end,
-## fed by set_progress with each car's remaining durability).
+## limit the survivor with the most kills does, then the healthiest
+## (RaceController.leader_wins_at_end, fed by set_progress with each car's
+## remaining durability). A knockout is credited to the last rival that
+## touched the car within KILL_CREDIT_TIME.
 
 @export var race_controller_path: NodePath
 @export var camera_path: NodePath
@@ -31,6 +33,8 @@ const STUCK_TIME := 7.0
 ## Share of each part's durability it enters the pit with. Head-on hits in
 ## one line are slow, so at full strength nothing ever breaks.
 const DERBY_DURABILITY := 0.3
+const KILL_CREDIT_TIME := 5.0
+const KILL_CALLOUT_OFFSET := Vector2(0.0, -140.0)
 
 class Driver:
 	var car_name := ""
@@ -42,9 +46,13 @@ class Driver:
 	var roof_time := 0.0
 	var stuck_time := 0.0
 	var out := false
+	var last_hitter: Driver = null
+	var last_hit_time := -INF
 
 var _race_controller: RaceController
 var _drivers: Array[Driver] = []
+var _driver_of_part: Dictionary = {}
+var _elapsed := 0.0
 var _signup: RaceSignup = null
 var _arena_left := 0.0
 var _arena_right := 2800.0
@@ -96,6 +104,8 @@ func _add_driver(car_name: String, car: CarAssembler.AssembledCar) -> void:
 	for part in [car.body] + car.wheels:
 		part.collision_layer = CAR_LAYER
 		part.collision_mask = CAR_LAYER | ARENA_LAYERS
+		part.contact_monitor = true
+		part.max_contacts_reported = 4
 		var tracker := CarPartDamage.of(part)
 		if tracker != null:
 			tracker.max_durability *= DERBY_DURABILITY
@@ -103,6 +113,8 @@ func _add_driver(car_name: String, car: CarAssembler.AssembledCar) -> void:
 	var driver := Driver.new()
 	driver.car_name = car_name
 	driver.car = car
+	for part in [car.body] + car.wheels:
+		_driver_of_part[part] = driver
 	for wheel in car.wheels:
 		driver.full_spin[wheel] = wheel.target_angular_velocity
 	_drivers.append(driver)
@@ -110,6 +122,10 @@ func _add_driver(car_name: String, car: CarAssembler.AssembledCar) -> void:
 		_race_controller.register_car(car_name, car)
 
 func _physics_process(delta: float) -> void:
+	_elapsed += delta
+	for driver in _drivers:
+		if not driver.out:
+			_record_hits(driver)
 	for driver in _drivers:
 		if driver.out:
 			continue
@@ -125,6 +141,16 @@ func _physics_process(delta: float) -> void:
 	if running.size() == 1 and _drivers.size() > 1 and _race_controller != null:
 		_race_controller.crown(running[0].car_name)
 		running[0].out = true
+
+func _record_hits(driver: Driver) -> void:
+	for part in [driver.car.body] + driver.car.wheels:
+		if not is_instance_valid(part):
+			continue
+		for other in (part as RigidBody2D).get_colliding_bodies():
+			var hitter: Driver = _driver_of_part.get(other)
+			if hitter != null and hitter != driver:
+				driver.last_hitter = hitter
+				driver.last_hit_time = _elapsed
 
 func _drive(driver: Driver, delta: float) -> void:
 	var body := driver.car.body
@@ -179,6 +205,14 @@ func _knock_out(driver: Driver) -> void:
 	if _race_controller != null:
 		_race_controller.knock_out(driver.car_name)
 	Sfx.play(&"knockout_bell", -6.0, 0.03)
+	if driver.last_hitter != null and _elapsed - driver.last_hit_time <= KILL_CREDIT_TIME:
+		print("    %s gets the kill" % driver.last_hitter.car_name)
+		if is_instance_valid(driver.last_hitter.car.body):
+			Pickup.spawn_callout(self, driver.last_hitter.car.body.global_position + KILL_CALLOUT_OFFSET, "KILL!")
+		if _race_controller != null:
+			_race_controller.credit_kill(driver.last_hitter.car_name)
+		if driver.last_hitter.car_name.begins_with("Player_"):
+			Sfx.play(&"derby_kill", -4.0, 0.03)
 
 ## Share of durability left over the body and wheels still on.
 func _health(driver: Driver) -> float:

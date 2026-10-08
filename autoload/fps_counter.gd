@@ -1,6 +1,6 @@
 extends CanvasLayer
-## Frames-per-second readout in the top-right corner. F3 toggles it from any
-## scene, paused or not.
+## Frames-per-second and draw-call readout in the top-right corner. F3 toggles
+## it from any scene, paused or not.
 
 const _TOGGLE_KEY := KEY_F3
 const _SCREEN_MARGIN := 12.0
@@ -48,4 +48,5 @@ func toggle() -> void:
 	Sfx.play(&"ui_click", Sfx.UI_CLICK_VOLUME_DB)
 
 func _refresh_text() -> void:
-	_label.text = "%d FPS" % Engine.get_frames_per_second()
+	var draw_calls := int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME))
+	_label.text = "%d FPS\n%d draws" % [Engine.get_frames_per_second(), draw_calls]

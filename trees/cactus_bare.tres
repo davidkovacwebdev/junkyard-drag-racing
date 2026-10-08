@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="TreeData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/tree_data.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/trees/parts/trunks/trunk_cactus.tscn" id="2"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Bare Cactus"
+trunk_scene = ExtResource("2")

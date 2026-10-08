@@ -1,6 +1,6 @@
 extends Control
 ## Settings screen: one row per audio bus with a volume bar and a mute toggle,
-## all backed by AudioSettings, plus a fullscreen toggle backed by
+## all backed by AudioSettings, plus fullscreen and VSync toggles backed by
 ## DisplaySettings. Changing a volume plays a sample through that bus so you
 ## hear the new level (Music just plays on).
 
@@ -23,6 +23,7 @@ const PREVIEW_SOUNDS := {
 @onready var _rows: VBoxContainer = $Content/Board/Rows
 @onready var _back_button: BackButton = $BackButton
 var _fullscreen_button: ScrapButton
+var _vsync_button: ScrapButton
 
 func _ready() -> void:
 	# Settings is reached two ways — straight from the main menu, or from
@@ -33,7 +34,14 @@ func _ready() -> void:
 	_back_button.target_scene = "res://scenes/world/main.tscn" if WorldState.has_player_position else "res://scenes/menu/main_menu.tscn"
 	for i in ROWS.size():
 		_add_row(ROWS[i][0], ROWS[i][1], i)
-	_add_fullscreen_row(ROWS.size())
+	_fullscreen_button = _add_toggle_row("Fullscreen", ROWS.size())
+	_show_toggle_state(DisplaySettings.fullscreen, _fullscreen_button)
+	_fullscreen_button.toggled.connect(DisplaySettings.set_fullscreen)
+	DisplaySettings.fullscreen_changed.connect(_show_toggle_state.bind(_fullscreen_button))
+	_vsync_button = _add_toggle_row("VSync", ROWS.size() + 1)
+	_show_toggle_state(DisplaySettings.vsync, _vsync_button)
+	_vsync_button.toggled.connect(DisplaySettings.set_vsync)
+	DisplaySettings.vsync_changed.connect(_show_toggle_state.bind(_vsync_button))
 
 func _add_row(bus_name: StringName, label_text: String, index: int) -> void:
 	var row := HBoxContainer.new()
@@ -67,29 +75,27 @@ func _add_row(bus_name: StringName, label_text: String, index: int) -> void:
 	mute_button.toggled.connect(_on_mute_toggled.bind(bus_name, mute_button, volume_bar))
 	row.add_child(mute_button)
 
-func _add_fullscreen_row(index: int) -> void:
+func _add_toggle_row(label_text: String, index: int) -> ScrapButton:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 24)
 	_rows.add_child(row)
 
 	var label := Label.new()
-	label.text = "Fullscreen"
+	label.text = label_text
 	label.custom_minimum_size = Vector2(190, 0)
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	label.add_theme_color_override("font_color", UiPalette.TEXT_BROWN)
 	label.add_theme_font_size_override("font_size", 24)
 	row.add_child(label)
 
-	_fullscreen_button = ScrapButton.new()
-	_fullscreen_button.custom_minimum_size = Vector2(110, 40)
-	_fullscreen_button.toggle_mode = true
-	_fullscreen_button.font_size = 20
-	_fullscreen_button.tilt_degrees = 1.5 if index % 2 == 0 else -1.5
-	_fullscreen_button.jitter_seed = 40 + index
-	_show_fullscreen_state(DisplaySettings.fullscreen)
-	_fullscreen_button.toggled.connect(DisplaySettings.set_fullscreen)
-	DisplaySettings.fullscreen_changed.connect(_show_fullscreen_state)
-	row.add_child(_fullscreen_button)
+	var toggle_button := ScrapButton.new()
+	toggle_button.custom_minimum_size = Vector2(110, 40)
+	toggle_button.toggle_mode = true
+	toggle_button.font_size = 20
+	toggle_button.tilt_degrees = 1.5 if index % 2 == 0 else -1.5
+	toggle_button.jitter_seed = 40 + index
+	row.add_child(toggle_button)
+	return toggle_button
 
 func _on_volume_changed(volume: float, bus_name: StringName) -> void:
 	AudioSettings.set_volume(bus_name, volume)
@@ -105,7 +111,7 @@ func _show_mute_state(mute_button: ScrapButton, muted: bool) -> void:
 	mute_button.selected = muted
 	mute_button.text = "Muted" if muted else "Mute"
 
-func _show_fullscreen_state(fullscreen: bool) -> void:
-	_fullscreen_button.set_pressed_no_signal(fullscreen)
-	_fullscreen_button.selected = fullscreen
-	_fullscreen_button.text = "On" if fullscreen else "Off"
+func _show_toggle_state(enabled: bool, toggle_button: ScrapButton) -> void:
+	toggle_button.set_pressed_no_signal(enabled)
+	toggle_button.selected = enabled
+	toggle_button.text = "On" if enabled else "Off"

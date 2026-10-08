@@ -50,7 +50,9 @@
 [ext_resource type="Resource" path="res://buildings/house_12.tres" id="house_data_12"]
 [ext_resource type="Resource" path="res://buildings/house_13.tres" id="house_data_13"]
 [ext_resource type="Resource" path="res://buildings/house_14.tres" id="house_data_14"]
+[ext_resource type="Resource" path="res://buildings/mountain_hut.tres" id="house_data_mountain_hut"]
 [ext_resource type="PackedScene" path="res://scenes/world/house.tscn" id="house_scene"]
+[ext_resource type="PackedScene" path="res://scenes/world/bigfoot_woods.tscn" id="landmark_bigfoot_woods"]
 [ext_resource type="PackedScene" path="res://scenes/world/crop_fields.tscn" id="landmark_fields"]
 [ext_resource type="PackedScene" path="res://scenes/world/graveyard.tscn" id="landmark_graveyard"]
 [ext_resource type="PackedScene" path="res://scenes/world/hangar.tscn" id="landmark_hangar"]
@@ -64,11 +66,20 @@
 [ext_resource type="PackedScene" path="res://scenes/world/shipwreck.tscn" id="landmark_shipwreck"]
 [ext_resource type="PackedScene" path="res://scenes/world/water_tower.tscn" id="landmark_water_tower"]
 [ext_resource type="Script" uid="uid://b2nqbm7s245w4" path="res://scripts/world/offscreen_culler.gd" id="offscreen_culler"]
+[ext_resource type="PackedScene" path="res://scenes/world/boulder.tscn" id="prop_boulder"]
+[ext_resource type="PackedScene" path="res://scenes/world/old_windmill.tscn" id="prop_old_windmill"]
+[ext_resource type="PackedScene" path="res://scenes/world/whale_skeleton.tscn" id="prop_whale_skeleton"]
+[ext_resource type="PackedScene" path="res://scenes/world/wildflower_patch.tscn" id="prop_wildflower_patch"]
+[ext_resource type="PackedScene" path="res://scenes/world/wind_turbine.tscn" id="prop_wind_turbine"]
 [ext_resource type="Script" uid="uid://cgja4fmhwax6j" path="res://scripts/world/shark_spawner.gd" id="shark_spawner"]
 [ext_resource type="Resource" path="res://buildings/shop.tres" id="shop_building"]
 [ext_resource type="PackedScene" path="res://scenes/shop/shop.tscn" id="shop_interior"]
 [ext_resource type="PackedScene" path="res://scenes/world/shop_sign.tscn" id="shop_sign"]
 [ext_resource type="Script" uid="uid://bu5uxu5bnirmt" path="res://scripts/world/story_director.gd" id="story_director"]
+[ext_resource type="Resource" path="res://trees/cactus.tres" id="tree_cactus"]
+[ext_resource type="Resource" path="res://trees/cactus_bare.tres" id="tree_cactus_bare"]
+[ext_resource type="Resource" path="res://trees/dead_tree_bare.tres" id="tree_dead_bare"]
+[ext_resource type="Resource" path="res://trees/oak.tres" id="tree_oak"]
 [ext_resource type="Script" uid="uid://cbycrxwy4n85t" path="res://scripts/world/tumbleweed_spawner.gd" id="tumbleweed_spawner"]
 
 [sub_resource type="Curve2D" id="Curve2D_688af"]
@@ -337,6 +348,28 @@ script = ExtResource("12")
 
 [node name="Puddles" type="Node2D" parent="." unique_id=316629190]
 script = ExtResource("19_puddle")
+
+[node name="Wildflowers" type="Node2D" parent="." unique_id=1751982736]
+
+[node name="WildflowerPatch1" parent="Wildflowers" unique_id=898793339 instance=ExtResource("prop_wildflower_patch")]
+position = Vector2(379, 8212)
+radius = Vector2(289, 101)
+pattern_seed = 777
+
+[node name="WildflowerPatch2" parent="Wildflowers" unique_id=1764660195 instance=ExtResource("prop_wildflower_patch")]
+position = Vector2(1605, 8537)
+radius = Vector2(287, 119)
+pattern_seed = 659
+
+[node name="WildflowerPatch3" parent="Wildflowers" unique_id=1077724563 instance=ExtResource("prop_wildflower_patch")]
+position = Vector2(1133, 7947)
+radius = Vector2(231, 116)
+pattern_seed = 531
+
+[node name="WildflowerPatch4" parent="Wildflowers" unique_id=1687684028 instance=ExtResource("prop_wildflower_patch")]
+position = Vector2(832, 8685)
+radius = Vector2(266, 110)
+pattern_seed = 365
 
 [node name="OffscreenCuller" type="Node" parent="." unique_id=376626378]
 script = ExtResource("offscreen_culler")
@@ -627,6 +660,9 @@ position = Vector2(-7300, 4900)
 [node name="LonelyIsland" parent="Sortables" unique_id=668891349 instance=ExtResource("landmark_lonely_island")]
 position = Vector2(12664, 13673)
 
+[node name="BigfootWoods" parent="Sortables" unique_id=1941879329 instance=ExtResource("landmark_bigfoot_woods")]
+position = Vector2(6957, 16156)
+
 [node name="Gulls" type="Node2D" parent="Sortables" unique_id=386723825]
 script = ExtResource("gull_spawner")
 max_critters = 6
@@ -642,6 +678,398 @@ position = Vector2(-4144, -1472)
 [node name="FishingBoat" type="Node2D" parent="Sortables" unique_id=337289220]
 position = Vector2(11000, 3200)
 script = ExtResource("fishing_boat")
+
+[node name="Countryside" type="Node2D" parent="Sortables" unique_id=1781888606]
+y_sort_enabled = true
+
+[node name="Pine1" parent="Sortables/Countryside" unique_id=2001689211 instance=ExtResource("17_bolr6")]
+position = Vector2(517, -4941)
+tree_data = ExtResource("32_5jr8u")
+flip_h = true
+
+[node name="Pine2" parent="Sortables/Countryside" unique_id=2058641201 instance=ExtResource("17_bolr6")]
+position = Vector2(896, -5076)
+tree_data = ExtResource("32_5jr8u")
+flip_h = true
+
+[node name="Pine3" parent="Sortables/Countryside" unique_id=1914849996 instance=ExtResource("17_bolr6")]
+position = Vector2(1383, -5103)
+tree_data = ExtResource("32_5jr8u")
+flip_h = true
+
+[node name="Pine4" parent="Sortables/Countryside" unique_id=92150546 instance=ExtResource("17_bolr6")]
+position = Vector2(-472, -4822)
+tree_data = ExtResource("32_5jr8u")
+flip_h = true
+
+[node name="Pine5" parent="Sortables/Countryside" unique_id=1390770521 instance=ExtResource("17_bolr6")]
+position = Vector2(897, -4724)
+tree_data = ExtResource("32_5jr8u")
+
+[node name="Pine6" parent="Sortables/Countryside" unique_id=1600413617 instance=ExtResource("17_bolr6")]
+position = Vector2(-21, -4738)
+tree_data = ExtResource("32_5jr8u")
+flip_h = true
+
+[node name="Pine7" parent="Sortables/Countryside" unique_id=229678408 instance=ExtResource("17_bolr6")]
+position = Vector2(259, -4704)
+tree_data = ExtResource("32_5jr8u")
+flip_h = true
+
+[node name="Pine8" parent="Sortables/Countryside" unique_id=225131255 instance=ExtResource("17_bolr6")]
+position = Vector2(287, -3869)
+tree_data = ExtResource("32_5jr8u")
+flip_h = true
+
+[node name="Pine9" parent="Sortables/Countryside" unique_id=52555510 instance=ExtResource("17_bolr6")]
+position = Vector2(1078, -4915)
+tree_data = ExtResource("32_5jr8u")
+flip_h = true
+
+[node name="Pine10" parent="Sortables/Countryside" unique_id=1636136788 instance=ExtResource("17_bolr6")]
+position = Vector2(-522, -4573)
+tree_data = ExtResource("32_5jr8u")
+
+[node name="Pine11" parent="Sortables/Countryside" unique_id=656703793 instance=ExtResource("17_bolr6")]
+position = Vector2(-229, -4572)
+tree_data = ExtResource("32_5jr8u")
+
+[node name="Spruce1" parent="Sortables/Countryside" unique_id=1047345476 instance=ExtResource("17_bolr6")]
+position = Vector2(3886, -5305)
+tree_data = ExtResource("18_hbyw3")
+flip_h = true
+
+[node name="Spruce2" parent="Sortables/Countryside" unique_id=1116910627 instance=ExtResource("17_bolr6")]
+position = Vector2(3333, -5190)
+tree_data = ExtResource("18_hbyw3")
+flip_h = true
+
+[node name="Spruce3" parent="Sortables/Countryside" unique_id=1617370120 instance=ExtResource("17_bolr6")]
+position = Vector2(2707, -5147)
+tree_data = ExtResource("18_hbyw3")
+flip_h = true
+
+[node name="Spruce4" parent="Sortables/Countryside" unique_id=2087679937 instance=ExtResource("17_bolr6")]
+position = Vector2(3018, -5169)
+tree_data = ExtResource("18_hbyw3")
+
+[node name="Spruce5" parent="Sortables/Countryside" unique_id=785483236 instance=ExtResource("17_bolr6")]
+position = Vector2(3598, -5245)
+tree_data = ExtResource("18_hbyw3")
+
+[node name="Spruce6" parent="Sortables/Countryside" unique_id=737048960 instance=ExtResource("17_bolr6")]
+position = Vector2(3415, -5431)
+tree_data = ExtResource("18_hbyw3")
+flip_h = true
+
+[node name="Spruce7" parent="Sortables/Countryside" unique_id=1854513978 instance=ExtResource("17_bolr6")]
+position = Vector2(3805, -5046)
+tree_data = ExtResource("18_hbyw3")
+flip_h = true
+
+[node name="Spruce8" parent="Sortables/Countryside" unique_id=1013145194 instance=ExtResource("17_bolr6")]
+position = Vector2(10980, -2857)
+tree_data = ExtResource("18_hbyw3")
+
+[node name="Spruce9" parent="Sortables/Countryside" unique_id=123220019 instance=ExtResource("17_bolr6")]
+position = Vector2(11379, -3133)
+tree_data = ExtResource("18_hbyw3")
+flip_h = true
+
+[node name="Spruce10" parent="Sortables/Countryside" unique_id=818433286 instance=ExtResource("17_bolr6")]
+position = Vector2(11540, -3332)
+tree_data = ExtResource("18_hbyw3")
+
+[node name="Spruce11" parent="Sortables/Countryside" unique_id=438175230 instance=ExtResource("17_bolr6")]
+position = Vector2(11116, -3951)
+tree_data = ExtResource("18_hbyw3")
+
+[node name="Spruce12" parent="Sortables/Countryside" unique_id=943137973 instance=ExtResource("17_bolr6")]
+position = Vector2(12001, -3158)
+tree_data = ExtResource("18_hbyw3")
+flip_h = true
+
+[node name="Spruce13" parent="Sortables/Countryside" unique_id=1005086485 instance=ExtResource("17_bolr6")]
+position = Vector2(12676, -3317)
+tree_data = ExtResource("18_hbyw3")
+
+[node name="Birch1" parent="Sortables/Countryside" unique_id=1357422575 instance=ExtResource("17_bolr6")]
+position = Vector2(-1554, 5838)
+tree_data = ExtResource("32_1notw")
+flip_h = true
+
+[node name="Birch2" parent="Sortables/Countryside" unique_id=1632240575 instance=ExtResource("17_bolr6")]
+position = Vector2(-747, 5312)
+tree_data = ExtResource("32_1notw")
+
+[node name="Birch3" parent="Sortables/Countryside" unique_id=768057482 instance=ExtResource("17_bolr6")]
+position = Vector2(-1904, 5394)
+tree_data = ExtResource("32_1notw")
+
+[node name="Birch4" parent="Sortables/Countryside" unique_id=804106703 instance=ExtResource("17_bolr6")]
+position = Vector2(-802, 5573)
+tree_data = ExtResource("32_1notw")
+
+[node name="Birch5" parent="Sortables/Countryside" unique_id=855150440 instance=ExtResource("17_bolr6")]
+position = Vector2(-1763, 5069)
+tree_data = ExtResource("32_1notw")
+flip_h = true
+
+[node name="Birch6" parent="Sortables/Countryside" unique_id=693629940 instance=ExtResource("17_bolr6")]
+position = Vector2(-1117, 5353)
+tree_data = ExtResource("32_1notw")
+flip_h = true
+
+[node name="Birch7" parent="Sortables/Countryside" unique_id=304150027 instance=ExtResource("17_bolr6")]
+position = Vector2(-1940, 6124)
+tree_data = ExtResource("32_1notw")
+flip_h = true
+
+[node name="Birch8" parent="Sortables/Countryside" unique_id=2135570962 instance=ExtResource("17_bolr6")]
+position = Vector2(-1646, 5438)
+tree_data = ExtResource("32_1notw")
+flip_h = true
+
+[node name="Oak1" parent="Sortables/Countryside" unique_id=62788987 instance=ExtResource("17_bolr6")]
+position = Vector2(3774, 7508)
+tree_data = ExtResource("tree_oak")
+
+[node name="Oak2" parent="Sortables/Countryside" unique_id=313889097 instance=ExtResource("17_bolr6")]
+position = Vector2(2946, 7905)
+tree_data = ExtResource("tree_oak")
+flip_h = true
+
+[node name="Oak3" parent="Sortables/Countryside" unique_id=454501930 instance=ExtResource("17_bolr6")]
+position = Vector2(1967, 7844)
+tree_data = ExtResource("tree_oak")
+
+[node name="Oak4" parent="Sortables/Countryside" unique_id=1067415736 instance=ExtResource("17_bolr6")]
+position = Vector2(2404, 7707)
+tree_data = ExtResource("tree_oak")
+flip_h = true
+
+[node name="Oak5" parent="Sortables/Countryside" unique_id=2024326958 instance=ExtResource("17_bolr6")]
+position = Vector2(3232, 6651)
+tree_data = ExtResource("tree_oak")
+
+[node name="Oak6" parent="Sortables/Countryside" unique_id=699183534 instance=ExtResource("17_bolr6")]
+position = Vector2(3837, 7983)
+tree_data = ExtResource("tree_oak")
+
+[node name="Oak7" parent="Sortables/Countryside" unique_id=1229377092 instance=ExtResource("17_bolr6")]
+position = Vector2(3878, 6738)
+tree_data = ExtResource("tree_oak")
+flip_h = true
+
+[node name="Oak8" parent="Sortables/Countryside" unique_id=881308758 instance=ExtResource("17_bolr6")]
+position = Vector2(2571, 6470)
+tree_data = ExtResource("tree_oak")
+
+[node name="Oak9" parent="Sortables/Countryside" unique_id=116665747 instance=ExtResource("17_bolr6")]
+position = Vector2(3733, 7044)
+tree_data = ExtResource("tree_oak")
+flip_h = true
+
+[node name="Oak10" parent="Sortables/Countryside" unique_id=261700699 instance=ExtResource("17_bolr6")]
+position = Vector2(2148, 8270)
+tree_data = ExtResource("tree_oak")
+
+[node name="Oak11" parent="Sortables/Countryside" unique_id=18946524 instance=ExtResource("17_bolr6")]
+position = Vector2(3195, 7527)
+tree_data = ExtResource("tree_oak")
+flip_h = true
+
+[node name="Oak12" parent="Sortables/Countryside" unique_id=604973358 instance=ExtResource("17_bolr6")]
+position = Vector2(2384, 6992)
+tree_data = ExtResource("tree_oak")
+flip_h = true
+
+[node name="Oak13" parent="Sortables/Countryside" unique_id=1481831947 instance=ExtResource("17_bolr6")]
+position = Vector2(2650, 7541)
+tree_data = ExtResource("tree_oak")
+flip_h = true
+
+[node name="Oak14" parent="Sortables/Countryside" unique_id=1586521154 instance=ExtResource("17_bolr6")]
+position = Vector2(2036, 7144)
+tree_data = ExtResource("tree_oak")
+
+[node name="Pine12" parent="Sortables/Countryside" unique_id=1777855222 instance=ExtResource("17_bolr6")]
+position = Vector2(6990, 18620)
+tree_data = ExtResource("32_5jr8u")
+
+[node name="Pine13" parent="Sortables/Countryside" unique_id=1322715270 instance=ExtResource("17_bolr6")]
+position = Vector2(7676, 19007)
+tree_data = ExtResource("32_5jr8u")
+flip_h = true
+
+[node name="Pine14" parent="Sortables/Countryside" unique_id=162495070 instance=ExtResource("17_bolr6")]
+position = Vector2(8062, 19529)
+tree_data = ExtResource("32_5jr8u")
+flip_h = true
+
+[node name="Pine15" parent="Sortables/Countryside" unique_id=1365262369 instance=ExtResource("17_bolr6")]
+position = Vector2(8375, 18828)
+tree_data = ExtResource("32_5jr8u")
+flip_h = true
+
+[node name="Pine16" parent="Sortables/Countryside" unique_id=2012936050 instance=ExtResource("17_bolr6")]
+position = Vector2(7697, 18459)
+tree_data = ExtResource("32_5jr8u")
+
+[node name="Pine17" parent="Sortables/Countryside" unique_id=1415047500 instance=ExtResource("17_bolr6")]
+position = Vector2(6701, 18305)
+tree_data = ExtResource("32_5jr8u")
+
+[node name="Pine18" parent="Sortables/Countryside" unique_id=1502313811 instance=ExtResource("17_bolr6")]
+position = Vector2(8127, 18596)
+tree_data = ExtResource("32_5jr8u")
+
+[node name="Pine19" parent="Sortables/Countryside" unique_id=1647093278 instance=ExtResource("17_bolr6")]
+position = Vector2(8076, 19205)
+tree_data = ExtResource("32_5jr8u")
+
+[node name="DeadTree1" parent="Sortables/Countryside" unique_id=1964498630 instance=ExtResource("17_bolr6")]
+position = Vector2(2647, 12567)
+tree_data = ExtResource("tree_dead_bare")
+
+[node name="DeadTree2" parent="Sortables/Countryside" unique_id=301410098 instance=ExtResource("17_bolr6")]
+position = Vector2(2891, 12987)
+tree_data = ExtResource("tree_dead_bare")
+flip_h = true
+
+[node name="DeadTree3" parent="Sortables/Countryside" unique_id=1262544809 instance=ExtResource("17_bolr6")]
+position = Vector2(3003, 13308)
+tree_data = ExtResource("tree_dead_bare")
+flip_h = true
+
+[node name="DeadTree4" parent="Sortables/Countryside" unique_id=2129484563 instance=ExtResource("17_bolr6")]
+position = Vector2(2245, 12905)
+tree_data = ExtResource("tree_dead_bare")
+flip_h = true
+
+[node name="DeadTree5" parent="Sortables/Countryside" unique_id=392770529 instance=ExtResource("17_bolr6")]
+position = Vector2(11477, 7839)
+tree_data = ExtResource("tree_dead_bare")
+flip_h = true
+
+[node name="DeadTree6" parent="Sortables/Countryside" unique_id=876700628 instance=ExtResource("17_bolr6")]
+position = Vector2(10518, 7321)
+tree_data = ExtResource("tree_dead_bare")
+flip_h = true
+
+[node name="DeadTree7" parent="Sortables/Countryside" unique_id=1010417442 instance=ExtResource("17_bolr6")]
+position = Vector2(11344, 7283)
+tree_data = ExtResource("tree_dead_bare")
+
+[node name="DeadTree8" parent="Sortables/Countryside" unique_id=361588098 instance=ExtResource("17_bolr6")]
+position = Vector2(12561, 7866)
+tree_data = ExtResource("tree_dead_bare")
+
+[node name="DeadTree12" parent="Sortables/Countryside" unique_id=589856198 instance=ExtResource("17_bolr6")]
+position = Vector2(-6715, -1987)
+tree_data = ExtResource("tree_dead_bare")
+flip_h = true
+
+[node name="DeadTree14" parent="Sortables/Countryside" unique_id=159746918 instance=ExtResource("17_bolr6")]
+position = Vector2(-6778, -1387)
+tree_data = ExtResource("tree_dead_bare")
+flip_h = true
+
+[node name="DeadTree15" parent="Sortables/Countryside" unique_id=1798605601 instance=ExtResource("17_bolr6")]
+position = Vector2(-6373, -1924)
+tree_data = ExtResource("tree_dead_bare")
+
+[node name="DeadTree16" parent="Sortables/Countryside" unique_id=1157658251 instance=ExtResource("17_bolr6")]
+position = Vector2(-5988, -2263)
+tree_data = ExtResource("tree_dead_bare")
+
+[node name="Cactus1" parent="Sortables/Countryside" unique_id=2068293096 instance=ExtResource("17_bolr6")]
+position = Vector2(4619, 10491)
+tree_data = ExtResource("tree_cactus")
+flip_h = true
+
+[node name="Cactus2" parent="Sortables/Countryside" unique_id=1651598859 instance=ExtResource("17_bolr6")]
+position = Vector2(3742, 11359)
+tree_data = ExtResource("tree_cactus_bare")
+
+[node name="Cactus3" parent="Sortables/Countryside" unique_id=1070814183 instance=ExtResource("17_bolr6")]
+position = Vector2(3555, 12170)
+tree_data = ExtResource("tree_cactus")
+
+[node name="Cactus4" parent="Sortables/Countryside" unique_id=126344036 instance=ExtResource("17_bolr6")]
+position = Vector2(4325, 11957)
+tree_data = ExtResource("tree_cactus_bare")
+
+[node name="Cactus5" parent="Sortables/Countryside" unique_id=2120792321 instance=ExtResource("17_bolr6")]
+position = Vector2(2206, 11027)
+tree_data = ExtResource("tree_cactus_bare")
+flip_h = true
+
+[node name="Cactus6" parent="Sortables/Countryside" unique_id=791755972 instance=ExtResource("17_bolr6")]
+position = Vector2(3514, 11578)
+tree_data = ExtResource("tree_cactus_bare")
+
+[node name="Cactus7" parent="Sortables/Countryside" unique_id=1825612087 instance=ExtResource("17_bolr6")]
+position = Vector2(3589, 10796)
+tree_data = ExtResource("tree_cactus")
+flip_h = true
+
+[node name="Cactus8" parent="Sortables/Countryside" unique_id=659483119 instance=ExtResource("17_bolr6")]
+position = Vector2(-2176, 1593)
+tree_data = ExtResource("tree_cactus_bare")
+
+[node name="Cactus9" parent="Sortables/Countryside" unique_id=171801358 instance=ExtResource("17_bolr6")]
+position = Vector2(-2932, 1486)
+tree_data = ExtResource("tree_cactus_bare")
+flip_h = true
+
+[node name="Cactus10" parent="Sortables/Countryside" unique_id=1409994243 instance=ExtResource("17_bolr6")]
+position = Vector2(-2719, 2202)
+tree_data = ExtResource("tree_cactus")
+flip_h = true
+
+[node name="Cactus11" parent="Sortables/Countryside" unique_id=489211883 instance=ExtResource("17_bolr6")]
+position = Vector2(-2315, 2156)
+tree_data = ExtResource("tree_cactus_bare")
+
+[node name="WindTurbine1" parent="Sortables/Countryside" unique_id=2049048482 instance=ExtResource("prop_wind_turbine")]
+position = Vector2(14181, 7582)
+
+[node name="WindTurbine2" parent="Sortables/Countryside" unique_id=1600390519 instance=ExtResource("prop_wind_turbine")]
+position = Vector2(12650, 8634)
+
+[node name="WindTurbine3" parent="Sortables/Countryside" unique_id=197862035 instance=ExtResource("prop_wind_turbine")]
+position = Vector2(14177, 9587)
+
+[node name="WindTurbine4" parent="Sortables/Countryside" unique_id=1821168773 instance=ExtResource("prop_wind_turbine")]
+position = Vector2(13515, 8509)
+
+[node name="WindTurbine5" parent="Sortables/Countryside" unique_id=385296597 instance=ExtResource("prop_wind_turbine")]
+position = Vector2(14292, 8531)
+
+[node name="Boulder1" parent="Sortables/Countryside" unique_id=671001713 instance=ExtResource("prop_boulder")]
+position = Vector2(13416, 9804)
+size = 1.09
+
+[node name="Boulder2" parent="Sortables/Countryside" unique_id=1620560489 instance=ExtResource("prop_boulder")]
+position = Vector2(13433, 9400)
+size = 1.11
+flip_h = true
+
+[node name="Boulder3" parent="Sortables/Countryside" unique_id=1514237470 instance=ExtResource("prop_boulder")]
+position = Vector2(15014, 8773)
+size = 1.37
+flip_h = true
+
+[node name="MountainHut" parent="Sortables/Countryside" unique_id=1781619173 instance=ExtResource("house_scene")]
+position = Vector2(14830, -4130)
+building_data = ExtResource("house_data_mountain_hut")
+
+[node name="OldWindmill" parent="Sortables/Countryside" unique_id=952305387 instance=ExtResource("prop_old_windmill")]
+position = Vector2(-2155, 6945)
+
+[node name="WhaleSkeleton" parent="Sortables/Countryside" unique_id=2072875776 instance=ExtResource("prop_whale_skeleton")]
+position = Vector2(-9700, 8400)
 
 [node name="PauseMenu" parent="." unique_id=1833115279 instance=ExtResource("6")]
 

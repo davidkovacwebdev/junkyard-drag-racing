@@ -1,7 +1,9 @@
 extends Node
 ## Frame cost with the player car parked at each landmark, then, at the worst
 ## spot, the cost of each world group found by hiding them one at a time:
-##   godot res://tools/location_perf_probe.tscn -- [--zoom=1.0] [--inside=Farm,Junkyard] --no-save
+##   godot res://tools/location_perf_probe.tscn -- [--zoom=1.0] [--at=Farm] [--inside=Farm,Junkyard] --no-save
+## `--at` skips the tour and breaks down that one landmark. A zoom below the
+## binoculars' limit (e.g. 0.03) uses traveler mode, like F6.
 ## `--inside` breaks those groups down child by child instead of touring.
 
 const MAIN := preload("res://scenes/world/main.tscn")
@@ -22,7 +24,11 @@ func _ready() -> void:
 	var camera: Camera2D = _player.get_node("Camera2D")
 	camera.set("zoom_speed", 1000.0)
 	var zoom := _zoom_arg()
-	camera.set("_target_zoom", zoom)
+	if zoom < WorldCamera.BINOCULARS_MIN_ZOOM:
+		_player.set_traveling(true)
+		camera.set("_traveler_zoom", zoom)
+	else:
+		camera.set("_target_zoom", zoom)
 	camera.zoom = Vector2(zoom, zoom)
 	var inside := _named_arg("--inside=")
 	if not inside.is_empty():
@@ -31,20 +37,26 @@ func _ready() -> void:
 		return
 	var worst: Node2D = null
 	var worst_ms := 0.0
-	for spot in _landmarks():
+	var spots := _landmarks()
+	var at := _named_arg("--at=")
+	if not at.is_empty():
+		spots = spots.filter(func(spot: Node2D) -> bool: return spot.name == at)
+	for spot in spots:
 		_player.global_position = spot.global_position + Vector2(0.0, 300.0)
 		var ms := await _measure()
-		print("at %-24s ms=%.2f" % [spot.name, ms])
+		print("at %-24s ms=%.2f draws=%d" % [spot.name, ms, _draw_calls()])
 		if ms > worst_ms:
 			worst_ms = ms
 			worst = spot
 	_player.global_position = worst.global_position + Vector2(0.0, 300.0)
-	print("--- groups at ", worst.name, " baseline ms=%.2f" % worst_ms)
+	var baseline_draws := _draw_calls()
+	print("--- groups at ", worst.name, " baseline ms=%.2f draws=%d" % [worst_ms, baseline_draws])
 	for group in _groups():
 		group.visible = false
 		var ms := await _measure()
+		var draws := _draw_calls()
 		group.visible = true
-		print("hide %-28s saves ms=%.2f" % [group.name, worst_ms - ms])
+		print("hide %-28s saves ms=%.2f draws=%d" % [group.name, worst_ms - ms, baseline_draws - draws])
 	get_tree().quit()
 
 func _measure() -> float:
@@ -82,6 +94,9 @@ func _break_down(names: PackedStringArray) -> void:
 			var ms := await _measure()
 			child.visible = true
 			print("hide %s/%-24s saves ms=%.2f" % [name, child.name, baseline - ms])
+
+func _draw_calls() -> int:
+	return int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME))
 
 func _zoom_arg() -> float:
 	var value := _named_arg("--zoom=")

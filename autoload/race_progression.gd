@@ -51,6 +51,9 @@ const TIER_ENTRY_FEES := { 1: 40, 2: 100, 3: 220, 4: 450 }
 ## DragStripMenu) pays back 3x the stake instead — driving risks more, so it
 ## pays more.
 const ENTRY_WIN_MULTIPLIER := 4
+## Each rival the player knocks out of the derby pays this share of the
+## entry fee, win or lose.
+const KILL_PAY_SHARE := 0.5
 ## Share of rivals wearing extras, by tier: a bolt-on is a rare sight at the
 ## bottom and common at the top. The roster times cars with their extras on,
 ## so this only picks which cars show up, not how fast they are.

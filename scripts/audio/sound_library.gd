@@ -52,6 +52,7 @@ const NAMES: Array[StringName] = [
 	&"headlight_click",
 	&"binocular_focus",
 	&"knockout_bell",
+	&"derby_kill",
 	&"summit_cowbell",
 	&"gondola_bell",
 	&"engine_stall",
@@ -71,6 +72,7 @@ const NAMES: Array[StringName] = [
 	&"flat_tire_flop",
 	&"giant_tire_boom",
 	&"robot_stomp",
+	&"bigfoot_stomp",
 	&"fuselage_bong",
 	&"bone_clatter",
 	&"track_clank",
@@ -152,8 +154,12 @@ const NAMES: Array[StringName] = [
 	&"dish_chirp",
 	&"rotor_creak",
 	&"hull_creak",
+	&"windmill_creak",
+	&"turbine_whoosh",
+	&"rib_whistle",
 	&"rig_clank",
 	&"castaway_holler",
+	&"bigfoot_howl",
 	&"wing_flutter",
 	&"tumbleweed_crunch",
 	&"dog_bark",
@@ -194,6 +200,7 @@ const CAR_SOUNDS: Array[StringName] = [
 	&"flat_tire_flop",
 	&"giant_tire_boom",
 	&"robot_stomp",
+	&"bigfoot_stomp",
 	&"fuselage_bong",
 	&"bone_clatter",
 	&"track_clank",
@@ -254,6 +261,9 @@ const AMBIENT_SOUNDS: Array[StringName] = [
 	&"dish_chirp",
 	&"rotor_creak",
 	&"hull_creak",
+	&"windmill_creak",
+	&"turbine_whoosh",
+	&"rib_whistle",
 	&"rig_clank",
 	&"castaway_holler",
 	&"wing_flutter",
@@ -324,6 +334,7 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"headlight_click": return _headlight_click(rng)
 		&"binocular_focus": return _binocular_focus(rng)
 		&"knockout_bell": return _knockout_bell(rng)
+		&"derby_kill": return _derby_kill(rng)
 		&"summit_cowbell": return _summit_cowbell(rng)
 		&"gondola_bell": return _gondola_bell(rng)
 		&"engine_stall": return _engine_stall(rng)
@@ -424,8 +435,13 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"dish_chirp": return _dish_chirp()
 		&"rotor_creak": return _rotor_creak(rng)
 		&"hull_creak": return _hull_creak(rng)
+		&"windmill_creak": return _windmill_creak(rng)
+		&"turbine_whoosh": return _turbine_whoosh(rng)
+		&"rib_whistle": return _rib_whistle(rng)
 		&"rig_clank": return _rig_clank(rng)
 		&"castaway_holler": return _castaway_holler(rng)
+		&"bigfoot_howl": return _bigfoot_howl(rng)
+		&"bigfoot_stomp": return _bigfoot_stomp(rng)
 		&"wing_flutter": return _wing_flutter(rng)
 		&"tumbleweed_crunch": return _tumbleweed_crunch(rng)
 		&"dog_bark": return _dog_bark(rng)
@@ -472,6 +488,19 @@ static func _knockout_bell(rng: RandomNumberGenerator) -> PackedFloat32Array:
 		out = Synth.mix_into(out, ding, hit * 0.2, 0.8)
 		out = Synth.mix_into(out, _metal_ring(0.08, 3400.0, 6.0, 0.02, rng), hit * 0.2, 0.5)
 	return Synth.finish(out, 0.6)
+
+## A crunch and a buzzy two-note "dun-DUN": the player knocked a rival out
+## of the derby.
+static func _derby_kill(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.7)
+	out = Synth.mix_into(out, Synth.thump(0.18, 700.0, 0.002, 0.06, rng), 0.0, 1.0)
+	out = Synth.mix_into(out, _metal_ring(0.12, 2100.0, 5.0, 0.03, rng), 0.0, 0.4)
+	var stinger := Synth.tones(0.5, [[[0.0, 196.0], [0.12, 196.0], [0.13, 294.0]], [[0.0, 98.0], [0.12, 98.0], [0.13, 147.0]]], {
+		square = 0.5,
+		amp = [[0.0, 0.0], [0.005, 0.8], [0.1, 0.5], [0.13, 1.0], [0.5, 0.0]],
+	})
+	out = Synth.mix_into(out, stinger, 0.08, 0.7)
+	return Synth.finish(out, 0.7)
 
 ## Two dull cowbell clanks: a car made the hill climb's summit.
 static func _summit_cowbell(rng: RandomNumberGenerator) -> PackedFloat32Array:
@@ -2409,6 +2438,45 @@ static func _hull_creak(rng: RandomNumberGenerator) -> PackedFloat32Array:
 	Synth.mix_into(out, Synth.thump(0.12, 600.0, 0.002, 0.04, rng), 0.75, 0.4)
 	return Synth.finish(out, 0.6)
 
+## The old windmill's wooden sails turning on a dry axle: a slow two-step
+## groan (up, then down) with a soft knock as each sail passes the tower.
+static func _windmill_creak(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.tones(1.2, [[[0.0, 170.0], [0.5, 215.0], [0.6, 190.0], [1.2, 150.0]]], {
+		square = 0.65,
+		amp = [[0.0, 0.0], [0.15, 0.8], [0.5, 0.5], [0.65, 0.8], [1.2, 0.0]],
+		tremolo = [22.0, 0.7],
+		peak = 0.5,
+	})
+	Synth.mix_into(out, Synth.thump(0.1, 650.0, 0.002, 0.035, rng), 0.55, 0.45)
+	return Synth.finish(out, 0.55)
+
+## A wind turbine blade sweeping past the mast: a soft, low "whum" of air.
+static func _turbine_whoosh(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.noise_sweep(1.0, {
+		freq = [[0.0, 180.0], [0.45, 420.0], [1.0, 160.0]],
+		q = [[0.0, 1.4]],
+		amp = [[0.0, 0.0], [0.4, 1.0], [1.0, 0.0]],
+	}, rng)
+	Synth.mix_into(out, Synth.tones(1.0, [[[0.0, 70.0], [1.0, 70.0]]], {
+		amp = [[0.0, 0.0], [0.4, 0.6], [1.0, 0.0]],
+		peak = 0.5,
+	}), 0.0, 0.4)
+	return Synth.finish(out, 0.5)
+
+## Wind through the whale's ribs: a hollow, breathy whistle that rises and
+## sags, like blowing over a bottle.
+static func _rib_whistle(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.noise_sweep(1.6, {
+		freq = [[0.0, 520.0], [0.7, 760.0], [1.6, 480.0]],
+		q = [[0.0, 9.0]],
+		amp = [[0.0, 0.0], [0.6, 1.0], [1.1, 0.7], [1.6, 0.0]],
+	}, rng)
+	Synth.mix_into(out, Synth.tones(1.6, [[[0.0, 520.0], [0.7, 760.0], [1.6, 480.0]]], {
+		amp = [[0.0, 0.0], [0.6, 0.35], [1.6, 0.0]],
+		peak = 0.5,
+	}), 0.0, 0.35)
+	return Synth.finish(out, 0.5)
+
 ## Work on the offshore rig carrying over the water: a heavy steel clank with a
 ## long, dull ring after it.
 static func _rig_clank(rng: RandomNumberGenerator) -> PackedFloat32Array:
@@ -2438,6 +2506,37 @@ static func _castaway_holler(rng: RandomNumberGenerator) -> PackedFloat32Array:
 		return Synth.mix_into(voice, breath, 0.0, 0.4)
 	return Synth.finish(Synth.concat([shout.call(0.22, 240.0, 300.0, 1900.0), Synth.silence(0.04),
 			shout.call(0.6, 260.0, 340.0, 700.0)]), 0.6)
+
+## Bigfoot spooked: a huge, hoarse "WHOO-AAAH" that swoops up from a low
+## grunt and breaks into a long, wobbling wail as it falls away.
+static func _bigfoot_howl(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var duration := 1.5
+	var voice := Synth.tones(duration, [[[0.0, 95.0], [0.18, 150.0], [0.5, 230.0], [1.0, 190.0], [duration, 110.0]]], {
+		square = 0.6,
+		amp = [[0.0, 0.0], [0.06, 0.7], [0.4, 1.0], [1.1, 0.7], [duration, 0.0]],
+		tremolo = [7.0, 0.35],
+		peak = 0.6,
+	})
+	var vowel := Synth.Formant.new()
+	vowel.tune(650.0, 3.5)
+	for i in voice.size():
+		voice[i] = voice[i] * 0.45 + vowel.step(voice[i]) * 0.9
+	var rasp := Synth.noise_sweep(duration, {
+		freq = [[0.0, 500.0], [0.5, 900.0], [duration, 400.0]],
+		q = [[0.0, 1.8]],
+		amp = [[0.0, 0.0], [0.08, 0.8], [1.0, 0.5], [duration, 0.0]],
+		peak = 0.35,
+	}, rng)
+	return Synth.finish(Synth.mix_into(voice, rasp, 0.0, 0.5), 0.7)
+
+## A big bare foot coming down on forest floor: a deep, padded thud with a
+## crunch of twigs under it.
+static func _bigfoot_stomp(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.thump(0.3, 120.0, 0.004, 0.12, rng)
+	Synth.mix_into(out, Synth.thump(0.12, 420.0, 0.002, 0.04, rng), 0.0, 0.35)
+	for i in 5:
+		Synth.mix_into(out, Synth.thump(0.012, 4200.0, 0.0005, 0.004, rng), rng.randf_range(0.0, 0.08), rng.randf_range(0.2, 0.45))
+	return Synth.finish(out, 0.7)
 
 ## A bird taking off: a quick run of soft, papery wing beats that speed up and
 ## fade as it climbs away.

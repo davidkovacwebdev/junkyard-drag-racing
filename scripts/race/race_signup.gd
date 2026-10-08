@@ -23,6 +23,7 @@ var player_car_name := ""
 ## Every rival's race name, in lane order, so a bet can be matched to the
 ## car that won.
 var field_car_names: Array[String] = []
+var _race_controller: RaceController = null
 
 static func take_pending() -> RaceSignup:
 	var signup := RaceSignup.new()
@@ -76,6 +77,7 @@ static func rival_car_name(slot: int, rival: Dictionary) -> String:
 func hook_up(race_controller: RaceController) -> void:
 	if race_controller == null:
 		return
+	_race_controller = race_controller
 	race_controller.race_ended.connect(_on_race_ended)
 	if tier > 0:
 		race_controller.exit_scene_path = MENU_SCENE
@@ -90,7 +92,13 @@ func _on_race_ended(winner_name: String) -> void:
 	var player_won := winner_name == player_car_name
 	RaceProgression.record_race(player_won)
 	Quests.race_finished(RaceProgression.menu_venue_name, player_won)
-	if player_won and entry_fee > 0:
-		Inventory.money += entry_fee * RaceProgression.ENTRY_WIN_MULTIPLIER
+	var win_pay := entry_fee * RaceProgression.ENTRY_WIN_MULTIPLIER if player_won else 0
+	var kills := _race_controller.kills_of(player_car_name)
+	var kill_pay := kills * int(entry_fee * RaceProgression.KILL_PAY_SHARE)
+	_race_controller.add_earning("Win", win_pay)
+	_race_controller.add_earning("%d kill%s" % [kills, "" if kills == 1 else "s"], kill_pay)
+	var payout := win_pay + kill_pay
+	if payout > 0:
+		Inventory.money += payout
 		Sfx.play(&"cash_register", -4.0)
 	SaveSystem.save_game()

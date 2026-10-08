@@ -4,8 +4,9 @@ extends Node2D
 ##
 ## One tile's worth of drops is simulated and stamped across every tile the
 ## camera can see, so the rain covers the whole view at any zoom level while
-## the per-frame work stays one small tile. All streaks go out in a single
-## `draw_multiline` call. Alpha comes straight off `Weather`, so rain builds as
+## the per-frame work stays one small tile. All streaks go out as one
+## TriangleBatch, and the rain fades out when zoomed out far enough that the
+## streaks would be specks anyway. Alpha comes straight off `Weather`, so rain builds as
 ## a shower arrives and thins out as it passes.
 ##
 ## Draw order: give it a high `z_index` in the scene (main.tscn uses 900) so it
@@ -35,6 +36,9 @@ extends Node2D
 @export_group("Look")
 @export var drop_color: Color = Color(0.79, 0.87, 0.95, 0.45)
 
+## Rain is fully drawn at `FULL_ZOOM` and gone by `HIDDEN_ZOOM`.
+const FULL_ZOOM := 0.3
+const HIDDEN_ZOOM := 0.15
 ## Used when there's no viewport to measure (headless).
 const FALLBACK_RECT := Rect2(-1400.0, -900.0, 2800.0, 1800.0)
 
@@ -64,7 +68,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	var intensity := Weather.get_rain_intensity()
 	_rain_sound.set_level(intensity)
-	visible = intensity > 0.02
+	visible = intensity * _zoom_fade() > 0.02
 	if not visible:
 		return
 	_advance(delta)
@@ -79,7 +83,7 @@ func _advance(delta: float) -> void:
 
 func _draw() -> void:
 	var color := drop_color
-	color.a *= Weather.get_rain_intensity()
+	color.a *= Weather.get_rain_intensity() * _zoom_fade()
 	# Streak direction is the drops' own velocity, so the angle leans with the
 	# wind instead of falling dead vertical while drifting sideways.
 	var direction := Vector2(wind, (fall_speed_min + fall_speed_max) * 0.5).normalized()
@@ -99,8 +103,13 @@ func _draw() -> void:
 				if view.has_point(head):
 					_streak_points.append(head - tail)
 					_streak_points.append(head)
-	if not _streak_points.is_empty():
-		draw_multiline(_streak_points, color, line_width, true)
+	var batch := TriangleBatch.new()
+	batch.add_segments(_streak_points, color, line_width)
+	batch.commit(self)
+
+func _zoom_fade() -> float:
+	var zoom := get_global_transform_with_canvas().get_scale().x
+	return clampf(inverse_lerp(HIDDEN_ZOOM, FULL_ZOOM, zoom), 0.0, 1.0)
 
 ## The part of this node's space the camera can see. Measured through the
 ## canvas transform so it works at any zoom without needing the camera itself.

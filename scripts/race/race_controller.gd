@@ -106,6 +106,9 @@ var _surrender_button: ScrapButton = null
 ## order.
 var _finish_order: Array[Dictionary] = []
 var _knockout_count := 0
+## What the player earned this race, as {"label", "amount"}, filled in by
+## race_ended listeners (RaceSignup) for the results screen.
+var _earnings: Array[Dictionary] = []
 ## Set the moment we start leaving, so Escape and the end-of-race handoff
 ## can both fire without queueing two scene changes.
 var _exiting := false
@@ -151,6 +154,9 @@ func register_car(car_name: String, car: CarAssembler.AssembledCar) -> void:
 		"last_progress_time": 0.0,
 		# Order knocked out of an arena (0 first), or -1 while still in it.
 		"knockout_order": -1,
+		# Arena races: rivals this car knocked out. Ranks survivors before
+		# progress does.
+		"kills": 0,
 		"body_part_data": body_part_data,
 	})
 
@@ -286,6 +292,21 @@ func crown(car_name: String) -> void:
 	if not entry.is_empty() and not entry["crossed"]:
 		_finish_car(entry)
 
+## Arena races: `car_name` knocked a rival out.
+func credit_kill(car_name: String) -> void:
+	var entry := _entry_named(car_name)
+	if not entry.is_empty():
+		entry["kills"] += 1
+
+func kills_of(car_name: String) -> int:
+	var entry := _entry_named(car_name)
+	return 0 if entry.is_empty() else entry["kills"]
+
+## Money the player made this race, shown on the results screen.
+func add_earning(label: String, amount: int) -> void:
+	if amount > 0:
+		_earnings.append({"label": label, "amount": amount})
+
 ## Arena races: how well a still-running car is doing, higher is better.
 func set_progress(car_name: String, progress: float) -> void:
 	var entry := _entry_named(car_name)
@@ -321,7 +342,7 @@ func surrender() -> void:
 	_end_race("SURRENDER")
 
 ## Cars that actually crossed the line, in crossing order, then everyone
-## else (still racing or destroyed) ranked by how far they got, then any
+## else (still racing or destroyed) ranked by kills, then how far they got, then any
 ## knocked out of an arena, the last one out first — so a race
 ## that ends by TIMEOUT or STALLED before anyone finishes still produces a
 ## sensible podium instead of an empty one. `force_player_last` is for
@@ -338,7 +359,10 @@ func _compute_standings(force_player_last: bool = false) -> Array[Dictionary]:
 			knocked_out.append(entry)
 		else:
 			rest.append(entry)
-	rest.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["progress"] > b["progress"])
+	rest.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		if a["kills"] != b["kills"]:
+			return a["kills"] > b["kills"]
+		return a["progress"] > b["progress"])
 	knocked_out.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["knockout_order"] > b["knockout_order"])
 	standings.append_array(rest)
 	standings.append_array(knocked_out)
@@ -349,30 +373,39 @@ func _compute_standings(force_player_last: bool = false) -> Array[Dictionary]:
 				break
 	return standings
 
-## Top 3 standings turned into what ResultsScreen actually shows: the
-## player's own entry stays "Player", an AI car in `driver_names` keeps that
-## name, and every other one gets a random, distinct placeholder driver name
-## (see name_gen.gd) picked fresh each race.
+## The top 3 standings, plus the player's own place when they finished lower,
+## turned into what ResultsScreen shows: the player is "You", an AI car in
+## `driver_names` keeps that name, and every other one gets a random,
+## distinct placeholder driver name (see name_gen.gd) picked fresh each race.
 func _build_results_data(standings: Array[Dictionary]) -> Array[Dictionary]:
-	var top := standings.slice(0, mini(3, standings.size()))
-	var ai_count := 0
-	for entry in top:
-		if not (entry["name"] as String).begins_with("Player_"):
-			ai_count += 1
+	var places: Array[int] = []
+	for i in standings.size():
+		if i < 3 or _is_player(standings[i]):
+			places.append(i)
+	var ai_count := places.filter(func(i: int) -> bool: return not _is_player(standings[i])).size()
 	var random_names := NameGen.random_names(ai_count)
 	var result: Array[Dictionary] = []
 	var name_i := 0
-	for entry in top:
+	for i in places:
+		var entry := standings[i]
 		var display_name: String
-		if (entry["name"] as String).begins_with("Player_"):
-			display_name = "Player"
+		if _is_player(entry):
+			display_name = "You"
 		elif driver_names.has(entry["name"]):
 			display_name = driver_names[entry["name"]]
 		else:
 			display_name = random_names[name_i]
 			name_i += 1
-		result.append({"name": display_name, "body_part_data": entry["body_part_data"]})
+		result.append({
+			"place": i + 1,
+			"name": display_name,
+			"body_part_data": entry["body_part_data"],
+			"kills": entry["kills"],
+		})
 	return result
+
+func _is_player(entry: Dictionary) -> bool:
+	return (entry["name"] as String).begins_with("Player_")
 
 func _end_race(reason: String) -> void:
 	_race_over = true
@@ -387,8 +420,6 @@ func _end_race(reason: String) -> void:
 	if _winner_name.is_empty() and leader_wins_at_end and not standings.is_empty():
 		_winner_name = standings[0]["name"]
 		print(">>> WINNER (furthest): %s" % _winner_name)
-	if _results_screen != null:
-		_results_screen.show_results(_build_results_data(standings))
 	for entry in _entries:
 		var car: CarAssembler.AssembledCar = entry["car"]
 		if not is_instance_valid(car.body):
@@ -396,6 +427,8 @@ func _end_race(reason: String) -> void:
 			continue
 		print("    %s final x=%.1f%s" % [entry["name"], car.body.global_position.x, " [finished]" if entry["finished"] else ""])
 	race_ended.emit(_winner_name)
+	if _results_screen != null:
+		_results_screen.show_results(_build_results_data(standings), _earnings)
 	# A results screen stays up until the player dismisses it (see _input) —
 	# no timer needed. Headless runs have nobody to click anything, so they
 	# always fall through to the old timer/instant handoff instead of

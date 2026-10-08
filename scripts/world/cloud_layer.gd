@@ -65,13 +65,16 @@ class CloudShape:
 	var points := PackedVector2Array()
 	var indices := PackedInt32Array()
 	var tints := PackedColorArray()
-	var colors := PackedColorArray()
 
-	func draw(canvas: CanvasItem, at: Vector2, scale: float, color: Color) -> void:
-		for i in tints.size():
+	func append_to(batch: TriangleBatch, at: Vector2, scale: float, color: Color) -> void:
+		var placed := PackedVector2Array()
+		var colors := PackedColorArray()
+		placed.resize(points.size())
+		colors.resize(points.size())
+		for i in points.size():
+			placed[i] = at + points[i] * scale
 			colors[i] = tints[i] * color
-		canvas.draw_set_transform(at, 0.0, Vector2.ONE * scale)
-		RenderingServer.canvas_item_add_triangle_array(canvas.get_canvas_item(), indices, points, colors)
+		batch.add_triangles(placed, colors, indices)
 
 class Cloud:
 	var position: Vector2
@@ -203,18 +206,19 @@ static func _shape(groups: Array, tints: Array[Color]) -> CloudShape:
 			shape.points.append_array(polygon)
 			for point in polygon:
 				shape.tints.append(tints[group])
-	shape.colors.resize(shape.tints.size())
 	return shape
 
 func _draw_shadows() -> void:
 	if _shadow_key.is_empty():
 		return
 	var cover: float = _shadow_key[1]
+	var batch := TriangleBatch.new()
 	for at_and_cloud in _clouds_in(_shadow_tiles, cover):
 		var cloud: Cloud = at_and_cloud[1]
 		var color := shadow_color
 		color.a *= _strength(cloud, cover)
-		_shadow_shapes[cloud.template].draw(_shadow_layer, at_and_cloud[0], cloud.scale, color)
+		_shadow_shapes[cloud.template].append_to(batch, at_and_cloud[0], cloud.scale, color)
+	batch.commit(_shadow_layer)
 
 func _draw_sky() -> void:
 	if _sky_key.is_empty():
@@ -222,13 +226,15 @@ func _draw_sky() -> void:
 	var cover: float = _sky_key[1]
 	var sky_fade: float = _sky_key[2]
 	var body := cloud_color.lerp(rain_cloud_color, _sky_key[3])
+	var batch := TriangleBatch.new()
 	for at_and_cloud in _clouds_in(_sky_tiles, cover):
 		var at: Vector2 = at_and_cloud[0]
 		var cloud: Cloud = at_and_cloud[1]
 		var clear := lerpf(car_clear_alpha, 1.0,
 				clampf((at.distance_to(_sky_view_center) - car_clear_radius) / car_clear_fade, 0.0, 1.0))
-		_sky_shapes[cloud.template].draw(_sky_layer, at, cloud.scale,
+		_sky_shapes[cloud.template].append_to(batch, at, cloud.scale,
 				Color(body, cloud_alpha * _strength(cloud, cover) * sky_fade * clear))
+	batch.commit(_sky_layer)
 
 ## Every cloud out at `cover` across `tiles`, as [position, cloud] pairs in the
 ## layer's own (undrifted) space.
