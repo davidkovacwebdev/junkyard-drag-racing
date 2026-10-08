@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"west_bridge"
+title = "Over the Bridge"
+description = "Grandpa went to see his brother Chad in a different town before he died. Chad was onto the treasure too.
+The west bridge is open now. Cross it and find him."
+objective = "Cross the west bridge to find Chad"
+objective_place = "West Bridge"
+return_to_giver = false

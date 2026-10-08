@@ -35,7 +35,11 @@
 [ext_resource type="PackedScene" path="res://scenes/world/dog_kennel.tscn" id="dog_kennel"]
 [ext_resource type="Script" uid="uid://3ffqup24bsrx" path="res://scripts/world/fishing_boat.gd" id="fishing_boat"]
 [ext_resource type="Script" uid="uid://w1y26uy8y6we" path="res://scripts/world/floating_trash_spawner.gd" id="floating_trash_spawner"]
+[ext_resource type="Script" uid="uid://cdw0smvexpm7v" path="res://scripts/world/grandpas_garage.gd" id="grandpas_garage"]
 [ext_resource type="Script" uid="uid://cu4bnxi4v8vu4" path="res://scripts/world/gull_spawner.gd" id="gull_spawner"]
+[ext_resource type="Resource" path="res://buildings/hospital.tres" id="hospital_building"]
+[ext_resource type="Script" uid="uid://b50ifyxrnnfqj" path="res://scripts/world/hospital.gd" id="hospital_script"]
+[ext_resource type="PackedScene" path="res://scenes/world/hospital_sign.tscn" id="hospital_sign"]
 [ext_resource type="Resource" path="res://buildings/house_01.tres" id="house_data_01"]
 [ext_resource type="Resource" path="res://buildings/house_02.tres" id="house_data_02"]
 [ext_resource type="Resource" path="res://buildings/house_03.tres" id="house_data_03"]
@@ -343,6 +347,11 @@ position = Vector2(-8480, 2000)
 script = ExtResource("blocked_bridge")
 deck_width = 340.0
 
+[node name="MinimapMarker" type="Node2D" parent="WestBridge" unique_id=283221116]
+script = ExtResource("21_marker")
+kind = 13
+place_name_override = "West Bridge"
+
 [node name="SkidMarks" type="Node2D" parent="." unique_id=344039305]
 script = ExtResource("12")
 
@@ -414,6 +423,7 @@ deck_width = 340.0
 
 [node name="House" parent="Sortables" unique_id=1165133855 instance=ExtResource("2")]
 position = Vector2(260, -260)
+script = ExtResource("grandpas_garage")
 building_data = ExtResource("10")
 display_name = "Garage"
 interior_scene = ExtResource("3")
@@ -440,6 +450,19 @@ position = Vector2(0, -136)
 [node name="MinimapMarker" type="Node2D" parent="Sortables/Shop" unique_id=844854616]
 script = ExtResource("21_marker")
 kind = 6
+
+[node name="Hospital" parent="Sortables" unique_id=539710022 instance=ExtResource("2")]
+position = Vector2(1820, -760)
+script = ExtResource("hospital_script")
+building_data = ExtResource("hospital_building")
+display_name = "Hospital"
+
+[node name="Sign" parent="Sortables/Hospital" unique_id=629560611 instance=ExtResource("hospital_sign")]
+position = Vector2(-165, 110)
+
+[node name="MinimapMarker" type="Node2D" parent="Sortables/Hospital" unique_id=446767588]
+script = ExtResource("21_marker")
+kind = 12
 
 [node name="Trash" type="Node2D" parent="Sortables" unique_id=260557314]
 script = ExtResource("7")

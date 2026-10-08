@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_data.gd" id="1_data"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/torsos/torso_skinny.tscn" id="4_torso"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/heads/head_oval.tscn" id="5_head"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/eyes/eyes_dots.tscn" id="7_eyes"]
+
+[resource]
+script = ExtResource("1_data")
+display_name = "Voice on the Phone"
+torso_scene = ExtResource("4_torso")
+head_scene = ExtResource("5_head")
+eyes_scene = ExtResource("7_eyes")
+voice_pitch_hz = 360.0
+voice_throat = 1.55
+voice_rasp = 0.0
+voice_wobble = 0.15

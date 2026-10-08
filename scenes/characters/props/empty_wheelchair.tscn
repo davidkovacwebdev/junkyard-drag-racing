@@ -1,0 +1,39 @@
+[gd_scene format=3]
+
+[node name="EmptyWheelchair" type="Node2D"]
+
+[node name="Backrest" type="Polygon2D" parent="."]
+color = Color(0.2, 0.2, 0.22, 1)
+polygon = PackedVector2Array(-44, -150, 44, -150, 44, -60, -44, -60)
+
+[node name="Seat" type="Polygon2D" parent="."]
+color = Color(0.3, 0.31, 0.34, 1)
+polygon = PackedVector2Array(-50, -66, 50, -66, 50, -48, -50, -48)
+
+[node name="Frame" type="Polygon2D" parent="."]
+color = Color(0.3, 0.31, 0.34, 1)
+polygon = PackedVector2Array(-52, -30, 52, -30, 52, -21, -52, -21)
+
+[node name="TyreLeft" type="Polygon2D" parent="."]
+color = Color(0.13, 0.13, 0.15, 1)
+polygon = PackedVector2Array(-60, -100, -54, -100, -48, -94, -48, -6, -54, 0, -60, 0, -66, -6, -66, -94)
+
+[node name="TyreRight" type="Polygon2D" parent="."]
+color = Color(0.13, 0.13, 0.15, 1)
+polygon = PackedVector2Array(54, -100, 60, -100, 66, -94, 66, -6, 60, 0, 54, 0, 48, -6, 48, -94)
+
+[node name="FlagPole" type="Polygon2D" parent="."]
+color = Color(0.3, 0.31, 0.34, 1)
+polygon = PackedVector2Array(54, -90, 59, -90, 61, -266, 56, -266)
+
+[node name="FlagTrans" type="Polygon2D" parent="."]
+color = Color(0.45, 0.76, 0.92, 1)
+polygon = PackedVector2Array(61, -266, 101, -266, 101, -240, 61, -240)
+
+[node name="TransPink" type="Polygon2D" parent="."]
+color = Color(0.93, 0.62, 0.72, 1)
+polygon = PackedVector2Array(61, -260.8, 101, -260.8, 101, -245.2, 61, -245.2)
+
+[node name="TransWhite" type="Polygon2D" parent="."]
+color = Color(0.96, 0.96, 0.96, 1)
+polygon = PackedVector2Array(61, -255.6, 101, -255.6, 101, -250.4, 61, -250.4)

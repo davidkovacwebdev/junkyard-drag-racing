@@ -1,0 +1,25 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/hospital/hospital_morgue.gd" id="1_morgue"]
+[ext_resource type="Script" path="res://scripts/hospital/morgue_table.gd" id="2_table"]
+[ext_resource type="Script" path="res://scripts/audio/sustained_sound.gd" id="3_hum"]
+
+[node name="Hospital" type="Node2D"]
+script = ExtResource("1_morgue")
+
+[node name="Grounds" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="MorgueTable" type="Node2D" parent="Grounds"]
+position = Vector2(60, 40)
+script = ExtResource("2_table")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+
+[node name="LightHum" type="AudioStreamPlayer2D" parent="."]
+position = Vector2(0, -300)
+max_distance = 3000.0
+script = ExtResource("3_hum")
+sound_name = &"morgue_hum_loop"
+base_volume_db = -18.0
+fade_in_time = 1.0

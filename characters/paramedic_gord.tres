@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_data.gd" id="1_data"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/legs/legs_cargo.tscn" id="2_legs"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/boots/boots_work.tscn" id="3_boots"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/torsos/torso_hazmat.tscn" id="4_torso"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/heads/head_square.tscn" id="5_head"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/hairs/hair_buzz.tscn" id="6_hair"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/eyes/eyes_squint.tscn" id="7_eyes"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/accessories/acc_cap.tscn" id="8_accessory"]
+
+[resource]
+script = ExtResource("1_data")
+display_name = "Paramedic Gord"
+legs_scene = ExtResource("2_legs")
+boots_scene = ExtResource("3_boots")
+torso_scene = ExtResource("4_torso")
+head_scene = ExtResource("5_head")
+hair_scene = ExtResource("6_hair")
+eyes_scene = ExtResource("7_eyes")
+accessory_scene = ExtResource("8_accessory")
+voice_pitch_hz = 98.0
+voice_throat = 0.85
+voice_rasp = 0.5
+voice_wobble = 0.1

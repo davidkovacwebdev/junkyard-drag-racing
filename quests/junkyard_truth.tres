@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="QuestData" format=3 uid="uid://ukhko6e0a5b0"]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://quests/read_grandpas_note.tres" id="2_next"]
+[ext_resource type="Script" uid="uid://b4kssi28o6a3g" path="res://scripts/items/item_data.gd" id="2_hdrm7"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"junkyard_truth"
+title = "What Happened?"
+description = "Grandpa was found at the junkyard with a crane on top of him. Nobody at the hospital knows what he was doing there.
+Somebody at the Junkyard has to know. Go ask."
+objective = "Ask at the Junkyard what happened"
+objective_place = "Junkyard"
+follow_ups = Array[ExtResource("1_script")]([ExtResource("2_next")])
+return_to_giver = false

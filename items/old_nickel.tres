@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" uid="uid://b4kssi28o6a3g" path="res://scripts/items/item_data.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/items/icons/item_old_nickel.tscn" id="2_icon"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"old_nickel"
+display_name = "Old Nickel"
+description = "From under Grandpa's mattress. Engraved on it, tiny: \"This is not part of the treasure.\" So it is part of the treasure."
+icon_scene = ExtResource("2_icon")

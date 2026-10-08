@@ -167,6 +167,13 @@ const NAMES: Array[StringName] = [
 	&"chicken_cluck",
 	&"chicken_squawk",
 	&"boat_putter_loop",
+	&"phone_ring",
+	&"phone_pickup",
+	&"crane_collapse",
+	&"pancake_splat",
+	&"paper_unfold",
+	&"morgue_hum_loop",
+	&"lightning_strike",
 ]
 
 const LOOPING: Array[StringName] = [
@@ -180,6 +187,7 @@ const LOOPING: Array[StringName] = [
 	&"anchor_drag_loop",
 	&"ufo_hum_loop",
 	&"boat_putter_loop",
+	&"morgue_hum_loop",
 ]
 
 const CAR_SOUNDS: Array[StringName] = [
@@ -270,6 +278,7 @@ const AMBIENT_SOUNDS: Array[StringName] = [
 	&"chicken_cluck",
 	&"boat_putter_loop",
 	&"bacon_sizzle",
+	&"morgue_hum_loop",
 ]
 
 ## The AudioSettings bus a sound plays on, so each volume slider covers it.
@@ -449,6 +458,13 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"chicken_cluck": return _chicken_cluck(rng)
 		&"chicken_squawk": return _chicken_squawk(rng)
 		&"boat_putter_loop": return _boat_putter_loop(rng)
+		&"phone_ring": return _phone_ring()
+		&"phone_pickup": return _phone_pickup(rng)
+		&"crane_collapse": return _crane_collapse(rng)
+		&"pancake_splat": return _pancake_splat(rng)
+		&"paper_unfold": return _paper_unfold(rng)
+		&"morgue_hum_loop": return _morgue_hum_loop(rng)
+		&"lightning_strike": return _lightning_strike(rng)
 	push_error("SoundLibrary: unknown sound '%s'" % sound_name)
 	return Synth.silence(0.05)
 
@@ -2656,3 +2672,125 @@ static func _boat_putter_loop(rng: RandomNumberGenerator) -> PackedFloat32Array:
 	for putt in putts:
 		Synth.mix_into(out, Synth.thump(0.16, 320.0, 0.004, 0.1, rng), duration * putt / putts, 0.9 if putt % 2 == 0 else 0.7)
 	return Synth.finish(out, 0.6, 0.0)
+
+# --- Grandpa's last story ---------------------------------------------------------
+
+## A trashy old phone going off: a cheap square-wave trill, two bursts, like a
+## ringtone squeezed out of a speaker the size of a coin.
+static func _phone_ring() -> PackedFloat32Array:
+	var notes: Array = []
+	for burst in 2:
+		for i in 10:
+			notes.append(Synth.tones(0.045, [[[0.0, 1320.0 if i % 2 == 0 else 990.0]]], {
+				square = 0.7,
+				amp = [[0.0, 0.0], [0.003, 1.0], [0.04, 0.8], [0.045, 0.0]],
+			}))
+		notes.append(Synth.silence(0.22))
+	var out := Synth.concat(notes)
+	# Tinny: the little speaker has no bottom end at all.
+	var band := Synth.Formant.new()
+	band.tune(1600.0, 1.2)
+	for i in out.size():
+		out[i] = out[i] * 0.5 + band.step(out[i]) * 0.5
+	return Synth.finish(out, 0.55)
+
+## Answering it: a plastic button click and a short blip.
+static func _phone_pickup(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.thump(0.05, 2400.0, 0.001, 0.012, rng)
+	out = Synth.mix_into(out, Synth.tones(0.09, [[[0.0, 880.0]]], {
+		square = 0.5,
+		amp = [[0.0, 0.0], [0.004, 1.0], [0.09, 0.0]],
+	}), 0.04, 0.4)
+	return Synth.finish(out, 0.5)
+
+## The crane coming down: a long rusty groan as it tips, then a huge steel
+## crash with a ringing boom and junk clattering after it.
+static func _crane_collapse(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(2.4)
+	out = Synth.mix_into(out, Synth.tones(0.9, [[[0.0, 140.0], [0.5, 110.0], [0.9, 70.0]]], {
+		square = 0.4,
+		tremolo = [9.0, 0.5],
+		amp = [[0.0, 0.0], [0.2, 0.8], [0.8, 1.0], [0.9, 0.0]],
+	}), 0.0, 0.35)
+	out = Synth.mix_into(out, Synth.noise_sweep(0.9, {
+		freq = [[0.0, 900.0], [0.9, 500.0]],
+		q = [[0.0, 6.0]],
+		amp = [[0.0, 0.0], [0.3, 0.6], [0.9, 0.2]],
+	}, rng), 0.0, 0.3)
+	var hit := 0.95
+	out = Synth.mix_into(out, Synth.thump(0.7, 260.0, 0.003, 0.3, rng), hit, 1.0)
+	out = Synth.mix_into(out, _metal_ring(1.2, 310.0, 9.0, 0.35, rng), hit, 0.6)
+	out = Synth.mix_into(out, _metal_ring(0.8, 870.0, 14.0, 0.18, rng), hit, 0.35)
+	for i in 6:
+		out = Synth.mix_into(out, Synth.thump(0.08, rng.randf_range(900.0, 2200.0), 0.001, 0.025, rng),
+				hit + 0.12 + i * rng.randf_range(0.07, 0.14), 0.45 - i * 0.05)
+	return Synth.finish(out, 0.9)
+
+## Squashed flat, cartoon style: a wet squelch and a little falling "bwoop".
+static func _pancake_splat(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.thump(0.12, 600.0, 0.002, 0.04, rng)
+	out = Synth.mix_into(out, Synth.noise_sweep(0.16, {
+		freq = [[0.0, 1100.0], [0.16, 500.0]],
+		q = [[0.0, 3.0]],
+		amp = [[0.0, 0.0], [0.01, 1.0], [0.16, 0.0]],
+	}, rng), 0.0, 0.6)
+	var long := Synth.silence(0.6)
+	out = Synth.mix_into(long, out, 0.0, 1.0)
+	out = Synth.mix_into(out, Synth.tones(0.35, [[[0.0, 520.0], [0.35, 140.0]]], {
+		square = 0.2,
+		amp = [[0.0, 0.0], [0.01, 1.0], [0.25, 0.6], [0.35, 0.0]],
+	}), 0.15, 0.45)
+	return Synth.finish(out, 0.65)
+
+## Unfolding a scrap of paper: two dry crinkles and a flap.
+static func _paper_unfold(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.45)
+	for i in 6:
+		out = Synth.mix_into(out, Synth.noise_sweep(0.05, {
+			freq = [[0.0, rng.randf_range(2500.0, 4200.0)]],
+			q = [[0.0, 1.8]],
+			amp = [[0.0, 0.0], [0.004, 1.0], [0.05, 0.0]],
+		}, rng), i * 0.045 + (0.12 if i >= 3 else 0.0), 0.5)
+	out = Synth.mix_into(out, Synth.noise_sweep(0.12, {
+		freq = [[0.0, 800.0], [0.12, 1600.0]],
+		q = [[0.0, 0.9]],
+		amp = [[0.0, 0.0], [0.03, 1.0], [0.12, 0.0]],
+	}, rng), 0.3, 0.4)
+	return Synth.finish(out, 0.55)
+
+## The morgue's strip lights: a buzzy mains hum. 2 s holds whole cycles of
+## every partial, and the level is flat, so it loops cleanly.
+static func _morgue_hum_loop(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.tones(2.0, [[[0.0, 120.0]], [[0.0, 240.0]]], {
+		square = 0.6,
+		amp = [[0.0, 1.0]],
+		fade = 0.0,
+	})
+	var fizz := Synth.noise_sweep(2.0, {
+		freq = [[0.0, 3000.0]],
+		q = [[0.0, 1.5]],
+		amp = [[0.0, 1.0]],
+		fade = 0.0,
+		peak = 0.15,
+	}, rng)
+	for i in out.size():
+		out[i] = out[i] * 0.5 + fizz[i]
+	return Synth.finish(out, 0.4, 0.0)
+
+## Struck by lightning: a vicious white-noise crack, a sizzle, then the
+## thunder rolling away underneath in two low booms.
+static func _lightning_strike(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(2.2)
+	out = Synth.mix_into(out, Synth.noise_sweep(0.12, {
+		freq = [[0.0, 5000.0], [0.12, 2500.0]],
+		q = [[0.0, 0.7]],
+		amp = [[0.0, 1.0], [0.12, 0.0]],
+	}, rng), 0.0, 1.0)
+	out = Synth.mix_into(out, Synth.noise_sweep(0.5, {
+		freq = [[0.0, 3200.0], [0.5, 1800.0]],
+		q = [[0.0, 2.0]],
+		amp = [[0.0, 0.0], [0.02, 0.6], [0.5, 0.0]],
+	}, rng), 0.05, 0.4)
+	out = Synth.mix_into(out, Synth.thump(1.4, 160.0, 0.02, 0.6, rng), 0.08, 1.0)
+	out = Synth.mix_into(out, Synth.thump(1.0, 120.0, 0.08, 0.45, rng), 0.8, 0.7)
+	return Synth.finish(out, 0.95)

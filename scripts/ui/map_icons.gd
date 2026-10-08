@@ -21,6 +21,9 @@ const HILL_SNOW := Color(0.88, 0.89, 0.90)
 ## The garbage truck's own greens (garbage_truck_body.tscn).
 const TRUCK_COLOR := Color(0.32, 0.46, 0.3)
 const TRUCK_SHADE := Color(0.25, 0.37, 0.24)
+const HOSPITAL_CROSS := Color(0.78, 0.2, 0.18)
+const BRIDGE_DECK := Color(0.62, 0.6, 0.55)
+const BRIDGE_PIER := Color(0.49, 0.47, 0.43)
 const HOME_ICON_SIZE := 7.0
 const LANDMARK_ICON_SIZE := 6.0
 const PLAYER_ARROW_SIZE := 7.0
@@ -158,6 +161,28 @@ static func draw_landmark(canvas: CanvasItem, kind: MinimapMarker.Kind, at: Vect
 				at + Vector2(unit * 0.7, unit * 0.8), at + Vector2(unit * 0.35, unit * 0.8),
 			]), GraveyardProp.STONE_SHADE)
 			canvas.draw_colored_polygon(FlatProps.octagon(at + Vector2(0, unit * 0.8), unit, unit * 0.3), GraveyardProp.MOUND)
+		MinimapMarker.Kind.HOSPITAL:
+			# A white board with a fat red cross on it.
+			draw_square(canvas, at, unit * 0.9, UiPalette.TRIM_OFF_WHITE)
+			canvas.draw_colored_polygon(PackedVector2Array([
+				at + Vector2(-unit * 0.22, -unit * 0.65), at + Vector2(unit * 0.22, -unit * 0.65),
+				at + Vector2(unit * 0.22, unit * 0.65), at + Vector2(-unit * 0.22, unit * 0.65),
+			]), HOSPITAL_CROSS)
+			canvas.draw_colored_polygon(PackedVector2Array([
+				at + Vector2(-unit * 0.65, -unit * 0.22), at + Vector2(unit * 0.65, -unit * 0.22),
+				at + Vector2(unit * 0.65, unit * 0.22), at + Vector2(-unit * 0.65, unit * 0.22),
+			]), HOSPITAL_CROSS)
+		MinimapMarker.Kind.BRIDGE:
+			# A deck over two chunky piers.
+			canvas.draw_colored_polygon(PackedVector2Array([
+				at + Vector2(-unit * 1.1, -unit * 0.5), at + Vector2(unit * 1.1, -unit * 0.5),
+				at + Vector2(unit * 1.1, 0), at + Vector2(-unit * 1.1, 0),
+			]), BRIDGE_DECK)
+			for x: float in [-0.65, 0.45]:
+				canvas.draw_colored_polygon(PackedVector2Array([
+					at + Vector2(unit * x, 0), at + Vector2(unit * (x + 0.3), 0),
+					at + Vector2(unit * (x + 0.3), unit * 0.9), at + Vector2(unit * x, unit * 0.9),
+				]), BRIDGE_PIER)
 		MinimapMarker.Kind.GARBAGE_TRUCK:
 			# The big green box, the cab in front of it, and the wheels under both.
 			canvas.draw_colored_polygon(PackedVector2Array([

@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[node name="TrashyPhone" type="Node2D"]
+rotation = 0.12
+
+[node name="Body" type="Polygon2D" parent="."]
+color = Color(0.3, 0.31, 0.34, 1)
+polygon = PackedVector2Array(-9, -22, 9, -22, 10, 22, -10, 22)
+
+[node name="Shade" type="Polygon2D" parent="."]
+color = Color(0.2, 0.2, 0.22, 1)
+polygon = PackedVector2Array(3, -22, 9, -22, 10, 22, 4, 22)
+
+[node name="Screen" type="Polygon2D" parent="."]
+color = Color(0.55, 0.7, 0.36, 1)
+polygon = PackedVector2Array(-6, -17, 5, -17, 5, -4, -6, -4)
+
+[node name="Antenna" type="Polygon2D" parent="."]
+color = Color(0.2, 0.2, 0.22, 1)
+polygon = PackedVector2Array(-8, -22, -3, -22, -3, -36, -8, -36)

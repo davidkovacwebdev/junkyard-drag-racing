@@ -44,6 +44,7 @@ Drunk="*res://autoload/drunk.gd"
 WorldMap="*res://autoload/world_map.gd"
 QuestDebugger="*res://autoload/quest_debugger.gd"
 SceneLoader="*res://autoload/scene_loader.gd"
+Funeral="*res://autoload/funeral.gd"
 
 [display]
 

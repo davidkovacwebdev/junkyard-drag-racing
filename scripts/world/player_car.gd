@@ -483,7 +483,8 @@ func _physics_process(delta: float) -> void:
 	# road network twice for the same answer. The puddle check sits beside it
 	# and feeds the skid test too — standing water lets the tires go with far
 	# less provocation than dry tarmac. A road (a bridge deck, say) is never sea.
-	var on_road := _road_network != null and _road_network.is_on_road(global_position)
+	var on_road := (_road_network != null and _road_network.is_on_road(global_position)) \
+			or BlockedBridge.any_deck_under(get_tree(), global_position)
 	var on_puddle := _puddles != null and _puddles.is_on_puddle(global_position)
 	var in_water := not on_road and _terrain != null and _terrain.is_in_water(_terrain.to_local(global_position))
 	_update_wading(delta, in_water)
@@ -839,7 +840,8 @@ func _find_cast_spot() -> Variant:
 
 func _is_open_water(point: Vector2) -> bool:
 	return _terrain.is_in_water(_terrain.to_local(point)) \
-			and not (_road_network != null and _road_network.is_on_road(point))
+			and not (_road_network != null and _road_network.is_on_road(point)) \
+			and not BlockedBridge.any_deck_under(get_tree(), point)
 
 ## Whatever was on the hook flies out of the sea into the car: an old boot, a
 ## car part, or (most of the time) a handful of scrap.

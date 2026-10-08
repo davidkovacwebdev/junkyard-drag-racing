@@ -4,11 +4,15 @@ extends StaticBody2D
 ## The roadblock that keeps the car off the bridge, GTA style: concrete blocks
 ## at both kerbs, a striped bar between them and a red "closed" sign standing
 ## on top. The origin is the middle of the deck; the bar runs along Y.
+##
+## It comes down for good once "Over the Bridge" (`OPEN_QUEST`) is on: gone
+## from the deck, nothing to bump into.
 
 const BAR_ORANGE := Color(0.85, 0.45, 0.12)
 const BAR_STRIPE := UiPalette.TRIM_OFF_WHITE
 const BLOCK := Color(0.62, 0.6, 0.55)
 const BLOCK_SHADE := Color(0.49, 0.47, 0.43)
+const OPEN_QUEST := &"west_bridge"
 
 @export var deck_width: float = 216.0
 @export var wall_overhang: float = 70.0
@@ -17,12 +21,26 @@ const BLOCK_SHADE := Color(0.49, 0.47, 0.43)
 @export var sign_size: Vector2 = Vector2(120.0, 90.0)
 @export var sign_height: float = 150.0
 
+var _collision: CollisionShape2D
+
 func _ready() -> void:
 	var shape := RectangleShape2D.new()
 	shape.size = Vector2(block_size.x, deck_width + wall_overhang * 2.0)
 	var collision := CollisionShape2D.new()
 	collision.shape = shape
 	add_child(collision)
+	_collision = collision
+
+func _process(_delta: float) -> void:
+	if Engine.is_editor_hint():
+		return
+	var open := is_open()
+	if visible == open:
+		visible = not open
+		_collision.set_deferred("disabled", open)
+
+static func is_open() -> bool:
+	return Quests.has_quest(OPEN_QUEST) or Quests.is_complete(OPEN_QUEST)
 
 func _draw() -> void:
 	var half := deck_width / 2.0 + wall_overhang

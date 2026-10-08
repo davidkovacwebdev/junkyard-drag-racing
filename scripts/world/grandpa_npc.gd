@@ -23,6 +23,11 @@ extends StaticBody2D
 ## whacks at his busted wheelchair; `bang(..., true)` swings the straight new
 ## one the player brought him instead.
 ##
+## Once "Grandpa?" (or anything after it, `GONE_QUESTS`) is in the log he's gone for good: no
+## chair, no beer, no quests, just the spot by the garage where he used to
+## sit (Tiger and the bacon smoker stay). If the player is nearby when the
+## quest lands, he waits until they've driven off before he's gone.
+##
 ## `actor` is a plain CutsceneActor, so cutscenes can hand it to
 ## Cutscenes.subtitle() for the talking squash like any spawned actor.
 
@@ -80,6 +85,12 @@ const SIGH_LEAN := 0.08
 const SIGH_SINK := 5.0
 ## The beer bottle's polygons in his torso (torso_overalls.tscn).
 const BOTTLE_PARTS := ["Bottle", "BottleCap", "Label"]
+## The quests of his last act: once any of them is in the log (or done),
+## he's gone (see `is_gone()`).
+const GONE_QUESTS: Array[StringName] = [&"grandpa_missing", &"hospital_visit", &"junkyard_truth"]
+## He only goes missing while the car is at least this far off, never in
+## plain sight.
+const VANISH_DISTANCE := 1600.0
 
 ## Which way he's turned. The wrench is in his left hand, so facing left
 ## puts it on his right-hand side of the screen.
@@ -113,6 +124,7 @@ var _move: Tween
 var _dialog: CharacterDialog
 ## The car that opened the dialog, so it closes when that car drives off.
 var _talker: Node2D = null
+var _vanished: bool = false
 
 func _ready() -> void:
 	add_to_group(GIVER_GROUP)
@@ -145,8 +157,38 @@ func _ready() -> void:
 	tiger = GrandpaHorse.new()
 	tiger.position = position + TIGER_OFFSET
 	get_parent().add_child.call_deferred(tiger)
+	if is_gone():
+		vanish()
+
+## Whether Grandpa is gone from his spot for good (the story's last act).
+static func is_gone() -> bool:
+	for id in GONE_QUESTS:
+		if Quests.has_quest(id) or Quests.is_complete(id):
+			return true
+	return false
+
+## Takes him out of the world: not drawn, not solid, no quests, nothing to
+## talk to.
+func vanish() -> void:
+	_vanished = true
+	# The night he went, the junkyard crane came down with him.
+	CraneWreck.note_fall()
+	_dialog.close()
+	visible = false
+	display_name = ""
+	remove_from_group(GIVER_GROUP)
+	for child in get_children():
+		if child is CollisionShape2D:
+			(child as CollisionShape2D).set_deferred("disabled", true)
 
 func _process(delta: float) -> void:
+	if _vanished:
+		return
+	if is_gone():
+		var car := get_tree().get_first_node_in_group(PlayerCar.GROUP) as Node2D
+		if car == null or global_position.distance_to(car.global_position) > VANISH_DISTANCE:
+			vanish()
+			return
 	if _dialog.is_open():
 		if not is_instance_valid(_talker) \
 				or global_position.distance_to(_talker.global_position) > dialog_range:

@@ -1,7 +1,7 @@
 class_name GrandpaPackageCutscene
 extends Cutscene
 ## After "Safety Last": Grandpa's having a coffee for once, chilling. The
-## player calls him Eugen, which only his son Chad gets away with, and out
+## player calls him Eugen, which only his brother Chad gets away with, and out
 ## comes the family's shame: Chad's a cop. Then Grandpa remembers his
 ## package. In this town the garbage truck brings the mail (and the medicine,
 ## and the ambulance, and...), so the player has to go and get it off the
@@ -30,7 +30,7 @@ const PLAYER_MARK := "> "
 ## .tres override them.
 @export_multiline var eugen_chat: PackedStringArray = [
 	"> What's up, Eugen?",
-	"Dontcha get cute with me. The only one who calls me that is your gay uncle Chad.",
+	"Dontcha get cute with me. The only one who calls me that is my gay brother Chad.",
 	"> You have a gay brother?",
 	"Yeah. Whole family was ashamed, so he moved to the next town over.",
 	"> Ashamed of him being gay?",

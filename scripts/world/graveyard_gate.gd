@@ -3,11 +3,14 @@ class_name GraveyardGate
 extends StaticBody2D
 ## The iron gate in the graveyard landmark's front fence. It stays chained
 ## shut until Grandpa sends the player to pay their respects ("Pay Your
-## Respects"). From then on it stands open, and E drives in to the cemetery
+## Respects"), or until Grandpa's own funeral is coming up (Funeral, whatever
+## quest the player's on). From then on it stands open, and E drives in to the cemetery
 ## (scenes/cemetery/cemetery.tscn). Origin at the middle of the gap, on the
 ## ground.
 
 const QUEST_ID := &"pay_respects"
+## The Funeral autoload finds the graveyard by it.
+const GROUP := &"graveyard_gate"
 const CEMETERY_SCENE := "res://scenes/cemetery/cemetery.tscn"
 const POST_HEIGHT := 70.0
 const LEAF_HEIGHT := 50.0
@@ -27,6 +30,7 @@ func _ready() -> void:
 	add_to_group(OffscreenCuller.GROUP)
 	if Engine.is_editor_hint():
 		return
+	add_to_group(GROUP)
 	var shape := RectangleShape2D.new()
 	shape.size = Vector2(half_width * 2.0, 12.0)
 	var collision := CollisionShape2D.new()
@@ -41,7 +45,7 @@ func _process(_delta: float) -> void:
 func is_open() -> bool:
 	if Engine.is_editor_hint():
 		return false
-	return Quests.has_quest(QUEST_ID) or Quests.is_complete(QUEST_ID)
+	return Quests.has_quest(QUEST_ID) or Quests.is_complete(QUEST_ID) or Funeral.is_scheduled()
 
 func get_interact_prompt() -> String:
 	if is_open():
