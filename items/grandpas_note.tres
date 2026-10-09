@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3 uid="uid://c3bnk3lk8g8dx"]
+
+[ext_resource type="Script" uid="uid://b4kssi28o6a3g" path="res://scripts/items/item_data.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/items/icons/item_note.tscn" id="2_icon"]
+[ext_resource type="Resource" path="res://quests/mattress_nickel.tres" id="3_quest"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"grandpas_note"
+display_name = "Grandpa's Note"
+description = "A folded scrap of paper Grandpa left with the junkyard. There's a beer ring on it. Use it to read it."
+icon_scene = ExtResource("2_icon")
+use_sound = &"paper_unfold"
+reusable = true
+read_text = "If you see this, I guess I'm already probably drunk somewhere and unable to reach you... I'll be back in a couple of days.
+I was tracking the old Junkyard Treasure for some time now, and I think I finally found the clue.
+The treasure was said to be hidden somewhere around our town, but everyone considered it a lie to get people to move to this shithole, you know?
+But it was not a lie, it was not... When I was digging for scraps I found a part of it. You'll find it under my mattress.
+It's an old nickel, but an old nickel with an inscription.
+Only the parts of the treasure will have \"This is not part of the treasure\" engraved on them. I think they're trying to make it hard for us to find it!
+Anyways, I'm seeing my brother in a different town. I know he was onto it as well."
+read_gives_quest = ExtResource("3_quest")

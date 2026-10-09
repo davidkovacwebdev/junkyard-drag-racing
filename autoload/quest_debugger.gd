@@ -10,6 +10,8 @@ extends CanvasLayer
 ##   Finish all - finishes every quest, earliest in the story first, so all
 ##                their rewards and unlocks land: everything opened up.
 ##   Reset all  - empties the quest log.
+##   Funeral    - holds Grandpa's funeral 10 in-game seconds from now, so
+##                the graveyard dash (and missing it) can be tried.
 ##
 ## Debug builds only, like the F1 dev menu. Pauses the game while open; F5 or
 ## Esc closes. Steel board with off-white text, the dev-tool look.
@@ -194,6 +196,12 @@ func _build() -> void:
 	finish_all.position = Vector2(244.0, BOARD_SIZE.y - 64.0)
 	finish_all.pressed.connect(_on_finish_all)
 	board.add_child(finish_all)
+	var funeral := _make_button("Funeral in 10 s", 200.0, 9)
+	funeral.position = Vector2(474.0, BOARD_SIZE.y - 64.0)
+	funeral.pressed.connect(func() -> void:
+		Funeral.debug_start_in(10.0)
+		close())
+	board.add_child(funeral)
 
 func _refresh() -> void:
 	# Freed right away (not queued) so the old rows don't sit in the list for

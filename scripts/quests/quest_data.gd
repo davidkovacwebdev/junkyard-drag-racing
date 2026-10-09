@@ -35,6 +35,10 @@ const QUEST_ARRAY_HINT := "24/17:QuestData"
 @export_custom(PROPERTY_HINT_TYPE_STRING, QUEST_ARRAY_HINT) var unlocks: Array = []
 ## Quests handed to the player straight away when this one is finished.
 @export_custom(PROPERTY_HINT_TYPE_STRING, QUEST_ARRAY_HINT) var follow_ups: Array = []
+## Holds the `follow_ups` back this many in-game days after the quest is
+## finished (see DayNightCycle.day): they land in the log out of nowhere
+## once the time has passed. 0: straight away.
+@export var follow_up_delay_days: int = 0
 ## The scene played when the player takes this quest from its giver. It
 ## should give this quest (its Gives Quest). Empty: the quest is just given.
 @export_file("*.tres") var start_cutscene: String = ""
@@ -67,6 +71,9 @@ const QUEST_ARRAY_HINT := "24/17:QuestData"
 ## Ready once this car part (its part scene) is fitted to one of the
 ## player's cars in the garage.
 @export_file("*.tscn") var fit_part_goal: String = ""
+## Ready once the player reads this item from the trunk (its
+## `read_text`; see `Quests.item_read()`): a letter they've been handed.
+@export var read_goal: ItemData
 ## Ready once the player has driven a race (won or lost) at the venue with
 ## this display name ("Drag Strip"). The quest's note becomes "won" or "lost".
 @export var race_goal_venue: String = ""

@@ -10,9 +10,19 @@ extends Node2D
 const WALK_BOB_PIXELS := 14.0
 const WALK_STEPS_PER_SECOND := 4.0
 const TALK_SQUASH := 0.05
+## Squashed flat (see `flatten()`): this tall and this wide at full flatness.
+const FLAT_HEIGHT := 0.07
+const FLAT_WIDTH := 2.4
+## Crying (see `cry()`): a tear from under each eye in turn, in character
+## space, the same teardrops Grandpa sheds.
+const TEAR_FROM := [Vector2(-12.0, -200.0), Vector2(12.0, -200.0)]
+const TEAR_FALL := 46.0
+const TEAR_Z := 11
 
 var walking: bool = false
 var talking: bool = false
+## 0 standing, 1 pancaked flat on the ground (see `flatten()`).
+var flatness: float = 0.0
 
 var _body: Node2D
 var _base_scale: float = 1.0
@@ -52,6 +62,38 @@ func hop(height: float) -> Tween:
 	tween.tween_property(_body, "position:y", 0.0, 0.16).set_ease(Tween.EASE_IN)
 	return tween
 
+## Squashes the character flat into the ground, cartoon style: a quick
+## overshoot, then a pancake. Lying down (`fall_over()`) first is fine; the
+## squash is along the ground either way.
+func flatten(seconds: float = 0.12) -> Tween:
+	walking = false
+	var tween := create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_property(self, "flatness", 1.0, seconds)
+	return tween
+
+## Teary-eyed for `seconds`: tears roll from each eye in turn. Fire and
+## forget; pair it with a sob sound.
+func cry(seconds: float = 2.0) -> void:
+	var tears := maxi(1, int(seconds / 0.4))
+	for i in tears:
+		if not is_instance_valid(self):
+			return
+		_drop_tear(TEAR_FROM[i % TEAR_FROM.size()])
+		await get_tree().create_timer(0.4).timeout
+
+func _drop_tear(from: Vector2) -> void:
+	var tear := Polygon2D.new()
+	tear.polygon = PackedVector2Array([Vector2(0.0, -10.0), Vector2(6.0, 1.0),
+			Vector2(4.0, 7.0), Vector2(-4.0, 7.0), Vector2(-6.0, 1.0)])
+	tear.color = GrandpaNpc.TEAR_COLOR
+	tear.position = from
+	tear.z_index = TEAR_Z
+	attach(tear)
+	var fall := create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	fall.tween_property(tear, "position:y", from.y + TEAR_FALL, 0.5)
+	fall.parallel().tween_property(tear, "modulate:a", 0.0, 0.2).set_delay(0.3)
+	fall.tween_callback(tear.queue_free)
+
 ## Tips over backwards and lands with a little bounce.
 func fall_over() -> Tween:
 	walking = false
@@ -73,4 +115,6 @@ func _process(delta: float) -> void:
 	else:
 		_body.skew = 0.0
 	var squash := sin(_time * TAU * 7.0) * TALK_SQUASH if talking else 0.0
-	_body.scale = Vector2(_facing * _base_scale * (1.0 - squash), _base_scale * (1.0 + squash))
+	var flat_x := lerpf(1.0, FLAT_WIDTH, flatness)
+	var flat_y := lerpf(1.0, FLAT_HEIGHT, flatness)
+	_body.scale = Vector2(_facing * _base_scale * (1.0 - squash) * flat_x, _base_scale * (1.0 + squash) * flat_y)

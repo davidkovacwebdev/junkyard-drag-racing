@@ -1,6 +1,8 @@
-[gd_resource type="Resource" script_class="QuestData" format=3]
+[gd_resource type="Resource" script_class="QuestData" format=3 uid="uid://bkdfrrou2qaq3"]
 
 [ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://quests/grandpa_missing.tres" id="2_next"]
+[ext_resource type="Script" uid="uid://b4kssi28o6a3g" path="res://scripts/items/item_data.gd" id="3_kb63f"]
 
 [resource]
 script = ExtResource("1_script")
@@ -12,6 +14,8 @@ description = "Roge Roger is back in town (or Roger Roge, Grandpa can't decide).
 At the Drag Strip, pick the Chop Shop tier, choose Bet and back Roge Roger. Then tell Grandpa how it went."
 objective = "Bet on Roge Roger in the Chop Shop tier at the Drag Strip"
 objective_place = "Drag Strip"
+follow_ups = Array[ExtResource("1_script")]([ExtResource("2_next")])
+follow_up_delay_days = 2
 start_cutscene = "res://cutscenes/grandpa_roge.tres"
 start_money = 100
 reminder_line = "Roge Roger, {player}! Top division! Put the money on Roge!"

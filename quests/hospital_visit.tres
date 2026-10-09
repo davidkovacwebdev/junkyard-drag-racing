@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://quests/junkyard_truth.tres" id="2_next"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"hospital_visit"
+title = "Bad News"
+description = "Grandpa wasn't home. Then your phone rang: the hospital. Eugen is dead.
+Go to the Hospital."
+objective = "Go to the Hospital"
+objective_place = "Hospital"
+follow_ups = Array[ExtResource("1_script")]([ExtResource("2_next")])
+return_to_giver = false

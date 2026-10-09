@@ -14,6 +14,8 @@ var _playing_song: StringName = &""
 var _playing_playlist: Array[StringName] = []
 var _next_index_by_playlist: Dictionary = {}
 var _fade_tween: Tween
+## Set by `hush()`: no music at all until it's lifted.
+var _hushed: bool = false
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -35,7 +37,7 @@ func _exit_tree() -> void:
 
 func _process(_delta: float) -> void:
 	var scene := get_tree().current_scene
-	if scene == null:
+	if scene == null or _hushed:
 		return
 	var wanted_playlist := _playlist_for_scene(scene)
 	if wanted_playlist != _playing_playlist:
@@ -43,6 +45,27 @@ func _process(_delta: float) -> void:
 		_play_next_from_playlist()
 	elif _current_song_is_ending():
 		_play_next_from_playlist()
+
+## Fades the music out for a scene that wants quiet (bad news, a morgue),
+## or, with false, brings the scene's playlist back in.
+func hush(on: bool, seconds: float = CROSSFADE_TIME) -> void:
+	if on == _hushed:
+		return
+	_hushed = on
+	if not on:
+		# Forget what was playing, so _process starts the playlist afresh.
+		_playing_playlist = []
+		_playing_song = &""
+		return
+	if _fade_tween != null:
+		_fade_tween.kill()
+	_fade_tween = create_tween().set_parallel()
+	for player in _players:
+		if player.playing:
+			_fade_tween.tween_property(player, "volume_db", -80.0, seconds)
+	_fade_tween.chain().tween_callback(func() -> void:
+		for player in _players:
+			player.stop())
 
 func _playlist_for_scene(scene: Node) -> Array[StringName]:
 	var path := scene.scene_file_path

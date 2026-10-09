@@ -1,0 +1,23 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_legs_dangling"]
+script = ExtResource("2")
+id = &"legs_dangling"
+display_name = "Dangling Legs"
+slot = 0
+npc_only = true
+
+[node name="LegsDangling" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_legs_dangling")
+
+[node name="LegLeft" type="Polygon2D" parent="."]
+color = Color(0.37, 0.48, 0.63, 1)
+polygon = PackedVector2Array(-24, -96, -6, -96, -12, -14, -28, -16)
+
+[node name="LegRight" type="Polygon2D" parent="."]
+color = Color(0.3, 0.4, 0.55, 1)
+polygon = PackedVector2Array(6, -96, 24, -96, 30, -18, 14, -14)

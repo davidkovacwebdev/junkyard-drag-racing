@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[node name="NoteIcon" type="Node2D"]
+rotation = 0.08
+
+[node name="Paper" type="Polygon2D" parent="."]
+color = Color(0.9, 0.87, 0.76, 1)
+polygon = PackedVector2Array(-24, -30, 24, -31, 25, 30, -25, 29)
+
+[node name="Fold" type="Polygon2D" parent="."]
+color = Color(0.76, 0.72, 0.6, 1)
+polygon = PackedVector2Array(-25, -2, 25, -3, 25, 6, -25, 7)
+
+[node name="Scrawl" type="Polygon2D" parent="."]
+color = Color(0.25, 0.22, 0.2, 1)
+polygon = PackedVector2Array(-16, -20, 14, -22, 15, -15, -15, -13)
+
+[node name="BeerRing" type="Polygon2D" parent="."]
+color = Color(0.7, 0.58, 0.36, 1)
+polygon = PackedVector2Array(6, 12, 14, 9, 20, 14, 19, 22, 11, 25, 5, 20)

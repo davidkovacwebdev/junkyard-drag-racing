@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://items/old_nickel.tres" id="2_nickel"]
+[ext_resource type="Resource" path="res://quests/west_bridge.tres" id="3_next"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"mattress_nickel"
+title = "Under the Mattress"
+description = "Grandpa's note says he found a piece of the old Junkyard Treasure: an old nickel with an inscription. He hid it under his mattress.
+Go look in the Garage."
+objective = "Look under Grandpa's mattress in the Garage"
+objective_place = "Garage"
+follow_ups = Array[ExtResource("1_script")]([ExtResource("3_next")])
+item_goal = ExtResource("2_nickel")
+hand_over_item = false
+return_to_giver = false

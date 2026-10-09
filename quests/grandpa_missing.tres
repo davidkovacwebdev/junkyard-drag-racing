@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://quests/hospital_visit.tres" id="2_next"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"grandpa_missing"
+title = "Grandpa?"
+description = "You haven't heard Grandpa yell at you in days. No \"SCRAPS!\", no wrench, no beer burps. That's not like him.
+Go check on him at the Garage."
+objective = "Check on Grandpa at the Garage"
+objective_place = "Garage"
+follow_ups = Array[ExtResource("1_script")]([ExtResource("2_next")])
+return_to_giver = false

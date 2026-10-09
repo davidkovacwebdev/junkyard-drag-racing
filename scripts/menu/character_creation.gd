@@ -180,6 +180,7 @@ func _start() -> void:
 	DayNightCycle.reset()
 	Cutscenes.clear_seen()
 	Quests.reset()
+	Funeral.reset()
 	Drunk.reset()
 	SaveSystem.delete_save()
 	_character.display_name = player_name

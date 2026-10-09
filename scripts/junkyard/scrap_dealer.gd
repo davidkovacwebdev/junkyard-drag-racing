@@ -57,6 +57,9 @@ extends StaticBody2D
 @export var greet_line: String = "Buyin' scrap. Or take the crane out back and dig for somethin' better yourself."
 ## Said while the crane is still locked (no "Claw Machine" yet).
 @export var locked_line: String = "Buyin' scrap. The crane? Not for rent, pal. Not to strangers."
+## Said while the crane is down after it came down on Grandpa (CraneWreck).
+## `%s` becomes how long until it's fixed ("2 days").
+@export var wrecked_line: String = "Crane's busted, pal. Fell over. You heard. Repair guy says it'll be fixed in %s."
 ## Said when the player turns up with Grandpa's quest: the crane opens.
 @export var grandpa_sent_line: String = "Eugen sent ya? Ha! That old drunk. Forty years we ran that crane together. Alright: $%d a go, crane's out back. Whatever the claw comes up with, it's yours."
 
@@ -112,7 +115,8 @@ func _on_sell_pressed() -> void:
 ## per dig, and the money is no good to the player standing in this yard
 ## anyway.
 func _on_crane_pressed() -> void:
-	if pen_scene.is_empty() or not crane_unlocked():
+	if pen_scene.is_empty() or not crane_unlocked() or CraneWreck.is_down():
+		Sfx.play(&"denied", -6.0, 0.0)
 		return
 	_close()
 	SaveSystem.save_game()
@@ -129,6 +133,9 @@ func _open() -> void:
 	if Quests.has_quest(CRANE_QUEST):
 		Quests.complete(CRANE_QUEST)
 		_dialog.say(grandpa_sent_line % crane_cost)
+	elif CraneWreck.is_down():
+		var days := CraneWreck.days_left()
+		_dialog.say(wrecked_line % ("%d day%s" % [days, "" if days == 1 else "s"]))
 	elif crane_unlocked():
 		_dialog.say(PlayerProfile.fill(_character.character_data.idle_line(greet_line)))
 	else:
@@ -152,13 +159,21 @@ func _refresh(animate: bool = false) -> void:
 		CharacterDialog.Option.new("Sell scrap (%d) for $%d" % [
 				Inventory.scrap, Inventory.scrap * money_per_scrap],
 				_on_sell_pressed, Inventory.scrap <= 0),
-		CharacterDialog.Option.new("Take the crane out back ($%d a dig)" % crane_cost
-				if crane_unlocked() else "The crane (not for rent)",
-				_on_crane_pressed, not crane_unlocked()),
+		_crane_option(),
 		CharacterDialog.Option.new("Walk away", _on_leave_pressed),
 	], animate)
 	_dialog.set_note("Scrap %d   $%d   Spare parts %d" % [
 		Inventory.scrap, Inventory.money, Inventory.spare_parts.size()])
+
+## The crane button: open, not for rent yet, or busted for a few days.
+func _crane_option() -> CharacterDialog.Option:
+	if CraneWreck.is_down():
+		var days := CraneWreck.days_left()
+		return CharacterDialog.Option.new("The crane (busted, fixed in %d day%s)" % [days, "" if days == 1 else "s"],
+				_on_crane_pressed, true)
+	if not crane_unlocked():
+		return CharacterDialog.Option.new("The crane (not for rent)", _on_crane_pressed, true)
+	return CharacterDialog.Option.new("Take the crane out back ($%d a dig)" % crane_cost, _on_crane_pressed)
 
 func _set_line(text: String) -> void:
 	_dialog.say(text)

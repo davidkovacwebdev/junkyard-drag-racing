@@ -1,0 +1,35 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_torso_labcoat"]
+script = ExtResource("2")
+id = &"torso_labcoat"
+display_name = "Lab Coat"
+slot = 2
+npc_only = true
+
+[node name="LabcoatTorso" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_torso_labcoat")
+
+[node name="Coat" type="Polygon2D" parent="."]
+color = Color(0.9, 0.91, 0.88, 1)
+polygon = PackedVector2Array(-28, -170, 28, -170, 31, -84, -31, -84)
+
+[node name="Shade" type="Polygon2D" parent="."]
+color = Color(0.74, 0.76, 0.73, 1)
+polygon = PackedVector2Array(14, -170, 28, -170, 31, -84, 16, -84)
+
+[node name="Shirt" type="Polygon2D" parent="."]
+color = Color(0.45, 0.6, 0.66, 1)
+polygon = PackedVector2Array(-12, -170, 12, -170, 0, -132)
+
+[node name="ArmLeft" type="Polygon2D" parent="."]
+color = Color(0.82, 0.83, 0.8, 1)
+polygon = PackedVector2Array(-44, -168, -28, -168, -28, -104, -44, -104)
+
+[node name="ArmRight" type="Polygon2D" parent="."]
+color = Color(0.82, 0.83, 0.8, 1)
+polygon = PackedVector2Array(28, -168, 44, -168, 44, -104, 28, -104)

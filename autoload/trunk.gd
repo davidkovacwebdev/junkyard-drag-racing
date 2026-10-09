@@ -10,6 +10,9 @@ extends CanvasLayer
 ## trunk (ItemData.closes_trunk). The space shows the uses left,
 ## and Inventory.item_used tells whoever cares (Drunk, for beer).
 ##
+## Something to read (ItemData.read_text, Grandpa's note) opens on a sheet
+## of paper over the trunk when used; any key or a click puts it away again.
+##
 ## Pauses the game like the journal and the pause menu; I or Esc closes it.
 ## Only opens where the journal can (world and buildings, no cutscene).
 
@@ -22,6 +25,7 @@ const EMPTY_HINT := "Hover something to look at it."
 const NOTHING_HINT := "Nothing in here yet but an old spare tire smell."
 const CANT_USE_LINE := "You can't use the %s like that."
 const USE_KEYS := [KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6]
+const PAPER_SIZE := Vector2(760.0, 560.0)
 
 var _open: bool = false
 
@@ -30,6 +34,10 @@ var _panel: TrunkPanel
 var _slots: Array[TrunkSlot] = []
 var _info_name: Label
 var _info_text: Label
+## The sheet a readable item opens on (see `_read()`).
+var _paper: Control
+var _paper_title: Label
+var _paper_text: Label
 
 func _ready() -> void:
 	layer = LAYER
@@ -55,10 +63,19 @@ func close() -> void:
 		return
 	_open = false
 	_root.visible = false
+	_paper.visible = false
 	get_tree().paused = false
 	Sfx.play(&"trunk_close", -5.0, 0.04)
 
 func _input(event: InputEvent) -> void:
+	if _open and _paper.visible:
+		# Any key or click folds the paper away, back to the trunk.
+		var pressed_key: bool = event is InputEventKey and event.pressed and not event.echo
+		var clicked: bool = event is InputEventMouseButton and event.pressed
+		if pressed_key or clicked:
+			_put_paper_away()
+			get_viewport().set_input_as_handled()
+		return
 	if not (event is InputEventKey and event.pressed and not event.echo):
 		return
 	var key: Key = event.physical_keycode
@@ -86,6 +103,9 @@ func use_slot(index: int) -> void:
 		return
 	if not item.use_sound.is_empty():
 		Sfx.play(item.use_sound, -4.0, 0.05)
+	if not item.read_text.is_empty():
+		_read(item)
+		return
 	if item.closes_trunk:
 		close()
 		return
@@ -178,6 +198,58 @@ func _build() -> void:
 	hint.offset_top = PANEL_SIZE.y * 0.5 + 86.0
 	hint.offset_bottom = PANEL_SIZE.y * 0.5 + 110.0
 	_root.add_child(hint)
+	_build_paper()
+
+## Opens `item`'s text on the sheet of paper, and hands out the quest it
+## leads to the first time.
+func _read(item: ItemData) -> void:
+	_paper_title.text = item.display_name.to_upper()
+	_paper_text.text = PlayerProfile.fill(item.read_text)
+	_paper.visible = true
+	_pop(_paper)
+	Quests.item_read(item)
+	if item.read_gives_quest != null:
+		Quests.give(item.read_gives_quest)
+
+func _put_paper_away() -> void:
+	_paper.visible = false
+	Sfx.play(&"paper_unfold", -8.0, 0.0).pitch_scale = 0.8
+
+func _build_paper() -> void:
+	var paper := ScrapPanel.new()
+	paper.body_color = UiPalette.CARDBOARD_LIGHT
+	paper.shade_color = UiPalette.CARDBOARD_BASE
+	paper.skirt_color = UiPalette.CARDBOARD_SHADE
+	paper.tilt_degrees = -1.2
+	paper.jitter_seed = 431
+	paper.nails = false
+	paper.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	paper.set_anchors_preset(Control.PRESET_CENTER)
+	paper.offset_left = -PAPER_SIZE.x * 0.5
+	paper.offset_right = PAPER_SIZE.x * 0.5
+	paper.offset_top = -PAPER_SIZE.y * 0.5 - 20.0
+	paper.offset_bottom = PAPER_SIZE.y * 0.5 - 20.0
+	paper.visible = false
+	# Over the trunk's item icons, which sit on raised z layers of their own.
+	paper.z_index = 20
+	_root.add_child(paper)
+	_paper = paper
+
+	_paper_title = _make_label(26, UiPalette.TEXT_BROWN)
+	_paper_title.position = Vector2(36.0, 22.0)
+	_paper_title.size = Vector2(PAPER_SIZE.x - 72.0, 34.0)
+	paper.add_child(_paper_title)
+	_paper_text = _make_label(19, UiPalette.TEXT_BROWN)
+	_paper_text.position = Vector2(36.0, 66.0)
+	_paper_text.size = Vector2(PAPER_SIZE.x - 72.0, PAPER_SIZE.y - 110.0)
+	_paper_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	paper.add_child(_paper_text)
+	var hint := _make_label(15, UiPalette.SURFACE_SHADE)
+	hint.text = "Any key  put it away"
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	hint.position = Vector2(36.0, PAPER_SIZE.y - 40.0)
+	hint.size = Vector2(PAPER_SIZE.x - 72.0, 24.0)
+	paper.add_child(hint)
 
 func _make_label(font_size: int, color: Color) -> Label:
 	var label := Label.new()

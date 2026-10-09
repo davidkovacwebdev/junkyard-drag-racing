@@ -38,3 +38,11 @@ extends Resource
 ## Using it is something done out in the world (casting the rod), so the trunk
 ## shuts to get out of the way.
 @export var closes_trunk: bool = false
+
+@export_group("Reading it")
+## Something to read (a letter): using it from the trunk opens it up on a
+## sheet of paper with this text. Empty: not readable.
+@export_multiline var read_text: String = ""
+## Handed to the player the first time it's read (the clue in Grandpa's
+## note). Nothing if they already have it or finished it.
+@export var read_gives_quest: QuestData

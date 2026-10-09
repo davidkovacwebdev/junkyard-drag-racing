@@ -18,6 +18,8 @@ enum Kind {
 	DERBY,
 	GRAVEYARD,
 	GARBAGE_TRUCK,
+	HOSPITAL,
+	BRIDGE,
 }
 
 @export var kind: Kind = Kind.HOME

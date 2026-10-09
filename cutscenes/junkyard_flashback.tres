@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="JunkyardFlashbackCutscene" format=3 uid="uid://b11ma7iwfwrc4"]
+
+[ext_resource type="Script" uid="uid://ccyfj6iok23hy" path="res://scripts/cutscenes/junkyard_flashback_cutscene.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+fool_line = "That old fool... he thought he saw one piece"
+myth_line = "One piece of the Junkyard Treasure. The famous old myth, passed down from generation to generation."

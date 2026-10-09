@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://items/grandpas_note.tres" id="2_note"]
+[ext_resource type="Resource" path="res://quests/mattress_nickel.tres" id="3_next"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"read_grandpas_note"
+title = "Grandpa's Note"
+description = "Grandpa left a note with the junkyard. It's in your trunk now.
+Press I to open the trunk, and use the note (its number, or double-click it) to read it."
+objective = "Read Grandpa's note (press I, then use it)"
+follow_ups = Array[ExtResource("1_script")]([ExtResource("3_next")])
+read_goal = ExtResource("2_note")
+return_to_giver = false

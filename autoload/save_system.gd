@@ -130,6 +130,10 @@ func _snapshot() -> SaveData:
 	data.has_player_position = WorldState.has_player_position
 	data.looted = WorldState.get_looted_snapshot()
 	data.tow_count = WorldState.tow_count
+	data.crane_fell_day = WorldState.crane_fell_day
+	data.funeral_at = Funeral.funeral_at
+	data.funeral_attended = Funeral.attended
+	data.funeral_window_left = Funeral.window_left
 	data.races_won = RaceProgression.races_won
 	data.day = DayNightCycle.day
 	data.time_of_day = DayNightCycle.time_of_day
@@ -144,6 +148,7 @@ func _snapshot() -> SaveData:
 	data.quest_notes = Quests.notes.duplicate()
 	data.quest_counts = Quests.counts.duplicate()
 	data.quest_horn_times = Quests.horn_times.duplicate()
+	data.quest_delayed = Quests.delayed.duplicate()
 	return data
 
 func _write_save(data: SaveData, slot: int) -> void:
@@ -191,6 +196,8 @@ func load_game() -> bool:
 	WorldState.has_player_position = data.has_player_position
 	WorldState.restore_looted(data.looted)
 	WorldState.tow_count = data.tow_count
+	WorldState.crane_fell_day = data.crane_fell_day
+	Funeral.restore(data.funeral_at, data.funeral_attended, data.funeral_window_left)
 	RaceProgression.races_won = data.races_won
 	DayNightCycle.day = data.day
 	DayNightCycle.time_of_day = data.time_of_day
@@ -199,7 +206,7 @@ func load_game() -> bool:
 	PlayerProfile.character = data.player_character
 	Quests.restore(data.quests_active, data.quests_completed, data.quests_ready,
 			data.quests_available, data.tracked_quest, data.quest_notes, data.quest_counts,
-			data.quest_horn_times)
+			data.quest_horn_times, data.quest_delayed)
 	return true
 
 ## Called by New Game so starting over doesn't leave a stale save

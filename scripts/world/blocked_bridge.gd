@@ -5,12 +5,17 @@ extends Node2D
 ## the near end by a `BridgeBarricade`. Drawn back to front so it reads as a
 ## raised span: water shadow, piers, girder face, deck, then the rail on top.
 ## The origin is the middle of the deck at the land end.
+##
+## The deck drives like a road, never like sea (`is_on_deck()`, which
+## PlayerCar asks through the `GROUP`).
 
 const DECK_COLOR := Color("4a6e64")
 const CONCRETE := Color(0.62, 0.6, 0.55)
 const CONCRETE_SHADE := Color(0.49, 0.47, 0.43)
 const CONCRETE_DARK := Color(0.38, 0.36, 0.33)
 const LANE_LINE := Color(0.95, 0.93, 0.68, 0.5)
+
+const GROUP := &"bridge_deck"
 
 @export var length: float = 8320.0:
 	set(value):
@@ -32,6 +37,22 @@ const LANE_LINE := Color(0.95, 0.93, 0.68, 0.5)
 @export var top_rail_thickness: float = 14.0
 @export var shadow_offset: Vector2 = Vector2(30.0, 190.0)
 @export var lane_line_width: float = 10.0
+
+func _ready() -> void:
+	if not Engine.is_editor_hint():
+		add_to_group(GROUP)
+
+## Whether `world_point` is up on the deck (not under it in the water).
+func is_on_deck(world_point: Vector2) -> bool:
+	var local := to_local(world_point)
+	return local.x <= 0.0 and local.x >= -length and absf(local.y) <= deck_width * 0.5
+
+## Whether `world_point` is on any bridge deck in the scene.
+static func any_deck_under(tree: SceneTree, world_point: Vector2) -> bool:
+	for bridge in tree.get_nodes_in_group(GROUP):
+		if (bridge as BlockedBridge).is_on_deck(world_point):
+			return true
+	return false
 
 func _draw() -> void:
 	var half := deck_width / 2.0

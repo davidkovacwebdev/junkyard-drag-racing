@@ -42,6 +42,9 @@ var _restocked_today: bool = false
 ## Times Hank's tow truck has pulled the car out of the sea. From the third,
 ## he hands over his fishing rod (TowTruckRescueCutscene).
 var tow_count: int = 0
+## The in-game day the junkyard crane came down on Grandpa (see CraneWreck),
+## or 0 while it has never fallen.
+var crane_fell_day: int = 0
 ## One-off finds the player has taken (the hangar's saucer). Unlike bins these
 ## never come back.
 var _claimed: Dictionary = {}
@@ -157,6 +160,7 @@ func clear() -> void:
 	_refilled.clear()
 	_claimed.clear()
 	tow_count = 0
+	crane_fell_day = 0
 	_restock_plan_day = 0
 	_restock_hour = RESTOCK_WINDOW_START
 	_restocked_today = false

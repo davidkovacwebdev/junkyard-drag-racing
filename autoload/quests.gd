@@ -46,8 +46,13 @@ var notes: Dictionary = {}
 var counts: Dictionary = {}
 ## Quest id -> seconds of horn honked toward its `horn_goal_seconds`.
 var horn_times: Dictionary = {}
+## Quest id -> the in-game day it lands in the log: follow-ups held back by
+## a finished quest's `follow_up_delay_days`.
+var delayed: Dictionary = {}
 
 func _process(_delta: float) -> void:
+	if not delayed.is_empty():
+		_give_due_follow_ups()
 	# Iterate a copy: finishing a quest takes it out of `active`.
 	for quest: QuestData in active.duplicate():
 		if quest.scrap_goal <= 0 and quest.money_goal <= 0 and quest.item_goal == null \
@@ -103,6 +108,7 @@ func reset() -> void:
 	notes.clear()
 	counts.clear()
 	horn_times.clear()
+	delayed.clear()
 	available_changed.emit()
 	tracked = null
 	tracked_changed.emit(null)
@@ -168,7 +174,10 @@ func complete(id: StringName) -> int:
 		Inventory.add_part(part)
 	quest_completed.emit(quest)
 	for next in quest.follow_ups:
-		give(next)
+		if quest.follow_up_delay_days > 0:
+			_hold_back(next, quest.follow_up_delay_days)
+		else:
+			give(next)
 	var unlocked := false
 	for next in quest.unlocks:
 		if next != null and not has_quest(next.id) and not is_complete(next.id) \
@@ -242,6 +251,14 @@ func race_finished(venue: String, won: bool) -> void:
 	for quest: QuestData in active.duplicate():
 		if quest.race_goal_venue == venue and not is_ready(quest.id):
 			set_note(quest.id, "won" if won else "lost")
+			goal_met(quest.id)
+
+## The player read `item` from the trunk: meets the goal of any active quest
+## waiting on reading it.
+func item_read(item: ItemData) -> void:
+	for quest: QuestData in active.duplicate():
+		if quest.read_goal != null and item != null and quest.read_goal.id == item.id \
+				and not is_ready(quest.id):
 			goal_met(quest.id)
 
 ## Remembers how `id`'s goal was met (see `notes`).
@@ -367,8 +384,9 @@ func tracked_target_position() -> Vector2:
 func restore(saved_active: Array[QuestData], saved_completed: Array[QuestData],
 		saved_ready: Array[StringName], saved_available: Array[QuestData],
 		saved_tracked: QuestData, saved_notes: Dictionary = {}, saved_counts: Dictionary = {},
-		saved_horn_times: Dictionary = {}) -> void:
+		saved_horn_times: Dictionary = {}, saved_delayed: Dictionary = {}) -> void:
 	notes = saved_notes.duplicate()
+	delayed = saved_delayed.duplicate()
 	counts = saved_counts.duplicate()
 	horn_times = saved_horn_times.duplicate()
 	active = saved_active.duplicate()
@@ -380,7 +398,11 @@ func restore(saved_active: Array[QuestData], saved_completed: Array[QuestData],
 	# the player.
 	for quest in completed:
 		for next in quest.follow_ups:
-			if next != null and not has_quest(next.id) and not is_complete(next.id):
+			if next == null or has_quest(next.id) or is_complete(next.id) or _already_past(next):
+				continue
+			if quest.follow_up_delay_days > 0:
+				_hold_back(next, quest.follow_up_delay_days)
+			else:
 				active.append(next)
 		for next in quest.unlocks:
 			if next != null and not has_quest(next.id) and not is_complete(next.id) \
@@ -389,6 +411,57 @@ func restore(saved_active: Array[QuestData], saved_completed: Array[QuestData],
 	available_changed.emit()
 	tracked = _find(active, saved_tracked.id) if saved_tracked != null else null
 	tracked_changed.emit(tracked)
+
+## Winds the story back: every quest in `forget` drops out of the log as if
+## it never happened (active, done, waiting, counts and notes), and
+## `restart` is handed over again, fresh and tracked. Missing Grandpa's
+## funeral does this (see Funeral).
+func rewind(forget: Array, restart: QuestData) -> void:
+	var ids: Array = forget.duplicate()
+	if restart != null:
+		ids.append(restart.id)
+	for id in ids:
+		for list: Array[QuestData] in [active, completed, available]:
+			var quest := _find(list, id)
+			if quest != null:
+				list.erase(quest)
+		ready_ids.erase(id)
+		notes.erase(id)
+		counts.erase(id)
+		horn_times.erase(id)
+		delayed.erase(id)
+	available_changed.emit()
+	if tracked != null and ids.has(tracked.id):
+		set_tracked(null)
+	if restart != null:
+		give(restart)
+		set_tracked(restart)
+
+## Whether the player is already on (or done with) what comes after
+## `quest`: a chain step added after they'd gone past it, which restoring an
+## old save shouldn't hand them.
+func _already_past(quest: QuestData) -> bool:
+	for next in quest.follow_ups + quest.unlocks:
+		if next != null and (has_quest(next.id) or is_complete(next.id)):
+			return true
+	return false
+
+## Puts `next` on hold for `days` in-game days, unless it's already waiting
+## (or already the player's).
+func _hold_back(next: QuestData, days: int) -> void:
+	if next == null or delayed.has(next.id) or has_quest(next.id) or is_complete(next.id):
+		return
+	delayed[next.id] = DayNightCycle.day + days
+
+## Gives every held-back follow-up whose day has come.
+func _give_due_follow_ups() -> void:
+	for quest in completed:
+		if quest.follow_up_delay_days <= 0:
+			continue
+		for next in quest.follow_ups:
+			if next != null and delayed.has(next.id) and DayNightCycle.day >= int(delayed[next.id]):
+				delayed.erase(next.id)
+				give(next)
 
 static func _find(quests: Array[QuestData], id: StringName) -> QuestData:
 	for quest in quests:

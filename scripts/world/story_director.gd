@@ -45,6 +45,10 @@ func _ready() -> void:
 	await get_tree().process_frame
 	Cutscenes.play_once(_make_opening())
 
+## Grandpa, parked by the garage (or the spot he used to sit in).
+func grandpa() -> GrandpaNpc:
+	return _grandpa
+
 ## Plays the opening again even if it was already seen (dev menu, F3), so its
 ## lines can be tuned without starting a new game each time.
 func replay_opening() -> void:
