@@ -33,6 +33,10 @@ extends CharacterBody2D
 ## end within this distance counts as "connects here" and gets a chance to be
 ## driven onto instead of just turning around in place.
 @export var hop_radius: float = 90.0
+## Junction exits that turn sharper than this off the way the truck arrives
+## are skipped. A road leaving a fork almost alongside the one it came in on
+## is a hairpin the truck can't make, and it ends up circling the junction.
+@export var max_junction_turn: float = deg_to_rad(120.0)
 ## Same resolution convention PlayerCar/TrashSpawner use: the exported path
 ## first, falling back to searching the scene for any RoadNetwork.
 @export var roads_path: NodePath = ^"../../Roads"
@@ -277,14 +281,21 @@ func _lookahead_spill() -> float:
 ## the end rather than nosing into it.
 func _choose_next_road() -> void:
 	var end_point := _road_end_point()
+	var arrival_dir := _current_road.direction_at_end(not _forward)
 	var candidates: Array[Dictionary] = []
 	for track in _tracks:
 		if track == _current_road:
 			continue
+		var forward: bool
 		if track.first_point().distance_to(end_point) <= hop_radius:
-			candidates.append({"road": track, "forward": true})
+			forward = true
 		elif track.last_point().distance_to(end_point) <= hop_radius:
-			candidates.append({"road": track, "forward": false})
+			forward = false
+		else:
+			continue
+		var leaving_dir := -track.direction_at_end(forward)
+		if absf(arrival_dir.angle_to(leaving_dir)) <= max_junction_turn:
+			candidates.append({"road": track, "forward": forward})
 	if candidates.is_empty():
 		_forward = not _forward
 		return
@@ -569,6 +580,14 @@ class RoadTrack:
 
 	func last_point() -> Vector2:
 		return points[points.size() - 1]
+
+	## Which way the road points as it runs out of its start or end, sampled
+	## a short way in so a single jittery vertex doesn't skew it.
+	func direction_at_end(at_start: bool) -> Vector2:
+		var reach := minf(60.0, length)
+		if at_start:
+			return sample(reach).direction_to(first_point())
+		return sample(length - reach).direction_to(last_point())
 
 	## Point `distance` along the road, clamped to its ends.
 	func sample(distance: float) -> Vector2:
