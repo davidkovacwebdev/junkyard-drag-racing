@@ -20,6 +20,6 @@ opens_with_quest = &"derby_debut"
 interior_scene = ExtResource("3")
 debug_race_scene = ExtResource("race")
 race_scene_path = "res://scenes/race/race_derby.tscn"
-course = 0
+course = 2
 rules_line = "Last heap runnin' wins. End up on yer roof and yer out."
 wall_color = Color(0.5, 0.3, 0.16, 1)

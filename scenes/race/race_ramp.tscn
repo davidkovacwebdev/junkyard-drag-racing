@@ -118,6 +118,9 @@ check_stalls = false
 [node name="MainCamera" type="Camera2D" parent="." unique_id=131360380]
 position = Vector2(400, 150)
 zoom = Vector2(0.5, 0.5)
+limit_left = -1900
+limit_top = -4050
+limit_right = 14650
 script = ExtResource("4")
 
 [node name="Foreground" type="Parallax2D" parent="." unique_id=714162298]

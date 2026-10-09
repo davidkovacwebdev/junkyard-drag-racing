@@ -40,6 +40,9 @@ extends Node2D
 ## drawn off their own lane line, so without this a car in the top or bottom lane
 ## could be drawn with its wheels hanging over the edge of the track.
 @export var apron := 100.0
+## Dirt laid out past the asphalt on every side, far enough that the race
+## camera's widest view never shows the empty background.
+@export var ground_margin := Vector2(3000.0, 2000.0)
 
 ## --- Markings -------------------------------------------------------------------
 
@@ -81,12 +84,22 @@ extends Node2D
 ## Burnout tracks off the start line.
 @export var rubber_color := Color(0.04, 0.05, 0.09, 0.3)
 
+@export_group("Ground")
+@export var dirt_color := Color(0.62, 0.49, 0.35, 1.0)
+## The packed gravel shoulder hugging both edges of the asphalt.
+@export var shoulder_color := Color(0.50, 0.39, 0.28, 1.0)
+@export var shoulder_width := 70.0
+@export var dirt_patch_count := 7
+@export var junk_pile_count := 8
+@export var drum_color := Color(0.62, 0.22, 0.18, 1.0)
+
 ## Asphalt and markings are a fixed shape, so this only has to run once — but it's
 ## re-run whenever the scene is reloaded in the editor with different exports, which
 ## is the only way any of this changes.
 func _draw() -> void:
 	var top := _top_edge()
 	var bottom := _bottom_edge()
+	_draw_ground(top, bottom)
 	draw_rect(Rect2(left, top, right - left, bottom - top), asphalt_color)
 
 	# Wear goes under the paint, so the lane lines stay crisp over the cracks.
@@ -125,6 +138,34 @@ func _draw_finish(top: float, bottom: float) -> void:
 			var light := (row + column) % 2 == 0
 			draw_rect(Rect2(origin + cell * Vector2(float(column), float(row)), cell),
 					finish_light if light else finish_dark)
+
+## --- Ground ---------------------------------------------------------------------
+
+## Dirt all around the strip, a darker shoulder along each edge, a few bare
+## patches and some tyre stacks and drums dumped well clear of the asphalt.
+func _draw_ground(top: float, bottom: float) -> void:
+	draw_rect(Rect2(left - ground_margin.x, top - ground_margin.y,
+			right - left + ground_margin.x * 2.0, bottom - top + ground_margin.y * 2.0), dirt_color)
+	draw_rect(Rect2(left, top - shoulder_width, right - left, shoulder_width), shoulder_color)
+	draw_rect(Rect2(left, bottom, right - left, shoulder_width), shoulder_color)
+
+	var rng := _rng(5)
+	for n in dirt_patch_count:
+		var center := Vector2(rng.randf_range(left - 1000.0, right + 1000.0), _off_track_y(rng, top, bottom, 200.0))
+		draw_colored_polygon(_blob(rng, center, rng.randf_range(140.0, 260.0), 0.4), dirt_color.darkened(0.08))
+
+	for n in junk_pile_count:
+		var base := Vector2(rng.randf_range(left, right), _off_track_y(rng, top, bottom, 130.0))
+		if n % 3 == 2:
+			FlatProps.draw_drum(self, base, drum_color, 26.0, 64.0)
+		else:
+			FlatProps.draw_tire_stack(self, base, rng.randi_range(2, 4), 34.0, 18.0)
+
+## A y on the dirt above or below the strip, at least `clearance` off the shoulder.
+func _off_track_y(rng: RandomNumberGenerator, top: float, bottom: float, clearance: float) -> float:
+	if rng.randf() < 0.5:
+		return top - shoulder_width - rng.randf_range(clearance, clearance + 500.0)
+	return bottom + shoulder_width + rng.randf_range(clearance, clearance + 500.0)
 
 ## --- Wear -----------------------------------------------------------------------
 

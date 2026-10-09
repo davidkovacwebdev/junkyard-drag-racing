@@ -1,155 +1,155 @@
-[gd_scene load_steps=2 format=3 uid="uid://dt22ep4uxjlar"]
+[gd_scene format=3 uid="uid://bfci3ixf53t8r"]
 
 [sub_resource type="RectangleShape2D" id="Shape_floor"]
 size = Vector2(6800, 60)
 
-[node name="TrackMultiRamp" type="Node2D"]
+[node name="TrackMultiRamp" type="Node2D" unique_id=1128215295]
 
-[node name="FloorLane0" type="StaticBody2D" parent="."]
+[node name="FloorLane0" type="StaticBody2D" parent="." unique_id=1259665047]
 position = Vector2(3400, 30)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="FloorLane0"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="FloorLane0" unique_id=1859929708]
 shape = SubResource("Shape_floor")
 
-[node name="Polygon2D" type="Polygon2D" parent="FloorLane0"]
+[node name="Polygon2D" type="Polygon2D" parent="FloorLane0" unique_id=124503972]
 color = Color(0.3, 0.3, 0.32, 1)
 polygon = PackedVector2Array(-3400, -30, 3400, -30, 3400, 30, -3400, 30)
 
-[node name="FloorLane1" type="StaticBody2D" parent="."]
+[node name="FloorLane1" type="StaticBody2D" parent="." unique_id=1961153797]
 position = Vector2(3400, 260)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="FloorLane1"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="FloorLane1" unique_id=599458996]
 shape = SubResource("Shape_floor")
 
-[node name="Polygon2D" type="Polygon2D" parent="FloorLane1"]
+[node name="Polygon2D" type="Polygon2D" parent="FloorLane1" unique_id=1282898281]
 color = Color(0.3, 0.3, 0.32, 1)
 polygon = PackedVector2Array(-3400, -30, 3400, -30, 3400, 30, -3400, 30)
 
-[node name="FloorLane2" type="StaticBody2D" parent="."]
+[node name="FloorLane2" type="StaticBody2D" parent="." unique_id=24238035]
 position = Vector2(3400, 490)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="FloorLane2"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="FloorLane2" unique_id=142533848]
 shape = SubResource("Shape_floor")
 
-[node name="Polygon2D" type="Polygon2D" parent="FloorLane2"]
+[node name="Polygon2D" type="Polygon2D" parent="FloorLane2" unique_id=878051306]
 color = Color(0.3, 0.3, 0.32, 1)
 polygon = PackedVector2Array(-3400, -30, 3400, -30, 3400, 30, -3400, 30)
 
-[node name="FloorLane3" type="StaticBody2D" parent="."]
+[node name="FloorLane3" type="StaticBody2D" parent="." unique_id=107195984]
 position = Vector2(3400, 720)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="FloorLane3"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="FloorLane3" unique_id=225268935]
 shape = SubResource("Shape_floor")
 
-[node name="Polygon2D" type="Polygon2D" parent="FloorLane3"]
+[node name="Polygon2D" type="Polygon2D" parent="FloorLane3" unique_id=829042239]
 color = Color(0.3, 0.3, 0.32, 1)
 polygon = PackedVector2Array(-3400, -30, 3400, -30, 3400, 30, -3400, 30)
 
-[node name="FloorLane4" type="StaticBody2D" parent="."]
+[node name="FloorLane4" type="StaticBody2D" parent="." unique_id=1600440979]
 position = Vector2(3400, 950)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="FloorLane4"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="FloorLane4" unique_id=841505793]
 shape = SubResource("Shape_floor")
 
-[node name="Polygon2D" type="Polygon2D" parent="FloorLane4"]
+[node name="Polygon2D" type="Polygon2D" parent="FloorLane4" unique_id=2100094543]
 color = Color(0.3, 0.3, 0.32, 1)
 polygon = PackedVector2Array(-3400, -30, 3400, -30, 3400, 30, -3400, 30)
 
-[node name="FloorLane5" type="StaticBody2D" parent="."]
+[node name="FloorLane5" type="StaticBody2D" parent="." unique_id=1888694633]
 position = Vector2(3400, 1180)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="FloorLane5"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="FloorLane5" unique_id=153377073]
 shape = SubResource("Shape_floor")
 
-[node name="Polygon2D" type="Polygon2D" parent="FloorLane5"]
+[node name="Polygon2D" type="Polygon2D" parent="FloorLane5" unique_id=14521580]
 color = Color(0.3, 0.3, 0.32, 1)
 polygon = PackedVector2Array(-3400, -30, 3400, -30, 3400, 30, -3400, 30)
 
-[node name="FinishLine" type="Polygon2D" parent="."]
+[node name="FinishLine" type="Polygon2D" parent="." unique_id=1927891944]
 position = Vector2(5400, 0)
 color = Color(1, 1, 1, 0.6)
 polygon = PackedVector2Array(-6, -80, 6, -80, 6, 1290, -6, 1290)
 
-[node name="RampLane0" type="StaticBody2D" parent="."]
+[node name="RampLane0" type="StaticBody2D" parent="." unique_id=75346670]
 position = Vector2(6300, 0)
 
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="RampLane0"]
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="RampLane0" unique_id=1294271285]
 polygon = PackedVector2Array(0, 0, 250, 0, 250, -250)
 
-[node name="Polygon2D" type="Polygon2D" parent="RampLane0"]
+[node name="Polygon2D" type="Polygon2D" parent="RampLane0" unique_id=786300483]
 color = Color(0.95, 0.55, 0.1, 1)
 polygon = PackedVector2Array(0, 0, 250, 0, 250, -250)
 
-[node name="Stripe" type="Polygon2D" parent="RampLane0"]
+[node name="Stripe" type="Polygon2D" parent="RampLane0" unique_id=151496815]
 color = Color(0.1, 0.1, 0.1, 1)
 polygon = PackedVector2Array(15, -15, 35, -35, 25, -35, 5, -15)
 
-[node name="RampLane1" type="StaticBody2D" parent="."]
+[node name="RampLane1" type="StaticBody2D" parent="." unique_id=1350842659]
 position = Vector2(6300, 230)
 
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="RampLane1"]
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="RampLane1" unique_id=1440756274]
 polygon = PackedVector2Array(0, 0, 250, 0, 250, -250)
 
-[node name="Polygon2D" type="Polygon2D" parent="RampLane1"]
+[node name="Polygon2D" type="Polygon2D" parent="RampLane1" unique_id=1721275849]
 color = Color(0.95, 0.55, 0.1, 1)
 polygon = PackedVector2Array(0, 0, 250, 0, 250, -250)
 
-[node name="Stripe" type="Polygon2D" parent="RampLane1"]
+[node name="Stripe" type="Polygon2D" parent="RampLane1" unique_id=758246462]
 color = Color(0.1, 0.1, 0.1, 1)
 polygon = PackedVector2Array(15, -15, 35, -35, 25, -35, 5, -15)
 
-[node name="RampLane2" type="StaticBody2D" parent="."]
+[node name="RampLane2" type="StaticBody2D" parent="." unique_id=1183995750]
 position = Vector2(6300, 460)
 
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="RampLane2"]
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="RampLane2" unique_id=542866917]
 polygon = PackedVector2Array(0, 0, 250, 0, 250, -250)
 
-[node name="Polygon2D" type="Polygon2D" parent="RampLane2"]
+[node name="Polygon2D" type="Polygon2D" parent="RampLane2" unique_id=1683765088]
 color = Color(0.95, 0.55, 0.1, 1)
 polygon = PackedVector2Array(0, 0, 250, 0, 250, -250)
 
-[node name="Stripe" type="Polygon2D" parent="RampLane2"]
+[node name="Stripe" type="Polygon2D" parent="RampLane2" unique_id=2038624252]
 color = Color(0.1, 0.1, 0.1, 1)
 polygon = PackedVector2Array(15, -15, 35, -35, 25, -35, 5, -15)
 
-[node name="RampLane3" type="StaticBody2D" parent="."]
+[node name="RampLane3" type="StaticBody2D" parent="." unique_id=1236572085]
 position = Vector2(6300, 690)
 
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="RampLane3"]
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="RampLane3" unique_id=1606672097]
 polygon = PackedVector2Array(0, 0, 250, 0, 250, -250)
 
-[node name="Polygon2D" type="Polygon2D" parent="RampLane3"]
+[node name="Polygon2D" type="Polygon2D" parent="RampLane3" unique_id=1017720503]
 color = Color(0.95, 0.55, 0.1, 1)
 polygon = PackedVector2Array(0, 0, 250, 0, 250, -250)
 
-[node name="Stripe" type="Polygon2D" parent="RampLane3"]
+[node name="Stripe" type="Polygon2D" parent="RampLane3" unique_id=2103370641]
 color = Color(0.1, 0.1, 0.1, 1)
 polygon = PackedVector2Array(15, -15, 35, -35, 25, -35, 5, -15)
 
-[node name="RampLane4" type="StaticBody2D" parent="."]
+[node name="RampLane4" type="StaticBody2D" parent="." unique_id=1480716668]
 position = Vector2(6300, 920)
 
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="RampLane4"]
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="RampLane4" unique_id=1694470534]
 polygon = PackedVector2Array(0, 0, 250, 0, 250, -250)
 
-[node name="Polygon2D" type="Polygon2D" parent="RampLane4"]
+[node name="Polygon2D" type="Polygon2D" parent="RampLane4" unique_id=882880849]
 color = Color(0.95, 0.55, 0.1, 1)
 polygon = PackedVector2Array(0, 0, 250, 0, 250, -250)
 
-[node name="Stripe" type="Polygon2D" parent="RampLane4"]
+[node name="Stripe" type="Polygon2D" parent="RampLane4" unique_id=1437615189]
 color = Color(0.1, 0.1, 0.1, 1)
 polygon = PackedVector2Array(15, -15, 35, -35, 25, -35, 5, -15)
 
-[node name="RampLane5" type="StaticBody2D" parent="."]
+[node name="RampLane5" type="StaticBody2D" parent="." unique_id=1658005442]
 position = Vector2(6300, 1150)
 
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="RampLane5"]
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="RampLane5" unique_id=1668243394]
 polygon = PackedVector2Array(0, 0, 250, 0, 250, -250)
 
-[node name="Polygon2D" type="Polygon2D" parent="RampLane5"]
+[node name="Polygon2D" type="Polygon2D" parent="RampLane5" unique_id=1300056158]
 color = Color(0.95, 0.55, 0.1, 1)
 polygon = PackedVector2Array(0, 0, 250, 0, 250, -250)
 
-[node name="Stripe" type="Polygon2D" parent="RampLane5"]
+[node name="Stripe" type="Polygon2D" parent="RampLane5" unique_id=1995501453]
 color = Color(0.1, 0.1, 0.1, 1)
 polygon = PackedVector2Array(15, -15, 35, -35, 25, -35, 5, -15)

@@ -34,6 +34,8 @@ end_delay = 4.0
 [node name="MainCamera" type="Camera2D" parent="."]
 position = Vector2(400, 400)
 zoom = Vector2(0.36, 0.36)
+limit_left = -3320
+limit_right = 5720
 script = ExtResource("4")
 pack_view = 2
 

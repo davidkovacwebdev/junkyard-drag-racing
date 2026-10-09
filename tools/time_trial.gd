@@ -39,6 +39,12 @@ var _batch_elapsed := 0.0
 var _worker_specs: Array[Array] = []
 var _worker_pids: Array[int] = []
 var on_hill := false
+## What the progress bar calls this run.
+var progress_label := "time trial"
+## Set in a worker process: where it reports how many cars it has finished.
+var progress_path := ""
+var _progress: ToolProgress
+var _progress_paths := PackedStringArray()
 var _hill_profile := HillClimbTrack.new()
 
 func _exit_tree() -> void:
@@ -57,6 +63,12 @@ func run(specs: Array[Dictionary]) -> void:
 	for i in specs.size():
 		_worker_specs[i % worker_count].append(specs[i])
 	DirAccess.make_dir_recursive_absolute(WORKER_DIR)
+	_progress_paths.clear()
+	for worker in worker_count:
+		_progress_paths.append(worker_progress_path(worker))
+		ToolProgress.write_worker_file(worker_progress_path(worker), 0)
+	_progress = ToolProgress.new(progress_label, specs.size(), "cars",
+			"starting %d workers, first cars in soon" % worker_count)
 	for worker in worker_count:
 		_worker_pids.append(_spawn_worker(worker, _worker_specs[worker]))
 
@@ -69,11 +81,13 @@ func run_in_this_process(specs: Array[Dictionary]) -> void:
 func _process(_delta: float) -> void:
 	if _worker_pids.is_empty():
 		return
+	_progress.update_from_files(_progress_paths)
 	for pid in _worker_pids:
 		if OS.is_process_running(pid):
 			OS.delay_msec(WORKER_POLL_MSEC)
 			return
 	_worker_pids.clear()
+	_progress.finish()
 	_collect_worker_results()
 
 func _spawn_worker(worker: int, specs: Array) -> int:
@@ -85,16 +99,22 @@ func _spawn_worker(worker: int, specs: Array) -> int:
 	file.store_string(JSON.stringify(car_specs))
 	file.close()
 	var arguments := PackedStringArray([
-		"--headless", "--fixed-fps", "60", "--path", ProjectSettings.globalize_path("res://"),
+		"--headless", "--quiet", "--fixed-fps", "60", "--path", ProjectSettings.globalize_path("res://"),
 		WORKER_SCENE, "--", "--no-save", "--worker=%d" % worker])
 	if on_hill:
 		arguments.append("--hill")
+	var executable := OS.get_executable_path()
 	# Godot's idle helper threads spin on whatever cores they can reach, so
 	# unpinned workers burn each other's CPU. Pinned, each gets a core to itself.
 	if OS.get_name() == "Linux":
-		arguments = PackedStringArray(["-c", str(worker), OS.get_executable_path()]) + arguments
-		return OS.create_process("taskset", arguments)
-	return OS.create_process(OS.get_executable_path(), arguments)
+		arguments = PackedStringArray(["-c", str(worker), executable]) + arguments
+		executable = "taskset"
+	# Piped rather than inherited, so what a worker prints goes out above the
+	# progress bar instead of over it. Quiet, so that's only warnings and errors.
+	var process := OS.execute_with_pipe(executable, arguments, false)
+	_progress.add_output_pipe(process["stdio"])
+	_progress.add_output_pipe(process["stderr"])
+	return process["pid"]
 
 func _collect_worker_results() -> void:
 	for worker in _worker_specs.size():
@@ -112,6 +132,7 @@ func _collect_worker_results() -> void:
 			spec["wrecked"] = bool(result["wrecked"])
 		DirAccess.remove_absolute(worker_specs_path(worker))
 		DirAccess.remove_absolute(worker_results_path(worker))
+		DirAccess.remove_absolute(worker_progress_path(worker))
 	finished.emit(_results)
 
 static func worker_specs_path(worker: int) -> String:
@@ -119,6 +140,9 @@ static func worker_specs_path(worker: int) -> String:
 
 static func worker_results_path(worker: int) -> String:
 	return "%s/results_%d.json" % [WORKER_DIR, worker]
+
+static func worker_progress_path(worker: int) -> String:
+	return "%s/progress_%d.txt" % [WORKER_DIR, worker]
 
 func _physics_process(delta: float) -> void:
 	if _batch_root == null:
@@ -140,6 +164,7 @@ func _physics_process(delta: float) -> void:
 			# Done cars would otherwise keep simulating until the batch's
 			# slowest car gives up.
 			car.root.queue_free()
+			_report_progress()
 		else:
 			var distance := snappedf(car.body.global_position.x - SPAWN_X, 1.0)
 			spec["distance"] = maxf(spec["distance"], distance) if on_hill else distance
@@ -161,7 +186,7 @@ func _start_batch() -> void:
 		_add_floor(floor_y)
 		var car := CarAssembler.assemble_from_car_data(RaceProgression.rival_car_model(spec),
 				_batch_root, Vector2(SPAWN_X, floor_y))
-		_remove_engine_sound(car)
+		remove_engine_sound(car)
 		_batch_specs.append(spec)
 		_batch_cars.append(car)
 
@@ -172,15 +197,26 @@ func _finish_batch() -> void:
 		_results.append(spec)
 	_batch_root.queue_free()
 	_batch_root = null
-	print("time trial: %d / %d" % [_results.size(), _total])
+	_report_progress()
 	if _pending.is_empty():
 		finished.emit(_results)
 	else:
 		_start_batch.call_deferred()
 
+## Cars done so far, counting the ones already over the line in this batch,
+## so the bar moves before a batch's slowest car gives up.
+func _report_progress() -> void:
+	var done := _results.size()
+	if _batch_root != null:
+		done += _batch_specs.filter(func(spec: Dictionary) -> bool: return spec.has("time")).size()
+	if progress_path.is_empty():
+		print("time trial: %d / %d" % [done, _total])
+	else:
+		ToolProgress.write_worker_file(progress_path, done)
+
 ## Nobody hears a time trial, and synthesizing engine sound was most of each
 ## frame's cost. It only reads the wheels, so the race comes out the same.
-static func _remove_engine_sound(car: CarAssembler.AssembledCar) -> void:
+static func remove_engine_sound(car: CarAssembler.AssembledCar) -> void:
 	for child in car.body.get_children():
 		if child is EngineSound:
 			child.free()

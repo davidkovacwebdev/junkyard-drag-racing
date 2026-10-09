@@ -37,6 +37,7 @@ const FISH := Color(0.86, 0.52, 0.2)
 const FISH_SILVER := Color(0.68, 0.72, 0.74)
 const STONE := Color(0.5, 0.5, 0.48)
 const GULL := Color(0.88, 0.88, 0.84)
+const GULL_BEAK := Color(0.9, 0.66, 0.2)
 
 const DECK_DEPTH := 56.0
 const DECK_FACE := 12.0
@@ -101,6 +102,9 @@ func _draw_pier() -> void:
 	var gull := Vector2(length - 50.0, -DECK_FACE - 18.0)
 	draw_colored_polygon(FlatProps.octagon(gull + Vector2(0.0, -14.0), 20.0, 14.0), GULL)
 	draw_colored_polygon(FlatProps.octagon(gull + Vector2(-16.0, -30.0), 9.0, 9.0), GULL)
+	draw_colored_polygon(PackedVector2Array([
+		gull + Vector2(-23.0, -34.0), gull + Vector2(-37.0, -29.0), gull + Vector2(-23.0, -26.0),
+	]), GULL_BEAK)
 	draw_colored_polygon(PackedVector2Array([
 		gull + Vector2(-8.0, -22.0), gull + Vector2(18.0, -18.0), gull + Vector2(30.0, -8.0), gull + Vector2(0.0, -8.0),
 	]), STONE)

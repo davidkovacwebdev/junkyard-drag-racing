@@ -12,6 +12,7 @@ func _ready() -> void:
 	specs.assign(JSON.parse_string(FileAccess.get_file_as_string(TimeTrial.worker_specs_path(_worker))))
 	var trial := TimeTrial.new()
 	trial.on_hill = "--hill" in OS.get_cmdline_user_args()
+	trial.progress_path = TimeTrial.worker_progress_path(_worker)
 	add_child(trial)
 	trial.finished.connect(_save)
 	trial.run_in_this_process(specs)

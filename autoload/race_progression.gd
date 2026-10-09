@@ -18,9 +18,15 @@ const ROSTER_PATH := "res://data/rival_roster.json"
 ## tools/build_rival_roster.gd --hill): a fast drag car is often a hopeless
 ## climber, so the hill picks its rivals from how they climb.
 const HILL_ROSTER_PATH := "res://data/hill_rival_roster.json"
+## The same kind of cars again, rated for the derby from their parts
+## (tools/build_rival_roster.gd --derby, see DerbyRating). A derby car isn't timed, so instead
+## of "time" each one has a "weakness": the median car's derby strength over
+## its own (0.5 is twice as strong as a median car). Lower is better,
+## same as a time, so it picks with the same windows.
+const DERBY_ROSTER_PATH := "res://data/derby_rival_roster.json"
 
 ## Which roster and tier pars a venue's rivals come from.
-enum Course { DRAG, HILL }
+enum Course { DRAG, HILL, DERBY }
 ## Roster time for a car that never reached the finish line.
 const DID_NOT_FINISH := 999.0
 
@@ -45,6 +51,9 @@ const TIER_PAR_TIMES := { 1: 47.0, 2: 33.0, 3: 22.5, 4: 17.5 }
 ## pars sit in the drag one.
 ## Tier 4's window only holds cars that reach the summit.
 const HILL_TIER_PAR_TIMES := { 1: 150.0, 2: 98.0, 3: 75.0, 4: 30.0 }
+## The derby's tier pars, in weakness, at the same spots in the derby roster
+## as the drag pars sit in the drag one.
+const DERBY_TIER_PAR_WEAKNESS := { 1: 1.2, 2: 0.74, 3: 0.55, 4: 0.45 }
 const TIER_ENTRY_FEES := { 1: 40, 2: 100, 3: 220, 4: 450 }
 ## Winning a paid-entry race pays back this many times the entry fee (so a
 ## win nets 3x the fee on top of getting it back); winning a bet (see
@@ -127,6 +136,7 @@ var _rosters := {}
 func _ready() -> void:
 	_rosters[Course.DRAG] = _load_roster(ROSTER_PATH)
 	_rosters[Course.HILL] = _load_roster(HILL_ROSTER_PATH)
+	_rosters[Course.DERBY] = _load_roster(DERBY_ROSTER_PATH)
 
 func reset() -> void:
 	races_won = 0
@@ -148,7 +158,8 @@ func entry_fee_for_tier(tier: int) -> int:
 	return int(TIER_ENTRY_FEES.get(tier, 0))
 
 ## `count` rival specs ({"body", "engine", "wheels", "accessories"} scene
-## paths plus their roster "time"), in random lane order.
+## paths plus their roster "time", or "weakness" in the derby), in random lane
+## order.
 func pick_rivals(count: int) -> Array[Dictionary]:
 	return _pick_rivals_at_par(count, par_time(), Course.DRAG)
 
@@ -161,17 +172,20 @@ func _pick_rivals_at_par(count: int, par: float, course: Course) -> Array[Dictio
 	var rivals: Array[Dictionary] = []
 	var roster: Array[Dictionary] = _rosters[course]
 	if roster.is_empty():
+		course = Course.DRAG
+		par = par_time()
 		roster = _rosters[Course.DRAG]
 	if count <= 0 or roster.is_empty():
 		return rivals
+	var key := score_key(course)
 	var accessory_share := _accessory_share_for_par(par, _tier_pars(course))
-	var headliner := _pick_in_window(roster, par * HEADLINER_WINDOW.x, par * HEADLINER_WINDOW.y, par,
+	var headliner := _pick_in_window(roster, key, par * HEADLINER_WINDOW.x, par * HEADLINER_WINDOW.y, par,
 			randf() < accessory_share)
 	rivals.append(headliner)
-	var headliner_time := float(headliner["time"])
+	var headliner_score := float(headliner[key])
 	for i in count - 1:
-		rivals.append(_pick_in_window(roster, headliner_time * FILLER_WINDOW.x, headliner_time * FILLER_WINDOW.y,
-				headliner_time * FILLER_WINDOW.y, randf() < accessory_share))
+		rivals.append(_pick_in_window(roster, key, headliner_score * FILLER_WINDOW.x, headliner_score * FILLER_WINDOW.y,
+				headliner_score * FILLER_WINDOW.y, randf() < accessory_share))
 	rivals.shuffle()
 	return rivals
 
@@ -185,7 +199,16 @@ static func _accessory_share_for_par(par: float, tier_pars: Dictionary) -> float
 	return RIVAL_ACCESSORY_SHARE[closest_tier]
 
 static func _tier_pars(course: Course) -> Dictionary:
-	return HILL_TIER_PAR_TIMES if course == Course.HILL else TIER_PAR_TIMES
+	match course:
+		Course.HILL:
+			return HILL_TIER_PAR_TIMES
+		Course.DERBY:
+			return DERBY_TIER_PAR_WEAKNESS
+	return TIER_PAR_TIMES
+
+## The roster field a course ranks its cars by. Lower is better for both.
+static func score_key(course: Course) -> String:
+	return "weakness" if course == Course.DERBY else "time"
 
 ## Roge Roger's car: always the same one, the roster car timed closest to
 ## the bottom tier's par (no extras), so he's hopelessly outclassed.
@@ -193,7 +216,7 @@ func roger_spec() -> Dictionary:
 	var roster: Array[Dictionary] = _rosters[Course.DRAG]
 	var plain := roster.filter(func(entry: Dictionary) -> bool:
 		return Array(entry.get("accessories", [])).is_empty())
-	return _pick_in_window(plain, TIER_PAR_TIMES[1], TIER_PAR_TIMES[1], TIER_PAR_TIMES[1], false) \
+	return _pick_in_window(plain, "time", TIER_PAR_TIMES[1], TIER_PAR_TIMES[1], TIER_PAR_TIMES[1], false) \
 			if not plain.is_empty() else roster[0]
 
 ## Whether Roge Roger turns up in `tier`'s bet field at `venue` right now.
@@ -217,13 +240,13 @@ static func rival_car_model(rival: Dictionary) -> CarModelData:
 	model.accessories = accessories
 	return model
 
-## A random roster car timed between `fastest` and `slowest`, wearing extras
-## or not as `with_accessories` asks (either kind if the window has none of
-## that kind), or the one timed closest to `fallback_time` when none is.
-static func _pick_in_window(roster: Array[Dictionary], fastest: float, slowest: float, fallback_time: float, with_accessories: bool) -> Dictionary:
+## A random roster car whose `key` score is between `best` and `worst`,
+## wearing extras or not as `with_accessories` asks (either kind if the window
+## has none of that kind), or the one closest to `fallback_score` when none is.
+static func _pick_in_window(roster: Array[Dictionary], key: String, best: float, worst: float, fallback_score: float, with_accessories: bool) -> Dictionary:
 	var candidates := roster.filter(func(entry: Dictionary) -> bool:
-		var time := float(entry["time"])
-		return time >= fastest and time <= slowest)
+		var score := float(entry[key])
+		return score >= best and score <= worst)
 	var matching := candidates.filter(func(entry: Dictionary) -> bool:
 		return Array(entry.get("accessories", [])).is_empty() != with_accessories)
 	if not matching.is_empty():
@@ -232,7 +255,7 @@ static func _pick_in_window(roster: Array[Dictionary], fastest: float, slowest: 
 		return candidates.pick_random()
 	var closest: Dictionary = roster[0]
 	for entry in roster:
-		if absf(float(entry["time"]) - fallback_time) < absf(float(closest["time"]) - fallback_time):
+		if absf(float(entry[key]) - fallback_score) < absf(float(closest[key]) - fallback_score):
 			closest = entry
 	return closest
 

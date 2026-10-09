@@ -26,12 +26,15 @@ extends Resource
 ## not done yet, that place's minimap icon glows yellow.
 @export var objective_place: String = ""
 
+const QUEST_ARRAY_HINT := "24/17:QuestData"
+
 @export_group("Chain")
 ## Quests that become available (giver's head on the map) once this one is
-## finished.
-@export var unlocks: Array[QuestData] = []
+## finished. Untyped with a QuestData-only hint rather than Array[QuestData]:
+## a script holding typed arrays of its own class leaks at exit.
+@export_custom(PROPERTY_HINT_TYPE_STRING, QUEST_ARRAY_HINT) var unlocks: Array = []
 ## Quests handed to the player straight away when this one is finished.
-@export var follow_ups: Array[QuestData] = []
+@export_custom(PROPERTY_HINT_TYPE_STRING, QUEST_ARRAY_HINT) var follow_ups: Array = []
 ## Holds the `follow_ups` back this many in-game days after the quest is
 ## finished (see DayNightCycle.day): they land in the log out of nowhere
 ## once the time has passed. 0: straight away.
