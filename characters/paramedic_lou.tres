@@ -1,9 +1,9 @@
-[gd_resource type="Resource" script_class="CharacterData" format=3]
+[gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://keudqs0wak07"]
 
-[ext_resource type="Script" path="res://scripts/character/character_data.gd" id="1_data"]
-[ext_resource type="PackedScene" path="res://scenes/characters/parts/legs/legs_cargo.tscn" id="2_legs"]
+[ext_resource type="Script" uid="uid://ckj8s3h32w3wv" path="res://scripts/character/character_data.gd" id="1_data"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/legs/legs_slacks.tscn" id="2_legs"]
 [ext_resource type="PackedScene" path="res://scenes/characters/parts/boots/boots_work.tscn" id="3_boots"]
-[ext_resource type="PackedScene" path="res://scenes/characters/parts/torsos/torso_hazmat.tscn" id="4_torso"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/torsos/torso_paramedic.tscn" id="4_torso"]
 [ext_resource type="PackedScene" path="res://scenes/characters/parts/heads/head_pear.tscn" id="5_head"]
 [ext_resource type="PackedScene" path="res://scenes/characters/parts/hairs/hair_mullet.tscn" id="6_hair"]
 [ext_resource type="PackedScene" path="res://scenes/characters/parts/eyes/eyes_wide.tscn" id="7_eyes"]
@@ -21,3 +21,4 @@ voice_pitch_hz = 150.0
 voice_throat = 1.1
 voice_rasp = 0.3
 voice_wobble = 0.2
+idle_lines = PackedStringArray()

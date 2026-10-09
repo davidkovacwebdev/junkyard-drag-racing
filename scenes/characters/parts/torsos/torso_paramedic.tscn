@@ -1,0 +1,34 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_torso_paramedic"]
+script = ExtResource("2")
+id = &"torso_paramedic"
+display_name = "Paramedic Torso"
+slot = 2
+
+[node name="ParamedicTorso" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_torso_paramedic")
+
+[node name="Suit" type="Polygon2D" parent="."]
+color = Color(0.26, 0.46, 0.34, 1)
+polygon = PackedVector2Array(-28, -170, 28, -170, 28, -96, -28, -96)
+
+[node name="ArmLeft" type="Polygon2D" parent="."]
+color = Color(0.21, 0.38, 0.28, 1)
+polygon = PackedVector2Array(-44, -168, -28, -168, -28, -104, -44, -104)
+
+[node name="ArmRight" type="Polygon2D" parent="."]
+color = Color(0.21, 0.38, 0.28, 1)
+polygon = PackedVector2Array(28, -168, 44, -168, 44, -104, 28, -104)
+
+[node name="CrossUp" type="Polygon2D" parent="."]
+color = Color(0.94, 0.94, 0.9, 1)
+polygon = PackedVector2Array(-5, -158, 5, -158, 5, -126, -5, -126)
+
+[node name="CrossAcross" type="Polygon2D" parent="."]
+color = Color(0.94, 0.94, 0.9, 1)
+polygon = PackedVector2Array(-16, -147, 16, -147, 16, -137, -16, -137)

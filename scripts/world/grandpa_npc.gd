@@ -25,8 +25,10 @@ extends StaticBody2D
 ##
 ## Once "Grandpa?" (or anything after it, `GONE_QUESTS`) is in the log he's gone for good: no
 ## chair, no beer, no quests, just the spot by the garage where he used to
-## sit (Tiger and the bacon smoker stay). If the player is nearby when the
-## quest lands, he waits until they've driven off before he's gone.
+## sit (Tiger and the bacon smoker stay). He goes the moment the quest
+## lands, and stays gone even if the quest log is emptied: the day he died is
+## on record (WorldState.crane_fell_day), or there's a funeral for him
+## (Funeral), booked or held.
 ##
 ## `actor` is a plain CutsceneActor, so cutscenes can hand it to
 ## Cutscenes.subtitle() for the talking squash like any spawned actor.
@@ -88,9 +90,6 @@ const BOTTLE_PARTS := ["Bottle", "BottleCap", "Label"]
 ## The quests of his last act: once any of them is in the log (or done),
 ## he's gone (see `is_gone()`).
 const GONE_QUESTS: Array[StringName] = [&"grandpa_missing", &"hospital_visit", &"junkyard_truth"]
-## He only goes missing while the car is at least this far off, never in
-## plain sight.
-const VANISH_DISTANCE := 1600.0
 
 ## Which way he's turned. The wrench is in his left hand, so facing left
 ## puts it on his right-hand side of the screen.
@@ -162,6 +161,9 @@ func _ready() -> void:
 
 ## Whether Grandpa is gone from his spot for good (the story's last act).
 static func is_gone() -> bool:
+	# The day he died is on record, or his funeral's been booked or held.
+	if WorldState.crane_fell_day > 0 or Funeral.funeral_at > 0.0 or Funeral.held:
+		return true
 	for id in GONE_QUESTS:
 		if Quests.has_quest(id) or Quests.is_complete(id):
 			return true
@@ -185,10 +187,8 @@ func _process(delta: float) -> void:
 	if _vanished:
 		return
 	if is_gone():
-		var car := get_tree().get_first_node_in_group(PlayerCar.GROUP) as Node2D
-		if car == null or global_position.distance_to(car.global_position) > VANISH_DISTANCE:
-			vanish()
-			return
+		vanish()
+		return
 	if _dialog.is_open():
 		if not is_instance_valid(_talker) \
 				or global_position.distance_to(_talker.global_position) > dialog_range:

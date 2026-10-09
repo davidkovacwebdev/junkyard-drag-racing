@@ -38,6 +38,7 @@ const _BODY_SCENES := [
 	"res://scenes/parts/bodies/body_cardboard_box.tscn",
 	"res://scenes/parts/bodies/body_ufo.tscn",
 	"res://scenes/parts/bodies/body_gondola.tscn",
+	"res://scenes/parts/bodies/body_wheelchair.tscn",
 ]
 const _WHEEL_SCENES := [
 	"res://scenes/parts/wheels/wheel_standard.tscn",
@@ -76,6 +77,7 @@ const _WHEEL_SCENES := [
 	"res://scenes/parts/wheels/wheel_helmet.tscn",
 	"res://scenes/parts/wheels/wheel_anchor.tscn",
 	"res://scenes/parts/wheels/wheel_bigfoot_leg.tscn",
+	"res://scenes/parts/wheels/wheel_wheelchair.tscn",
 ]
 const _ENGINE_SCENES := [
 	"res://scenes/parts/engines/engine_v6.tscn",

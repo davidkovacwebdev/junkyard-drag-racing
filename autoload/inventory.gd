@@ -324,14 +324,30 @@ const STARTER_ENGINE := "res://scenes/parts/engines/engine_lawn_mower.tscn"
 const STARTER_WHEEL := "res://scenes/parts/wheels/wheel_standard.tscn"
 
 func _build_starter_car() -> CarModelData:
+	return build_car(STARTER_BODY, STARTER_ENGINE, STARTER_WHEEL)
+
+## A whole car made of fresh catalog copies: `body_path`, `engine_path`, and
+## `wheel_path` on every mount.
+static func build_car(body_path: String, engine_path: String, wheel_path: String) -> CarModelData:
 	var car := CarModelData.new()
-	car.body = _catalog_copy(PartDatabase.bodies, STARTER_BODY) as BodyPartData
-	car.engine = _catalog_copy(PartDatabase.engines, STARTER_ENGINE) as EnginePartData
-	var wheel := _catalog_copy(PartDatabase.wheels, STARTER_WHEEL) as WheelPartData
+	car.body = _catalog_copy(PartDatabase.bodies, body_path) as BodyPartData
+	car.engine = _catalog_copy(PartDatabase.engines, engine_path) as EnginePartData
+	var wheel := _catalog_copy(PartDatabase.wheels, wheel_path) as WheelPartData
 	car.wheels = []
 	for i in PartDatabase.wheel_mount_count(car.body):
 		car.wheels.append(wheel.duplicate())
 	return car
+
+## Parks a whole car in the garage, next to the ones already there.
+func give_car(car: CarModelData) -> void:
+	owned_cars.append(car)
+
+## Whether a car wearing the body `body_id` is already in the garage.
+func owns_car_with_body(body_id: StringName) -> bool:
+	for car in owned_cars:
+		if car.body != null and car.body.id == body_id:
+			return true
+	return false
 
 ## A fresh copy of the catalog part living in `scene_path`.
 static func _catalog_copy(parts: Array, scene_path: String) -> PartData:

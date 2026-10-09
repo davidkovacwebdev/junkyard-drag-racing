@@ -117,6 +117,11 @@ func build_from(car: CarModelData) -> void:
 		if _engine is HorseEngine or _engine is PunkerEngine:
 			_engine.set(&"gait_rate", horse_gait_rate)
 
+	# A body with a seat (the wheelchair) has the player sat in it.
+	var driver_seat := DriverSeat.of(_body)
+	if driver_seat != null:
+		driver_seat.seat(PlayerProfile.character)
+
 	_accessories = CarAccessory.instantiate_all(car)
 	for accessory in _accessories:
 		_neutralize_physics(accessory)

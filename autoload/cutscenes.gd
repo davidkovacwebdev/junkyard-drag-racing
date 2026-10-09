@@ -49,7 +49,7 @@ var _top_bar: ColorRect
 var _bottom_bar: ColorRect
 var _fade: ColorRect
 var _title: Label
-var _part_card: PartSlot = null
+var _part_card: Control = null
 var _subtitle_name: Label
 var _subtitle_line: Label
 var _speech: SpeechPlayer
@@ -185,18 +185,47 @@ func title_card(text: String, seconds: float = 2.0) -> void:
 ## card), for a part the player is handed: popped up mid-screen, held, then
 ## faded away.
 func part_card(part: PartData, seconds: float = 2.5) -> void:
-	if _skipping or part == null:
+	if part != null:
+		await part_cards([part], "", seconds)
+
+## A row of crane-pen part cards (a whole car's body, engine and wheel, say),
+## with `heading` over them when given, popped up mid-screen the same way.
+## Works outside a cutscene too (a reward once one's over).
+func part_cards(parts: Array[PartData], heading: String = "", seconds: float = 2.5) -> void:
+	if _skipping or parts.is_empty():
 		return
-	if is_instance_valid(_part_card):
-		_part_card.queue_free()
-	_part_card = PART_CARD.instantiate()
-	_part_card.custom_minimum_size = Vector2(PART_CARD_WIDTH, 0.0)
-	# Just for looking at: nothing to drag it onto here.
-	_part_card.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_part_card.category = part.category
-	_part_card.modulate.a = 0.0
-	_layer.add_child(_part_card)
-	_part_card.set_part(part)
+	_free_part_card()
+	_layer.visible = true
+	var box := VBoxContainer.new()
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.modulate.a = 0.0
+	# In the tree before the cards are filled in: they look their nodes up
+	# when they're ready.
+	_layer.add_child(box)
+	_part_card = box
+	box.add_theme_constant_override("separation", 14)
+	if not heading.is_empty():
+		var label := Label.new()
+		label.text = heading
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.add_theme_font_size_override("font_size", 30)
+		label.add_theme_color_override("font_color", UiPalette.TEXT_LIGHT)
+		label.add_theme_color_override("font_outline_color", UiPalette.INK)
+		label.add_theme_constant_override("outline_size", 8)
+		box.add_child(label)
+	var row := HBoxContainer.new()
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 12)
+	box.add_child(row)
+	for part in parts:
+		var card: PartSlot = PART_CARD.instantiate()
+		card.custom_minimum_size = Vector2(PART_CARD_WIDTH, 0.0)
+		# Just for looking at: nothing to drag it onto here.
+		card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		card.category = part.category
+		row.add_child(card)
+		card.set_part(part)
 	_part_card.reset_size()
 	var card_size := _part_card.get_combined_minimum_size()
 	_part_card.size = card_size
@@ -213,6 +242,8 @@ func part_card(part: PartData, seconds: float = 2.5) -> void:
 	fade.tween_property(_part_card, "modulate:a", 0.0, 0.4)
 	await _await_tween(fade)
 	_free_part_card()
+	if not _active:
+		_layer.visible = false
 
 func _free_part_card() -> void:
 	if is_instance_valid(_part_card):

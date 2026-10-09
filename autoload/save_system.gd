@@ -134,6 +134,7 @@ func _snapshot() -> SaveData:
 	data.funeral_at = Funeral.funeral_at
 	data.funeral_attended = Funeral.attended
 	data.funeral_window_left = Funeral.window_left
+	data.funeral_held = Funeral.held
 	data.races_won = RaceProgression.races_won
 	data.day = DayNightCycle.day
 	data.time_of_day = DayNightCycle.time_of_day
@@ -197,7 +198,8 @@ func load_game() -> bool:
 	WorldState.restore_looted(data.looted)
 	WorldState.tow_count = data.tow_count
 	WorldState.crane_fell_day = data.crane_fell_day
-	Funeral.restore(data.funeral_at, data.funeral_attended, data.funeral_window_left)
+	Funeral.restore(data.funeral_at, data.funeral_attended, data.funeral_window_left,
+			data.funeral_held)
 	RaceProgression.races_won = data.races_won
 	DayNightCycle.day = data.day
 	DayNightCycle.time_of_day = data.time_of_day

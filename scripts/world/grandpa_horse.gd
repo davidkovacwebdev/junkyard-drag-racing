@@ -12,6 +12,7 @@ extends StaticBody2D
 ## splashed on the grass and the two cans dropped where they were emptied.
 ##
 ## GrandpaNpc makes it and keeps it in step with the quests (`refresh()`);
+## Grandpa's funeral makes a `stand_in` (always there, painted, no mess);
 ## cutscenes can bring it on early with `walk_in()` and paint it with
 ## `set_painted()`.
 
@@ -83,6 +84,9 @@ const CARROT_TOP := Color(0.36, 0.55, 0.26)
 
 var _horse: HorseEngine
 var _painted := false
+## At Grandpa's funeral: there and painted whatever the quests say, and
+## without the paint job's mess on the ground.
+var stand_in := false
 var _paint_job: Array[Node] = []
 var _neigh: AmbientCall
 
@@ -110,6 +114,10 @@ func _ready() -> void:
 ## In step with the quests: there once "Giddy Up" is done, painted once
 ## "Fenced In"'s fence piece is in the trunk (or the quest is done).
 func refresh() -> void:
+	if stand_in:
+		_set_present(true)
+		set_painted(true)
+		return
 	_set_present(Quests.is_complete(HORSE_QUEST))
 	set_painted(Quests.is_ready(PAINT_QUEST) or Quests.is_complete(PAINT_QUEST))
 
@@ -124,6 +132,22 @@ func walk_in(from: Vector2, seconds: float) -> Tween:
 	tween.tween_property(_horse, "global_position", spot, seconds)
 	tween.tween_callback(func() -> void: _horse.scale.x = HORSE_SCALE)
 	return tween
+
+## Walks the whole of Tiger (mess and all) to `to` (world space) in
+## `seconds`, turned the way it's going. Cutscenes only.
+func walk_to(to: Vector2, seconds: float) -> Tween:
+	if to.x != global_position.x:
+		face(to.x > global_position.x)
+	var tween := create_tween()
+	tween.tween_property(self, "global_position", to, seconds)
+	return tween
+
+## Head up from the carrots (to say something), or back down to them.
+func lift_head(up: bool) -> void:
+	_horse.grazing = not up
+
+func face(right: bool) -> void:
+	_horse.scale.x = HORSE_SCALE * (1.0 if right else -1.0)
 
 func set_painted(painted: bool) -> void:
 	if painted == _painted:
@@ -157,6 +181,8 @@ func set_painted(painted: bool) -> void:
 	for prop: Polygon2D in [_polygon(CARROT_TOPS, CARROT_TOP), _polygon(CARROT_A, CARROT), _polygon(CARROT_B, CARROT_SHADE)]:
 		horse.add_child(prop)
 		_paint_job.append(prop)
+	if stand_in:
+		return
 	# The mess sits on the ground under (behind) Tiger, unflipped and unscaled.
 	var mess := [_polygon(SPLASH_ORANGE, ORANGE), _polygon(SPLASH_BLACK, STRIPE), _polygon(CAN_SPILL, ORANGE),
 			_polygon(CAN_TIPPED, CAN_STEEL), _polygon(CAN_TIPPED_SHADE, CAN_STEEL_SHADE),

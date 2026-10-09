@@ -1,8 +1,8 @@
 [gd_resource type="Resource" script_class="QuestData" format=3 uid="uid://ukhko6e0a5b0"]
 
 [ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
-[ext_resource type="Resource" path="res://quests/read_grandpas_note.tres" id="2_next"]
 [ext_resource type="Script" uid="uid://b4kssi28o6a3g" path="res://scripts/items/item_data.gd" id="2_hdrm7"]
+[ext_resource type="Resource" path="res://quests/read_grandpas_note.tres" id="2_next"]
 
 [resource]
 script = ExtResource("1_script")

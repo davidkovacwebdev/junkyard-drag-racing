@@ -243,6 +243,8 @@ func _build_paper() -> void:
 	_paper_text.position = Vector2(36.0, 66.0)
 	_paper_text.size = Vector2(PAPER_SIZE.x - 72.0, PAPER_SIZE.y - 110.0)
 	_paper_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	# Each line of a letter is its own paragraph, with a gap after it.
+	_paper_text.add_theme_constant_override("paragraph_spacing", 12)
 	paper.add_child(_paper_text)
 	var hint := _make_label(15, UiPalette.SURFACE_SHADE)
 	hint.text = "Any key  put it away"

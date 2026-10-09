@@ -6,9 +6,12 @@ extends CanvasLayer
 ##
 ## When the time comes the board turns red and the player has
 ## `WINDOW_SECONDS` of real time to get to the graveyard: within
-## `ARRIVE_DISTANCE` of its gate, or inside the cemetery. Make it and the
-## funeral's attended (for now that's all: a bell and a line on the board).
-## Miss it and lightning strikes the car, Grandpa yells from above, the
+## `ARRIVE_DISTANCE` of its gate, or inside the cemetery. While it's on
+## the minimap, the GPS and the board's arrow all point at the graveyard
+## (`wants_graveyard()`). Make it and the funeral's attended: the countdown
+## stops, the gate stays open, and driving in plays the ceremony
+## (GrandpaGrave, FuneralCutscene). Once that's `held` he lies in his grave
+## for good. Miss it and lightning strikes the car, Grandpa yells from above, the
 ## player dies (FuneralLightningCutscene), and the story winds back to the
 ## day he died: "Grandpa?" again, everything after it forgotten, the note and
 ## the nickel gone, the clock back to that morning, the car at the garage.
@@ -34,12 +37,16 @@ const AFTER_DEATH_QUESTS: Array[StringName] = [&"hospital_visit", &"junkyard_tru
 const AFTER_DEATH_ITEMS: Array[StringName] = [&"grandpas_note", &"old_nickel"]
 
 const LAYER := 45
-const BOARD_SIZE := Vector2(330.0, 58.0)
+const BOARD_SIZE := Vector2(420.0, 58.0)
+## The arrow on the board pointing at the graveyard, while it's time to go.
+const ARROW_SIZE := 15.0
 const MADE_IT_SECONDS := 4.0
 
 ## When it's held, in absolute game seconds (see `now()`). 0: not set yet.
 var funeral_at: float = 0.0
 var attended: bool = false
+## The ceremony in the cemetery has been played (FuneralCutscene).
+var held: bool = false
 ## Real seconds left to get to the graveyard once it's time. -1: not yet.
 var window_left: float = -1.0
 
@@ -48,6 +55,7 @@ var _last_tick: int = -1
 var _made_it_left: float = 0.0
 var _board: ScrapPanel
 var _label: Label
+var _arrow: Polygon2D
 var _flash: ColorRect
 var _cover: ColorRect
 
@@ -63,22 +71,48 @@ static func now() -> float:
 func is_scheduled() -> bool:
 	return funeral_at > 0.0 and not attended
 
+## Whether there's a funeral the graveyard gate stays open for: coming up,
+## under way, or made it to but not yet driven in for.
+func is_pending() -> bool:
+	return funeral_at > 0.0 and not held
+
+## Whether the ceremony plays on driving into the cemetery: it's time (or
+## the player already made it) and it hasn't been held yet.
+func is_ceremony_due() -> bool:
+	return is_pending() and (attended or window_left >= 0.0)
+
+## Whether everything should point the player at the graveyard right now.
+func wants_graveyard() -> bool:
+	return is_ceremony_due() and not _striking
+
+## The ceremony is over (FuneralCutscene).
+func hold() -> void:
+	attended = true
+	held = true
+	window_left = -1.0
+	_made_it_left = 0.0
+	SaveSystem.save_game()
+
 func reset() -> void:
 	funeral_at = 0.0
 	attended = false
+	held = false
 	window_left = -1.0
 	_made_it_left = 0.0
 
 ## For SaveSystem.
-func restore(saved_at: float, saved_attended: bool, saved_window_left: float) -> void:
+func restore(saved_at: float, saved_attended: bool, saved_window_left: float,
+		saved_held: bool = false) -> void:
 	funeral_at = saved_at
 	attended = saved_attended
+	held = saved_held
 	window_left = saved_window_left
 	_made_it_left = 0.0
 
 ## Dev: holds it `seconds` from now (the F5 board).
 func debug_start_in(seconds: float) -> void:
 	attended = false
+	held = false
 	window_left = -1.0
 	funeral_at = now() + seconds
 
@@ -182,19 +216,23 @@ func cover() -> void:
 # --- The board -------------------------------------------------------------------
 
 func _update_board(delta: float) -> void:
-	if _made_it_left > 0.0:
-		_made_it_left -= delta
-		_label.text = "You made it to the funeral."
-		_style(false)
-		_board.visible = Journal.hud_allowed()
-		return
-	if not is_scheduled() or _striking:
+	_update_arrow()
+	if not is_pending() or _striking or _in_cemetery():
 		_board.visible = false
 		return
 	_board.visible = Journal.hud_allowed()
+	if _made_it_left > 0.0:
+		_made_it_left -= delta
+		_label.text = "You made it! Drive in the gate"
+		_style(false)
+		return
+	if attended:
+		_label.text = "Grandpa's funeral: drive in the gate"
+		_style(false)
+		return
 	if window_left >= 0.0:
 		var seconds := ceili(window_left)
-		_label.text = "FUNERAL NOW! Get to the graveyard  %d:%02d" % [seconds / 60, seconds % 60]
+		_label.text = "FUNERAL NOW! To the graveyard  %d:%02d" % [seconds / 60, seconds % 60]
 		_style(true)
 		return
 	var hours := (funeral_at - now()) / DayNightCycle.SECONDS_PER_HOUR
@@ -207,6 +245,19 @@ func _update_board(delta: float) -> void:
 	else:
 		_label.text = "Grandpa's funeral in %dm" % maxi(1, int(hours * 60.0))
 	_style(false)
+
+## The ceremony plays the moment the cemetery loads; no board in there.
+func _in_cemetery() -> bool:
+	var scene := get_tree().current_scene
+	return scene != null and scene.scene_file_path == CEMETERY_SCENE
+
+## Points from the car to the graveyard gate, on the left end of the board.
+func _update_arrow() -> void:
+	var car := get_tree().get_first_node_in_group(PlayerCar.GROUP) as Node2D
+	var gate := get_tree().get_first_node_in_group(GraveyardGate.GROUP) as Node2D
+	_arrow.visible = wants_graveyard() and car != null and gate != null
+	if _arrow.visible:
+		_arrow.rotation = (gate.global_position - car.global_position).angle()
 
 ## Plain wood counting down; red once it's time to go.
 func _style(urgent: bool) -> void:
@@ -237,12 +288,24 @@ func _build() -> void:
 	_label.add_theme_color_override("font_color", UiPalette.TEXT_LIGHT)
 	_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	# Always one line: the board is sized for the longest text it shows.
+	_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	_label.clip_text = true
 	_label.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_label.offset_left = 10.0
-	_label.offset_right = -10.0
+	_label.offset_left = ARROW_SIZE * 2.0 + 14.0
+	_label.offset_right = -ARROW_SIZE * 2.0 - 14.0
 	_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_board.add_child(_label)
+	# A chunky chevron pointing right; turned toward the graveyard.
+	_arrow = Polygon2D.new()
+	_arrow.polygon = PackedVector2Array([
+		Vector2(ARROW_SIZE, 0.0), Vector2(-ARROW_SIZE * 0.8, -ARROW_SIZE * 0.85),
+		Vector2(-ARROW_SIZE * 0.35, 0.0), Vector2(-ARROW_SIZE * 0.8, ARROW_SIZE * 0.85),
+	])
+	_arrow.color = UiPalette.ACCENT_YELLOW
+	_arrow.position = Vector2(ARROW_SIZE + 14.0, BOARD_SIZE.y * 0.5)
+	_arrow.visible = false
+	_board.add_child(_arrow)
 	_style(false)
 
 	_flash = _full_screen(Color(1, 1, 1, 0))

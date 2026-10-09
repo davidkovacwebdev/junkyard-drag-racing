@@ -11,6 +11,9 @@ extends Node
 ## driving stay under the threshold; slamming into the end wall does not.
 
 signal broken
+## Every knock over the impact threshold, before it's turned into damage
+## (`delta_v` is the part's change in speed in that step).
+signal impacted(delta_v: float)
 
 const GROUP := &"car_part_damage"
 
@@ -78,6 +81,7 @@ func _physics_process(delta: float) -> void:
 	_prev_velocity = velocity
 	if delta_v < IMPACT_VELOCITY_THRESHOLD:
 		return
+	impacted.emit(delta_v)
 	var momentum := target.mass * delta_v
 	var total_absorption := absorption
 	if ground_absorption > 0.0 and _is_ground_hit():

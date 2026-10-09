@@ -9,7 +9,8 @@ extends CanvasLayer
 ##                follow-ups and unlocks, exactly like finishing it for real.
 ##   Finish all - finishes every quest, earliest in the story first, so all
 ##                their rewards and unlocks land: everything opened up.
-##   Reset all  - empties the quest log.
+##   Reset all  - empties the quest log, and undoes Grandpa's death (the
+##                crane wreck and the funeral) so the story can be replayed.
 ##   Funeral    - holds Grandpa's funeral 10 in-game seconds from now, so
 ##                the graveyard dash (and missing it) can be tried.
 ##
@@ -140,6 +141,8 @@ func _on_finish_all() -> void:
 
 func _on_reset() -> void:
 	Quests.reset()
+	WorldState.crane_fell_day = 0
+	Funeral.reset()
 	_refresh()
 
 # --- Building -----------------------------------------------------------------------

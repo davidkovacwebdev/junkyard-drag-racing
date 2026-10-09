@@ -1,0 +1,19 @@
+[gd_scene format=3]
+
+[node name="TransHandFlag" type="Node2D"]
+
+[node name="Pole" type="Polygon2D" parent="."]
+color = Color(0.3, 0.31, 0.34, 1)
+polygon = PackedVector2Array(38, -98, 45, -98, 46, -248, 39, -248)
+
+[node name="FlagBlue" type="Polygon2D" parent="."]
+color = Color(0.45, 0.76, 0.92, 1)
+polygon = PackedVector2Array(45, -248, 108, -246, 108, -208, 45, -210)
+
+[node name="FlagPink" type="Polygon2D" parent="."]
+color = Color(0.93, 0.62, 0.72, 1)
+polygon = PackedVector2Array(45, -240, 108, -238, 108, -216, 45, -218)
+
+[node name="FlagWhite" type="Polygon2D" parent="."]
+color = Color(0.96, 0.96, 0.96, 1)
+polygon = PackedVector2Array(45, -233, 108, -231, 108, -223, 45, -225)

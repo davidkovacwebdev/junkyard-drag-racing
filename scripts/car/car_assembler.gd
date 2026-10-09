@@ -166,6 +166,15 @@ static func assemble_parts(body_instance: CarBody, wheel_instances: Array[CarWhe
 	body_instance.contact_monitor = true
 	body_instance.max_contacts_reported = 4
 	body_instance.add_child(body_damage)
+	# A body with a seat (the wheelchair) carries the player in it: they
+	# bleed on every hard knock, and fly out as a ragdoll when it breaks.
+	var driver_seat := DriverSeat.of(body_instance)
+	if driver_seat != null:
+		driver_seat.seat(PlayerProfile.character)
+		body_damage.impacted.connect(func(delta_v: float) -> void:
+			if is_instance_valid(driver_seat):
+				driver_seat.bleed(delta_v, root)
+		)
 	body_damage.broken.connect(func() -> void:
 		if not is_instance_valid(body_instance):
 			return
@@ -181,6 +190,9 @@ static func assemble_parts(body_instance: CarBody, wheel_instances: Array[CarWhe
 				wheel.target_angular_velocity = 0.0
 				wheel.angular_damp = LOOSE_WHEEL_DAMP
 				wheel.linear_damp = LOOSE_WHEEL_DAMP
+		if driver_seat != null and is_instance_valid(driver_seat):
+			driver_seat.eject(root, body_instance.linear_velocity,
+					body_instance.collision_layer, body_instance.collision_mask)
 		PartShatter.shatter(body_instance, _get_part_color(body_instance), root)
 	)
 

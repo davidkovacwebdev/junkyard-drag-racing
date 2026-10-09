@@ -171,6 +171,7 @@ const NAMES: Array[StringName] = [
 	&"phone_pickup",
 	&"crane_collapse",
 	&"pancake_splat",
+	&"flesh_splat",
 	&"paper_unfold",
 	&"morgue_hum_loop",
 	&"lightning_strike",
@@ -462,6 +463,7 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"phone_pickup": return _phone_pickup(rng)
 		&"crane_collapse": return _crane_collapse(rng)
 		&"pancake_splat": return _pancake_splat(rng)
+		&"flesh_splat": return _flesh_splat(rng)
 		&"paper_unfold": return _paper_unfold(rng)
 		&"morgue_hum_loop": return _morgue_hum_loop(rng)
 		&"lightning_strike": return _lightning_strike(rng)
@@ -2741,6 +2743,17 @@ static func _pancake_splat(rng: RandomNumberGenerator) -> PackedFloat32Array:
 		amp = [[0.0, 0.0], [0.01, 1.0], [0.25, 0.6], [0.35, 0.0]],
 	}), 0.15, 0.45)
 	return Synth.finish(out, 0.65)
+
+## The wheelchair driver taking a knock: a dull meaty thud and a short wet
+## spatter.
+static func _flesh_splat(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.thump(0.1, 300.0, 0.002, 0.035, rng)
+	out = Synth.mix_into(out, Synth.noise_sweep(0.14, {
+		freq = [[0.0, 1800.0], [0.14, 700.0]],
+		q = [[0.0, 2.4]],
+		amp = [[0.0, 0.0], [0.006, 1.0], [0.05, 0.4], [0.14, 0.0]],
+	}, rng), 0.015, 0.55)
+	return Synth.finish(out, 0.6)
 
 ## Unfolding a scrap of paper: two dry crinkles and a flap.
 static func _paper_unfold(rng: RandomNumberGenerator) -> PackedFloat32Array:

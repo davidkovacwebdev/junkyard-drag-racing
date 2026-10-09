@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/back_button.tscn" id="4_back"]
 [ext_resource type="Script" path="res://scripts/junkyard/gate_exit.gd" id="5_gate"]
 [ext_resource type="Script" path="res://scripts/audio/ambient_call.gd" id="6_call"]
+[ext_resource type="Script" path="res://scripts/cemetery/grandpa_grave.gd" id="7_grandpa"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_gate"]
 size = Vector2(300, 60)
@@ -30,6 +31,10 @@ remember_position = false
 [node name="DragQueenGrave" type="StaticBody2D" parent="Grounds"]
 position = Vector2(1000, -760)
 script = ExtResource("2_grave")
+
+[node name="GrandpaGrave" type="StaticBody2D" parent="Grounds"]
+position = Vector2(0, -170)
+script = ExtResource("7_grandpa")
 
 [node name="Crows" type="AudioStreamPlayer2D" parent="."]
 position = Vector2(-700, -700)

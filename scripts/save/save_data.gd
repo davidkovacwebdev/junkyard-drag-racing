@@ -55,10 +55,12 @@ extends Resource
 ## The day the junkyard crane fell (WorldState.crane_fell_day), 0 if never.
 @export var crane_fell_day: int = 0
 ## Grandpa's funeral (see the Funeral autoload): when, whether the player
-## made it, and the real seconds left to get there once it's time (-1: not yet).
+## made it, the real seconds left to get there once it's time (-1: not yet),
+## and whether the ceremony in the cemetery has been held.
 @export var funeral_at: float = 0.0
 @export var funeral_attended: bool = false
 @export var funeral_window_left: float = -1.0
+@export var funeral_held: bool = false
 ## How drunk the player is (see Drunk): beers in them, seconds until sober.
 @export var drunk_beers: int = 0
 @export var drunk_seconds_left: float = 0.0

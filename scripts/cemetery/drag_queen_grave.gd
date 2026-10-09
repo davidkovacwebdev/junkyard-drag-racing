@@ -3,8 +3,8 @@ class_name DragQueenGrave
 extends StaticBody2D
 ## The Drag Queen's resting place, tucked away in the back of the cemetery:
 ## a stone statue of her on a plinth (big bouffant, one arm thrown up, a
-## gold tiara), a trans flag flying beside it and two mourners keeping her
-## company. Origin at the foot of the plinth so it Y-sorts against the car.
+## gold tiara), a trans flag flying beside it and two mourners (her parents,
+## each holding a little trans flag) keeping her company. Origin at the foot of the plinth so it Y-sorts against the car.
 ##
 ## While "Pay Your Respects" is on, driving up and pressing E plays the
 ## scene where the player leaves Grandpa's wheel here
@@ -16,6 +16,7 @@ const GRAVE_SCENE_PATH := "res://cutscenes/drag_queen_grave.tres"
 const WHEEL := preload("res://scenes/characters/props/grandpas_wheel.tscn")
 const DARLENE := preload("res://characters/mourner_darlene.tres")
 const GUS := preload("res://characters/mourner_gus.tres")
+const TRANS_FLAG := preload("res://scenes/characters/props/trans_hand_flag.tscn")
 
 const STONE := GraveyardProp.STONE
 const STONE_SHADE := GraveyardProp.STONE_SHADE
@@ -71,6 +72,7 @@ func _place_company() -> void:
 		var mourner := CemeteryMourner.new()
 		mourner.character_data = [DARLENE, GUS][i]
 		mourner.facing_right = true
+		mourner.held_prop = TRANS_FLAG
 		mourner.position = position + MOURNER_SPOTS[i]
 		parent.add_child(mourner)
 		mourners.append(mourner)

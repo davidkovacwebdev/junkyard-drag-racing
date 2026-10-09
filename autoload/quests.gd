@@ -358,8 +358,12 @@ func objective_text(quest: QuestData) -> String:
 
 ## The name of whatever the tracked quest sends the player to right now,
 ## for the minimap to light up: the giver once it's ready to hand in,
-## otherwise its `objective_place`. Empty when there's nothing to point at.
+## otherwise its `objective_place`. While it's time for Grandpa's funeral,
+## the Graveyard, whatever's tracked. Empty when there's nothing to point at.
 func tracked_target() -> String:
+	# Grandpa's funeral trumps whatever quest is tracked.
+	if Funeral.wants_graveyard():
+		return GraveyardGate.DISPLAY_NAME
 	if tracked == null:
 		return ""
 	if is_ready(tracked.id):
