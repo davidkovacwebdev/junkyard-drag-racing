@@ -385,7 +385,7 @@ script = ExtResource("21_marker")
 kind = 1
 
 [node name="RallyStage" parent="Sortables" unique_id=1400628117 instance=ExtResource("24_rally")]
-position = Vector2(7150, 1650)
+position = Vector2(7012, 1867)
 
 [node name="MinimapMarker" type="Node2D" parent="Sortables/RallyStage" unique_id=1873546020]
 script = ExtResource("21_marker")
@@ -981,6 +981,19 @@ tree_data = ExtResource("tree_dead_bare")
 
 [node name="DeadTree16" parent="Sortables/Countryside" unique_id=1157658251 instance=ExtResource("17_bolr6")]
 position = Vector2(-5988, -2263)
+tree_data = ExtResource("tree_dead_bare")
+
+[node name="DeadTree13" parent="Sortables/Countryside" unique_id=521461423 instance=ExtResource("17_bolr6")]
+position = Vector2(-5981, -3351)
+tree_data = ExtResource("tree_dead_bare")
+flip_h = true
+
+[node name="DeadTree17" parent="Sortables/Countryside" unique_id=1619655145 instance=ExtResource("17_bolr6")]
+position = Vector2(-5639, -3288)
+tree_data = ExtResource("tree_dead_bare")
+
+[node name="DeadTree18" parent="Sortables/Countryside" unique_id=250729724 instance=ExtResource("17_bolr6")]
+position = Vector2(-5254, -3627)
 tree_data = ExtResource("tree_dead_bare")
 
 [node name="Cactus1" parent="Sortables/Countryside" unique_id=2068293096 instance=ExtResource("17_bolr6")]

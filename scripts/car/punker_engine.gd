@@ -1,23 +1,22 @@
 class_name PunkerEngine
 extends CarEngine
-## The Scrap Dealer as an engine, hauled out of the crane pen by the claw. The
-## part's origin is the hitch on the body's EngineMount; he runs in front of the
-## car with the tow rope over his shoulder and drags the thing along himself.
+## A person as an engine (Vern and the crane workers), hauled out of the crane
+## pen by the claw. The part's origin is the hitch on the body's EngineMount; he
+## runs in front of the car with the tow rope over his shoulder and drags the
+## thing along himself.
 ##
 ## Built like HorseEngine: `attach_to_body()` stands him on the ground past the
 ## body's nose, and the run is driven by how far he actually moves, so he pelts
 ## along in a race, on the map and backs up when the car reverses, and stands
 ## there catching his breath when parked.
 ##
-## He's the same punker the yard uses (a CharacterRig on punker.tres), not a
-## copy of his art, so he can't drift from the man at the counter. The run is
-## just his own leg and boot polygons stomping up and down in turn, a bob, and
-## a lean into the rope. He faces the camera the whole time, like everyone in
-## this game.
+## He's a CharacterRig on his character's .tres, not a copy of the art, so he
+## can't drift from the NPC version. The run is just his own leg and boot
+## polygons stomping up and down in turn, a bob, and a lean into the rope. He
+## faces the camera the whole time, like everyone in this game.
 ##
-## Nothing here is punker-specific beyond the part scene: the rig works for any
-## character, picked by the Character node's `character_data`, or by the part's
-## own `runner` when it's a RunnerEnginePartData (Vern and the crane workers).
+## The character comes from the Character node's `character_data`, or from the
+## part's own `runner` when it's a RunnerEnginePartData.
 
 ## How far his art reaches behind his own origin (his arm, at half size).
 const REAR_REACH := 18.0

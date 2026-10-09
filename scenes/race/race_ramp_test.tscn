@@ -1,39 +1,38 @@
-[gd_scene load_steps=8 format=3 uid="uid://dpo351grnm7ea"]
+[gd_scene format=3 uid="uid://cysndnsvysioe"]
 
-[ext_resource type="Script" uid="uid://dvpc6plismwj3" path="res://scripts/race/random_race_setup.gd" id="1"]
-[ext_resource type="PackedScene" uid="uid://dt22ep4uxjlar" path="res://scenes/race/track_multi_ramp.tscn" id="2"]
+[ext_resource type="Script" path="res://scripts/race/random_race_setup.gd" id="1"]
+[ext_resource type="PackedScene" uid="uid://bfci3ixf53t8r" path="res://scenes/race/track_multi_ramp.tscn" id="2"]
 [ext_resource type="Script" uid="uid://4c501krrbwml" path="res://scripts/race/race_controller.gd" id="3"]
 [ext_resource type="Script" uid="uid://daxmnxgvm6578" path="res://scripts/race/camera_follow.gd" id="4"]
-[ext_resource type="Script" path="res://scripts/race/race_timer_hud.gd" id="5"]
+[ext_resource type="Script" uid="uid://vfglvlitoy2v" path="res://scripts/race/race_timer_hud.gd" id="5"]
 [ext_resource type="PackedScene" path="res://scenes/race/results_screen.tscn" id="6"]
-[ext_resource type="Script" path="res://scripts/ui/scrap_button.gd" id="7"]
+[ext_resource type="Script" uid="uid://bgfims42x47t1" path="res://scripts/ui/scrap_button.gd" id="7"]
 
-[node name="RaceRampTest" type="Node2D"]
+[node name="RaceRampTest" type="Node2D" unique_id=786401698]
 script = ExtResource("1")
 race_controller_path = NodePath("RaceController")
 camera_path = NodePath("MainCamera")
 
-[node name="Track" parent="." instance=ExtResource("2")]
+[node name="Track" parent="." unique_id=58608322 instance=ExtResource("2")]
 
-[node name="RaceController" type="Node2D" parent="."]
+[node name="RaceController" type="Node2D" parent="." unique_id=409007169]
 script = ExtResource("3")
 finish_x = 5400.0
-max_duration = 60.0
 camera_path = NodePath("../MainCamera")
+end_delay = 4.0
 timer_hud_path = NodePath("../UI/RaceTimerHud")
 results_screen_path = NodePath("../UI/ResultsScreen")
 surrender_button_path = NodePath("../UI/SurrenderButton")
-end_delay = 4.0
 
-[node name="MainCamera" type="Camera2D" parent="."]
+[node name="MainCamera" type="Camera2D" parent="." unique_id=1336827150]
 position = Vector2(400, 575)
 zoom = Vector2(0.5, 0.5)
 script = ExtResource("4")
 
-[node name="UI" type="CanvasLayer" parent="."]
+[node name="UI" type="CanvasLayer" parent="." unique_id=178378157]
 
-[node name="RaceTimerHud" type="Control" parent="UI"]
-anchors_preset = -1
+[node name="RaceTimerHud" type="Control" parent="UI" unique_id=271686080]
+layout_mode = 3
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -34.0
@@ -42,7 +41,36 @@ offset_right = 34.0
 offset_bottom = 51.0
 script = ExtResource("5")
 
-[node name="SurrenderButton" type="BaseButton" parent="UI"]
+[node name="SurrenderButton" type="BaseButton" parent="UI" unique_id=1149824339]
+unique_name_in_owner = false
+process_mode = 0
+process_priority = 0
+process_physics_priority = 0
+process_thread_group = 0
+physics_interpolation_mode = 2
+auto_translate_mode = 0
+editor_description = ""
+visible = true
+modulate = Color(1, 1, 1, 1)
+self_modulate = Color(1, 1, 1, 1)
+show_behind_parent = false
+top_level = false
+clip_children = 0
+oversampling_with_scale = 0
+light_mask = 1
+visibility_layer = 1
+z_index = 0
+z_as_relative = true
+y_sort_enabled = false
+texture_filter = 0
+texture_repeat = 0
+material = null
+use_parent_material = false
+custom_minimum_size = Vector2(0, 0)
+custom_maximum_size = Vector2(-1, -1)
+propagate_maximum_size = false
+clip_contents = false
+layout_mode = 3
 anchors_preset = -1
 anchor_left = 0.5
 anchor_top = 1.0
@@ -52,10 +80,64 @@ offset_left = -70.0
 offset_top = -64.0
 offset_right = 70.0
 offset_bottom = -24.0
+grow_horizontal = 1
+grow_vertical = 1
+rotation = 0.0
+scale = Vector2(1, 1)
+pivot_offset = Vector2(0, 0)
+pivot_offset_ratio = Vector2(0, 0)
+size_flags_horizontal = 1
+size_flags_vertical = 1
+size_flags_stretch_ratio = 1.0
+offset_transform_enabled = false
+offset_transform_position = Vector2(0, 0)
+offset_transform_position_ratio = Vector2(0, 0)
+offset_transform_scale = Vector2(1, 1)
+offset_transform_rotation = 0.0
+offset_transform_pivot = Vector2(0, 0)
+offset_transform_pivot_ratio = Vector2(0.5, 0.5)
+offset_transform_visual_only = true
+localize_numeral_system = true
+layout_direction = 0
+translation_context = &""
+tooltip_text = ""
+tooltip_auto_translate_mode = 0
+focus_neighbor_left = NodePath("")
+focus_neighbor_top = NodePath("")
+focus_neighbor_right = NodePath("")
+focus_neighbor_bottom = NodePath("")
+focus_next = NodePath("")
+focus_previous = NodePath("")
+focus_mode = 2
+focus_behavior_recursive = 0
+mouse_filter = 0
+mouse_behavior_recursive = 0
+mouse_force_pass_scroll_events = true
+mouse_default_cursor_shape = 0
+accessibility_name = ""
+accessibility_description = ""
+accessibility_live = 0
+accessibility_controls_nodes = Array[NodePath]([])
+accessibility_described_by_nodes = Array[NodePath]([])
+accessibility_labeled_by_nodes = Array[NodePath]([])
+accessibility_flow_to_nodes = Array[NodePath]([])
+theme = null
+theme_type_variation = &""
+disabled = false
+toggle_mode = false
+button_pressed = false
+action_mode = 1
+button_mask = 1
+keep_pressed_outside = false
+button_group = null
+shortcut = null
+shortcut_feedback = true
+shortcut_in_tooltip = true
 script = ExtResource("7")
 text = "Surrender"
 font_size = 20
 tilt_degrees = -2.0
 jitter_seed = 55
 
-[node name="ResultsScreen" parent="UI" instance=ExtResource("6")]
+[node name="ResultsScreen" parent="UI" unique_id=532282486 instance=ExtResource("6")]
+layout_mode = 3

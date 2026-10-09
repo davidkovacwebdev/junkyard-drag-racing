@@ -54,10 +54,12 @@ func add_segments(segments: PackedVector2Array, color: Color, width: float) -> v
 
 ## Ready-made triangles, e.g. built natively (see RoadGeometry).
 func add_triangles(points: PackedVector2Array, colors: PackedColorArray, indices: PackedInt32Array) -> void:
+	# Copied, not adopted: packed arrays are shared by reference, so adopting
+	# the caller's arrays would make the next append grow (and loop over) them.
 	if is_empty():
-		_points = points
-		_colors = colors
-		_indices = indices
+		_points = points.duplicate()
+		_colors = colors.duplicate()
+		_indices = indices.duplicate()
 		return
 	var start := _points.size()
 	_points.append_array(points)

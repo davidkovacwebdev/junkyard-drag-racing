@@ -1,13 +1,13 @@
 class_name BigfootWoods
 extends Node2D
-## The forest grove on the peninsula road where Bigfoot lives. Once a night,
-## when the car comes near, he steps out of the trees and ambles across the
-## road. Get close and he howls (`bigfoot_howl`) and bolts into the woods,
+## The forest grove on the peninsula road where Bigfoot lives. One night only
+## (`WorldState` claim `bigfoot_sighting`), when the car comes near, he steps
+## out of the trees and ambles across the road. Get close and he howls (`bigfoot_howl`) and bolts into the woods,
 ## stomping (`bigfoot_stomp`) and leaving a trail of big footprints. Follow it
 ## and part way along he loses his leg: it thuds down as a part orb (the
 ## `BigfootLeg` child, a HiddenPartPickup kept out of the tree until then),
-## and he hops off on the other one. Once the leg's been taken he's one-legged
-## every night after.
+## and he hops off on the other one. If the leg is left lying there it stays
+## at its drop spot on later loads.
 ##
 ## Paths are in this node's space. The prints stay until morning.
 
@@ -33,6 +33,7 @@ const LEG_LAND_DB := -2.0
 const LEG_ARC := 120.0
 const LEG_FLIGHT := 0.7
 const VANISH_SECONDS := 0.6
+const SIGHTING_CLAIM := "bigfoot_sighting"
 
 const MAX_PRINTS := 24
 ## Sideways gap between his left and right prints.
@@ -52,6 +53,9 @@ var _leg: HiddenPartPickup = null
 var _left_foot := false
 
 func _ready() -> void:
+	if WorldState.is_claimed(SIGHTING_CLAIM):
+		set_process(false)
+		return
 	_leg = get_node_or_null("BigfootLeg") as HiddenPartPickup
 	if _leg != null:
 		if _leg.is_queued_for_deletion():
@@ -84,6 +88,7 @@ func _player_within(point: Vector2, radius: float) -> bool:
 
 func _step_out() -> void:
 	_state = State.CROSSING
+	WorldState.mark_claimed(SIGHTING_CLAIM)
 	_bigfoot = Bigfoot.new()
 	_bigfoot.one_legged = _leg == null
 	_bigfoot.position = cross_path[0]
@@ -126,6 +131,8 @@ func _reset_for_day() -> void:
 	_bigfoot = null
 	for footprint in _footprints.get_children():
 		footprint.queue_free()
+	if WorldState.is_claimed(SIGHTING_CLAIM):
+		set_process(false)
 
 func _on_footfall(at: Vector2, heading: Vector2) -> void:
 	var running := _state == State.FLEEING

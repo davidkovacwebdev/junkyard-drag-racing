@@ -23,6 +23,8 @@ enum PackView { AHEAD_OF_LEADER, MIDDLE, UP_AHEAD_OF_LEADER }
 
 var targets: Array[Node2D] = []
 @export var pack_view: PackView = PackView.AHEAD_OF_LEADER
+## How far the player may zoom out, as a multiple of the scene's starting zoom.
+@export var min_zoom_factor := 0.4
 
 const LOCK_EASE := 4.0
 ## How fast (1/s) the camera catches up with the lead car.
@@ -32,8 +34,8 @@ const VERTICAL_DEAD_ZONE := 40.0
 const PACK_LEAD := 250.0
 const ZOOM_STEP := 1.15
 const ZOOM_EASE := 10.0
-## Zoom limits, as multiples of the scene's starting zoom.
-const ZOOM_RANGE := Vector2(0.4, 2.6)
+## How far the player may zoom in, as a multiple of the scene's starting zoom.
+const MAX_ZOOM_FACTOR := 2.6
 ## Screen pixels per second when looking around with the keys.
 const KEY_PAN_SPEED := 900.0
 ## Screen pixels the mouse has to move before a press becomes a drag, so a
@@ -123,7 +125,7 @@ func _handle_mouse_button(event: InputEventMouseButton) -> void:
 				get_viewport().set_input_as_handled()
 
 func _zoom_by(factor: float) -> void:
-	_target_zoom = clampf(_target_zoom * factor, _base_zoom * ZOOM_RANGE.x, _base_zoom * ZOOM_RANGE.y)
+	_target_zoom = clampf(_target_zoom * factor, _base_zoom * min_zoom_factor, _base_zoom * MAX_ZOOM_FACTOR)
 
 ## Pack, then each car still in the race in turn, then back to the pack.
 func _follow_next_car() -> void:
@@ -201,7 +203,22 @@ func _ease_toward(goal: Vector2, delta: float) -> void:
 	_smooth_position.y = lerpf(_smooth_position.y, _follow_y, 1.0 - exp(-FOLLOW_EASE_Y * delta))
 
 func _apply_position() -> void:
+	_smooth_position = _clamped_to_limits(_smooth_position)
 	global_position = (_smooth_position * zoom).round() / zoom
+
+## Keeps the camera's centre where the view stays inside the scene's limit_*
+## edges, so looking around stops at the edge instead of piling up past it.
+func _clamped_to_limits(center: Vector2) -> Vector2:
+	var half_view := get_viewport_rect().size * 0.5 / zoom
+	return Vector2(
+			_clamp_axis(center.x, limit_left + half_view.x, limit_right - half_view.x),
+			_clamp_axis(center.y, limit_top + half_view.y, limit_bottom - half_view.y))
+
+## Centred between the edges when the view is wider than the space between them.
+func _clamp_axis(value: float, low: float, high: float) -> float:
+	if low > high:
+		return (low + high) * 0.5
+	return clampf(value, low, high)
 
 ## See PackView. Null when nothing tracked is left.
 func _pack_goal() -> Variant:
