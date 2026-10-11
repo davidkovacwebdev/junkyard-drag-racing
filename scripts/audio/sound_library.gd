@@ -55,6 +55,7 @@ const NAMES: Array[StringName] = [
 	&"derby_kill",
 	&"summit_cowbell",
 	&"gondola_bell",
+	&"cart_squeak",
 	&"engine_stall",
 	&"backfire",
 	&"race_stalled",
@@ -78,6 +79,7 @@ const NAMES: Array[StringName] = [
 	&"track_clank",
 	&"radiator_clang",
 	&"gondola_clang",
+	&"cart_rattle",
 	&"anchor_clonk",
 	&"bicycle_rattle",
 	&"tractor_thud",
@@ -215,6 +217,7 @@ const CAR_SOUNDS: Array[StringName] = [
 	&"track_clank",
 	&"radiator_clang",
 	&"gondola_clang",
+	&"cart_rattle",
 	&"anchor_clonk",
 	&"bicycle_rattle",
 	&"tractor_thud",
@@ -347,6 +350,7 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"derby_kill": return _derby_kill(rng)
 		&"summit_cowbell": return _summit_cowbell(rng)
 		&"gondola_bell": return _gondola_bell(rng)
+		&"cart_squeak": return _cart_squeak(rng)
 		&"engine_stall": return _engine_stall(rng)
 		&"backfire": return _backfire(rng)
 		&"race_stalled": return _race_stalled()
@@ -370,6 +374,7 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"track_clank": return _track_clank(rng)
 		&"radiator_clang": return _radiator_clang(rng)
 		&"gondola_clang": return _gondola_clang(rng)
+		&"cart_rattle": return _cart_rattle(rng)
 		&"anchor_clonk": return _anchor_clonk(rng)
 		&"bicycle_rattle": return _bicycle_rattle(rng)
 		&"tractor_thud": return _tractor_thud(rng)
@@ -919,6 +924,32 @@ static func _gondola_clang(rng: RandomNumberGenerator) -> PackedFloat32Array:
 	for i in 3:
 		out = Synth.mix_into(out, Synth.thump(0.03, 2400.0, 0.001, 0.008, rng), 0.06 + i * 0.045, 0.25 - i * 0.06)
 	return Synth.finish(out)
+
+## A shopping cart knocked: a light tinny thud and the wire basket shivering
+## like a cage full of loose cans.
+static func _cart_rattle(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.thump(0.12, 1100.0, 0.001, 0.04, rng)
+	out = Synth.concat([out, Synth.silence(0.25)])
+	out = Synth.mix_into(out, _metal_ring(0.3, 880.0, 16.0, 0.08, rng), 0.0, 0.35)
+	for i in 5:
+		out = Synth.mix_into(out, _metal_ring(0.07, rng.randf_range(2200.0, 3400.0), 18.0, 0.02, rng),
+				0.02 + i * 0.04, 0.3 - i * 0.04)
+	return Synth.finish(out)
+
+## Pulling a dumped shopping cart out from under the bridge: the wonky front
+## caster squealing round, then a rattle as it bumps loose.
+static func _cart_squeak(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(1.0)
+	for i in 3:
+		var length := 0.14
+		var pitch := 1700.0 - i * 120.0
+		out = Synth.mix_into(out, Synth.tones(length, [[[0.0, pitch], [length * 0.6, pitch * 1.3], [length, pitch * 0.9]]], {
+			square = 0.25,
+			tremolo = [32.0, 0.6],
+			amp = [[0.0, 0.0], [0.015, 1.0], [length, 0.0]],
+		}), i * 0.17, 0.45)
+	out = Synth.mix_into(out, _cart_rattle(rng), 0.55, 0.7)
+	return Synth.finish(out, 0.5)
 
 ## A ship's anchor rolling into something: a deep, dead iron clonk with
 ## barely any ring, and a short jangle of the chain stub.

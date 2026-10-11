@@ -76,7 +76,8 @@ func _input(event: InputEvent) -> void:
 			_put_paper_away()
 			get_viewport().set_input_as_handled()
 		return
-	if not (event is InputEventKey and event.pressed and not event.echo):
+	if not (event is InputEventKey and event.pressed and not event.echo) \
+			or event.is_command_or_control_pressed():
 		return
 	var key: Key = event.physical_keycode
 	if _open and USE_KEYS.has(key):

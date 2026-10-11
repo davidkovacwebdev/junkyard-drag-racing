@@ -1,0 +1,39 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/building_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/building_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_wall_school_bus"]
+script = ExtResource("2")
+id = &"wall_school_bus"
+display_name = "School Bus Wall"
+slot = 0
+
+[node name="SchoolBusWall" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_wall_school_bus")
+footprint_size = Vector2(260, 180)
+
+[node name="Body" type="Polygon2D" parent="."]
+color = Color(0.8, 0.64, 0.27, 1)
+polygon = PackedVector2Array(-130, -150, -112, -180, 130, -180, 130, -14, -130, -14)
+
+[node name="Shade" type="Polygon2D" parent="."]
+color = Color(0.65, 0.5, 0.2, 1)
+polygon = PackedVector2Array(-130, -40, 130, -40, 130, -14, -130, -14)
+
+[node name="Stripe" type="Polygon2D" parent="."]
+color = Color(0.18, 0.17, 0.16, 1)
+polygon = PackedVector2Array(-130, -98, 130, -98, 130, -90, -130, -90)
+
+[node name="Bumper" type="Polygon2D" parent="."]
+color = Color(0.3, 0.3, 0.31, 1)
+polygon = PackedVector2Array(-138, -34, -122, -34, -122, -20, -138, -20)
+
+[node name="WheelLeft" type="Polygon2D" parent="."]
+color = Color(0.13, 0.13, 0.14, 1)
+polygon = PackedVector2Array(-67.7, -7.6, -79.6, 4.3, -96.4, 4.3, -108.3, -7.6, -108.3, -24.4, -96.4, -36.3, -79.6, -36.3, -67.7, -24.4)
+
+[node name="WheelRight" type="Polygon2D" parent="."]
+color = Color(0.13, 0.13, 0.14, 1)
+polygon = PackedVector2Array(108.3, -7.6, 96.4, 4.3, 79.6, 4.3, 67.7, -7.6, 67.7, -24.4, 79.6, -36.3, 96.4, -36.3, 108.3, -24.4)

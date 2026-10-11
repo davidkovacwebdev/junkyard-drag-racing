@@ -182,7 +182,8 @@ func _process(_delta: float) -> void:
 ## Number keys pick the card with that number while the grid is up.
 func _input(event: InputEvent) -> void:
 	if not _browsing or not _dialog.is_open() or not event is InputEventKey \
-			or not event.pressed or event.echo:
+			or not event.pressed or event.echo \
+			or event.is_command_or_control_pressed():
 		return
 	var index: int = event.keycode - KEY_1
 	if index < 0 or index >= mini(_cards.size(), 9):

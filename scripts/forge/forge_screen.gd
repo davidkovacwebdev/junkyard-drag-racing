@@ -78,7 +78,8 @@ func is_open() -> bool:
 	return visible
 
 func _input(event: InputEvent) -> void:
-	if not visible or not event is InputEventKey or not event.pressed or event.echo:
+	if not visible or not event is InputEventKey or not event.pressed or event.echo \
+			or event.is_command_or_control_pressed():
 		return
 	if event.keycode == KEY_ESCAPE:
 		get_viewport().set_input_as_handled()

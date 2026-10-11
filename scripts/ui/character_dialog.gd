@@ -164,7 +164,8 @@ func _process(delta: float) -> void:
 	_animate_speaker()
 
 func _input(event: InputEvent) -> void:
-	if not is_open() or not event is InputEventKey or not event.pressed or event.echo:
+	if not is_open() or not event is InputEventKey or not event.pressed or event.echo \
+			or event.is_command_or_control_pressed():
 		return
 	if event.keycode == KEY_ESCAPE:
 		get_viewport().set_input_as_handled()

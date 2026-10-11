@@ -15,6 +15,9 @@ extends CharacterBody2D
 const GROUP := &"player"
 ## The shop item that swaps in the Super Horn (items/super_horn.tres).
 const SUPER_HORN := &"super_horn"
+## Under a bridge deck the car draws beneath the bridge (z 0), so the span
+## hides it.
+const UNDER_BRIDGE_Z_INDEX := -1
 
 @export var max_speed: float = 420.0
 @export var acceleration: float = 1800.0
@@ -259,6 +262,7 @@ var _tow_called: bool = false
 ## The puke shake, kept apart so the sink offset can sit on top of it.
 var _visual_shake: Vector2 = Vector2.ZERO
 var _default_collision_mask: int = 1
+var _under_bridge := false
 var _default_collision_layer: int = 1
 var _traveling: bool = false
 
@@ -291,7 +295,8 @@ func _ready() -> void:
 	add_child(_water_line)
 	move_child(_water_line, _visual.get_index())
 	_water_line.hold(_visual)
-	_default_collision_mask = collision_mask
+	_default_collision_mask = collision_mask | BlockedBridge.DECK_LAYER
+	collision_mask = _default_collision_mask
 	_default_collision_layer = collision_layer
 	Inventory.set_use_check(&"fish", _fishing_blocked_reason)
 	Inventory.item_used.connect(_on_item_used)
@@ -482,11 +487,12 @@ func _physics_process(delta: float) -> void:
 	# One on-road check feeds both multipliers, rather than querying the
 	# road network twice for the same answer. The puddle check sits beside it
 	# and feeds the skid test too — standing water lets the tires go with far
-	# less provocation than dry tarmac. A road (a bridge deck, say) is never sea.
+	# less provocation than dry tarmac. A road is never sea.
+	_update_bridge_level()
 	var on_road := (_road_network != null and _road_network.is_on_road(global_position)) \
-			or BlockedBridge.any_deck_under(get_tree(), global_position)
+			or (not _under_bridge and BlockedBridge.any_deck_under(get_tree(), global_position))
 	var on_puddle := _puddles != null and _puddles.is_on_puddle(global_position)
-	var in_water := not on_road and _terrain != null and _terrain.is_in_water(_terrain.to_local(global_position))
+	var in_water := not on_road and _terrain != null and _is_in_water_here()
 	_update_wading(delta, in_water)
 	if _stuck:
 		input_dir = Vector2.ZERO
@@ -774,6 +780,25 @@ func _update_puke(delta: float) -> void:
 		if _puke_left <= 0.0:
 			_puke_left = 0.0
 
+## Up on a bridge deck or down under it (see `BlockedBridge.is_car_under()`).
+## Underneath, the car draws beneath the bridge and drives through the deck's
+## railings and barricade. Reapplied every frame, since towing and traveler
+## mode reset the mask.
+func _update_bridge_level() -> void:
+	_under_bridge = BlockedBridge.is_car_under(get_tree(), global_position, _under_bridge)
+	z_index = UNDER_BRIDGE_Z_INDEX if _under_bridge else 0
+	if collision_mask != 0:
+		collision_mask = _default_collision_mask & ~BlockedBridge.DECK_LAYER if _under_bridge \
+				else _default_collision_mask
+
+func is_under_bridge() -> bool:
+	return _under_bridge
+
+## Under a bridge the sea is still sea; anywhere else a deck counts as land.
+func _is_in_water_here() -> bool:
+	var point := _terrain.to_local(global_position)
+	return _terrain.is_in_sea(point) if _under_bridge else _terrain.is_in_water(point)
+
 ## Off the sand (see the Wading exports) the car sinks a little more every
 ## moment, splashing on the way in; sunk to its axles it's stuck for good and
 ## the tow truck gets called (TowTruckRescueCutscene). Back on land it drains
@@ -824,7 +849,7 @@ func _on_item_used(item: ItemData) -> void:
 
 ## The nearest open water around the car, searched outward in rings, or null.
 ## A spot only counts with more sea past it (so the bobber lands out in the
-## blue, not in the surf), and roads (a bridge deck) don't count as water.
+## blue, not in the surf), and roads don't count as water.
 func _find_cast_spot() -> Variant:
 	if _terrain == null:
 		return null
@@ -840,8 +865,7 @@ func _find_cast_spot() -> Variant:
 
 func _is_open_water(point: Vector2) -> bool:
 	return _terrain.is_in_water(_terrain.to_local(point)) \
-			and not (_road_network != null and _road_network.is_on_road(point)) \
-			and not BlockedBridge.any_deck_under(get_tree(), point)
+			and not (_road_network != null and _road_network.is_on_road(point))
 
 ## Whatever was on the hook flies out of the sea into the car: an old boot, a
 ## car part, or (most of the time) a handful of scrap.
@@ -1000,6 +1024,8 @@ func _spawn_skid_segment(a: Vector2, b: Vector2) -> void:
 	line.begin_cap_mode = Line2D.LINE_CAP_ROUND
 	line.end_cap_mode = Line2D.LINE_CAP_ROUND
 	line.antialiased = true
+	if _under_bridge:
+		line.z_index = UNDER_BRIDGE_Z_INDEX
 	line.add_point(_skid_marks.to_local(a))
 	line.add_point(_skid_marks.to_local(b))
 	_skid_marks.add_child(line)
