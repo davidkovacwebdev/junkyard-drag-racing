@@ -44,6 +44,7 @@ const NAMES: Array[StringName] = [
 	&"jumpscare_scream",
 	&"loot_lost",
 	&"pickup_skid",
+	&"tin_cup_clink",
 	&"gate_rattle",
 	&"flag_kiss",
 	&"cemetery_gate_creak",
@@ -343,6 +344,7 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"jumpscare_scream": return _jumpscare_scream(rng)
 		&"loot_lost": return _loot_lost()
 		&"pickup_skid": return _pickup_skid(rng)
+		&"tin_cup_clink": return _tin_cup_clink(rng)
 		&"gate_rattle": return _gate_rattle(rng)
 		&"flag_kiss": return _flag_kiss(rng)
 		&"grandpa_gasp": return _grandpa_gasp(rng)
@@ -1507,6 +1509,16 @@ static func _pickup_skid(rng: RandomNumberGenerator) -> PackedFloat32Array:
 		out = Synth.mix_into(out, Synth.thump(0.05, 2400.0, 0.001, 0.02, rng), rng.randf_range(0.05, 0.55), 0.3)
 	out = Synth.mix_into(out, Synth.thump(0.25, 180.0, 0.005, 0.08, rng), 0.6, 0.8)
 	return Synth.finish(Synth.concat([out, Synth.silence(0.2)]), 0.8)
+
+## Something dropped in a beggar's tin cup: a bright tinny clink and a
+## smaller rattle as it settles.
+static func _tin_cup_clink(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.4)
+	out = Synth.mix_into(out, Synth.thump(0.04, 2600.0, 0.001, 0.012, rng), 0.0, 0.5)
+	out = Synth.mix_into(out, _metal_ring(0.3, 2350.0, 22.0, 0.08, rng), 0.0, 0.7)
+	out = Synth.mix_into(out, _metal_ring(0.15, 3100.0, 22.0, 0.04, rng), 0.09, 0.35)
+	out = Synth.mix_into(out, _metal_ring(0.12, 2800.0, 22.0, 0.03, rng), 0.15, 0.25)
+	return Synth.finish(out, 0.7)
 
 static func _haunt_sting() -> PackedFloat32Array:
 	var voices: Array = []
