@@ -7,7 +7,9 @@ extends Node2D
 ## The origin is the middle of the deck at the land end.
 ##
 ## The deck drives like a road, never like sea (`is_on_deck()`, which
-## PlayerCar asks through the `GROUP`).
+## PlayerCar asks through the `GROUP`). On it the car passes through the
+## islands' sea walls; the rails along both edges are solid instead, so it
+## can't drive off the side.
 
 const DECK_COLOR := Color("4a6e64")
 const CONCRETE := Color(0.62, 0.6, 0.55)
@@ -41,6 +43,19 @@ const GROUP := &"bridge_deck"
 func _ready() -> void:
 	if not Engine.is_editor_hint():
 		add_to_group(GROUP)
+		_build_rails()
+
+func _build_rails() -> void:
+	var rails := StaticBody2D.new()
+	rails.name = "Rails"
+	for side: float in [-1.0, 1.0]:
+		var shape := RectangleShape2D.new()
+		shape.size = Vector2(length, rail_width)
+		var collision := CollisionShape2D.new()
+		collision.shape = shape
+		collision.position = Vector2(-length * 0.5, side * (deck_width * 0.5 + rail_width * 0.5))
+		rails.add_child(collision)
+	add_child(rails)
 
 ## Whether `world_point` is up on the deck (not under it in the water).
 func is_on_deck(world_point: Vector2) -> bool:

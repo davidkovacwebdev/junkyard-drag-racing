@@ -118,7 +118,12 @@ func owns_part(part: PartData) -> bool:
 ## Nothing is lost or cloned: the copy leaves its slot empty and comes back in
 ## `PartHome.part`, for the caller to fit somewhere or hand back with
 ## `give_part()`. Null when the player owns no copy to begin with.
-func detach_part(part: PartData) -> PartHome:
+##
+## `last` is searched after every other car: the car a part is being fitted
+## to, so a second copy of a wheel it already wears comes off another car
+## (or the stash) instead of off its own other mount, which would only swap
+## its wheels round.
+func detach_part(part: PartData, last: CarModelData = null) -> PartHome:
 	if part == null:
 		return null
 	for i in spare_parts.size():
@@ -127,9 +132,13 @@ func detach_part(part: PartData) -> PartHome:
 			spare_parts.remove_at(i)
 			return _home(loose, null, PartHome.SLOT_SPARE)
 	for car in owned_cars:
+		if car == last:
+			continue
 		var home := _detach_fitted(car, part)
 		if home != null:
 			return home
+	if last != null:
+		return _detach_fitted(last, part)
 	return null
 
 ## Takes ONE owned copy of `part` away for good (a quest giver keeping it).
@@ -451,7 +460,7 @@ func _fit_wheel(car: CarModelData, wheel_part: PartData, mount: int) -> bool:
 	var mount_count := PartDatabase.wheel_mount_count(car.body)
 	if mount_count <= 0:
 		return false
-	var home := detach_part(wheel_part)
+	var home := detach_part(wheel_part, car)
 	if home == null:
 		return false
 	# Grown, never filled: an empty mount stays empty unless this drop is

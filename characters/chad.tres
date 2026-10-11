@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://bjyg2c0mveptk"]
+
+[ext_resource type="Script" uid="uid://ckj8s3h32w3wv" path="res://scripts/character/character_data.gd" id="1_data"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/legs/legs_leather.tscn" id="2_legs"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/boots/boots_combat.tscn" id="3_boots"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/torsos/torso_police_open.tscn" id="4_torso"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/heads/head_square.tscn" id="5_head"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/hairs/hair_balding.tscn" id="6_hair"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/eyes/eyes_wide.tscn" id="7_eyes"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/accessories/acc_leather_cop.tscn" id="8_acc"]
+
+[resource]
+script = ExtResource("1_data")
+display_name = "Chad"
+legs_scene = ExtResource("2_legs")
+boots_scene = ExtResource("3_boots")
+torso_scene = ExtResource("4_torso")
+head_scene = ExtResource("5_head")
+hair_scene = ExtResource("6_hair")
+eyes_scene = ExtResource("7_eyes")
+accessory_scene = ExtResource("8_acc")
+voice_pitch_hz = 340.0
+voice_throat = 1.45
+voice_rasp = 0.1
+voice_wobble = 0.25
+idle_lines = PackedStringArray("Officer Chad, island police. Half of it, anyway. The other half is my husband.", "Nobody honks out here, {player}. Nobody\'s around to honk at.", "Eugen and I didn\'t talk for years. Then he\'d call at three in the morning about the treasure.", "Mind the bridge on the way back. The rails are the only thing holding it together.")

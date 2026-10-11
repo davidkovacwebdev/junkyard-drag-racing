@@ -28,6 +28,9 @@ class Option:
 const OPTION_HEIGHT := 50.0
 const OPTION_GAP := 10.0
 const OPTION_FONT_SIZE := 22
+## Options longer than this many letters drop to the smaller size, so they fit.
+const LONG_OPTION_LETTERS := 40
+const LONG_OPTION_FONT_SIZE := 18
 ## The slice of a character (in character space, feet at 0, +y down) that
 ## fills the portrait: the waist sits on the bottom edge, with headroom above
 ## for hair and hats.
@@ -187,6 +190,7 @@ func _choose(index: int) -> void:
 func _apply_option(button: ScrapButton, index: int) -> void:
 	var option: Option = _options[index]
 	button.text = "%d. %s" % [index + 1, option.text]
+	button.font_size = LONG_OPTION_FONT_SIZE if button.text.length() > LONG_OPTION_LETTERS else OPTION_FONT_SIZE
 	button.disabled = option.disabled
 
 func _layout_options(animate: bool) -> void:

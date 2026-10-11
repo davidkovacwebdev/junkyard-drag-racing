@@ -15,6 +15,8 @@ extends CharacterBody2D
 const GROUP := &"player"
 ## The shop item that swaps in the Super Horn (items/super_horn.tres).
 const SUPER_HORN := &"super_horn"
+## Fishing too long (`fishing_patience`) plays this.
+const LANDOWNER_SCENE_PATH := "res://cutscenes/landowner.tres"
 
 @export var max_speed: float = 420.0
 @export var acceleration: float = 1800.0
@@ -165,6 +167,11 @@ const SUPER_HORN := &"super_horn"
 ## What comes up on the hook: a part this often, an old boot this often, scrap
 ## (`catch_scrap` of it) the rest of the time.
 @export_range(0.0, 1.0) var catch_part_chance: float = 0.15
+## Fishing too long in one spot brings the landowner (LandownerCutscene):
+## this many seconds with a line in, counted while the car stays within
+## `fishing_spot_radius` of where the count started.
+@export var fishing_patience: float = 40.0
+@export var fishing_spot_radius: float = 900.0
 @export_range(0.0, 1.0) var catch_boot_chance: float = 0.2
 @export var catch_scrap := Vector2i(2, 5)
 
@@ -251,6 +258,8 @@ var _blood_distance: float = 0.0
 var _blood_idle: float = 0.0
 ## Null on a map without islands (the junkyard yard), where there's no sea.
 var _terrain: TerrainNetwork = null
+## On a bridge deck, past the sea walls (see `_pass_sea_walls()`).
+var _passing_sea_walls := false
 var _water_line: CarWaterLine
 ## 0 dry, 1 sunk to the axles. Stuck latches at 1 and lets go back on land.
 var _sink: float = 0.0
@@ -267,6 +276,9 @@ const SCRAP_PICKUP := preload("res://scenes/world/scrap_pickup.tscn")
 const PART_PICKUP := preload("res://scenes/world/part_pickup.tscn")
 ## Null unless a line is in the water.
 var _fishing: FishingCast = null
+## Seconds with a line in around `_fishing_anchor` (see `fishing_patience`).
+var _fishing_seconds: float = 0.0
+var _fishing_anchor: Vector2 = Vector2.INF
 
 ## Rebuilds the car's look and weight from the selected car, after something
 ## out in the world swapped one of its parts (Grandpa taking his helmet back).
@@ -483,8 +495,9 @@ func _physics_process(delta: float) -> void:
 	# road network twice for the same answer. The puddle check sits beside it
 	# and feeds the skid test too — standing water lets the tires go with far
 	# less provocation than dry tarmac. A road (a bridge deck, say) is never sea.
-	var on_road := (_road_network != null and _road_network.is_on_road(global_position)) \
-			or BlockedBridge.any_deck_under(get_tree(), global_position)
+	var on_bridge := BlockedBridge.any_deck_under(get_tree(), global_position)
+	_pass_sea_walls(on_bridge)
+	var on_road := (_road_network != null and _road_network.is_on_road(global_position)) or on_bridge
 	var on_puddle := _puddles != null and _puddles.is_on_puddle(global_position)
 	var in_water := not on_road and _terrain != null and _terrain.is_in_water(_terrain.to_local(global_position))
 	_update_wading(delta, in_water)
@@ -495,6 +508,9 @@ func _physics_process(delta: float) -> void:
 		if input_dir != Vector2.ZERO:
 			_fishing.cancel()
 		input_dir = Vector2.ZERO
+		_fishing_seconds += delta
+		if _fishing_seconds >= fishing_patience and not Cutscenes.is_active():
+			_evict_from_fishing()
 
 	if input_dir.x > 0.0:
 		_facing_right = true
@@ -669,6 +685,19 @@ func _compute_car_mass(car: CarModelData) -> float:
 	total += car.accessory_mass()
 	return maxf(total, 1.0)
 
+## Up on a bridge deck the car drives straight through the sea walls that
+## ring every island offshore (the deck has rails of its own to keep it on);
+## off it, they hold it back again.
+func _pass_sea_walls(passing: bool) -> void:
+	if passing == _passing_sea_walls:
+		return
+	_passing_sea_walls = passing
+	for wall in get_tree().get_nodes_in_group(TerrainNetwork.SHORE_GROUP):
+		if passing:
+			add_collision_exception_with(wall)
+		else:
+			remove_collision_exception_with(wall)
+
 func _is_touching_shore() -> bool:
 	for i in get_slide_collision_count():
 		var collider := get_slide_collision(i).get_collider() as Node
@@ -817,10 +846,25 @@ func _on_item_used(item: ItemData) -> void:
 	if spot == null:
 		return
 	velocity = Vector2.ZERO
+	if global_position.distance_to(_fishing_anchor) > fishing_spot_radius:
+		_fishing_anchor = global_position
+		_fishing_seconds = 0.0
 	_fishing = FishingCast.new()
 	_fishing.spot = spot
 	_fishing.finished.connect(_on_fishing_finished)
 	add_child(_fishing)
+
+## Clyde's had enough: the line comes in empty and he runs the player off
+## his land. The count starts over after.
+func _evict_from_fishing() -> void:
+	_fishing_seconds = 0.0
+	var water := _fishing.spot
+	_fishing.cancel()
+	var scene := ResourceLoader.load(LANDOWNER_SCENE_PATH, "", ResourceLoader.CACHE_MODE_REPLACE) as LandownerCutscene
+	if scene == null:
+		return
+	scene.water_at = water
+	Cutscenes.play(scene)
 
 ## The nearest open water around the car, searched outward in rings, or null.
 ## A spot only counts with more sea past it (so the bobber lands out in the

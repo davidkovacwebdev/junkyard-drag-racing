@@ -1,0 +1,35 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_acc_leather_cop"]
+script = ExtResource("2")
+id = &"acc_leather_cop"
+display_name = "Leather Cop Cap"
+slot = 6
+npc_only = true
+
+[node name="LeatherCopCap" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_acc_leather_cop")
+
+[node name="Crown" type="Polygon2D" parent="."]
+color = Color(0.11, 0.1, 0.1, 1)
+polygon = PackedVector2Array(-30, -244, -24, -258, 24, -258, 30, -244, 26, -234, -26, -234)
+
+[node name="Chain" type="Polygon2D" parent="."]
+color = Color(0.64, 0.68, 0.74, 1)
+polygon = PackedVector2Array(-26, -240, 26, -240, 26, -235, -26, -235)
+
+[node name="Brim" type="Polygon2D" parent="."]
+color = Color(0.11, 0.1, 0.1, 1)
+polygon = PackedVector2Array(-6, -234, 34, -232, 36, -226, -6, -228)
+
+[node name="Badge" type="Polygon2D" parent="."]
+color = Color(0.95, 0.75, 0.1, 1)
+polygon = PackedVector2Array(-5, -254, 5, -254, 6, -247, 0, -243, -6, -247)
+
+[node name="Moustache" type="Polygon2D" parent="."]
+color = Color(0.25, 0.18, 0.12, 1)
+polygon = PackedVector2Array(-24, -203, -6, -211, 6, -211, 24, -203, 16, -195, -16, -195)

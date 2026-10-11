@@ -40,6 +40,9 @@ const GRID_COLUMNS := 5
 const GRID_GAP := 8
 const LEAVE_POSITION := Vector2(0.04, 0.89)
 const LEAVE_SIZE := Vector2(150.0, 46.0)
+## The "Ask Around" button, right of Leave.
+const ASK_GAP := 16.0
+const ASK_WIDTH := 500.0
 ## The longest an item's `buy_sound` goes off for when it's bought.
 const BUY_SOUND_SECONDS := 1.2
 
@@ -161,6 +164,25 @@ func _build_grid() -> void:
 	leave.offset_bottom = LEAVE_SIZE.y
 	leave.pressed.connect(_dialog.close)
 	_grid_root.add_child(leave)
+	if TreasureRumors.can_ask():
+		_grid_root.add_child(_ask_button())
+
+## "Ask Around": asking about the Junkyard Treasure, next to Leave.
+func _ask_button() -> ScrapButton:
+	var ask := ScrapButton.new()
+	ask.text = TreasureRumors.ASK_LINE
+	ask.font_size = 18
+	ask.tilt_degrees = 1.0
+	ask.jitter_seed = 78
+	ask.anchor_left = LEAVE_POSITION.x
+	ask.anchor_top = LEAVE_POSITION.y
+	ask.anchor_right = LEAVE_POSITION.x
+	ask.anchor_bottom = LEAVE_POSITION.y
+	ask.offset_left = LEAVE_SIZE.x + ASK_GAP
+	ask.offset_right = LEAVE_SIZE.x + ASK_GAP + ASK_WIDTH
+	ask.offset_bottom = LEAVE_SIZE.y
+	ask.pressed.connect(func() -> void: _dialog.say(TreasureRumors.answer(SHOPKEEPER)))
+	return ask
 
 ## Browsing: the dialog's own options give way to the card grid.
 func _show_stock(_animate: bool = false) -> void:

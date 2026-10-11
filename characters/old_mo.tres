@@ -4,10 +4,10 @@
 [ext_resource type="PackedScene" path="res://scenes/characters/parts/legs/legs_slacks.tscn" id="2_legs"]
 [ext_resource type="PackedScene" path="res://scenes/characters/parts/boots/boots_slipper.tscn" id="3_boots"]
 [ext_resource type="PackedScene" path="res://scenes/characters/parts/torsos/torso_skinny.tscn" id="4_torso"]
-[ext_resource type="PackedScene" path="res://scenes/characters/parts/heads/head_pear.tscn" id="5_head"]
-[ext_resource type="PackedScene" path="res://scenes/characters/parts/hairs/hair_balding.tscn" id="6_hair"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/heads/head_long.tscn" id="5_head"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/hairs/hair_mohawk.tscn" id="6_hair"]
 [ext_resource type="PackedScene" path="res://scenes/characters/parts/eyes/eyes_sleepy.tscn" id="7_eyes"]
-[ext_resource type="PackedScene" path="res://scenes/characters/parts/accessories/acc_beard_grandpa.tscn" id="8_beard"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/accessories/acc_goggles.tscn" id="8_beard"]
 
 [resource]
 script = ExtResource("1_data")

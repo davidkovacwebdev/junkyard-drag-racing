@@ -317,7 +317,8 @@ func dig() -> void:
 	# Paid up front, like a coin in an arcade claw: the money is for the go, not
 	# for what comes up, so a miss costs the same as a catch.
 	Inventory.spend_money(grab_cost)
-	Sfx.play(&"cash_register", -10.0, 0.05)
+	if grab_cost > 0:
+		Sfx.play(&"cash_register", -10.0, 0.05)
 	_digging = true
 	_set_shells_solid(true)
 

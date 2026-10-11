@@ -39,6 +39,13 @@ extends Node2D
 ## How far the claw hangs below the boom when parked.
 @export var hoist_length: float = 175.0
 @export var sway_amplitude: float = 0.06
+## Fresh steel plates welded over the mast and the boom, where it was put back
+## together after it fell (CraneWreck).
+@export var repaired: bool = false:
+	set(value):
+		if repaired != value:
+			repaired = value
+			queue_redraw()
 @export var sway_speed: float = 0.7
 
 @export_group("Claw")
@@ -68,6 +75,7 @@ extends Node2D
 @export var cable_color: Color = Color(0.13, 0.13, 0.14, 1)
 
 const TURRET_H := 74.0
+const REPAIR_PLATE := UiPalette.STEEL_LIGHT
 const RAIL := 14.0
 const LATTICE_STEP := 124.0
 const BRACE_W := 10.0
@@ -96,7 +104,12 @@ var _claw: Node2D = null
 var jaw_open: float = 1.0:
 	set = set_jaw_open
 
+## What `sway_amplitude` was when it was built, to go back to once it's back
+## on its feet (CraneWreck.apply()).
+var standing_sway: float = 0.06
+
 func _ready() -> void:
+	standing_sway = sway_amplitude
 	trolley = trolley_offset
 	hoist = hoist_length
 	_claw = get_node_or_null("Claw") as Node2D
@@ -262,6 +275,21 @@ func _draw_boom() -> void:
 
 	# counterweight block hanging off the tail
 	draw_rect(Rect2(right - 62.0, top - 26.0, 62.0, boom_height + 52.0), rust_color)
+	if repaired:
+		_draw_repairs()
+
+## Where it was welded back together: one plate over the mast halfway up, one
+## over the boom where it buckled, in bright new steel against the old paint.
+func _draw_repairs() -> void:
+	var plate := REPAIR_PLATE
+	var mast_mid := (_boom_y() + _turret_top()) * 0.5
+	var half := mast_width * 0.5 + 8.0
+	draw_rect(Rect2(-half, mast_mid - 34.0, half * 2.0, 68.0), plate)
+	draw_rect(Rect2(half - 12.0, mast_mid - 34.0, 12.0, 68.0), plate.darkened(0.2))
+	var y := _boom_y()
+	var boom_x := -boom_reach * 0.45
+	draw_rect(Rect2(boom_x - 60.0, y - boom_height * 0.5 - 8.0, 120.0, boom_height + 16.0), plate)
+	draw_rect(Rect2(boom_x - 60.0, y + boom_height * 0.5, 120.0, 8.0), plate.darkened(0.2))
 
 func _draw_hoist() -> void:
 	var y := _boom_y()

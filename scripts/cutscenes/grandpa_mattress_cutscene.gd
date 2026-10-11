@@ -15,7 +15,7 @@ const NICKEL := preload("res://scenes/items/icons/item_old_nickel.tscn")
 ## These defaults are the scene as written; edits in the inspector on the
 ## .tres override them.
 @export var found_line: String = "Under the mattress... an old nickel."
-@export var inscription_line: String = "\"This is not part of the treasure.\" Huh."
+@export var inscription_line: String = "\"This is not part of the tresure.\" Huh."
 
 @export_group("Staging")
 @export var zoom: float = 1.6

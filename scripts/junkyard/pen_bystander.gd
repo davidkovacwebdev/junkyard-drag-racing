@@ -5,8 +5,8 @@ extends RigidBody2D
 ## Vern, Grandpa's old crane buddy who runs the thing, is fair game: what the
 ## claw hauls up is him, as an engine part that pulls the car along on a rope
 ## (PunkerEngine, engine_crane_operator.tscn). From the next visit on a crane
-## worker is on shift in his spot, made up by CraneWorkerGenerator, and each
-## one the claw takes is replaced by a new one. Old Mo turns up too, off past
+## worker is on shift in his spot, made up by CraneWorkerGenerator, and he
+## can't be caught: the claw only shoves him. Old Mo turns up too, off past
 ## the drum, and never lets the claw near him: he scoots out from under it
 ## every time and has something to say about it.
 ##
@@ -16,8 +16,7 @@ extends RigidBody2D
 ## (`is PenBystander`) and call `claim()`. Once claimed they never come back to
 ## the pen on that save (WorldState's claimed set, the same one the hangar's
 ## flying saucer uses). The man at the yard's counter stays where he is, so
-## there's still someone to sell scrap to. A generated worker's claim is his
-## place in line, so the next visit's worker is the next one along.
+## there's still someone to sell scrap to.
 ##
 ## A real body standing upright (rotation locked), heavy and flat-footed so a
 ## glancing shell barely shifts them, and they yelp when it does. An oil drum
@@ -54,8 +53,8 @@ const SPEECH_HOLD := 1.8
 @export var catchable: bool = true
 ## The engine part the claw hauls up, if catchable.
 @export_file("*.tscn") var engine_scene: String = ""
-## Made up on the spot (CraneWorkerGenerator) rather than set here: the next
-## crane worker in line, with his own claim, look, engine and caught line.
+## Made up on the spot (CraneWorkerGenerator) rather than set here: the crane
+## worker on shift after Vern, with his look and lines. Never catchable.
 @export var generated_worker: bool = false
 ## One of these, said over their head, when a shell shoves them.
 @export var bump_lines: PackedStringArray = []
@@ -100,13 +99,12 @@ var _speech_tween: Tween
 var _last_line: int = -1
 
 func _ready() -> void:
-	var worker_index := -1
 	if generated_worker:
-		worker_index = CraneWorkerGenerator.next_index()
-		claim_id = CraneWorkerGenerator.claim_id(worker_index)
-		character_data = CraneWorkerGenerator.worker(worker_index)
-		caught_line = CraneWorkerGenerator.caught_line(character_data)
+		claim_id = CraneWorkerGenerator.CLAIM
+		character_data = CraneWorkerGenerator.worker()
 		bump_lines = PackedStringArray(CraneWorkerGenerator.BUMP_LINES)
+		# Once was enough: the claw only shoves him.
+		catchable = false
 	# Already caught, or not their turn yet: someone else has the spot this
 	# visit. The pen is rebuilt on every visit, so a claim made today shows up
 	# the next time round.
@@ -138,8 +136,7 @@ func _ready() -> void:
 	body_entered.connect(_on_bumped)
 	_crane = get_node_or_null(crane_path) as CraneRig
 	if catchable:
-		part_data = CraneWorkerGenerator.engine_part(worker_index, character_data) \
-				if generated_worker else _engine_data()
+		part_data = _engine_data()
 		var heap := get_node_or_null(heap_path) as TrashHeap
 		if heap != null:
 			heap.add_item(self)

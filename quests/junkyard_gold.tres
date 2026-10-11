@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="QuestData" format=3 uid="uid://crlnhclqi240p"]
+
+[ext_resource type="Script" uid="uid://b4kssi28o6a3g" path="res://scripts/items/item_data.gd" id="1_jidb7"]
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://quests/treasure_rumors.tres" id="2_next"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"junkyard_gold"
+title = "Dig Deeper"
+giver = "Chad"
+description = "Chad thinks Eugen found something gold under the junkyard heap. Once the crane's fixed, meet him at the Junkyard, take the crane, and stir the heap up until something shows. Chad's paying for the digs.
+
+Stir it with the claw, then press E to search the junk under the claw. Keep an eye out for anything shiny."
+objective = "Stir the junkyard heap with the crane and search it"
+objective_place = "Junkyard"
+follow_ups = [ExtResource("2_next")]
+return_to_giver = false

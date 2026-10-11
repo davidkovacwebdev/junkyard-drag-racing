@@ -17,6 +17,17 @@ extends Node2D
 ## what the jaws actually close on is the heap's job, and driving them there is
 ## the player's.
 ##
+## **Searching for the gold** ("Dig Deeper", after meeting Chad): while it's
+## on, Chad pays for the digs, and every dig stirs the heap. After each one,
+## E searches through the junk under the claw, like going through a bin: a
+## little scrap, and nothing more. Somewhere between `GOLD_AFTER_STIRS` digs
+## in, a corner of something gold works its way up out of the pen floor
+## (PenGold), quietly, half hidden by the junk around it. Nobody points it
+## out: the player has to spot it (or, after a few more searches in the wrong
+## place, gets told which way to look), dig there and search under the claw.
+## Then Chad walks in to look at it (GoldFakeCutscene): it's a fake, and the
+## quest is done.
+##
 ## Fitting the pit out is a two-part contract, the same one junkyard_yard.gd has
 ## with its walls: `pit_rect` here is what gets painted, and the pen's own
 ## StaticBody2D walls are what actually holds the junk in. Move one, move the
@@ -53,6 +64,22 @@ const CARD_SECONDS := 5.0
 ## "Talk Shop"): the first dig meets the goal, and he gets told what it
 ## brought up (a part's name, or nothing for a miss or plain junk).
 const FISH_QUESTS: Array[StringName] = [&"crane_fish", &"crane_fish_again"]
+## "Dig Deeper": the quest, how many digs it takes for the gold to show up
+## (rolled each visit), and the scrap a plain search turns up.
+const GOLD_QUEST := &"junkyard_gold"
+const GOLD_AFTER_STIRS := Vector2i(1, 2)
+const SEARCH_SCRAP := Vector2i(1, 3)
+## How close (sideways) the claw has to be to the gold for a search to turn
+## it up, and how many searches in the wrong place before the line hints at
+## which way it is.
+const GOLD_REACH := 110.0
+const GOLD_HINT_AFTER := 2
+const GOLD_FAKE_SCENE := "res://cutscenes/gold_fake.tres"
+const NOTHING_LINES: Array[String] = [
+	"Just junk under there. Stir it up some more.",
+	"Rust, a shoe, half a toaster. Keep stirring.",
+	"Nothing shiny. Give the heap another go with the claw.",
+]
 ## Seagulls wheeling over the pen (PenGull).
 const GULL_COUNT := 4
 ## The garbage truck that delivers the heap: where it starts and leaves from
@@ -116,13 +143,34 @@ var _caught_claim: String = ""
 ## The part cards from the last dig, popped up in the middle of the screen.
 var _cards: VBoxContainer
 var _cards_tween: Tween
+## "Dig Deeper" (see the top of this file).
+var _searching := false
+var _stirs := 0
+var _gold_after := 0
+## A dig has stirred the heap since the last search.
+var _can_search := false
+var _gold: PenGold = null
+## Searches since the gold came up that missed it.
+var _gold_misses := 0
+## What a dig costs when Chad isn't paying.
+var _paid_grab_cost := 0
 
 func _ready() -> void:
+	# Welded back together after it fell, if it did.
+	_crane.repaired = CraneWreck.is_repaired()
 	_crane.dug.connect(_on_dug)
 	_crane.missed.connect(_on_missed)
 	_crane.denied.connect(_on_denied)
 	_crane.dig_finished.connect(_on_dig_finished)
-	_hint.text = "A / D  roll the claw over the heap     Space  drop the claw ($%d a go), Space again to shut it early     Esc  leave" % _crane.grab_cost
+	_searching = Quests.has_quest(GOLD_QUEST)
+	if _searching:
+		# Chad's paying.
+		_paid_grab_cost = _crane.grab_cost
+		_crane.grab_cost = 0
+		_gold_after = randi_range(GOLD_AFTER_STIRS.x, GOLD_AFTER_STIRS.y)
+		_hint.text = "A / D  roll the claw over the heap     Space  drop the claw to stir the junk     E  search under the claw     Esc  leave"
+	else:
+		_hint.text = "A / D  roll the claw over the heap     Space  drop the claw ($%d a go), Space again to shut it early     Esc  leave" % _crane.grab_cost
 	# The load is still raining in when the pen opens: no digging until it has
 	# landed, or the claw would be grabbing at pieces in mid-air.
 	_crane.controls_enabled = false
@@ -171,6 +219,9 @@ func _on_heap_settled() -> void:
 	_crane.controls_enabled = true
 	_refresh()
 	Sfx.play(&"crane_ready", -8.0, 0.0)
+	if _searching:
+		_set_line("Chad's paying for the digs. Drop the claw into the heap to stir it up, then press E to search the junk under the claw.")
+		return
 	_set_line("Roll the claw out over the junk and hit Space to drop it. It shuts by itself once it settles, or hit Space again to shut it sooner - whatever it's holding is yours. $%d a go, as long as your money lasts."
 			% _crane.grab_cost)
 
@@ -225,6 +276,89 @@ func _on_dig_finished(caught: int) -> void:
 	_haul.clear()
 	_haul_parts.clear()
 	_haul_scrap = 0
+	if _searching:
+		_stir()
+	SaveSystem.save_game()
+
+# --- Searching for the gold -------------------------------------------------------
+
+## A dig went through the heap: there's something new to search, and maybe
+## the gold has worked its way up.
+func _stir() -> void:
+	_stirs += 1
+	_can_search = true
+	if _gold == null and _stirs >= _gold_after:
+		_reveal_gold()
+	_set_line("The junk's been turned over. Press E to search under the claw.")
+
+## The gold works its way up somewhere across the pit floor, not announced:
+## just a faint ting, and its glint now and then.
+func _reveal_gold() -> void:
+	_gold = PenGold.new()
+	var x := randf_range(pit_rect.position.x + 90.0, pit_rect.end.x - 90.0)
+	_gold.position = Vector2(x, _heap.position.y - PenGold.SORT_LIFT)
+	($Yard as Node2D).add_child(_gold)
+	Sfx.play(&"wink_ting", -16.0, 0.0)
+
+## Where the gold sits on the pen floor, in global space.
+func _gold_floor() -> Vector2:
+	return _gold.global_position + Vector2(0.0, PenGold.SORT_LIFT)
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not _searching or not event is InputEventKey or not event.pressed or event.echo:
+		return
+	if (event as InputEventKey).physical_keycode != KEY_E:
+		return
+	get_viewport().set_input_as_handled()
+	if _crane.is_digging():
+		return
+	if not _can_search:
+		Sfx.play(&"denied", -8.0, 0.0)
+		_set_line("Nothing new to look at. Stir the heap with the claw first.")
+		return
+	_search()
+
+## Going through what the last dig turned over, like a bin: a bit of scrap,
+## or the gold once it's showing.
+func _search() -> void:
+	_can_search = false
+	Sfx.play(&"trash_rummage", -4.0, 0.05)
+	if _gold != null and absf(_crane.jaw_mouth_global().x - _gold_floor().x) < GOLD_REACH:
+		_find_gold()
+		return
+	var scrap := randi_range(SEARCH_SCRAP.x, SEARCH_SCRAP.y)
+	Inventory.add_scrap(scrap)
+	Sfx.play(&"scrap_pickup", -6.0, 0.0)
+	_popup("+%d scrap" % scrap, POPUP_AT)
+	_set_line(NOTHING_LINES[randi() % NOTHING_LINES.size()])
+	if _gold != null:
+		_gold_misses += 1
+		if _gold_misses >= GOLD_HINT_AFTER:
+			var left := _gold_floor().x < _crane.jaw_mouth_global().x
+			_set_line("Nothing here. But something keeps catching the light off to the %s..." % ("left" if left else "right"))
+	_refresh()
+
+## The claw's right over it: there it is. Chad comes over to have a look
+## (GoldFakeCutscene), and it's a fake. The crane is locked while he's in.
+func _find_gold() -> void:
+	_searching = false
+	_crane.grab_cost = _paid_grab_cost
+	_crane.controls_enabled = false
+	Sfx.play(&"wink_ting", -2.0, 0.0)
+	_popup("GOLD?", POPUP_AT)
+	_set_line("Under all that junk: the corner of something big and gold, stuck fast in the ground. Eugen wasn't making it up...")
+	_gold.uncover()
+	await get_tree().create_timer(1.2).timeout
+	_set_line("")
+	var scene := ResourceLoader.load(GOLD_FAKE_SCENE, "", ResourceLoader.CACHE_MODE_REPLACE) as GoldFakeCutscene
+	if scene != null:
+		scene.gold_at = _gold_floor()
+		scene.cab_at = _crane.global_position
+		await Cutscenes.play(scene)
+	_set_line("Fake gold, just like the nickel. Chad's taking the fakes to his husband: snoop around town, and meet him in 2 days.")
+	_crane.controls_enabled = true
+	_hint.text = "A / D  roll the claw over the heap     Space  drop the claw ($%d a go), Space again to shut it early     Esc  leave" % _crane.grab_cost
+	Quests.goal_met(GOLD_QUEST)
 	SaveSystem.save_game()
 
 func _on_missed() -> void:

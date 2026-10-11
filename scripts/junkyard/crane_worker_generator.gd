@@ -1,21 +1,16 @@
 class_name CraneWorkerGenerator
 extends RefCounted
-## Makes up the crane workers who take over the pen once Vern has been fished
-## out, a new one each time the last gets craned. They're picked from parts that
-## read as yard crew (work clothes, boots, a cap or a moustache) and seeded by
-## their place in line, so the same guy is still standing there next visit
-## until he's caught.
-##
-## Their place in line is just WorldState's claimed set: worker N is the first
-## `crane_pen_worker_N` nobody has claimed yet.
+## Makes up the crane worker who takes over the pen once Vern has been fished
+## out. He's picked from parts that read as yard crew (work clothes, boots, a
+## cap or a moustache) and seeded by the save's player, so it's the same guy
+## every visit. Unlike Vern he can't be caught: the claw only shoves him.
 
-const CLAIM_PREFIX := "crane_pen_worker_"
+## His spot in the pen. Never claimed, since he can't be caught.
+const CLAIM := "crane_pen_worker"
 ## Vern runs the crane until the claw takes him; his claim in the pen.
 const VERN := preload("res://characters/crane_vern.tres")
 const VERN_CLAIM := "crane_pen_vern"
 const PARTS_DIRECTORY := "res://scenes/characters/parts/"
-## The engine a caught worker becomes: Vern's, with the worker running instead.
-const OPERATOR_ENGINE := "res://scenes/parts/engines/engine_crane_operator.tscn"
 
 const LEGS: Array[String] = ["legs_cargo", "legs_standard", "legs_baggy", "legs_slacks", "legs_plaid"]
 const BOOTS: Array[String] = ["boots_work", "boots_steel", "boots_rain", "boots_combat"]
@@ -47,7 +42,7 @@ const BUMP_LINES: Array[String] = [
 	"Vern never swung it like that!",
 	"I'm not scrap, pal!",
 	"Easy! I just got these boots!",
-	"Twenty years on the crane and THIS is how I go?",
+	"I saw what you did to Vern. Not happenin' twice!",
 ]
 
 ## Whoever runs the crane right now: Vern, or once he's been fished out, the
@@ -55,21 +50,11 @@ const BUMP_LINES: Array[String] = [
 static func current_operator() -> CharacterData:
 	if not WorldState.is_claimed(VERN_CLAIM):
 		return VERN
-	return worker(next_index())
+	return worker()
 
-## Which worker is up next: how many have been caught before him.
-static func next_index() -> int:
-	var index := 0
-	while WorldState.is_claimed(claim_id(index)):
-		index += 1
-	return index
-
-static func claim_id(index: int) -> String:
-	return CLAIM_PREFIX + str(index)
-
-## Worker `index`'s look, name and voice. Same index, same guy.
-static func worker(index: int) -> CharacterData:
-	var rng := _rng(index, "look")
+## The worker's look, name and voice: the same guy every visit.
+static func worker() -> CharacterData:
+	var rng := _rng("look")
 	var data := CharacterData.new()
 	data.display_name = _pick(rng, NAMES)
 	data.legs_scene = _part(rng, "legs", LEGS)
@@ -86,36 +71,12 @@ static func worker(index: int) -> CharacterData:
 	data.idle_lines = PackedStringArray(IDLE_LINES)
 	return data
 
-## The engine part a caught worker turns into: Vern's runner engine with this
-## worker on the rope and his own stats, a little either side of Vern's.
-static func engine_part(index: int, worker_data: CharacterData) -> RunnerEnginePartData:
-	var rng := _rng(index, "engine")
-	var base := _operator_engine()
-	var part := base.duplicate() as RunnerEnginePartData
-	part.id = StringName("engine_crane_worker_%d" % index)
-	part.base_part_id = base.id
-	part.display_name = worker_data.display_name
-	part.runner = worker_data
-	part.power = base.power * rng.randf_range(0.8, 1.3)
-	part.durability = base.durability * rng.randf_range(0.75, 1.25)
-	part.mass = base.mass * rng.randf_range(0.8, 1.3)
-	part.speed = part.power * base.speed / base.power
-	return part
-
-static func caught_line(worker_data: CharacterData) -> String:
-	return "You hauled %s off the crane crew! He's in your garage now as an engine. Somebody else'll be on shift next time." \
-			% worker_data.display_name
-
-static func _operator_engine() -> RunnerEnginePartData:
-	for engine in PartDatabase.engines:
-		if engine.scene_path == OPERATOR_ENGINE:
-			return engine as RunnerEnginePartData
-	return PartDatabase.load_part_data(OPERATOR_ENGINE) as RunnerEnginePartData
-
 ## Seeded by the save's player too, so two saves don't get the same crew.
-static func _rng(index: int, what: String) -> RandomNumberGenerator:
+## (The 0 is left over from when there was a line of workers, so a save
+## keeps the same guy it already had.)
+static func _rng(what: String) -> RandomNumberGenerator:
 	var rng := RandomNumberGenerator.new()
-	rng.seed = hash("%s/%d/%s" % [PlayerProfile.player_name, index, what])
+	rng.seed = hash("%s/%d/%s" % [PlayerProfile.player_name, 0, what])
 	return rng
 
 static func _pick(rng: RandomNumberGenerator, options: Array[String]) -> String:

@@ -35,6 +35,15 @@ const NAMES: Array[StringName] = [
 	&"beer_chug",
 	&"puke",
 	&"wink_ting",
+	&"fake_gold_knock",
+	&"shy_blush",
+	&"skeleton_rise",
+	&"skeleton_shriek",
+	&"skeleton_rattle",
+	&"haunt_sting",
+	&"jumpscare_scream",
+	&"loot_lost",
+	&"pickup_skid",
 	&"gate_rattle",
 	&"flag_kiss",
 	&"cemetery_gate_creak",
@@ -325,6 +334,15 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"beer_chug": return _beer_chug(rng)
 		&"puke": return _puke(rng)
 		&"wink_ting": return _wink_ting()
+		&"fake_gold_knock": return _fake_gold_knock(rng)
+		&"shy_blush": return _shy_blush()
+		&"skeleton_rise": return _skeleton_rise(rng)
+		&"skeleton_shriek": return _skeleton_shriek(rng)
+		&"skeleton_rattle": return _skeleton_rattle(rng)
+		&"haunt_sting": return _haunt_sting()
+		&"jumpscare_scream": return _jumpscare_scream(rng)
+		&"loot_lost": return _loot_lost()
+		&"pickup_skid": return _pickup_skid(rng)
 		&"gate_rattle": return _gate_rattle(rng)
 		&"flag_kiss": return _flag_kiss(rng)
 		&"grandpa_gasp": return _grandpa_gasp(rng)
@@ -1371,6 +1389,135 @@ static func _puke(rng: RandomNumberGenerator) -> PackedFloat32Array:
 	return Synth.finish(out, 0.75)
 
 ## A cartoon wink: one bright little ting off a tin cup.
+## Knuckles on the "gold" under the crane pen: three hollow, tinny knocks,
+## like rapping on a painted biscuit tin. Real gold would just thud.
+static func _fake_gold_knock(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.55)
+	for offset in [0.0, 0.16, 0.3]:
+		out = Synth.mix_into(out, Synth.thump(0.08, 1100.0, 0.001, 0.025, rng), offset, 0.6)
+		out = Synth.mix_into(out, _metal_ring(0.2, 780.0, 6.0, 0.06, rng), offset, 0.55)
+		out = Synth.mix_into(out, _metal_ring(0.12, 2300.0, 14.0, 0.03, rng), offset, 0.25)
+	return Synth.finish(out, 0.7)
+
+## Somebody going red in the face: a soft, wobbly slide-whistle swoop up,
+## cartoon style.
+static func _shy_blush() -> PackedFloat32Array:
+	return Synth.tones(0.6, [[[0.0, 420.0], [0.35, 980.0], [0.6, 900.0]]], {
+		square = 0.0,
+		amp = [[0.0, 0.0], [0.05, 0.8], [0.4, 0.6], [0.6, 0.0]],
+		peak = 0.5,
+	})
+
+## A skeleton clawing up out of its grave: dirt crunching apart, a rattle of
+## bones shaking loose, and a low hollow moan wobbling underneath.
+static func _skeleton_rise(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(1.3)
+	out = Synth.mix_into(out, Synth.noise_sweep(0.45, {
+		freq = [[0.0, 380.0], [0.45, 900.0]],
+		q = [[0.0, 1.5]],
+		amp = [[0.0, 0.0], [0.04, 1.0], [0.45, 0.0]],
+	}, rng), 0.0, 0.6)
+	var knock_time := 0.2
+	for i in 6:
+		var pitch := rng.randf_range(700.0, 1250.0)
+		out = Synth.mix_into(out, Synth.tones(0.06, [[[0.0, pitch], [0.06, pitch * 0.9]]], {
+			square = 0.1,
+			amp = [[0.0, 0.0], [0.002, 1.0], [0.045, 0.0]],
+		}), knock_time, 0.35)
+		knock_time += rng.randf_range(0.04, 0.09)
+	out = Synth.mix_into(out, Synth.tones(1.1, [_wobbling(150.0, 1.1, 5.0, 0.04)], {
+		square = 0.15,
+		amp = [[0.0, 0.0], [0.3, 1.0], [0.8, 0.7], [1.1, 0.0]],
+		peak = 0.6,
+	}), 0.15, 0.6)
+	return Synth.finish(out, 0.8)
+
+## A skeleton spotting the car: a ragged two-voice screech sliding down, with
+## a breathy hiss through it.
+static func _skeleton_shriek(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.tones(0.7, [[[0.0, 1500.0], [0.15, 1650.0], [0.7, 620.0]],
+			[[0.0, 1580.0], [0.15, 1720.0], [0.7, 655.0]]], {
+		square = 0.45,
+		amp = [[0.0, 0.0], [0.03, 1.0], [0.4, 0.7], [0.7, 0.0]],
+		tremolo = [28.0, 0.35],
+		peak = 0.6,
+	})
+	out = Synth.mix_into(out, Synth.noise_sweep(0.7, {
+		freq = [[0.0, 3400.0], [0.7, 1600.0]],
+		q = [[0.0, 2.0]],
+		amp = [[0.0, 0.0], [0.03, 0.8], [0.7, 0.0]],
+	}, rng), 0.0, 0.35)
+	return Synth.finish(out, 0.8)
+
+## A skeleton running: a quick clack-clack of loose bones.
+static func _skeleton_rattle(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.18)
+	for offset in [0.0, 0.05, 0.11]:
+		var pitch := rng.randf_range(800.0, 1300.0)
+		out = Synth.mix_into(out, Synth.tones(0.06, [[[0.0, pitch], [0.06, pitch * 0.85]]], {
+			square = 0.15,
+			amp = [[0.0, 0.0], [0.002, 1.0], [0.04, 0.0]],
+		}), offset, 0.5)
+	return Synth.finish(out, 0.7)
+
+## The dead waking up: a cheap, wobbly, out-of-tune organ chord swelling up
+## and dying away, B-movie style.
+## The jumpscare: a loud, ragged, blown-out scream, several buzzy voices
+## sliding up and down against each other over a burst of hiss and a thump.
+static func _jumpscare_scream(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.tones(0.9, [[[0.0, 620.0], [0.08, 1350.0], [0.9, 980.0]],
+			[[0.0, 660.0], [0.08, 1420.0], [0.9, 1040.0]],
+			[[0.0, 410.0], [0.08, 900.0], [0.9, 700.0]]], {
+		square = 0.7,
+		amp = [[0.0, 0.0], [0.01, 1.0], [0.5, 0.8], [0.9, 0.0]],
+		tremolo = [34.0, 0.4],
+		peak = 0.8,
+	})
+	out = Synth.mix_into(out, Synth.noise_sweep(0.9, {
+		freq = [[0.0, 2500.0], [0.9, 1800.0]],
+		q = [[0.0, 0.8]],
+		amp = [[0.0, 1.0], [0.9, 0.0]],
+	}, rng), 0.0, 0.5)
+	out = Synth.mix_into(out, Synth.thump(0.3, 200.0, 0.001, 0.1, rng), 0.0, 0.9)
+	for i in out.size():
+		out[i] = Synth.softclip(out[i], 2.5)
+	return Synth.finish(out, 0.95)
+
+## Losing money or scrap: the scrap blip run backwards, three quick buzzy
+## blips falling away.
+static func _loot_lost() -> PackedFloat32Array:
+	var blips: Array[PackedFloat32Array] = []
+	for pitch in [1300.0, 980.0, 700.0]:
+		blips.append(Synth.tones(0.08, [[[0.0, pitch], [0.08, pitch * 0.8]]], {
+			square = 0.35,
+			amp = [[0.0, 0.0], [0.005, 1.0], [0.05, 0.6], [0.08, 0.0]],
+			peak = 0.6,
+		}))
+	return Synth.finish(Synth.concat(blips), 0.7)
+
+## A pickup sliding to a stop on dirt: a gritty skid hissing down, gravel
+## spraying, and the body rocking on its springs with a thunk.
+static func _pickup_skid(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.noise_sweep(0.7, {
+		freq = [[0.0, 2200.0], [0.7, 700.0]],
+		q = [[0.0, 1.2]],
+		amp = [[0.0, 0.0], [0.03, 1.0], [0.5, 0.6], [0.7, 0.0]],
+	}, rng)
+	for i in 5:
+		out = Synth.mix_into(out, Synth.thump(0.05, 2400.0, 0.001, 0.02, rng), rng.randf_range(0.05, 0.55), 0.3)
+	out = Synth.mix_into(out, Synth.thump(0.25, 180.0, 0.005, 0.08, rng), 0.6, 0.8)
+	return Synth.finish(Synth.concat([out, Synth.silence(0.2)]), 0.8)
+
+static func _haunt_sting() -> PackedFloat32Array:
+	var voices: Array = []
+	for pitch in [110.0, 116.5, 164.8, 233.1]:
+		voices.append(_wobbling(pitch, 2.2, 4.5, 0.02))
+	return Synth.finish(Synth.tones(2.2, voices, {
+		square = 0.35,
+		amp = [[0.0, 0.0], [0.6, 1.0], [1.4, 0.8], [2.2, 0.0]],
+		peak = 0.7,
+	}), 0.7)
+
 static func _wink_ting() -> PackedFloat32Array:
 	return Synth.tones(0.4, [[[0.0, 1760.0]], [[0.0, 2640.0]]], {
 		amp = [[0.0, 0.0], [0.004, 1.0], [0.08, 0.35], [0.4, 0.0]],
