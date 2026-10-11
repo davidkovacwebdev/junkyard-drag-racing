@@ -29,10 +29,15 @@ extends StaticBody2D
 
 const POPUP_RISE := 54.0
 const POPUP_LIFETIME := 1.4
-const _OPTION_KEYS := [KEY_1, KEY_2]
+const _OPTION_KEYS := [KEY_1, KEY_2, KEY_3]
 
 var _popup_home: Vector2 = Vector2.ZERO
 var _actor: Node2D = null
+## "Ask Around" (TreasureRumors): only shown while that quest is on, and
+## the board grows by `ASK_ROW` to fit it.
+var _ask_button: ScrapButton
+var _board_top: float
+const ASK_ROW := 56.0
 
 @onready var _dialog: CanvasLayer = $Dialog
 @onready var _line: Label = $Dialog/Board/Layout/LineLabel
@@ -45,7 +50,16 @@ func _ready() -> void:
 	_popup_home = _popup.position
 	_buy_button.pressed.connect(buy_horse)
 	_leave_button.pressed.connect(_close)
-	for button in [_buy_button, _leave_button]:
+	# On its own row under Buy / Walk Away: it's a long question.
+	_ask_button = ScrapButton.new()
+	_ask_button.custom_minimum_size = Vector2(0.0, 48.0)
+	_ask_button.font_size = 20
+	_ask_button.tilt_degrees = -0.8
+	_ask_button.jitter_seed = 13
+	_ask_button.pressed.connect(_ask_about_treasure)
+	_buy_button.get_parent().add_sibling(_ask_button)
+	_board_top = ($Dialog/Board as Control).offset_top
+	for button in [_buy_button, _ask_button, _leave_button]:
 		button.focus_mode = Control.FOCUS_NONE
 	_close()
 
@@ -60,9 +74,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not _is_open() or not event is InputEventKey or not event.pressed or event.echo \
 			or event.is_command_or_control_pressed():
 		return
-	var options := [_buy_button, _leave_button]
+	var options := [_buy_button, _leave_button, _ask_button] if _ask_button.visible else [_buy_button, _leave_button]
 	var index := _OPTION_KEYS.find(event.keycode)
-	if index == -1:
+	if index == -1 or index >= options.size():
 		return
 	get_viewport().set_input_as_handled()
 	options[index].pressed.emit()
@@ -121,7 +135,13 @@ func _say(text: String) -> void:
 func _refresh() -> void:
 	_buy_button.text = "1. Buy a Horse ($%d)" % horse_price
 	_buy_button.disabled = not _is_selling()
+	_ask_button.visible = TreasureRumors.can_ask()
+	_ask_button.text = "3. %s" % TreasureRumors.ASK_LINE
+	($Dialog/Board as Control).offset_top = _board_top - (ASK_ROW if _ask_button.visible else 0.0)
 	_stats.text = "You have $%d" % Inventory.money
+
+func _ask_about_treasure() -> void:
+	_line.text = TreasureRumors.answer(($Character as CharacterRig).character_data)
 
 func _close() -> void:
 	_actor = null

@@ -18,6 +18,8 @@ const SUPER_HORN := &"super_horn"
 ## Under a bridge deck the car draws beneath the bridge (z 0), so the span
 ## hides it.
 const UNDER_BRIDGE_Z_INDEX := -1
+## Fishing too long (`fishing_patience`) plays this.
+const LANDOWNER_SCENE_PATH := "res://cutscenes/landowner.tres"
 
 @export var max_speed: float = 420.0
 @export var acceleration: float = 1800.0
@@ -168,6 +170,11 @@ const UNDER_BRIDGE_Z_INDEX := -1
 ## What comes up on the hook: a part this often, an old boot this often, scrap
 ## (`catch_scrap` of it) the rest of the time.
 @export_range(0.0, 1.0) var catch_part_chance: float = 0.15
+## Fishing too long in one spot brings the landowner (LandownerCutscene):
+## this many seconds with a line in, counted while the car stays within
+## `fishing_spot_radius` of where the count started.
+@export var fishing_patience: float = 40.0
+@export var fishing_spot_radius: float = 900.0
 @export_range(0.0, 1.0) var catch_boot_chance: float = 0.2
 @export var catch_scrap := Vector2i(2, 5)
 
@@ -271,6 +278,9 @@ const SCRAP_PICKUP := preload("res://scenes/world/scrap_pickup.tscn")
 const PART_PICKUP := preload("res://scenes/world/part_pickup.tscn")
 ## Null unless a line is in the water.
 var _fishing: FishingCast = null
+## Seconds with a line in around `_fishing_anchor` (see `fishing_patience`).
+var _fishing_seconds: float = 0.0
+var _fishing_anchor: Vector2 = Vector2.INF
 
 ## Rebuilds the car's look and weight from the selected car, after something
 ## out in the world swapped one of its parts (Grandpa taking his helmet back).
@@ -501,6 +511,9 @@ func _physics_process(delta: float) -> void:
 		if input_dir != Vector2.ZERO:
 			_fishing.cancel()
 		input_dir = Vector2.ZERO
+		_fishing_seconds += delta
+		if _fishing_seconds >= fishing_patience and not Cutscenes.is_active():
+			_evict_from_fishing()
 
 	if input_dir.x > 0.0:
 		_facing_right = true
@@ -842,10 +855,25 @@ func _on_item_used(item: ItemData) -> void:
 	if spot == null:
 		return
 	velocity = Vector2.ZERO
+	if global_position.distance_to(_fishing_anchor) > fishing_spot_radius:
+		_fishing_anchor = global_position
+		_fishing_seconds = 0.0
 	_fishing = FishingCast.new()
 	_fishing.spot = spot
 	_fishing.finished.connect(_on_fishing_finished)
 	add_child(_fishing)
+
+## Clyde's had enough: the line comes in empty and he runs the player off
+## his land. The count starts over after.
+func _evict_from_fishing() -> void:
+	_fishing_seconds = 0.0
+	var water := _fishing.spot
+	_fishing.cancel()
+	var scene := ResourceLoader.load(LANDOWNER_SCENE_PATH, "", ResourceLoader.CACHE_MODE_REPLACE) as LandownerCutscene
+	if scene == null:
+		return
+	scene.water_at = water
+	Cutscenes.play(scene)
 
 ## The nearest open water around the car, searched outward in rings, or null.
 ## A spot only counts with more sea past it (so the bobber lands out in the

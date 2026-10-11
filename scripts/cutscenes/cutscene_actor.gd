@@ -18,6 +18,10 @@ const FLAT_WIDTH := 2.4
 const TEAR_FROM := [Vector2(-12.0, -200.0), Vector2(12.0, -200.0)]
 const TEAR_FALL := 46.0
 const TEAR_Z := 11
+## Blushing (see `blush()`): a red cheek under each eye, in character space.
+const CHEEKS := [Vector2(-17.0, -186.0), Vector2(17.0, -186.0)]
+const CHEEK_SIZE := Vector2(11.0, 7.0)
+const BLUSH_COLOR := Color(0.86, 0.3, 0.3, 0.85)
 
 var walking: bool = false
 var talking: bool = false
@@ -93,6 +97,21 @@ func _drop_tear(from: Vector2) -> void:
 	fall.tween_property(tear, "position:y", from.y + TEAR_FALL, 0.5)
 	fall.parallel().tween_property(tear, "modulate:a", 0.0, 0.2).set_delay(0.3)
 	fall.tween_callback(tear.queue_free)
+
+## Red in the face for `seconds`: the cheeks glow up, hold, and fade. Fire
+## and forget.
+func blush(seconds: float = 3.0) -> void:
+	var tween := create_tween()
+	for at: Vector2 in CHEEKS:
+		var cheek := Polygon2D.new()
+		cheek.polygon = FlatProps.octagon(at, CHEEK_SIZE.x, CHEEK_SIZE.y)
+		cheek.color = BLUSH_COLOR
+		cheek.z_index = TEAR_Z
+		cheek.modulate.a = 0.0
+		attach(cheek)
+		tween.parallel().tween_property(cheek, "modulate:a", 1.0, 0.3)
+		tween.parallel().tween_property(cheek, "modulate:a", 0.0, 0.6).set_delay(seconds)
+		tween.parallel().tween_callback(cheek.queue_free).set_delay(seconds + 0.6)
 
 ## Tips over backwards and lands with a little bounce.
 func fall_over() -> Tween:

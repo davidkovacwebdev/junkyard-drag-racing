@@ -9,6 +9,9 @@ extends Node
 ## While the crane is down (CraneWreck) it lies in the yard where it fell,
 ## creaking now and then, and the man at the counter stands clear of it.
 ##
+## For "Dig Deeper", once the crane is fixed and the player has met Chad on
+## the island, Chad waits in the yard by the crane (ChadNpc, `at_junkyard`).
+##
 ## The quest finishes when the scene does, not when the note is owned: a
 ## note already in the trunk (say, from testing with the F5 board) mustn't
 ## finish the quest before the player has even been here.
@@ -18,6 +21,10 @@ const SCENE_PATH := "res://cutscenes/junkyard_flashback.tres"
 const NOTE := preload("res://items/grandpas_note.tres")
 ## Where the man at the counter stands while the crane lies across his spot.
 const DEALER_CLEAR_OF_WRECK := Vector2(560.0, 580.0)
+const GOLD_QUEST := &"junkyard_gold"
+const MET_CHAD_QUEST := &"west_bridge"
+## Where Chad waits, between the crane and the counter.
+const CHAD_SPOT := Vector2(330.0, 470.0)
 
 func _enter_tree() -> void:
 	# Before anything else is ready, so nothing sees the crane standing.
@@ -26,6 +33,8 @@ func _enter_tree() -> void:
 func _show_wreck() -> void:
 	var crane := get_parent().get_node_or_null(^"Yard/Crane") as JunkyardCrane
 	if not CraneWreck.lay_down(crane):
+		if crane != null:
+			crane.repaired = CraneWreck.is_repaired()
 		return
 	var dealer := get_parent().get_node_or_null(^"Yard/Dealer") as Node2D
 	if dealer != null:
@@ -39,10 +48,23 @@ func _show_wreck() -> void:
 	creak.position = Vector2(0.0, -350.0)
 
 func _ready() -> void:
+	_place_chad()
 	if Quests.has_quest(QUEST_ID):
 		_tell.call_deferred()
 	elif Quests.is_complete(QUEST_ID) and not Inventory.has_item(NOTE.id):
 		_hand_over_note.call_deferred()
+
+func _place_chad() -> void:
+	if CraneWreck.is_down() or not Quests.is_complete(MET_CHAD_QUEST) or Quests.is_complete(GOLD_QUEST):
+		return
+	var yard := get_parent().get_node_or_null(^"Yard")
+	if yard == null:
+		return
+	var chad := ChadNpc.new()
+	chad.name = "Chad"
+	chad.at_junkyard = true
+	chad.position = CHAD_SPOT
+	yard.add_child.call_deferred(chad)
 
 func _tell() -> void:
 	# Let the car and its camera settle into place first.

@@ -1,7 +1,10 @@
 class_name DragStripMenu
 extends Control
-## The front office shared by every race venue (drag strip, rally): pick a tier, then either pay to drive the
-## race yourself or bet on one car in a simulated field. Reached instead of
+## The front office shared by every race venue (drag strip, rally, hill
+## climb, derby). The clerk opens with a small desk menu: race, bet, or (while
+## "Ask Around" is on) ask about the Junkyard Treasure. Racing or betting
+## then picks a tier, and either pays to drive the race yourself or bets on
+## one car in a simulated field. Reached instead of
 ## the venue's race scene directly (see drag_strip.tscn's Entrance) — this
 ## screen decides the tier/car/bet, writes it to RaceProgression's pending_*
 ## fields, and change_scene_to_packed()s into the same race scene either
@@ -56,10 +59,23 @@ enum Page { TIER, MODE, DRIVE, BET_AMOUNT, BET_PICK }
 @onready var _bet_confirm_button: ScrapButton = $Content/BetPickPage/ConfirmButton
 
 const _BET_CARD_SCENE := preload("res://scenes/race/drag_strip_bet_card.tscn")
+## Who's behind the counter at each venue, by its name; anywhere else gets
+## the drag strip's clerk from the scene.
+const CLERKS := {
+	"Rally": preload("res://characters/race_clerk_rally.tres"),
+	"Hill Climb": preload("res://characters/race_clerk_hill.tres"),
+	"Demolition Derby": preload("res://characters/race_clerk_derby.tres"),
+}
 const CLERK_IDLE_BOB_PIXELS := 2.0
 const CLERK_TALK_SQUASH := 0.03
 
 var _tier: int = 1
+## Which way the desk menu went: betting on the field, or driving it.
+var _betting: bool = false
+## "Ask Around" (TreasureRumors), on the desk menu; and the way back to it
+## from the tier page.
+var _ask_button: ScrapButton
+var _tier_back_button: ScrapButton
 var _car_index: int = 0
 var _bet_amount: int = 0
 var _bet_field: Array[Dictionary] = []
@@ -77,14 +93,49 @@ var _time := 0.0
 
 func _ready() -> void:
 	add_child(_clerk_speech)
+	if CLERKS.has(RaceProgression.menu_venue_name):
+		_clerk.set_character(CLERKS[RaceProgression.menu_venue_name])
 	_clerk_rest = _clerk.position
 	_clerk_scale = _clerk.scale
 	_car_index = clampi(Inventory.selected_index, 0, maxi(Inventory.owned_cars.size() - 1, 0))
+	_build_desk()
 	_refresh_money()
-	_show_page(Page.TIER)
+	_show_page(Page.MODE)
 	if _resolve_pending_bet():
 		_refresh_money()
 		SaveSystem.save_game()
+
+## The desk menu is the old Drive / Bet page, put first: Race and Bet, the
+## rumours question under them, and no back button (the screen's own Back
+## leaves). The tier page gets a way back to it.
+func _build_desk() -> void:
+	_drive_button.text = "Race"
+	_bet_button.text = "Bet"
+	($Content/ModePage/BackButton as Control).visible = false
+	_ask_button = ScrapButton.new()
+	_ask_button.text = TreasureRumors.ASK_LINE
+	_ask_button.font_size = 18
+	_ask_button.tilt_degrees = -1.0
+	_ask_button.jitter_seed = 64
+	_ask_button.position = Vector2(216.0, 390.0)
+	_ask_button.size = Vector2(520.0, 56.0)
+	_ask_button.pressed.connect(_on_ask_pressed)
+	_mode_page.add_child(_ask_button)
+	_tier_back_button = ScrapButton.new()
+	_tier_back_button.text = "< Back"
+	_tier_back_button.font_size = 18
+	_tier_back_button.tilt_degrees = -1.0
+	_tier_back_button.jitter_seed = 65
+	_tier_back_button.position = Vector2(30.0, 560.0)
+	_tier_back_button.size = Vector2(130.0, 40.0)
+	_tier_back_button.pressed.connect(_show_page.bind(Page.MODE))
+	_tier_page.add_child(_tier_back_button)
+	# The drive and bet-amount pages now step back to the tier, not the mode.
+	for back: ScrapButton in [$Content/DrivePage/BackButton, $Content/BetAmountPage/BackButton]:
+		back.text = "< Tier"
+
+func _on_ask_pressed() -> void:
+	_clerk_says(TreasureRumors.answer(_clerk.character_data))
 
 ## The clerk bobs behind the counter, and squashes while talking.
 func _process(delta: float) -> void:
@@ -141,24 +192,26 @@ func _show_page(page: Page) -> void:
 	_bet_amount_page.visible = page == Page.BET_AMOUNT
 	_bet_pick_page.visible = page == Page.BET_PICK
 	match page:
+		Page.MODE:
+			_title_label.text = RaceProgression.menu_venue_name
+			_ask_button.visible = TreasureRumors.can_ask()
+			_clerk_says("What'll it be? Race, or put money on somebody who can?")
 		Page.TIER:
 			_title_label.text = "%s — Pick a Tier" % RaceProgression.menu_venue_name
 			for i in TIERS.size():
 				_tier_buttons[i].selected = _tier == TIERS[i]
-			_clerk_says("Signin' up? Pick a class. Bigger fee, meaner junk.")
-		Page.MODE:
-			_title_label.text = "%s Tier — Drive or Bet?" % TIER_NAMES[_tier]
+			_clerk_says("Bettin'? Pick a class to put yer money on." if _betting
+					else "Signin' up? Pick a class. Bigger fee, meaner junk.")
+		Page.DRIVE:
+			_title_label.text = "Choose Your Car"
+			_refresh_drive_car()
 			var fee := RaceProgression.entry_fee_for_tier(_tier)
 			var rules := RaceProgression.menu_venue_rules
 			if rules.is_empty():
 				rules = "Rivals do it in about %d seconds." % roundi(RaceProgression.par_time_for_tier(_tier))
-			_clerk_says("%s. $%d to enter, a win pays $%d. %s" % [
-					TIER_NAMES[_tier], fee, fee * RaceProgression.ENTRY_WIN_MULTIPLIER, rules])
-		Page.DRIVE:
-			_title_label.text = "Choose Your Car"
-			_refresh_drive_car()
 			_clerk_says("No car? Can't race a shopping list." if Inventory.owned_cars.is_empty()
-					else "Roll yer heap up to the line.")
+					else "%s. $%d to enter, a win pays $%d. %s" % [
+					TIER_NAMES[_tier], fee, fee * RaceProgression.ENTRY_WIN_MULTIPLIER, rules])
 		Page.BET_AMOUNT:
 			_title_label.text = "Place Your Bet"
 			for i in BET_AMOUNTS.size():
@@ -171,21 +224,26 @@ func _show_page(page: Page) -> void:
 
 func _on_tier_pressed(index: int) -> void:
 	_tier = TIERS[index]
-	_show_page(Page.MODE)
+	if _betting:
+		_bet_amount = 0
+		_show_page(Page.BET_AMOUNT)
+	else:
+		_car_index = clampi(Inventory.selected_index, 0, maxi(Inventory.owned_cars.size() - 1, 0))
+		_show_page(Page.DRIVE)
 
 func _on_mode_back_pressed() -> void:
-	_show_page(Page.TIER)
+	_show_page(Page.MODE)
 
 func _on_drive_pressed() -> void:
-	_car_index = clampi(Inventory.selected_index, 0, maxi(Inventory.owned_cars.size() - 1, 0))
-	_show_page(Page.DRIVE)
+	_betting = false
+	_show_page(Page.TIER)
 
 func _on_bet_pressed() -> void:
-	_bet_amount = 0
-	_show_page(Page.BET_AMOUNT)
+	_betting = true
+	_show_page(Page.TIER)
 
 func _on_drive_back_pressed() -> void:
-	_show_page(Page.MODE)
+	_show_page(Page.TIER)
 
 func _on_drive_prev_pressed() -> void:
 	_cycle_drive_car(-1)
@@ -236,7 +294,7 @@ func _on_bet_amount_pressed(index: int) -> void:
 		_bet_amount_buttons[i].selected = i == index
 
 func _on_bet_amount_back_pressed() -> void:
-	_show_page(Page.MODE)
+	_show_page(Page.TIER)
 
 func _on_bet_amount_next_pressed() -> void:
 	if _bet_amount <= 0 or not Inventory.can_afford(_bet_amount):

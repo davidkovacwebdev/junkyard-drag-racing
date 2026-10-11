@@ -7,6 +7,10 @@ extends CanvasLayer
 ##                start cutscene).
 ##   Finish     - completes it on the spot: pays its reward, hands out its
 ##                follow-ups and unlocks, exactly like finishing it for real.
+##   Restart    - wipes it and everything after it in its chain (follow-ups
+##                and unlocks, all the way down) from the log, then hands it
+##                over fresh and tracked, so that stretch of the story can be
+##                played again in order. Nothing earlier changes.
 ##   Finish all - finishes every quest, earliest in the story first, so all
 ##                their rewards and unlocks land: everything opened up.
 ##   Reset all  - empties the quest log, and undoes Grandpa's death (the
@@ -19,7 +23,7 @@ extends CanvasLayer
 
 const LAYER := 47
 const QUESTS_ROOT := "res://quests"
-const BOARD_SIZE := Vector2(860.0, 600.0)
+const BOARD_SIZE := Vector2(980.0, 600.0)
 const ROW_HEIGHT := 44.0
 ## Gap between rows, so the tilted buttons' skirts don't run into the row
 ## below.
@@ -123,6 +127,23 @@ func _on_give(quest: QuestData) -> void:
 	Quests.give(quest)
 	Quests.set_tracked(quest)
 	_refresh()
+
+func _on_restart(quest: QuestData) -> void:
+	Quests.rewind(_after(quest), quest)
+	_refresh()
+
+## Every quest that comes after `quest` in the story: its follow-ups and
+## unlocks, and theirs, all the way down.
+static func _after(quest: QuestData) -> Array[StringName]:
+	var found: Array[StringName] = []
+	var queue: Array = quest.follow_ups + quest.unlocks
+	while not queue.is_empty():
+		var next := queue.pop_front() as QuestData
+		if next == null or next.id == quest.id or found.has(next.id):
+			continue
+		found.append(next.id)
+		queue.append_array(next.follow_ups + next.unlocks)
+	return found
 
 func _on_finish(quest: QuestData) -> void:
 	if not Quests.has_quest(quest.id):
@@ -241,6 +262,11 @@ func _build_row(quest: QuestData, index: int) -> Control:
 	finish.disabled = Quests.is_complete(quest.id)
 	finish.pressed.connect(_on_finish.bind(quest))
 	row.add_child(finish)
+
+	var restart := _make_button("Restart", 110.0, index * 3 + 2)
+	restart.disabled = not (Quests.has_quest(quest.id) or Quests.is_complete(quest.id))
+	restart.pressed.connect(_on_restart.bind(quest))
+	row.add_child(restart)
 	return row
 
 func _make_label(text: String, font_size: int, color: Color) -> Label:

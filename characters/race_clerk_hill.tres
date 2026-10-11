@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_data.gd" id="1_data"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/legs/legs_plaid.tscn" id="2_p"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/boots/boots_cowboy.tscn" id="3_p"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/torsos/torso_trench.tscn" id="4_p"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/heads/head_oval.tscn" id="5_p"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/hairs/hair_long.tscn" id="6_p"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/eyes/eyes_sleepy.tscn" id="7_p"]
+[ext_resource type="PackedScene" path="res://scenes/characters/parts/accessories/acc_beard.tscn" id="8_p"]
+
+[resource]
+script = ExtResource("1_data")
+display_name = "Elmer"
+legs_scene = ExtResource("2_p")
+boots_scene = ExtResource("3_p")
+torso_scene = ExtResource("4_p")
+head_scene = ExtResource("5_p")
+hair_scene = ExtResource("6_p")
+eyes_scene = ExtResource("7_p")
+accessory_scene = ExtResource("8_p")
+voice_pitch_hz = 95.0
+voice_throat = 1.3
+voice_rasp = 0.6
+voice_wobble = 0.3

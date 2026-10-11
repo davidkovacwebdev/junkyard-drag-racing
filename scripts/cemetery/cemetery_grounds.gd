@@ -49,11 +49,19 @@ const DEAD_TREES := [
 ]
 
 @onready var _grounds: Node2D = $Grounds
+## Every tombstone and cross, for the dead to climb out of (CemeteryHaunt).
+var _grave_spots: Array[Vector2] = []
 
 func _ready() -> void:
 	_build_walls()
 	_build_fence()
 	_build_graves()
+	var haunt := CemeteryHaunt.new()
+	haunt.name = "Haunt"
+	haunt.grave_spots = _grave_spots
+	haunt.grounds = _grounds
+	haunt.lot = Rect2(-lot_size / 2.0, lot_size)
+	add_child(haunt)
 
 ## The hint at the bottom says what to do here, and how to leave once it's
 ## done.
@@ -126,6 +134,7 @@ func _build_graves() -> void:
 				continue
 			var kind := GraveyardProp.Kind.CROSS if rng.randf() < 0.3 else GraveyardProp.Kind.TOMBSTONE
 			_add_prop(kind, at, rng.randf_range(-9.0, 9.0))
+			_grave_spots.append(at)
 	for at: Vector2 in CRYPTS:
 		_add_prop(GraveyardProp.Kind.CRYPT, at, 0.0)
 	for at: Vector2 in DEAD_TREES:

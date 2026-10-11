@@ -17,6 +17,15 @@ const GRANDPA_SPOT := OPENING_CAR_SPOT + Vector2(-105.0, 15.0)
 ## His bacon smoker stands off to his left (it hides itself until he's
 ## built it; see BaconSmoker).
 const SMOKER_SPOT := GRANDPA_SPOT + Vector2(-210.0, -10.0)
+## Over the west bridge, on the big island: Chad's house, and Chad out front
+## of it, just north of where the bridge lands (-16800, 2000), out of the
+## car's way.
+const CHAD_HOUSE := preload("res://buildings/house_06.tres")
+const CHAD_HOUSE_SPOT := Vector2(-17700.0, 1640.0)
+const CHAD_SPOT := Vector2(-17380.0, 1760.0)
+const BUILDING_SCENE := preload("res://scenes/world/composed_building.tscn")
+## The beggar sits outside the graveyard's front fence, right of its gate.
+const BEGGAR_FROM_GATE := Vector2(170.0, 46.0)
 
 const GROUP := &"story_director"
 ## The opening's lines and staging; edit them in the inspector on the .tres.
@@ -36,6 +45,8 @@ func _ready() -> void:
 	var smoker := BaconSmoker.new()
 	smoker.position = SMOKER_SPOT
 	sortables.add_child.call_deferred(smoker)
+	_place_chad(sortables)
+	_place_beggar.call_deferred(sortables)
 	# Saves from before character creation have no player character; they
 	# skip the intro rather than meeting Grandpa mid-game.
 	if PlayerProfile.character == null or Cutscenes.has_seen(GrandpaScrapsCutscene.ID):
@@ -44,6 +55,29 @@ func _ready() -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 	Cutscenes.play_once(_make_opening())
+
+## Chad's house on the island past the west bridge, and Chad. Added from here
+## rather than placed in main.tscn.
+func _place_chad(sortables: Node) -> void:
+	var house := BUILDING_SCENE.instantiate() as ComposedBuilding
+	house.name = "ChadsHouse"
+	house.building_data = CHAD_HOUSE
+	house.position = CHAD_HOUSE_SPOT
+	sortables.add_child.call_deferred(house)
+	var chad := ChadNpc.new()
+	chad.name = "Chad"
+	chad.position = CHAD_SPOT
+	sortables.add_child.call_deferred(chad)
+
+## The beggar by the graveyard gate (BeggarNpc), once the gate is in the tree.
+func _place_beggar(sortables: Node) -> void:
+	var gate := get_tree().get_first_node_in_group(GraveyardGate.GROUP) as Node2D
+	if gate == null:
+		return
+	var beggar := BeggarNpc.new()
+	beggar.name = "Beggar"
+	sortables.add_child(beggar)
+	beggar.global_position = gate.global_position + BEGGAR_FROM_GATE
 
 ## Grandpa, parked by the garage (or the spot he used to sit in).
 func grandpa() -> GrandpaNpc:

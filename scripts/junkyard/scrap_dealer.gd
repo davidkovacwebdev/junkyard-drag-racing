@@ -155,13 +155,16 @@ func _close() -> void:
 ## Reflect the world in the dialog: what he'd pay for the scrap, what a dig
 ## costs, and what the player is carrying.
 func _refresh(animate: bool = false) -> void:
-	_dialog.set_options([
+	var options := [
 		CharacterDialog.Option.new("Sell scrap (%d) for $%d" % [
 				Inventory.scrap, Inventory.scrap * money_per_scrap],
 				_on_sell_pressed, Inventory.scrap <= 0),
 		_crane_option(),
-		CharacterDialog.Option.new("Walk away", _on_leave_pressed),
-	], animate)
+	]
+	if TreasureRumors.can_ask():
+		options.append(TreasureRumors.option(_dialog, _character.character_data))
+	options.append(CharacterDialog.Option.new("Walk away", _on_leave_pressed))
+	_dialog.set_options(options, animate)
 	_dialog.set_note("Scrap %d   $%d   Spare parts %d" % [
 		Inventory.scrap, Inventory.money, Inventory.spare_parts.size()])
 

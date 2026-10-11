@@ -1,7 +1,7 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://dxseno7sc2uok"]
 
-[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
-[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+[ext_resource type="Script" uid="uid://dbwu61t1vh1yx" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" uid="uid://dro1drnrdj5a5" path="res://scripts/parts/character_part_data.gd" id="2"]
 
 [sub_resource type="Resource" id="Resource_eyes_dots"]
 script = ExtResource("2")
@@ -9,14 +9,14 @@ id = &"eyes_dots"
 display_name = "Dot Eyes"
 slot = 5
 
-[node name="EyesDots" type="Node2D"]
+[node name="EyesDots" type="Node2D" unique_id=510523093]
 script = ExtResource("1")
 part_data = SubResource("Resource_eyes_dots")
 
-[node name="EyeLeft" type="Polygon2D" parent="."]
+[node name="EyeLeft" type="Polygon2D" parent="." unique_id=1837925007]
 color = Color(0.1, 0.1, 0.14, 1)
 polygon = PackedVector2Array(-15, -222, -5, -222, -5, -212, -15, -212)
 
-[node name="EyeRight" type="Polygon2D" parent="."]
+[node name="EyeRight" type="Polygon2D" parent="." unique_id=829363311]
 color = Color(0.1, 0.1, 0.14, 1)
 polygon = PackedVector2Array(5, -222, 15, -222, 15, -212, 5, -212)

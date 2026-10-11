@@ -13,7 +13,7 @@ extends CanvasLayer
 signal closed
 
 const _PART_SLOT_SCENE := preload("res://scenes/garage/part_slot.tscn")
-const _OPTION_KEYS := [KEY_1, KEY_2]
+const _OPTION_KEYS := [KEY_1, KEY_2, KEY_3]
 const _CATEGORY_NAMES := {
 	PartData.Category.BODY: "BODY",
 	PartData.Category.ENGINE: "ENGINE",
@@ -51,6 +51,9 @@ var _stats_label: Label
 var _result_slot: PartSlot
 var _forge_button: ScrapButton
 var _leave_button: ScrapButton
+## "Ask Around" (TreasureRumors): under Forge / Walk Away, only while that
+## quest is on.
+var _ask_button: ScrapButton
 var _flash: ColorRect
 
 func _ready() -> void:
@@ -64,6 +67,7 @@ func open() -> void:
 	_clear_stash_rows()
 	_result_slot.visible = false
 	_line_label.text = PlayerProfile.fill(character.idle_line(greet_line) if character != null else greet_line)
+	_ask_button.visible = TreasureRumors.can_ask()
 	_refresh()
 	visible = true
 
@@ -88,8 +92,11 @@ func _input(event: InputEvent) -> void:
 	var index := _OPTION_KEYS.find(event.keycode)
 	if index == -1:
 		return
+	var options := [_forge_button, _leave_button, _ask_button] if _ask_button.visible else [_forge_button, _leave_button]
+	if index >= options.size():
+		return
 	get_viewport().set_input_as_handled()
-	[_forge_button, _leave_button][index].pressed.emit()
+	options[index].pressed.emit()
 
 # --- Picking parts -------------------------------------------------------------
 
@@ -180,6 +187,7 @@ func _refresh() -> void:
 	_forge_button.text = "1. Forge It ($%d)" % forge_price
 	_forge_button.disabled = _busy or not PartForge.can_forge(_crucible_parts)
 	_leave_button.disabled = _busy
+	_ask_button.disabled = _busy
 
 ## One row per part id with how many loose copies are left, like the garage.
 ## A row per copy means a live SubViewport icon per copy, which freezes the
@@ -342,6 +350,10 @@ func _build() -> void:
 	_leave_button = _button("2. Walk Away", Vector2(200, 48), -1.2, 22)
 	_leave_button.pressed.connect(close)
 	buttons.add_child(_leave_button)
+	_ask_button = _button("3. %s" % TreasureRumors.ASK_LINE, Vector2(0, 48), -0.8, 23)
+	_ask_button.font_size = 18
+	_ask_button.pressed.connect(func() -> void: _line_label.text = TreasureRumors.answer(character))
+	right.add_child(_ask_button)
 
 	_flash = ColorRect.new()
 	_flash.color = FLASH_COLOR

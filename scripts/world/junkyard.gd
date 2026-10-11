@@ -175,8 +175,15 @@ func _spawn_crane() -> void:
 	if not Engine.is_editor_hint():
 		var tracks := Rect2(-crane.track_width * 0.5, -crane.track_height * 0.5, crane.track_width, crane.track_height * 0.5)
 		RoundedRectShape.add_solid(crane, tracks)
-		# On its side for a few days after it came down on Grandpa.
-		CraneWreck.lay_down(crane)
+		# On its side for a few days after it came down on Grandpa, then back
+		# up with its repair plates on; checked every few seconds so it stands
+		# up the moment it's fixed, not on the next visit.
+		CraneWreck.apply(crane)
+		var check := Timer.new()
+		check.wait_time = 2.0
+		check.autostart = true
+		check.timeout.connect(CraneWreck.apply.bind(crane))
+		crane.add_child(check)
 
 ## The heap, standing on the node's origin (the ground line, which is also its
 ## y-sort point).

@@ -1,0 +1,31 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_legs_leather"]
+script = ExtResource("2")
+id = &"legs_leather"
+display_name = "Leather Pants"
+slot = 0
+npc_only = true
+
+[node name="LegsLeather" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_legs_leather")
+
+[node name="LegLeft" type="Polygon2D" parent="."]
+color = Color(0.11, 0.1, 0.1, 1)
+polygon = PackedVector2Array(-23, -96, -7, -96, -8, -14, -24, -14)
+
+[node name="LegRight" type="Polygon2D" parent="."]
+color = Color(0.11, 0.1, 0.1, 1)
+polygon = PackedVector2Array(7, -96, 23, -96, 24, -14, 8, -14)
+
+[node name="ShineLeft" type="Polygon2D" parent="."]
+color = Color(0.27, 0.26, 0.27, 1)
+polygon = PackedVector2Array(-19, -90, -14, -90, -15, -24, -20, -24)
+
+[node name="ShineRight" type="Polygon2D" parent="."]
+color = Color(0.27, 0.26, 0.27, 1)
+polygon = PackedVector2Array(11, -90, 16, -90, 17, -24, 12, -24)

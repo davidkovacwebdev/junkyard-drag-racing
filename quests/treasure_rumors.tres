@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"treasure_rumors"
+title = "Ask Around"
+giver = "Chad"
+description = "The gold under the junkyard was a fake, like the nickel. Somebody's planting fake treasure, but there's a real one out there somewhere. Chad's taking the fakes to his husband and having a weekend out with his honey.
+
+Snoop around town and ask anyone you can talk to about the Junkyard Treasure. Meet Chad in 2 days."
+objective = "Ask around town about the Junkyard Treasure"
+return_to_giver = false

@@ -1,0 +1,24 @@
+[gd_scene format=3]
+
+[node name="NoHornSign" type="Node2D"]
+rotation = 0.04
+
+[node name="Pole" type="Polygon2D" parent="."]
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-4, 0, 4, 0, 4, -92, -4, -92)
+
+[node name="Ring" type="Polygon2D" parent="."]
+color = Color(0.78, 0.2, 0.18, 1)
+polygon = PackedVector2Array(34.77, -114.68, 25.46, -98.54, 9.32, -89.23, -9.32, -89.23, -25.46, -98.54, -34.77, -114.68, -34.77, -133.32, -25.46, -149.46, -9.32, -158.77, 9.32, -158.77, 25.46, -149.46, 34.77, -133.32)
+
+[node name="Face" type="Polygon2D" parent="."]
+color = Color(0.92, 0.91, 0.86, 1)
+polygon = PackedVector2Array(26.08, -117.01, 19.09, -104.91, 6.99, -97.92, -6.99, -97.92, -19.09, -104.91, -26.08, -117.01, -26.08, -130.99, -19.09, -143.09, -6.99, -150.08, 6.99, -150.08, 19.09, -143.09, 26.08, -130.99)
+
+[node name="Horn" type="Polygon2D" parent="."]
+color = Color(0.15, 0.14, 0.13, 1)
+polygon = PackedVector2Array(-18, -128, -2, -128, 14, -138, 14, -110, -2, -120, -18, -120)
+
+[node name="Slash" type="Polygon2D" parent="."]
+color = Color(0.78, 0.2, 0.18, 1)
+polygon = PackedVector2Array(-16.17, -102.17, 21.83, -140.17, 16.17, -145.83, -21.83, -107.83)
