@@ -356,7 +356,6 @@ curve = SubResource("Curve2D_road_rallylink")
 position = Vector2(-8480, 2000)
 script = ExtResource("blocked_bridge")
 deck_width = 340.0
-north_entry_depth = null
 
 [node name="MinimapMarker" type="Node2D" parent="WestBridge" unique_id=283221116]
 script = ExtResource("21_marker")
@@ -432,7 +431,7 @@ script = ExtResource("bridge_barricade")
 deck_width = 340.0
 
 [node name="HiddenShoppingCart" parent="Sortables" unique_id=1314167475 instance=ExtResource("part_pickup")]
-position = Vector2(-10527, 3634)
+position = Vector2(-8657, 2032)
 script = ExtResource("hidden_part_pickup")
 part_id = &"body_shopping_cart"
 claim_id = "west_bridge_shopping_cart"
