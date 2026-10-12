@@ -13,13 +13,14 @@ const SONGS := {
 	&"glup_glup_dupy_doo": preload("res://scripts/audio/songs/glup_glup_dupy_doo.gd"),
 	&"goblin_gumbo_wobble": preload("res://scripts/audio/songs/goblin_gumbo_wobble.gd"),
 	&"blorp_hup_hup_stampede": preload("res://scripts/audio/songs/blorp_hup_hup_stampede.gd"),
+	&"bonk_club": preload("res://scripts/audio/songs/bonk_club.gd"),
 }
 
 ## Songs per scene group, played in order; each one hands over to the next when
 ## it ends.
 const MENU_PLAYLIST: Array[StringName] = [&"glup_glup_dupy_doo", &"junkyard_strut"]
 const OVERWORLD_PLAYLIST: Array[StringName] = [&"goblin_gumbo_wobble", &"drunk_crane_shuffle"]
-const RACE_PLAYLIST: Array[StringName] = [&"blorp_hup_hup_stampede", &"scrapheap_stampede"]
+const RACE_PLAYLIST: Array[StringName] = [&"bonk_club", &"blorp_hup_hup_stampede", &"scrapheap_stampede"]
 
 const MUSIC_DIRECTORY := "res://sounds/music"
 

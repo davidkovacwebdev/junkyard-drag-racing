@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="QuestData" format=3 uid="uid://dsu5n65tv0mon"]
+
+[ext_resource type="Script" uid="uid://b4kssi28o6a3g" path="res://scripts/items/item_data.gd" id="1_dbsn0"]
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://quests/smithy_visit.tres" id="2_side"]
+[ext_resource type="Resource" path="res://quests/dig_site.tres" id="3_dig"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"chad_meetup"
+title = "Weekend's Over"
+giver = "Chad"
+description = "Two days have passed. Chad should be back from his weekend with his husband, hopefully with something to say about the fake coins.
+
+Go see him at his house, over the west bridge, and tell him what you've dug up."
+objective = "Meet Chad at his house over the west bridge"
+objective_place = "Chad"
+side_quests = [ExtResource("2_side"), ExtResource("3_dig")]
+return_to_giver = false

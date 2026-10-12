@@ -457,6 +457,17 @@ func _already_past(quest: QuestData) -> bool:
 			return true
 	return false
 
+## Lands `quest` in the log `days` in-game days from now (Chad's "meet me in
+## two days"). It has to be a side quest of an active quest, which is where
+## it's looked up when the day comes. Does nothing if it's already waiting,
+## the player's, or done.
+func give_later(quest: QuestData, days: int) -> void:
+	_hold_back(quest, days)
+
+## Whether `quest` is waiting to land in the log (see `give_later()`).
+func is_waiting(id: StringName) -> bool:
+	return delayed.has(id)
+
 ## Puts `next` on hold for `days` in-game days, unless it's already waiting
 ## (or already the player's).
 func _hold_back(next: QuestData, days: int) -> void:
@@ -464,15 +475,19 @@ func _hold_back(next: QuestData, days: int) -> void:
 		return
 	delayed[next.id] = DayNightCycle.day + days
 
-## Gives every held-back follow-up whose day has come.
+## Gives every held-back follow-up (and side quest, see `give_later()`)
+## whose day has come.
 func _give_due_follow_ups() -> void:
+	var due: Array = []
 	for quest in completed:
-		if quest.follow_up_delay_days <= 0:
-			continue
-		for next in quest.follow_ups:
-			if next != null and delayed.has(next.id) and DayNightCycle.day >= int(delayed[next.id]):
-				delayed.erase(next.id)
-				give(next)
+		if quest.follow_up_delay_days > 0:
+			due.append_array(quest.follow_ups)
+	for quest in active:
+		due.append_array(quest.side_quests)
+	for next in due:
+		if next != null and delayed.has(next.id) and DayNightCycle.day >= int(delayed[next.id]):
+			delayed.erase(next.id)
+			give(next)
 
 static func _find(quests: Array[QuestData], id: StringName) -> QuestData:
 	for quest in quests:

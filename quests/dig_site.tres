@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"dig_site"
+title = "The Dig Site"
+giver = "Chad"
+description = "Gus found his real treasure coin west of the docks and marked the spot on your map with an X. That's where the real Junkyard Treasure must be.
+
+Chad's riding along. Drive out to the Treasure Area Spot."
+objective = "Drive to the Treasure Area Spot (the X on your map)"
+objective_place = "Treasure Area Spot"
+cutscene_ids = Array[StringName]([&"dig_site", &"coming_soon"])
+return_to_giver = false

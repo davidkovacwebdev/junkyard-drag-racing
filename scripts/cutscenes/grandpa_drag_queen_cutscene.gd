@@ -158,10 +158,11 @@ func _kiss(player: CutsceneActor) -> void:
 		return
 	await Cutscenes.hop(player, 10.0)
 	Cutscenes.sound(&"flag_kiss", -2.0, player)
-	_pop_heart(flag + Vector2(0.0, -14.0))
+	pop_heart(flag + Vector2(0.0, -14.0))
 	await Cutscenes.wait(0.9)
 
-func _pop_heart(at: Vector2) -> void:
+## A little pink heart floats up from `at` and fades (a kiss landing).
+static func pop_heart(at: Vector2) -> void:
 	var heart := Polygon2D.new()
 	heart.polygon = PackedVector2Array([Vector2(0.0, 10.0), Vector2(-12.0, -2.0), Vector2(-11.0, -9.0),
 			Vector2(-5.0, -12.0), Vector2(0.0, -7.0), Vector2(5.0, -12.0), Vector2(11.0, -9.0), Vector2(12.0, -2.0)])

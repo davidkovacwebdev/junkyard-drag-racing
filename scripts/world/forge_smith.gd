@@ -7,9 +7,13 @@ extends StaticBody2D
 ## him a target, `get_interact_prompt()` words the tooltip and `interact()`
 ## opens the counter.
 ##
-## At night during "Graveyard Shift" he's out in his pickup
-## (NightDiggerSpawner.digger_out()): he isn't at the forge, can't be talked
-## to, and is back in the morning.
+## At night while the player is asking around about the treasure (until he's
+## caught) he's out in his pickup (NightDiggerSpawner.digger_out()): he isn't
+## at the forge, can't be talked to, and is back in the morning.
+
+const GROUP := &"forge_smith"
+## What he says about the treasure once he's confessed (TreasureStory).
+const CAUGHT_LINE := "I told you everything I know. Now leave me be."
 
 @export var display_name: String = "Gus"
 @export var forge_price: int = 60
@@ -24,6 +28,7 @@ var _name: String
 var _away := false
 
 func _ready() -> void:
+	add_to_group(GROUP)
 	_name = display_name
 	_screen = ForgeScreen.new()
 	_screen.forge_price = forge_price
@@ -56,6 +61,10 @@ func _set_away(away: bool) -> void:
 	if away:
 		_screen.close()
 
+## Whether he's out in his pickup rather than at the forge.
+func is_away() -> bool:
+	return _away
+
 func get_interact_prompt() -> String:
 	return "%s: E or left-click to forge parts ($%d)" % [display_name, forge_price]
 
@@ -69,6 +78,9 @@ func interact(actor: Node = null) -> void:
 ## and throws the player out; after the beggar's tip, he's accused and does
 ## it again (SmithConfrontCutscene).
 func _ask_about_treasure() -> void:
+	if TreasureStory.gus_caught():
+		_screen.say(CAUGHT_LINE)
+		return
 	if TreasureRumors.has_scene(TreasureRumors.SMITH):
 		_screen.close()
 		TreasureRumors.play_scene(TreasureRumors.SMITH, get_node_or_null("Character") as CharacterRig)

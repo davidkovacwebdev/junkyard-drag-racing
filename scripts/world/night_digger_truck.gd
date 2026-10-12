@@ -10,11 +10,14 @@ extends GarbageTruck
 ## there will cross his path.
 ##
 ## Off screen but in earshot, sound-wave chevrons at the screen edge point
-## at it (EngineNoiseIndicator), brighter and faster the closer it is.
+## at it (EngineNoiseIndicator), brighter and faster the closer it is, but
+## only once the beggar has told the player to listen for it ("Graveyard
+## Shift" is on).
 ##
 ## Every hard ram knocks a chunk off the health bar over it (one of the
-## quest's `count_goal`); at zero it breaks down where it is and
-## NightDiggerCutscene plays. Spawned and cleared away by NightDiggerSpawner.
+## quest's `count_goal`, counted even before the beggar hands out the quest);
+## at zero it breaks down where it is and NightDiggerCutscene plays. Spawned
+## and cleared away by NightDiggerSpawner.
 
 const SCENE := preload("res://scenes/world/night_digger/night_digger_truck.tscn")
 const QUEST := preload("res://quests/night_digger.tres")
@@ -30,6 +33,8 @@ const BAR_BACK := Color(0.15, 0.14, 0.13, 0.85)
 const HAUNT_RADIUS := 3000.0
 const LEASH_CHECK := 0.5
 const LEASH_LOOK := 250.0
+## Sunrise: how long it takes to fade away home (go_home()).
+const HOME_FADE := 1.2
 ## Broken down: how fast it rolls to a stop.
 const BREAKDOWN_DECEL := 900.0
 
@@ -72,8 +77,8 @@ func _ready() -> void:
 	hud.layer = BAR_LAYER
 	add_child(hud)
 	_noise = EngineNoiseIndicator.new()
-	_noise.source = self
 	hud.add_child(_noise)
+	_update_noise()
 
 ## Starts somewhere on a road by the graveyard, well away from the player's
 ## car (anywhere out of sight if there's no such spot).
@@ -157,8 +162,28 @@ func _physics_process(delta: float) -> void:
 	if _leash_timer <= 0.0:
 		_leash_timer = LEASH_CHECK
 		_keep_near_graveyard()
+		_update_noise()
 	_bar.position = global_position
 	_bar.queue_redraw()
+
+## The chevrons only point at it once the player knows to listen for it.
+func _update_noise() -> void:
+	_noise.source = self if Quests.has_quest(QUEST.id) and not broken else null
+
+## Sunrise: Gus heads home. It fades out where it is (its engine with it)
+## and is gone.
+func go_home() -> void:
+	broken = true
+	_noise.source = null
+	_bar.visible = false
+	set_collision_layer(0)
+	set_collision_mask(0)
+	var tween := create_tween().set_parallel()
+	tween.tween_property(self, "modulate:a", 0.0, HOME_FADE)
+	for child in get_children():
+		if child is EngineSound:
+			tween.tween_property(child, "volume_db", -60.0, HOME_FADE)
+	tween.chain().tween_callback(queue_free)
 
 ## How much of its health is left, 0-1.
 func health() -> float:
@@ -172,7 +197,7 @@ func _update_marker() -> void:
 
 ## A hard ram: a chunk off its health, and at zero it breaks down.
 func _count_ram() -> void:
-	if _ram_timer > 0.0 or broken or not Quests.has_quest(QUEST.id):
+	if _ram_timer > 0.0 or broken:
 		return
 	_ram_timer = ram_cooldown
 	Sfx.play_at(&"car_whack", global_position, -4.0, 0.08)
@@ -196,10 +221,9 @@ func _break_down() -> void:
 	cutscene.truck = self
 	Cutscenes.play_once(cutscene)
 
-## The health bar over the cab: a dark back and a red fill, while the
-## player's hunting it.
+## The health bar over the cab: a dark back and a red fill, till it breaks.
 func _draw_bar() -> void:
-	if broken or not Quests.has_quest(QUEST.id):
+	if broken:
 		return
 	var left := Vector2(-BAR_SIZE.x * 0.5, -BAR_LIFT)
 	_bar.draw_rect(Rect2(left, BAR_SIZE), BAR_BACK)

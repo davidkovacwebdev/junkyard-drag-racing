@@ -50,6 +50,7 @@ func _ready() -> void:
 	var digger := NightDiggerSpawner.new()
 	digger.sortables = sortables
 	add_child(digger)
+	add_child(TreasureStory.new())
 	# Saves from before character creation have no player character; they
 	# skip the intro rather than meeting Grandpa mid-game.
 	if PlayerProfile.character == null or Cutscenes.has_seen(GrandpaScrapsCutscene.ID):

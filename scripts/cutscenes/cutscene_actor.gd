@@ -23,6 +23,21 @@ const TEAR_Z := 11
 const CHEEKS := [Vector2(-17.0, -186.0), Vector2(17.0, -186.0)]
 const CHEEK_SIZE := Vector2(11.0, 7.0)
 const BLUSH_COLOR := Color(0.86, 0.3, 0.3, 0.85)
+## Puckering up for a kiss (see `pucker()`): pursed lips, in character space.
+const PUCKER_AT := Vector2(0.0, -193.0)
+const PUCKER_SIZE := Vector2(7.0, 6.0)
+const PUCKER_COLOR := Color(0.78, 0.32, 0.38)
+## On the phone (see `hold_phone()`): the right arm swings up this far, the
+## hand at the ear, and the phone sits by the ear in character space.
+const PHONE_ARM := PI * 0.9
+const PHONE_AT := Vector2(29.0, -201.0)
+const PHONE_SIZE := Vector2(12.0, 24.0)
+const PHONE_COLOR := Color(0.84, 0.45, 0.6)
+const PHONE_SHADE := Color(0.66, 0.32, 0.45)
+## Swaying (see `swaying`): hips rocking side to side.
+const SWAY_SPEED := 1.6
+const SWAY_SKEW := 0.12
+const SWAY_TILT := 0.05
 ## A part's (or attached prop's) slot z, kept once its z_index is zeroed.
 const LAYER_META := &"layer"
 ## Crawling (see `crawl_to()`): flat on the belly, lifted this far so the
@@ -43,6 +58,10 @@ var walking: bool = false
 var talking: bool = false
 ## 0 standing, 1 pancaked flat on the ground (see `flatten()`).
 var flatness: float = 0.0
+## Rocking the hips while standing (on the phone to a sweetheart, say).
+var swaying: bool = false
+var _swayed := false
+var _phone: Node2D = null
 
 var _body: Node2D
 ## The assembled character's parts, stacked by child order (see `_layer_parts()`).
@@ -157,6 +176,77 @@ func blush(seconds: float = 3.0) -> void:
 		tween.parallel().tween_property(cheek, "modulate:a", 0.0, 0.6).set_delay(seconds)
 		tween.parallel().tween_callback(cheek.queue_free).set_delay(seconds + 0.6)
 
+## Shuts one eye for a moment, with a ting, the way Grandpa winks
+## (GrandpaNpc.wink(): the same lid over the left eye).
+func wink(volume_db: float = -8.0) -> void:
+	var eyes := find_child("EyesPart", true, false) as Node2D
+	if eyes == null:
+		return
+	var hidden: Array[Node2D] = []
+	for path in GrandpaNpc.WINK_EYE_NODES:
+		var part := eyes.get_node_or_null(path) as Node2D
+		if part != null and part.visible:
+			part.visible = false
+			hidden.append(part)
+	var lid := Polygon2D.new()
+	lid.polygon = PackedVector2Array(GrandpaNpc.WINK_LID)
+	lid.color = GrandpaNpc.WINK_LID_COLOR
+	eyes.add_child(lid)
+	eyes.move_child(lid, 0)
+	Sfx.play_at(&"wink_ting", global_position, volume_db, 0.0)
+	var tween := create_tween()
+	tween.tween_interval(0.6)
+	tween.tween_callback(func() -> void:
+		for part in hidden:
+			if is_instance_valid(part):
+				part.visible = true
+		lid.queue_free())
+
+## Purses their lips for a kiss, for `seconds`.
+func pucker(seconds: float = 0.8) -> void:
+	var lips := Polygon2D.new()
+	lips.polygon = FlatProps.octagon(Vector2.ZERO, PUCKER_SIZE.x, PUCKER_SIZE.y)
+	lips.position = PUCKER_AT
+	lips.color = PUCKER_COLOR
+	lips.z_index = TEAR_Z
+	attach(lips)
+	var tween := create_tween()
+	tween.tween_property(lips, "scale", Vector2.ONE * 1.25, 0.12).from(Vector2.ONE * 0.6)
+	tween.tween_interval(seconds)
+	tween.tween_callback(lips.queue_free)
+
+## Puts a phone to their ear (the right hand up to it), or back down out of
+## sight with `up` false.
+func hold_phone(up: bool, seconds: float = 0.25) -> Tween:
+	if up and not is_instance_valid(_phone):
+		var held := Node2D.new()
+		held.name = "Phone"
+		held.position = PHONE_AT
+		held.z_index = TEAR_Z
+		var case := Polygon2D.new()
+		case.polygon = PackedVector2Array([-PHONE_SIZE * 0.5, Vector2(PHONE_SIZE.x * 0.5, -PHONE_SIZE.y * 0.5),
+				PHONE_SIZE * 0.5, Vector2(-PHONE_SIZE.x * 0.5, PHONE_SIZE.y * 0.5)])
+		case.color = PHONE_COLOR
+		held.add_child(case)
+		var shade := Polygon2D.new()
+		shade.polygon = PackedVector2Array([Vector2(PHONE_SIZE.x * 0.5 - 4.0, -PHONE_SIZE.y * 0.5),
+				Vector2(PHONE_SIZE.x * 0.5, -PHONE_SIZE.y * 0.5), PHONE_SIZE * 0.5,
+				Vector2(PHONE_SIZE.x * 0.5 - 4.0, PHONE_SIZE.y * 0.5)])
+		shade.color = PHONE_SHADE
+		held.add_child(shade)
+		attach(held)
+		_phone = held
+	elif not up and is_instance_valid(_phone):
+		_phone.queue_free()
+		_phone = null
+	var tween := create_tween()
+	var arms := _arm_pivots()
+	if arms.is_empty():
+		tween.tween_interval(seconds)
+	else:
+		tween.tween_property(arms.back(), "rotation", PHONE_ARM if up else 0.0, seconds)
+	return tween
+
 ## Tips over backwards and lands with a little bounce.
 func fall_over() -> Tween:
 	walking = false
@@ -259,8 +349,14 @@ func _process(delta: float) -> void:
 	if walking:
 		_body.position.y = -absf(sin(_time * PI * WALK_STEPS_PER_SECOND)) * WALK_BOB_PIXELS
 		_body.skew = sin(_time * PI * WALK_STEPS_PER_SECOND) * 0.08
+	elif swaying:
+		_body.skew = sin(_time * TAU * SWAY_SPEED) * SWAY_SKEW
+		_body.rotation = sin(_time * TAU * SWAY_SPEED + 0.6) * SWAY_TILT
 	else:
 		_body.skew = 0.0
+	if _swayed and not swaying:
+		_body.rotation = 0.0
+	_swayed = swaying
 	var squash := sin(_time * TAU * 7.0) * TALK_SQUASH if talking else 0.0
 	var flat_x := lerpf(1.0, FLAT_WIDTH, flatness)
 	var flat_y := lerpf(1.0, FLAT_HEIGHT, flatness)

@@ -6,7 +6,8 @@ extends Cutscene
 ## the town on the map, and he wanted to make a splash with the one real coin
 ## he found (as a race prize, for a fee). Threatened with Chad's baton, he
 ## marks where he found it on the player's map (TreasureDigSpot), west of the
-## docks. Finishes "Graveyard Shift" and "Ask Around". Played by
+## docks. Finishes "Graveyard Shift" if the beggar gave it ("Ask Around" goes
+## on until the player reports to Chad, see ChadReportCutscene). Played by
 ## NightDiggerTruck.
 ##
 ## The words live in res://cutscenes/night_digger.tres.
@@ -15,7 +16,6 @@ const ID := &"night_digger"
 const MASKED := preload("res://characters/gus_masked.tres")
 const GUS := preload("res://characters/smith.tres")
 const KID := preload("res://characters/gus_kid.tres")
-const RUMORS := &"treasure_rumors"
 
 @export var aggressive_line: String = "WHY SO AGGRESSIVE?!"
 @export var caught_line: String = "So you've been wandering around and planting fake treasure."
@@ -101,4 +101,3 @@ func play() -> void:
 	if is_instance_valid(truck):
 		truck.queue_free()
 	Quests.complete(NightDiggerTruck.QUEST.id)
-	Quests.complete(RUMORS)

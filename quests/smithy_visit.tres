@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"smithy_visit"
+title = "Strike While It's Hot"
+giver = "Chad"
+description = "Chad's husband looked the fake coins over: freshly smelted, poured in a bumpy mould, and every one has a snapped-off pour spout on its rim. Somebody in town has a forge.
+
+Chad's riding along. Drive to Gus's Scrap Forge and have a word with him."
+objective = "Drive to the Scrap Forge with Chad"
+objective_place = "Gus"
+cutscene_ids = Array[StringName]([&"smithy_raid"])
+return_to_giver = false

@@ -49,6 +49,11 @@ const NAMES: Array[StringName] = [
 	&"muscle_flex",
 	&"gate_rattle",
 	&"flag_kiss",
+	&"cute_coo",
+	&"phone_dial",
+	&"phone_busy",
+	&"phone_beep",
+	&"phone_mimimi",
 	&"cemetery_gate_creak",
 	&"funeral_bell",
 	&"wood_clonk",
@@ -361,6 +366,11 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"muscle_flex": return _muscle_flex(rng)
 		&"gate_rattle": return _gate_rattle(rng)
 		&"flag_kiss": return _flag_kiss(rng)
+		&"cute_coo": return _cute_coo()
+		&"phone_dial": return _phone_dial()
+		&"phone_busy": return _phone_busy()
+		&"phone_beep": return _phone_beep()
+		&"phone_mimimi": return _phone_mimimi(rng)
 		&"grandpa_gasp": return _grandpa_gasp(rng)
 		&"cemetery_gate_creak": return _cemetery_gate_creak(rng)
 		&"funeral_bell": return _funeral_bell(rng)
@@ -1689,6 +1699,65 @@ static func _flag_kiss(rng: RandomNumberGenerator) -> PackedFloat32Array:
 		amp = [[0.0, 0.0], [0.02, 0.4], [0.2, 0.0]],
 	}, rng), 0.34, 0.4)
 	return Synth.finish(out, 0.6)
+
+## Chad going all soft over his "hubby bubby": a squeaky little "oo-wee",
+## sliding up with a wobble, like a dog toy getting a gentle squeeze.
+static func _cute_coo() -> PackedFloat32Array:
+	return Synth.tones(0.55, [[[0.0, 620.0], [0.18, 560.0], [0.45, 1250.0], [0.55, 1180.0]]], {
+		square = 0.15,
+		tremolo = [11.0, 0.35],
+		amp = [[0.0, 0.0], [0.03, 0.8], [0.2, 0.5], [0.4, 0.9], [0.55, 0.0]],
+		peak = 0.5,
+	})
+
+## Ringing someone up on a cheap mobile: five quick keypad beeps (two tones
+## each, like real keys), then the two long burrs of it ringing out.
+static func _phone_dial() -> PackedFloat32Array:
+	var keys := [[770.0, 1336.0], [697.0, 1209.0], [852.0, 1477.0], [770.0, 1209.0], [941.0, 1336.0]]
+	var out := Synth.silence(3.4)
+	for i in keys.size():
+		var pair: Array = keys[i]
+		Synth.mix_into(out, Synth.tones(0.09, [[[0.0, pair[0]]], [[0.0, pair[1]]]], {
+			amp = [[0.0, 0.0], [0.005, 1.0], [0.08, 1.0], [0.09, 0.0]],
+		}), 0.05 + i * 0.14, 0.45)
+	for i in 2:
+		Synth.mix_into(out, Synth.tones(0.9, [[[0.0, 440.0]], [[0.0, 480.0]]], {
+			amp = [[0.0, 0.0], [0.02, 1.0], [0.88, 1.0], [0.9, 0.0]],
+		}), 1.0 + i * 1.3, 0.4)
+	return Synth.finish(out, 0.6)
+
+## Declined: the call drops into the flat beep-beep-beep of a busy line.
+static func _phone_busy() -> PackedFloat32Array:
+	var out := Synth.silence(1.35)
+	for i in 3:
+		Synth.mix_into(out, Synth.tones(0.25, [[[0.0, 480.0]], [[0.0, 620.0]]], {
+			square = 0.2,
+			amp = [[0.0, 0.0], [0.01, 1.0], [0.24, 1.0], [0.25, 0.0]],
+		}), i * 0.45, 0.5)
+	return Synth.finish(out, 0.55)
+
+## A mobile's single blip: picking up a call or hanging up.
+static func _phone_beep() -> PackedFloat32Array:
+	return Synth.tones(0.14, [[[0.0, 1400.0]], [[0.0, 2100.0]]], {
+		square = 0.25,
+		amp = [[0.0, 0.0], [0.004, 1.0], [0.1, 0.6], [0.14, 0.0]],
+		peak = 0.45,
+	})
+
+## Someone talking on the other end of a phone, the cartoon way: a squeaky
+## little "mi mi mimimi", high, quick and tinny.
+static func _phone_mimimi(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var gaps := [0.0, 0.17, 0.34, 0.44, 0.54, 0.75, 0.85, 0.95, 1.05]
+	var out := Synth.silence(1.25)
+	for at: float in gaps:
+		var pitch := rng.randf_range(1050.0, 1500.0)
+		var length := rng.randf_range(0.07, 0.11)
+		Synth.mix_into(out, Synth.tones(length, [[[0.0, pitch * 0.85], [length * 0.4, pitch], [length, pitch * 0.92]]], {
+			square = 0.45,
+			tremolo = [38.0, 0.3],
+			amp = [[0.0, 0.0], [0.01, 1.0], [length * 0.7, 0.7], [length, 0.0]],
+		}), at, 0.5)
+	return Synth.finish(out, 0.5)
 
 ## Pushing open the cemetery's iron gate: a long rusty hinge creak that
 ## climbs and sags, and a dull clank as it swings against its post.

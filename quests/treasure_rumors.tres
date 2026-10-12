@@ -2,7 +2,8 @@
 
 [ext_resource type="Script" uid="uid://b4kssi28o6a3g" path="res://scripts/items/item_data.gd" id="1_aln38"]
 [ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
-[ext_resource type="Resource" path="res://quests/beggar_info.tres" id="2_side"]
+[ext_resource type="Resource" uid="uid://betosai84qbk3" path="res://quests/beggar_info.tres" id="2_side"]
+[ext_resource type="Resource" path="res://quests/chad_meetup.tres" id="3_meet"]
 
 [resource]
 script = ExtResource("1_script")
@@ -13,6 +14,6 @@ description = "The gold under the junkyard was a fake, like the nickel. Somebody
 
 Snoop around town and ask anyone you can talk to about the Junkyard Treasure. Meet Chad in 2 days."
 objective = "Ask around town about the Junkyard Treasure"
-side_quests = [ExtResource("2_side")]
-cutscene_ids = Array[StringName]([&"farmer_coins", &"smith_coins", &"smith_confront"])
+side_quests = [ExtResource("2_side"), ExtResource("3_meet")]
+cutscene_ids = Array[StringName]([&"farmer_coins", &"smith_coins", &"smith_confront", &"night_digger"])
 return_to_giver = false
