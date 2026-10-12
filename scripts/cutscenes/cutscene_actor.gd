@@ -56,6 +56,7 @@ var _time: float = 0.0
 func setup(character: CharacterData, scale_factor: float) -> void:
 	_base_scale = scale_factor
 	_body = Node2D.new()
+	_body.scale = Vector2(_facing, 1.0) * _base_scale
 	add_child(_body)
 	var rig := CharacterRig.new()
 	rig.character_data = character
@@ -92,6 +93,8 @@ func _layer_parts(parts: Node2D) -> void:
 
 func face(right: bool) -> void:
 	_facing = 1.0 if right else -1.0
+	if _body != null:
+		_body.scale.x = absf(_body.scale.x) * _facing
 
 ## Tween the walk; the waddle runs while it's moving.
 func walk_to(to: Vector2, speed: float) -> Tween:
@@ -170,6 +173,28 @@ func stand_up() -> Tween:
 	tween.tween_property(_body, "rotation", 0.0, 0.35)
 	tween.parallel().tween_property(_body, "position:y", 0.0, 0.35)
 	return tween
+
+## Tilts the body to `angle` and lifts it `lift` above the actor's spot
+## (hanging off a fence, say). The spot itself stays put, so the actor keeps
+## Y-sorting from where it stands on the ground.
+func pose(angle: float, lift: float, seconds: float, trans := Tween.TRANS_SINE, ease := Tween.EASE_IN_OUT) -> Tween:
+	walking = false
+	var tween := create_tween().set_parallel().set_trans(trans).set_ease(ease)
+	tween.tween_property(_body, "rotation", angle, seconds)
+	tween.tween_property(_body, "position:y", -lift, seconds)
+	return tween
+
+## `pose()` straight away, with no tween in between.
+func set_pose(angle: float, lift: float) -> void:
+	_body.rotation = angle
+	_body.position.y = -lift
+
+## Moves the actor's spot to height `y` while the body stays exactly where
+## it is on screen: going over the top of something, mid-air, so it's now
+## Y-sorted behind it.
+func set_footing_y(y: float) -> void:
+	_body.position.y += global_position.y - y
+	global_position.y = y
 
 ## Belly down, head first towards `to`, dragging the body along by the arms:
 ## one reaches out past the head, then hauls back while the body lurches

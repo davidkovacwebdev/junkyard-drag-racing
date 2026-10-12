@@ -52,6 +52,7 @@ const NAMES: Array[StringName] = [
 	&"wood_clonk",
 	&"fence_crack",
 	&"grandpa_sigh",
+	&"grandpa_heave",
 	&"carrot_crunch",
 	&"paint_slosh",
 	&"bacon_sizzle",
@@ -363,6 +364,7 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"wood_clonk": return _wood_clonk(rng)
 		&"fence_crack": return _fence_crack(rng)
 		&"grandpa_sigh": return _grandpa_sigh(rng)
+		&"grandpa_heave": return _grandpa_heave(rng)
 		&"carrot_crunch": return _carrot_crunch(rng)
 		&"paint_slosh": return _paint_slosh(rng)
 		&"bacon_sizzle": return _bacon_sizzle(rng)
@@ -1724,6 +1726,22 @@ static func _grandpa_sigh(rng: RandomNumberGenerator) -> PackedFloat32Array:
 		tremolo = [6.0, 0.35],
 		amp = [[0.0, 0.0], [0.15, 0.7], [0.6, 0.5], [0.8, 0.0]],
 	}), 0.5, 0.45)
+	return Synth.finish(out, 0.55)
+
+## An old man hauling himself up by his arms: a strained, quavering
+## "hnnnGH!" that climbs and cracks at the top, and a wheezy breath out.
+static func _grandpa_heave(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.6)
+	out = Synth.mix_into(out, Synth.tones(0.36, [[[0.0, 150.0], [0.24, 190.0], [0.28, 240.0], [0.36, 170.0]]], {
+		square = 0.4,
+		tremolo = [9.0, 0.45],
+		amp = [[0.0, 0.0], [0.05, 0.6], [0.24, 1.0], [0.36, 0.0]],
+	}), 0.0, 0.6)
+	out = Synth.mix_into(out, Synth.noise_sweep(0.3, {
+		freq = [[0.0, 1400.0], [0.3, 800.0]],
+		q = [[0.0, 2.0]],
+		amp = [[0.0, 0.0], [0.04, 0.8], [0.3, 0.0]],
+	}, rng), 0.3, 0.45)
 	return Synth.finish(out, 0.55)
 
 ## A horse biting into a carrot: a crisp snap and two wet, crunchy chews.

@@ -59,7 +59,7 @@ func play() -> void:
 	if PlayerProfile.character != null:
 		player = Cutscenes.spawn_actor(PlayerProfile.character, player_spot + Vector2(80.0, 0.0), false)
 		if has_helmet:
-			worn = GrandpaHelmetCutscene.helmet_prop(Vector2(4.0, -222.0), 1.25)
+			worn = GrandpaHelmetCutscene.helmet_prop()
 			player.attach(worn)
 	Cutscenes.cut_to(middle, zoom)
 	await Cutscenes.fade_in(0.8)

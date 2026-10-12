@@ -19,6 +19,10 @@ extends Cutscene
 const ID := &"grandpa_helmet"
 const GRANDPA := preload("res://characters/grandpa.tres")
 const HELMET_WHEEL := "res://scenes/parts/wheels/wheel_helmet.tscn"
+## The helmet as worn, front on so the face shows, centred on the head.
+const WORN_HELMET := preload("res://scenes/characters/props/grandpas_helmet_worn.tscn")
+## Where the worn helmet sits on the player, in their character space.
+const WORN_HELMET_SPOT := Vector2(0.0, -210.0)
 ## In `chat`, a line starting with this is the player's; any other is his.
 const PLAYER_MARK := "> "
 
@@ -48,10 +52,6 @@ const PLAYER_MARK := "> "
 @export var zoom: float = 1.9
 ## Aims above the pair's feet so heads stay in frame.
 @export var camera_lift: float = 70.0
-## Where the helmet wheel sits on the player, in their character space: down
-## over their head, with just the chin showing.
-@export var helmet_spot := Vector2(4.0, -222.0)
-@export var helmet_scale: float = 1.25
 ## The player's long, blank stare before asking his name.
 @export var pause_seconds: float = 1.8
 
@@ -120,19 +120,12 @@ static func helmet_part() -> PartData:
 func _wear_helmet(player: CutsceneActor) -> void:
 	if player == null or Cutscenes.is_skipping():
 		return
-	player.attach(helmet_prop(helmet_spot, helmet_scale))
+	player.attach(helmet_prop())
 
-## The helmet wheel's own polygons, without its physics body, for a
-## character to wear at `spot` (their character space).
-static func helmet_prop(spot: Vector2, prop_scale: float) -> Node2D:
-	var wheel := (load(HELMET_WHEEL) as PackedScene).instantiate()
-	var helmet := Node2D.new()
-	for child in wheel.get_children():
-		if child is Polygon2D:
-			helmet.add_child(child.duplicate())
-	wheel.free()
-	helmet.position = spot
-	helmet.scale = Vector2.ONE * prop_scale
+## The front-on helmet for a character to wear over their head.
+static func helmet_prop() -> Node2D:
+	var helmet := WORN_HELMET.instantiate() as Node2D
+	helmet.position = WORN_HELMET_SPOT
 	helmet.z_index = 10
 	return helmet
 
