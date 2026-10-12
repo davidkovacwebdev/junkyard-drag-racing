@@ -15,9 +15,12 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="Junkyard drag racing"
-run/main_scene="res://scenes/menu/main_menu.tscn"
+run/main_scene="res://scenes/menu/boot_screen.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
+boot_splash/bg_color=Color(0.8, 0.68, 0.49, 1)
+boot_splash/image="res://assets/boot_splash.png"
 config/icon="res://icon.svg"
+config/windows_native_icon="res://icon.ico"
 
 [autoload]
 
