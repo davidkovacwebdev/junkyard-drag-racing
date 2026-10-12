@@ -182,6 +182,65 @@ pub fn finish(samples: &mut [f32], peak: f64, fade_time: f64) {
     }
 }
 
+/// How loud `samples` sound, in LUFS: K-weighted (ITU-R BS.1770) mean square
+/// over the loudest `window` seconds. A sound shorter than the window counts
+/// as padded with silence, so a short click measures quieter than a held tone
+/// at the same peak, the way it's heard.
+pub fn loudness(samples: &[f32], window: f64) -> f64 {
+    let mut shelf = Biquad::high_shelf(1681.974450955533, 3.999843853973347, 0.7071752369554196);
+    let mut highpass = Biquad::high_pass(38.13547087602444, 0.5003270373238773);
+    let weighted: Vec<f64> = samples.iter().map(|&s| highpass.step(shelf.step(s as f64))).collect();
+    let window_len = sample_count(window).max(1);
+    let mut sum = 0.0;
+    let mut loudest = 0.0f64;
+    for i in 0..weighted.len() {
+        sum += weighted[i] * weighted[i];
+        if i >= window_len {
+            sum -= weighted[i - window_len] * weighted[i - window_len];
+        }
+        loudest = loudest.max(sum);
+    }
+    -0.691 + 10.0 * (loudest / window_len as f64 + 1e-12).log10()
+}
+
+/// Direct form I biquad, for the K-weighting filters.
+struct Biquad {
+    b: [f64; 3],
+    a: [f64; 2],
+    x: [f64; 2],
+    y: [f64; 2],
+}
+
+impl Biquad {
+    fn high_shelf(frequency: f64, gain_db: f64, q: f64) -> Self {
+        let k = (PI * frequency / SAMPLE_RATE).tan();
+        let vh = 10f64.powf(gain_db / 20.0);
+        let vb = vh.powf(0.4996667741545416);
+        let a0 = 1.0 + k / q + k * k;
+        Self::new(
+            [(vh + vb * k / q + k * k) / a0, 2.0 * (k * k - vh) / a0, (vh - vb * k / q + k * k) / a0],
+            [2.0 * (k * k - 1.0) / a0, (1.0 - k / q + k * k) / a0],
+        )
+    }
+
+    fn high_pass(frequency: f64, q: f64) -> Self {
+        let k = (PI * frequency / SAMPLE_RATE).tan();
+        let a0 = 1.0 + k / q + k * k;
+        Self::new([1.0, -2.0, 1.0], [2.0 * (k * k - 1.0) / a0, (1.0 - k / q + k * k) / a0])
+    }
+
+    fn new(b: [f64; 3], a: [f64; 2]) -> Self {
+        Self { b, a, x: [0.0; 2], y: [0.0; 2] }
+    }
+
+    fn step(&mut self, x: f64) -> f64 {
+        let y = self.b[0] * x + self.b[1] * self.x[0] + self.b[2] * self.x[1] - self.a[0] * self.y[0] - self.a[1] * self.y[1];
+        self.x = [x, self.x[0]];
+        self.y = [y, self.y[0]];
+        y
+    }
+}
+
 /// Mix `other` into `samples` from `offset`, growing `samples` to fit.
 pub fn mix_into(samples: &mut Vec<f32>, other: &[f32], offset: usize, gain: f64) {
     if samples.len() < offset + other.len() {

@@ -409,7 +409,7 @@ func _queue_card(header: String, title: String, hint: String, sound: StringName,
 	_card_queue.append([header, title, hint, sound, quest_id, stale_when_done])
 
 func _show_card(header: String, title: String, hint: String, sound: StringName) -> void:
-	Sfx.play(sound, -4.0, 0.0)
+	Sfx.play(sound, -2.0, 0.0)
 	_toast_header.text = header
 	_toast_title.text = title
 	_toast_hint.text = hint

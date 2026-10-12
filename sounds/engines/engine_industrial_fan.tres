@@ -22,3 +22,4 @@ resonance_q = 5.0
 resonance_gain = 0.3
 idle_volume = 0.4
 max_volume = 0.8
+level_db = 4.0

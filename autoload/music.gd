@@ -4,7 +4,7 @@ extends Node
 ## changes and from each song into the next as it ends. Songs are prebaked WAVs
 ## (see tools/render_music.gd).
 
-const VOLUME_DB := -8.0
+const VOLUME_DB := -6.0
 const CROSSFADE_TIME := 1.5
 
 var _songs: Dictionary = {}

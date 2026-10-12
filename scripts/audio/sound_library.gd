@@ -315,8 +315,17 @@ static func bus_for(sound_name: StringName) -> StringName:
 		return AudioSettings.AMBIENCE
 	return AudioSettings.SFX
 
-static func build_stream(sound_name: StringName) -> AudioStreamWAV:
-	return Synth.to_stream(render(sound_name), LOOPING.has(sound_name))
+## Every sound is peak-normalised when it's built, which leaves them up to
+## 20 dB apart in how loud they actually sound. Sfx turns each one to this
+## loudness before the volume it's played at, so a call site's volume_db is
+## the sound's real place in the mix (the levels table in the sound-design
+## skill).
+const REFERENCE_LOUDNESS := -14.0
+
+## The gain that brings a sound measuring `loudness` (Synth.loudness) to
+## REFERENCE_LOUDNESS.
+static func level_trim_db(loudness: float) -> float:
+	return REFERENCE_LOUDNESS - loudness
 
 static func render(sound_name: StringName) -> PackedFloat32Array:
 	# Seeded per sound so the noise, and therefore the sound, is identical on

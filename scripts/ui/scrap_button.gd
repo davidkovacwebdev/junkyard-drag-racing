@@ -56,7 +56,7 @@ func _on_hover_started() -> void:
 	queue_redraw()
 	if disabled or Engine.is_editor_hint():
 		return
-	Sfx.play(&"ui_hover", -14.0)
+	Sfx.play(&"ui_hover", Sfx.UI_HOVER_VOLUME_DB)
 	var tween := create_tween().set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
 	_wobble = WOBBLE_DEGREES * (1.0 if tilt_degrees <= 0.0 else -1.0)
 	tween.tween_property(self, "_wobble", 0.0, WOBBLE_TIME)

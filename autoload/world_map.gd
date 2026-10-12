@@ -222,7 +222,7 @@ func _update_hovered_marker() -> void:
 				closest = marker
 				closest_distance = distance
 	if closest != null and closest != _hovered_marker:
-		Sfx.play(&"ui_hover", -14.0)
+		Sfx.play(&"ui_hover", Sfx.UI_HOVER_VOLUME_DB)
 	_hovered_marker = closest
 
 func _draw_marker_name(marker: MinimapMarker) -> void:

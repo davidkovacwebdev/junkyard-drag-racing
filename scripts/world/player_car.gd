@@ -113,12 +113,12 @@ const LANDOWNER_SCENE_PATH := "res://cutscenes/landowner.tres"
 ## _physics_process for why this exists alongside the hard-hit zeroing.
 @export var collision_contact_friction: float = 2400.0
 @export var engine_volume_db: float = -12.0
-@export var horn_volume_db: float = -6.0
+@export var horn_volume_db: float = -4.0
 ## The Super Horn from the shop (owned in the trunk): its blown-out air horn
 ## replaces whatever horn the car has, at a level way out of proportion.
-@export var super_horn_volume_db: float = 6.0
+@export var super_horn_volume_db: float = 13.0
 @export var bump_volume_db: float = -6.0
-@export var tire_screech_volume_db: float = -12.0
+@export var tire_screech_volume_db: float = -9.0
 
 ## Traveler mode (debug, F6 via DevMenu): flies over everything at this speed,
 ## Shift multiplying it, then lands on the nearest clear dry spot.

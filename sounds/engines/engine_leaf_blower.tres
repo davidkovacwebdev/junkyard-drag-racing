@@ -22,3 +22,4 @@ chuff_level = 0.15
 chuff_ratio = 0.5
 idle_volume = 0.4
 max_volume = 0.8
+level_db = 1.0

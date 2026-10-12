@@ -45,7 +45,7 @@ func _ready() -> void:
 	_drip_sound = AudioStreamPlayer2D.new()
 	_drip_sound.stream = Sfx.stream(&"tank_drip")
 	_drip_sound.bus = SoundLibrary.bus_for(&"tank_drip")
-	_drip_sound.volume_db = -12.0
+	_drip_sound.volume_db = -12.0 + Sfx.level_trim_db(&"tank_drip")
 	_drip_sound.max_distance = DRIP_HEARING_RANGE
 	_drip_sound.position = Vector2(DRIP_X, 0.0)
 	add_child(_drip_sound)

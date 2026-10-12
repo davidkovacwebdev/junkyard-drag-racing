@@ -23,6 +23,7 @@ const FORMANT_BANDWIDTHS := [90.0, 110.0, 150.0]
 const FORMANT_GAINS := [1.0, 0.65, 0.3]
 const SYLLABLE_TIME := 0.085
 const CONSONANT_TIME := 0.012
+const VOICE_LOUDNESS := -14.0
 
 static var _cache: Dictionary = {}
 
@@ -33,9 +34,19 @@ static func streams_for(character: CharacterData) -> Dictionary:
 	if not _cache.has(key):
 		var rng := RandomNumberGenerator.new()
 		rng.seed = hash(key)
+		var syllables := {}
+		var all_syllables := PackedFloat32Array()
+		for vowel in VOWELS:
+			syllables[vowel] = _render_syllable(vowel, settings, rng)
+			all_syllables.append_array(syllables[vowel])
+		# Every voice equally loud, however high, low or raspy it is.
+		var gain := db_to_linear(VOICE_LOUDNESS - Synth.loudness(all_syllables))
 		var streams := {}
 		for vowel in VOWELS:
-			streams[vowel] = Synth.to_stream(_render_syllable(vowel, settings, rng))
+			var samples: PackedFloat32Array = syllables[vowel]
+			for i in samples.size():
+				samples[i] = clampf(samples[i] * gain, -1.0, 1.0)
+			streams[vowel] = Synth.to_stream(samples)
 		_cache[key] = streams
 	return _cache[key]
 

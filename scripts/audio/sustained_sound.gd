@@ -19,9 +19,11 @@ extends AudioStreamPlayer2D
 var _target_level: float = 0.0
 var _level: float = 0.0
 var _on_time: float = 0.0
+var _level_trim_db: float = 0.0
 
 func _ready() -> void:
 	stream = Sfx.stream(sound_name)
+	_level_trim_db = Sfx.level_trim_db(sound_name)
 	bus = SoundLibrary.bus_for(sound_name)
 	volume_db = -80.0
 
@@ -45,6 +47,6 @@ func _process(delta: float) -> void:
 			play(0.0 if restart_on_start else randf() * stream.get_length())
 			_on_time = 0.0
 		_on_time += delta
-		volume_db = base_volume_db + linear_to_db(_level)
+		volume_db = base_volume_db + _level_trim_db + linear_to_db(_level)
 	elif playing:
 		stop()

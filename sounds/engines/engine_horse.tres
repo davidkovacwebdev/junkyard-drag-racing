@@ -25,3 +25,4 @@ chuff_sharpness = 14
 idle_volume = 0.2
 max_volume = 1.8
 throttle_boost = 0.15
+level_db = 3.5

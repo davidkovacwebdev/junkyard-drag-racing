@@ -9,7 +9,8 @@ extends Node
 ## in the game clicks through here too — see `_on_node_added`.
 
 const POOL_SIZE := 12
-const UI_CLICK_VOLUME_DB := -8.0
+const UI_CLICK_VOLUME_DB := -12.0
+const UI_HOVER_VOLUME_DB := -16.0
 
 var _cache: Dictionary = {}
 var _cache_mutex := Mutex.new()
@@ -37,12 +38,25 @@ func _exit_tree() -> void:
 ## The rendered stream for a SoundLibrary name. Renders on the spot if the
 ## background task hasn't reached it yet.
 func stream(sound_name: StringName) -> AudioStreamWAV:
+	return _rendered(sound_name).stream
+
+## The gain that brings `sound_name` to SoundLibrary.REFERENCE_LOUDNESS. Every
+## player of a library sound adds it to its volume_db; `play()`, `play_at()`,
+## SustainedSound and AmbientCall do it themselves.
+func level_trim_db(sound_name: StringName) -> float:
+	return _rendered(sound_name).trim_db
+
+func _rendered(sound_name: StringName) -> Dictionary:
 	_cache_mutex.lock()
-	var cached: AudioStreamWAV = _cache.get(sound_name)
+	var cached: Dictionary = _cache.get(sound_name, {})
 	_cache_mutex.unlock()
-	if cached != null:
+	if not cached.is_empty():
 		return cached
-	var rendered := SoundLibrary.build_stream(sound_name)
+	var samples := SoundLibrary.render(sound_name)
+	var rendered := {
+		stream = Synth.to_stream(samples, SoundLibrary.LOOPING.has(sound_name)),
+		trim_db = SoundLibrary.level_trim_db(Synth.loudness(samples)),
+	}
 	_cache_mutex.lock()
 	_cache[sound_name] = rendered
 	_cache_mutex.unlock()
@@ -56,7 +70,7 @@ func play(sound_name: StringName, volume_db: float = 0.0, pitch_variation: float
 	var player := _free_player()
 	player.stream = stream(sound_name)
 	player.bus = bus if bus != &"" else SoundLibrary.bus_for(sound_name)
-	player.volume_db = volume_db
+	player.volume_db = volume_db + level_trim_db(sound_name)
 	player.pitch_scale = 1.0 + randf_range(-pitch_variation, pitch_variation)
 	player.play()
 	return player
@@ -72,7 +86,7 @@ func play_at(sound_name: StringName, global_position: Vector2, volume_db: float 
 	var player := AudioStreamPlayer2D.new()
 	player.stream = stream(sound_name)
 	player.bus = SoundLibrary.bus_for(sound_name)
-	player.volume_db = volume_db
+	player.volume_db = volume_db + level_trim_db(sound_name)
 	player.pitch_scale = 1.0 + randf_range(-pitch_variation, pitch_variation)
 	player.max_distance = 2500.0
 	scene.add_child(player)
@@ -97,7 +111,7 @@ func _prerender_all() -> void:
 		var done := _cache.has(sound_name)
 		_cache_mutex.unlock()
 		if not done:
-			stream(sound_name)
+			_rendered(sound_name)
 
 func _on_node_added(node: Node) -> void:
 	if node is BaseButton and not (node as BaseButton).pressed.is_connected(_play_ui_click):

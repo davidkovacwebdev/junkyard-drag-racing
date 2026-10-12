@@ -22,3 +22,4 @@ chuff_ratio = 0.8
 chuff_sharpness = 8.0
 idle_volume = 0.35
 max_volume = 0.8
+level_db = 7.0

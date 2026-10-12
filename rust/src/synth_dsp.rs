@@ -6,7 +6,7 @@ use godot::prelude::*;
 use std::f64::consts::TAU;
 
 use crate::dsp::{
-    Curve, Formant, HighPass, LowPass, SAMPLE_RATE, finish, lowpass_noise_gain, mix_into,
+    Curve, Formant, HighPass, LowPass, SAMPLE_RATE, finish, loudness, lowpass_noise_gain, mix_into,
     option_array, option_curve, option_f64, sample_count, softclip, to_packed, variant_f64,
 };
 use crate::pcg::with_rng;
@@ -160,6 +160,11 @@ impl SynthDsp {
         let mut out = samples.to_vec();
         finish(&mut out, peak, fade_time);
         to_packed(out)
+    }
+
+    #[func]
+    fn loudness(samples: PackedFloat32Array, window: f64) -> f64 {
+        loudness(samples.as_slice(), window)
     }
 
     #[func]

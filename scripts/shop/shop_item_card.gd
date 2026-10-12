@@ -72,7 +72,7 @@ func _refresh() -> void:
 
 func _set_hovering(value: bool) -> void:
 	if value and not owned and not _hovering:
-		Sfx.play(&"ui_hover", -14.0)
+		Sfx.play(&"ui_hover", Sfx.UI_HOVER_VOLUME_DB)
 	_hovering = value and not owned
 	queue_redraw()
 
@@ -81,7 +81,7 @@ func _gui_input(event: InputEvent) -> void:
 		return
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		accept_event()
-		Sfx.play(&"ui_click", -8.0)
+		Sfx.play(&"ui_click", Sfx.UI_CLICK_VOLUME_DB)
 		pressed.emit()
 
 func _draw() -> void:

@@ -447,7 +447,7 @@ func _end_race(reason: String) -> void:
 	if reason == "STALLED" or reason == "SURRENDER":
 		Sfx.play(&"race_stalled", -6.0, 0.0)
 	else:
-		Sfx.play(&"results_fanfare", -4.0, 0.0)
+		Sfx.play(&"results_fanfare", -2.0, 0.0)
 	_refresh_track_progress()
 	var standings := _compute_standings(reason == "SURRENDER")
 	if _winner_name.is_empty() and leader_wins_at_end and not standings.is_empty():

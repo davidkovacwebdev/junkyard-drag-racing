@@ -25,7 +25,7 @@ func _ready() -> void:
 	mouse_exited.connect(queue_redraw)
 
 func _on_hover() -> void:
-	Sfx.play(&"ui_hover", -14.0)
+	Sfx.play(&"ui_hover", Sfx.UI_HOVER_VOLUME_DB)
 	queue_redraw()
 
 func setup(driver_name: String, car_model: CarModelData) -> void:
@@ -39,7 +39,7 @@ func set_picked(value: bool) -> void:
 
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		Sfx.play(&"ui_click", -8.0)
+		Sfx.play(&"ui_click", Sfx.UI_CLICK_VOLUME_DB)
 		pressed.emit()
 
 func _draw() -> void:
