@@ -34,6 +34,9 @@ enum State { RISING, CHASING, SINKING, BROKEN }
 @export var speed: float = 720.0
 @export var chase_seconds: float = 16.0
 
+## Off for most of a Super Horn horde, so fifty of them don't drown out
+## everything: only some of them rise, shriek and rattle out loud.
+var voiced := true
 var _state := State.RISING
 var _time := 0.0
 var _stride := 0.0
@@ -46,7 +49,8 @@ var _car: PlayerCar
 func _ready() -> void:
 	_car = get_tree().get_first_node_in_group(PlayerCar.GROUP) as PlayerCar
 	_next_rattle = randf_range(RATTLE_GAP.x, RATTLE_GAP.y)
-	Sfx.play_at(&"skeleton_rise", global_position, -6.0)
+	if voiced:
+		Sfx.play_at(&"skeleton_rise", global_position, -6.0)
 
 func _process(delta: float) -> void:
 	_time += delta
@@ -56,7 +60,8 @@ func _process(delta: float) -> void:
 			if _risen >= 1.0:
 				_state = State.CHASING
 				_time = 0.0
-				Sfx.play_at(&"skeleton_shriek", global_position, -4.0)
+				if voiced:
+					Sfx.play_at(&"skeleton_shriek", global_position, -4.0)
 		State.CHASING:
 			_chase(delta)
 		State.SINKING:
@@ -80,7 +85,8 @@ func _chase(delta: float) -> void:
 	_next_rattle -= delta
 	if _next_rattle <= 0.0:
 		_next_rattle = randf_range(RATTLE_GAP.x, RATTLE_GAP.y)
-		Sfx.play_at(&"skeleton_rattle", global_position, -10.0)
+		if voiced:
+			Sfx.play_at(&"skeleton_rattle", global_position, -10.0)
 
 ## Into the car: it falls to bits, and the car lurches.
 func _crash_into_car() -> void:

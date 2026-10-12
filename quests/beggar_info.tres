@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="QuestData" format=3 uid="uid://betosai84qbk3"]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" uid="uid://c0s7kqbr5yejs" path="res://items/six_pack.tres" id="2_beer"]
+[ext_resource type="Script" uid="uid://b4kssi28o6a3g" path="res://scripts/items/item_data.gd" id="3_jyla1"]
+[ext_resource type="Resource" uid="uid://dycxcwt31t53h" path="res://quests/night_digger.tres" id="3_next"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"beggar_info"
+title = "Wet His Whistle"
+giver = "Beggar"
+description = "The beggar by the graveyard gate knows something about the Junkyard Treasure, but it'll cost you: a six-pack and some scrap."
+objective = "Bring the beggar a six-pack and 10 scrap"
+objective_place = "Beggar"
+items_place = "Shop"
+follow_ups = [ExtResource("3_next")]
+scrap_goal = 10
+item_goal = ExtResource("2_beer")
+reminder_line = "Six-pack and ten scrap, friend. Then we talk."

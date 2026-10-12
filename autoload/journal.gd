@@ -19,6 +19,8 @@ const RACE_SCENES_DIR := "res://scenes/race/"
 const WORLD_SCENE := "res://scenes/world/main.tscn"
 const BOARD_SIZE := Vector2(840, 470)
 const LIST_WIDTH := 250.0
+## Room around the scrolling list so the tilted buttons aren't clipped.
+const LIST_SIDE_ROOM := 6.0
 const TOAST_SECONDS := 3.5
 ## How long a card stays up when more are waiting behind it.
 const TOAST_SECONDS_BUSY := 1.8
@@ -32,6 +34,10 @@ var _open: bool = false
 
 var _panel: Control
 var _list: VBoxContainer
+var _list_scroll: ScrollContainer
+## "scroll for more" under the list while some of it is out of view.
+var _more_label: Label
+var _description_scroll: ScrollContainer
 var _empty_label: Label
 var _detail: VBoxContainer
 var _title_label: Label
@@ -107,6 +113,8 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _process(_delta: float) -> void:
+	if _open:
+		_update_more_hint()
 	_tracker.visible = Quests.tracked != null and not _open and hud_allowed() and _in_world() \
 			and not _dialog_open()
 	if _tracker.visible:
@@ -193,10 +201,27 @@ func _build_panel() -> void:
 	columns.add_theme_constant_override("separation", 26)
 	board.add_child(columns)
 
+	# The list scrolls (mouse wheel or drag) once there are more quests than
+	# fit; no scrollbar is drawn. A little room on each side for the tilt.
+	_list_scroll = ScrollContainer.new()
+	_list_scroll.custom_minimum_size = Vector2(LIST_WIDTH + LIST_SIDE_ROOM * 2.0, 0.0)
+	_list_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_list_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
+	columns.add_child(_list_scroll)
+	var list_margin := MarginContainer.new()
+	list_margin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	for side in ["left", "right", "top", "bottom"]:
+		list_margin.add_theme_constant_override("margin_" + side, int(LIST_SIDE_ROOM))
+	_list_scroll.add_child(list_margin)
 	_list = VBoxContainer.new()
 	_list.custom_minimum_size = Vector2(LIST_WIDTH, 0.0)
 	_list.add_theme_constant_override("separation", 10)
-	columns.add_child(_list)
+	list_margin.add_child(_list)
+	_more_label = _make_label("", 15, UiPalette.SURFACE_DARK)
+	_more_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_more_label.position = Vector2(30.0, BOARD_SIZE.y - 42.0)
+	_more_label.size = Vector2(LIST_WIDTH + LIST_SIDE_ROOM * 2.0, 24.0)
+	board.add_child(_more_label)
 
 	var divider := ColorRect.new()
 	divider.color = UiPalette.CARDBOARD_DARK
@@ -212,10 +237,16 @@ func _build_panel() -> void:
 	_detail.add_child(_title_label)
 	_giver_label = _make_label("", 18, UiPalette.SURFACE_DARK)
 	_detail.add_child(_giver_label)
+	# A long journal entry scrolls the same way.
+	_description_scroll = ScrollContainer.new()
+	_description_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_description_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_description_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
+	_detail.add_child(_description_scroll)
 	_description_label = _make_label("", 20, UiPalette.TEXT_BROWN)
 	_description_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_description_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_detail.add_child(_description_label)
+	_description_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_description_scroll.add_child(_description_label)
 	_objective_label = _make_label("", 20, UiPalette.TEXT_BROWN)
 	_objective_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_detail.add_child(_objective_label)
@@ -251,7 +282,7 @@ func _rebuild_list() -> void:
 		child.queue_free()
 	var quests := _all_quests()
 	_empty_label.visible = quests.is_empty()
-	_list.visible = not quests.is_empty()
+	_list_scroll.visible = not quests.is_empty()
 	_detail.visible = not quests.is_empty()
 	for i in quests.size():
 		var quest := quests[i]
@@ -277,6 +308,7 @@ func _show_detail() -> void:
 	_giver_label.text = "From %s" % _selected.giver if not _selected.giver.is_empty() else ""
 	_giver_label.visible = not _selected.giver.is_empty()
 	_description_label.text = PlayerProfile.fill(_selected.description)
+	_description_scroll.scroll_vertical = 0
 	_objective_label.text = "Done!" if done else "To do: %s" % Quests.objective_text(_selected)
 	var reward := Quests.reward_text(_selected)
 	_reward_label.text = "Reward: %s" % reward
@@ -415,3 +447,21 @@ func _pop(control: Control) -> void:
 	control.scale = Vector2(0.9, 1.08)
 	var tween := create_tween().set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
 	tween.tween_property(control, "scale", Vector2.ONE, 0.45)
+
+## Keeps the "more" hint under the quest list in step with the scroll.
+func _update_more_hint() -> void:
+	if _more_label == null or not _list_scroll.is_visible_in_tree():
+		if _more_label != null:
+			_more_label.text = ""
+		return
+	var bar := _list_scroll.get_v_scroll_bar()
+	var hidden_below := bar.max_value - bar.page - _list_scroll.scroll_vertical > 2.0
+	var hidden_above := _list_scroll.scroll_vertical > 2.0
+	if hidden_below and hidden_above:
+		_more_label.text = "scroll for more"
+	elif hidden_below:
+		_more_label.text = "v  scroll for more"
+	elif hidden_above:
+		_more_label.text = "^  scroll up"
+	else:
+		_more_label.text = ""

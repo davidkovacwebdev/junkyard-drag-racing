@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="QuestData" format=3 uid="uid://dycxcwt31t53h"]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://b4kssi28o6a3g" path="res://scripts/items/item_data.gd" id="1_x23o2"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"night_digger"
+title = "Graveyard Shift"
+giver = "Beggar"
+description = "The beggar's seen a guy in a welding mask wandering around the graveyard at night with a kid, in a little brown pickup, digging stuff up. Smells like whoever's been planting the fake treasure.
+
+Go to the graveyard at night, but don't go in: he drives the roads just outside it, never inside the gates. Listen for his engine and look for his pickup out there. He's fast. Ram it till it gives up."
+objective = "At night, find the masked digger's pickup on the roads outside the graveyard and ram it"
+objective_place = "Graveyard"
+cutscene_ids = Array[StringName]([&"night_digger"])
+count_goal = 20
+count_label = "rams"
+return_to_giver = false

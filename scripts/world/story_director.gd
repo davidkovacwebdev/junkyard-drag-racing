@@ -47,6 +47,9 @@ func _ready() -> void:
 	sortables.add_child.call_deferred(smoker)
 	_place_chad(sortables)
 	_place_beggar.call_deferred(sortables)
+	var digger := NightDiggerSpawner.new()
+	digger.sortables = sortables
+	add_child(digger)
 	# Saves from before character creation have no player character; they
 	# skip the intro rather than meeting Grandpa mid-game.
 	if PlayerProfile.character == null or Cutscenes.has_seen(GrandpaScrapsCutscene.ID):

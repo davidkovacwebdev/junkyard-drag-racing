@@ -73,6 +73,7 @@ func _ready() -> void:
 	add_to_group(GROUP)
 	visible = false
 	_speech_board.gui_input.connect(_on_speech_board_input)
+	SpeechScroll.wrap(_line_label)
 	_speech = SpeechPlayer.new()
 	add_child(_speech)
 
@@ -103,6 +104,13 @@ func open(speaker_name: String, character: CharacterData) -> void:
 	_tween.tween_property(_portrait_holder, "position:y", _portrait_rest.y, OPEN_TIME).set_delay(OPEN_TIME * 0.35)
 	_speech_board.scale = Vector2(0.6, 0.6)
 	_tween.tween_property(_speech_board, "scale", Vector2.ONE, OPEN_TIME).set_delay(OPEN_TIME * 0.2)
+
+## The speaker's rig on the portrait board (to pose it), or null.
+func portrait_rig() -> CharacterRig:
+	for child in _portrait_holder.get_children():
+		if child is CharacterRig and not child.is_queued_for_deletion():
+			return child
+	return null
 
 ## Replaces the current line and types it out.
 ## `{player}` in the line becomes the player's name (see PlayerProfile).

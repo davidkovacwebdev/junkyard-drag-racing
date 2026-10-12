@@ -179,7 +179,7 @@ func _update_quest_heads() -> void:
 		if head == null:
 			if not waiting:
 				continue
-			head = _make_head(giver.get("character_data") as CharacterData)
+			head = make_head(giver.get("character_data") as CharacterData)
 			_map_disc.add_child(head)
 			_heads[giver] = head
 		head.visible = waiting
@@ -190,7 +190,7 @@ func _update_quest_heads() -> void:
 
 ## Just the head, hair, eyes and accessory of `character`, shrunk onto a dark
 ## disc.
-func _make_head(character: CharacterData) -> Node2D:
+static func make_head(character: CharacterData) -> Node2D:
 	var root := Node2D.new()
 	var backing := Polygon2D.new()
 	backing.name = "Backing"

@@ -162,7 +162,7 @@ func _refresh(animate: bool = false) -> void:
 		_crane_option(),
 	]
 	if TreasureRumors.can_ask():
-		options.append(TreasureRumors.option(_dialog, _character.character_data))
+		options.append(TreasureRumors.option(_dialog, TreasureRumors.SCRAP_DEALER))
 	options.append(CharacterDialog.Option.new("Walk away", _on_leave_pressed))
 	_dialog.set_options(options, animate)
 	_dialog.set_note("Scrap %d   $%d   Spare parts %d" % [

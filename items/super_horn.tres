@@ -10,5 +10,3 @@ display_name = "Super Horn"
 price = 150
 description = "A stadium air horn wired straight into your car's horn button. Blows windows out, ears too. Keep it in the trunk and H does the rest. No refunds, I'm already deaf."
 icon_scene = ExtResource("2_icon")
-buy_sound = &"super_horn_loop"
-buy_sound_volume_db = 6.0

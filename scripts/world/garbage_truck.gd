@@ -299,9 +299,14 @@ func _choose_next_road() -> void:
 	if candidates.is_empty():
 		_forward = not _forward
 		return
-	var chosen: Dictionary = candidates[_rng.randi_range(0, candidates.size() - 1)]
+	var chosen := _pick_exit(candidates)
 	_next_road = chosen["road"]
 	_next_forward = chosen["forward"]
+
+## Which junction exit to take, out of `candidates` ({road, forward}). Any of
+## them, at random; NightDiggerTruck steers it toward the graveyard.
+func _pick_exit(candidates: Array[Dictionary]) -> Dictionary:
+	return candidates[_rng.randi_range(0, candidates.size() - 1)]
 
 ## Junction roads can meet anywhere within `hop_radius` of each other, so
 ## the handover happens once the truck is nearer the next road's entry than

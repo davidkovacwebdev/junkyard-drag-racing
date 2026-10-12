@@ -110,10 +110,10 @@ polygon = PackedVector2Array(-26, -76, 26, -76, 18, -46, 6, -34, -6, -34, -18, -
 
 [node name="SpeechPlate" type="Control" parent="Content"]
 layout_mode = 0
-offset_left = 760.0
-offset_top = 100.0
-offset_right = 1120.0
-offset_bottom = 178.0
+offset_left = 740.0
+offset_top = 76.0
+offset_right = 1130.0
+offset_bottom = 186.0
 mouse_filter = 2
 script = ExtResource("3")
 body_color = Color(0.74, 0.63, 0.47, 1)
@@ -135,7 +135,7 @@ offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.25, 0.16, 0.08, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 16
 vertical_alignment = 1
 autowrap_mode = 3
 
