@@ -41,7 +41,7 @@ var _player: CutsceneActor = null
 func _init() -> void:
 	id = ID
 	# The default, so the quest survives even if the .tres doesn't list it.
-	gives_quest = preload("res://quests/horse_for_gramps.tres")
+	default_quest = preload("res://quests/horse_for_gramps.tres")
 
 func play() -> void:
 	if not is_instance_valid(grandpa):
