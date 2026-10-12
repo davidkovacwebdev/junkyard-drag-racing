@@ -50,7 +50,7 @@ func play() -> void:
 
 	Music.hush(true)
 	await Cutscenes.fade_out(0.0)
-	var player := Cutscenes.spawn_actor(me, start + Vector2(-70.0, 10.0), false)
+	var player := Cutscenes.spawn_actor(me, start + Vector2(-110.0, 10.0), false)
 	Cutscenes.cut_to(start + Vector2(-60.0, -120.0), zoom)
 	await Cutscenes.fade_in(0.8)
 

@@ -1,7 +1,8 @@
 class_name HospitalMorgueCutscene
 extends Cutscene
 ## "Bad News", in the hospital morgue: the player walks in, and Grandpa is on
-## the slab under a sheet, flat as a line. The doctor says he was found at
+## the slab, still pancaked flat from the crane (the same squash as in the
+## junkyard flashback). The doctor says he was found at
 ## the junkyard with a crane on top of him. The player cries, thanks him,
 ## and he says the funeral will be arranged. Played by HospitalMorgue as
 ## soon as the morgue loads.
@@ -11,6 +12,8 @@ extends Cutscene
 
 const ID := &"hospital_morgue"
 const DOCTOR := preload("res://characters/doctor.tres")
+## Grandpa as he went up the crane, out of his chair.
+const GRANDPA := preload("res://characters/grandpa_flashback.tres")
 
 ## These defaults are the scene as written; edits in the inspector on the
 ## .tres override them.
@@ -23,7 +26,7 @@ const DOCTOR := preload("res://characters/doctor.tres")
 @export_group("Staging")
 @export var zoom: float = 1.2
 @export var table_zoom: float = 1.9
-## How long the player stares at the sheet before saying anything.
+## How long the player stares at him before saying anything.
 @export var stare_seconds: float = 1.8
 @export var cry_seconds: float = 2.6
 
@@ -42,6 +45,10 @@ func play() -> void:
 	var table_top: Vector2 = morgue.table.global_position + Vector2(0.0, -110.0)
 
 	await Cutscenes.fade_out(0.0)
+	# A child of the slab, so he draws on top of it.
+	var grandpa := Cutscenes.spawn_actor(GRANDPA, morgue.table.to_global(morgue.table.body_spot()), true)
+	grandpa.reparent(morgue.table)
+	grandpa.flatness = 0.8
 	var doctor := Cutscenes.spawn_actor(DOCTOR, to_world.call(morgue.doctor_spot), false)
 	doctor.reparent(morgue.grounds)
 	var player: CutsceneActor = null

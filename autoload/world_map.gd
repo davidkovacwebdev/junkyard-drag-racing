@@ -115,6 +115,9 @@ func _fit_to_world() -> void:
 		for coastline in _terrain.get_island_polygons():
 			for point in _terrain.global_transform * coastline:
 				bounds = bounds.expand(point)
+	for bridge: BlockedBridge in get_tree().get_nodes_in_group(BlockedBridge.GROUP):
+		for point in bridge.deck_polygon():
+			bounds = bounds.expand(point)
 	var area := _map_area.size - Vector2.ONE * FIT_PADDING * 2.0
 	var scale := minf(area.x / maxf(bounds.size.x, 1.0), area.y / maxf(bounds.size.y, 1.0))
 	var offset := _map_area.size * 0.5 - bounds.get_center() * scale
@@ -145,6 +148,7 @@ func _draw_roads() -> void:
 	for polyline in roads.get_draw_polylines():
 		if polyline.size() >= 2:
 			_road_layer.draw_polyline(roads.global_transform * polyline, MapIcons.ROAD_COLOR, width)
+	MapIcons.draw_bridge_decks(_road_layer, width)
 
 func _draw_icons() -> void:
 	if not _open or _player == null:

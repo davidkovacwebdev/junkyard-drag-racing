@@ -78,10 +78,14 @@ const EYES_CENTER := Vector2(0.0, -214.0)
 const LAUGH_LEAN := 0.12
 const LAUGH_BOUNCES_PER_SECOND := 7.0
 const LAUGH_PIXELS := 5.0
-## Tiger, his horse (see GrandpaHorse), stands this far from him: off his
-## other side from where the player walks up, by the house wall and clear of
-## where the car parks.
-const TIGER_OFFSET := Vector2(-190.0, -55.0)
+## Tiger, his horse (see GrandpaHorse), stands this far from him: down on
+## the grass off his left, in front of the bacon smoker so it's never hidden
+## behind it, left of the driveway and clear of every garage bay spot
+## (GrandpasGarage.BAY_SPOTS).
+const TIGER_OFFSET := Vector2(-130.0, 100.0)
+## Where his scenes park the player's car: off his right, past the spot the
+## player stands to talk (110, -40), so the character never ends up on it.
+const SCENE_CAR_OFFSET := Vector2(250.0, -15.0)
 ## A sad sigh: he sags forward this far and sinks this much.
 const SIGH_LEAN := 0.08
 const SIGH_SINK := 5.0
@@ -421,6 +425,13 @@ func roll_to(offset: Vector2, seconds: float = 0.8) -> Tween:
 	if offset == Vector2.ZERO:
 		_move.tween_callback(actor.face.bind(facing_right))
 	return _move
+
+## Parks the player's car at SCENE_CAR_OFFSET, nose towards him, as if they
+## just pulled up and climbed out. Call it while the scene is faded out.
+func park_car_for_scene() -> void:
+	var car := get_tree().get_first_node_in_group(PlayerCar.GROUP) as PlayerCar
+	if car != null:
+		car.park(global_position + SCENE_CAR_OFFSET, false)
 
 ## Swaps the beer bottle in his right hand for `prop` (a coffee mug, drawn in
 ## the torso's space), or puts the bottle back with null.

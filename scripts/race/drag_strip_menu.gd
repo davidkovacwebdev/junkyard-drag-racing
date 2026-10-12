@@ -22,7 +22,8 @@ extends Control
 
 const TIERS := [1, 2, 3, 4]
 const TIER_NAMES := { 1: "Scrapper", 2: "Junker", 3: "Hot Rod", 4: "Chop Shop" }
-const BET_AMOUNTS := [20, 50, 100]
+const BET_MIN := 10
+const BET_DEFAULT := 20
 const BET_FIELD_SIZE := 5
 const BET_WIN_MULTIPLIER := 3
 
@@ -50,8 +51,12 @@ enum Page { TIER, MODE, DRIVE, BET_AMOUNT, BET_PICK }
 @onready var _drive_race_button: ScrapButton = $Content/DrivePage/RaceButton
 
 @onready var _bet_amount_page: Control = $Content/BetAmountPage
-@onready var _bet_amount_buttons: Array[ScrapButton] = [
-	$Content/BetAmountPage/Bet20Button, $Content/BetAmountPage/Bet50Button, $Content/BetAmountPage/Bet100Button,
+@onready var _bet_amount_label: Label = $Content/BetAmountPage/AmountPlate/AmountLabel
+@onready var _bet_decrease_buttons: Array[ScrapButton] = [
+	$Content/BetAmountPage/Minus100Button, $Content/BetAmountPage/Minus10Button,
+]
+@onready var _bet_increase_buttons: Array[ScrapButton] = [
+	$Content/BetAmountPage/Plus10Button, $Content/BetAmountPage/Plus100Button, $Content/BetAmountPage/AllInButton,
 ]
 
 @onready var _bet_pick_page: Control = $Content/BetPickPage
@@ -153,9 +158,10 @@ func _clerk_says(line: String) -> void:
 ## race, which never sets last_ai_race_winner). Returns whether a bet was
 ## actually resolved, so the caller knows whether to save.
 func _resolve_pending_bet() -> bool:
-	if RaceProgression.last_ai_race_winner.is_empty():
+	var torn := RaceProgression.last_bet_torn
+	if RaceProgression.last_ai_race_winner.is_empty() and not torn:
 		return false
-	var won := RaceProgression.last_ai_race_winner == RaceProgression.last_bet_car_name
+	var won := not torn and RaceProgression.last_ai_race_winner == RaceProgression.last_bet_car_name
 	var on_roger := RaceProgression.last_bet_on_roger
 	if on_roger:
 		Quests.set_note(RaceProgression.ROGER_QUEST, "won" if won else "lost")
@@ -168,14 +174,18 @@ func _resolve_pending_bet() -> bool:
 		_clerk_says("Well I'll be. Your pick came in. Here's yer $%d." % payout)
 	else:
 		Sfx.play(&"denied", -6.0)
-		_flash_info("Your car lost the bet.")
-		_clerk_says("Roge Roger? HA! Ya might as well've burned it." if on_roger
-				else "Tough luck. House keeps the stake.")
+		_flash_info("You tore up your ticket." if torn else "Your car lost the bet.")
+		if torn:
+			_clerk_says("Tore it up, huh? House keeps the stake all the same.")
+		else:
+			_clerk_says("Roge Roger? HA! Ya might as well've burned it." if on_roger
+					else "Tough luck. House keeps the stake.")
 	RaceProgression.last_ai_race_winner = ""
 	RaceProgression.last_ai_race_field_names = []
 	RaceProgression.last_bet_amount = 0
 	RaceProgression.last_bet_car_name = ""
 	RaceProgression.last_bet_on_roger = false
+	RaceProgression.last_bet_torn = false
 	return true
 
 func _flash_info(text: String) -> void:
@@ -199,7 +209,10 @@ func _show_page(page: Page) -> void:
 		Page.TIER:
 			_title_label.text = "%s — Pick a Tier" % RaceProgression.menu_venue_name
 			for i in TIERS.size():
-				_tier_buttons[i].selected = _tier == TIERS[i]
+				var tier: int = TIERS[i]
+				_tier_buttons[i].selected = _tier == tier
+				_tier_buttons[i].text = TIER_NAMES[tier] if _betting \
+						else "%s — $%d" % [TIER_NAMES[tier], RaceProgression.entry_fee_for_tier(tier)]
 			_clerk_says("Bettin'? Pick a class to put yer money on." if _betting
 					else "Signin' up? Pick a class. Bigger fee, meaner junk.")
 		Page.DRIVE:
@@ -214,8 +227,7 @@ func _show_page(page: Page) -> void:
 					TIER_NAMES[_tier], fee, fee * RaceProgression.ENTRY_WIN_MULTIPLIER, rules])
 		Page.BET_AMOUNT:
 			_title_label.text = "Place Your Bet"
-			for i in BET_AMOUNTS.size():
-				_bet_amount_buttons[i].selected = _bet_amount == BET_AMOUNTS[i]
+			_set_bet_amount(_bet_amount if _bet_amount > 0 else BET_DEFAULT)
 			_clerk_says("How much ya puttin' down? Pays %dx." % BET_WIN_MULTIPLIER)
 		Page.BET_PICK:
 			_title_label.text = "Back a Car to Win"
@@ -292,18 +304,29 @@ func _on_race_pressed() -> void:
 	RaceProgression.pending_bet_names = []
 	SceneLoader.change_scene(RaceProgression.menu_race_scene)
 
-func _on_bet_amount_pressed(index: int) -> void:
-	_bet_amount = BET_AMOUNTS[index]
-	for i in _bet_amount_buttons.size():
-		_bet_amount_buttons[i].selected = i == index
+## Any amount from BET_MIN up to everything the player has.
+func _set_bet_amount(amount: int) -> void:
+	_bet_amount = clampi(amount, mini(BET_MIN, Inventory.money), Inventory.money)
+	_bet_amount_label.text = "$%d" % _bet_amount
+	for button in _bet_decrease_buttons:
+		button.disabled = _bet_amount <= BET_MIN
+	for button in _bet_increase_buttons:
+		button.disabled = _bet_amount >= Inventory.money
+
+func _on_bet_step_pressed(step: int) -> void:
+	_set_bet_amount(_bet_amount + step)
+
+func _on_bet_all_in_pressed() -> void:
+	_set_bet_amount(Inventory.money)
+	_clerk_says("The whole wad?! Ya got guts, pal.")
 
 func _on_bet_amount_back_pressed() -> void:
 	_show_page(Page.TIER)
 
 func _on_bet_amount_next_pressed() -> void:
-	if _bet_amount <= 0 or not Inventory.can_afford(_bet_amount):
+	if _bet_amount < BET_MIN or not Inventory.can_afford(_bet_amount):
 		Sfx.play(&"denied", -6.0)
-		_clerk_says("Pick an amount first." if _bet_amount <= 0 else "Ya can't cover that, pal.")
+		_clerk_says("Minimum's $%d. Ya can't cover that, pal." % BET_MIN)
 		return
 	_roll_bet_field()
 	_show_page(Page.BET_PICK)

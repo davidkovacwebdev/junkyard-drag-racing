@@ -67,6 +67,8 @@ signal race_ended(winner_name: String)
 ## no point offering an out before the player's even seen how this run's
 ## parts drive.
 @export var surrender_delay: float = 5.0
+## Optional button that cycles the race speed through RACE_SPEEDS.
+@export var speed_button_path: NodePath
 ## Played whenever a car crosses the line, on top of its backfire.
 @export var finish_sound: StringName = &""
 ## Off for an arena with no line to cross (the demolition derby): its own
@@ -113,6 +115,13 @@ var _earnings: Array[Dictionary] = []
 ## can both fire without queueing two scene changes.
 var _exiting := false
 const LOG_INTERVAL := 1.0
+## Fast-forward steps. Physics ticks scale along with the speed so every step
+## stays the same size: a sped-up race plays out exactly as it would at x1.
+const RACE_SPEEDS: Array[int] = [1, 2, 4]
+var _speed_button: ScrapButton = null
+var _race_speed_index := 0
+var _base_physics_ticks := Engine.physics_ticks_per_second
+var _base_max_physics_steps := Engine.max_physics_steps_per_frame
 
 func _ready() -> void:
 	DayNightCycle.advance_hours(4.0)
@@ -124,6 +133,10 @@ func _ready() -> void:
 	if _surrender_button != null:
 		_surrender_button.visible = false
 		_surrender_button.pressed.connect(surrender)
+	_speed_button = get_node_or_null(speed_button_path) as ScrapButton
+	if _speed_button != null:
+		_speed_button.text = "x1"
+		_speed_button.pressed.connect(_cycle_race_speed)
 	# CarRig children finish assembling in their own _ready() before this
 	# one runs (Godot calls _ready bottom-up), so `assembled` is populated.
 	for child in get_children():
@@ -145,9 +158,9 @@ func register_car(car_name: String, car: CarAssembler.AssembledCar) -> void:
 		# opposed to "finished" which also covers being destroyed or the
 		# race ending under it. Standings need to tell those apart.
 		"crossed": false,
-		# Ranks cars that never crossed the line: on a track, the furthest x
-		# reached while the body was still valid; in an arena, whatever its
-		# setup reports through set_progress().
+		# Ranks cars that never crossed the line: on a track, its x where the
+		# race ended (or where it wrecked); in an arena, whatever its setup
+		# reports through set_progress().
 		"progress": -INF,
 		# Where the car last made GIVE_UP_PROGRESS of headway, and when.
 		"progress_mark": -INF,
@@ -211,7 +224,7 @@ func _physics_process(delta: float) -> void:
 		if x > entry["progress_mark"] + GIVE_UP_PROGRESS:
 			entry["progress_mark"] = x
 			entry["last_progress_time"] = _elapsed
-		entry["progress"] = maxf(entry["progress"], x)
+		entry["progress"] = x
 		if x >= finish_x:
 			_finish_car(entry)
 		elif give_up_after > 0.0 and _elapsed - entry["last_progress_time"] > give_up_after:
@@ -341,30 +354,46 @@ func surrender() -> void:
 		return
 	_end_race("SURRENDER")
 
-## Cars that actually crossed the line, in crossing order, then everyone
-## else (still racing or destroyed) ranked by kills, then how far they got, then any
-## knocked out of an arena, the last one out first — so a race
+## Swaps what the surrender button says and does (a bet race tears up the
+## ticket instead, since there's no player car to concede with).
+func repurpose_surrender_button(text: String, action: Callable) -> void:
+	if _surrender_button == null:
+		return
+	_surrender_button.text = text
+	_surrender_button.pressed.disconnect(surrender)
+	_surrender_button.pressed.connect(action)
+
+## Cars that actually crossed the line, in crossing order, then cars still
+## intact ranked by kills, then where they are now, then wrecked cars by where
+## they wrecked, then any knocked out of an arena, the last one
+## out first — so a race
 ## that ends by TIMEOUT or STALLED before anyone finishes still produces a
 ## sensible podium instead of an empty one. `force_player_last` is for
 ## surrender(): the player's own entry gets moved to the very end
 ## regardless of where it would otherwise land.
 func _compute_standings(force_player_last: bool = false) -> Array[Dictionary]:
 	var standings: Array[Dictionary] = _finish_order.duplicate()
-	var rest: Array[Dictionary] = []
+	var intact: Array[Dictionary] = []
+	var wrecked: Array[Dictionary] = []
 	var knocked_out: Array[Dictionary] = []
 	for entry in _entries:
 		if entry["crossed"]:
 			continue
 		if entry["knockout_order"] >= 0:
 			knocked_out.append(entry)
+		elif is_instance_valid((entry["car"] as CarAssembler.AssembledCar).body):
+			intact.append(entry)
 		else:
-			rest.append(entry)
-	rest.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+			wrecked.append(entry)
+	var by_kills_then_progress := func(a: Dictionary, b: Dictionary) -> bool:
 		if a["kills"] != b["kills"]:
 			return a["kills"] > b["kills"]
-		return a["progress"] > b["progress"])
+		return a["progress"] > b["progress"]
+	intact.sort_custom(by_kills_then_progress)
+	wrecked.sort_custom(by_kills_then_progress)
 	knocked_out.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["knockout_order"] > b["knockout_order"])
-	standings.append_array(rest)
+	standings.append_array(intact)
+	standings.append_array(wrecked)
 	standings.append_array(knocked_out)
 	if force_player_last:
 		for i in standings.size():
@@ -409,6 +438,9 @@ func _is_player(entry: Dictionary) -> bool:
 
 func _end_race(reason: String) -> void:
 	_race_over = true
+	_set_race_speed(1)
+	if _speed_button != null:
+		_speed_button.visible = false
 	print(">>> RACE OVER (%s) after %.2fs" % [reason, _elapsed])
 	if _surrender_button != null:
 		_surrender_button.visible = false
@@ -416,6 +448,7 @@ func _end_race(reason: String) -> void:
 		Sfx.play(&"race_stalled", -6.0, 0.0)
 	else:
 		Sfx.play(&"results_fanfare", -4.0, 0.0)
+	_refresh_track_progress()
 	var standings := _compute_standings(reason == "SURRENDER")
 	if _winner_name.is_empty() and leader_wins_at_end and not standings.is_empty():
 		_winner_name = standings[0]["name"]
@@ -428,6 +461,7 @@ func _end_race(reason: String) -> void:
 		print("    %s final x=%.1f%s" % [entry["name"], car.body.global_position.x, " [finished]" if entry["finished"] else ""])
 	race_ended.emit(_winner_name)
 	if _results_screen != null:
+		_freeze_cars()
 		_results_screen.show_results(_build_results_data(standings), _earnings)
 	# A results screen stays up until the player dismisses it (see _input) —
 	# no timer needed. Headless runs have nobody to click anything, so they
@@ -440,12 +474,46 @@ func _end_race(reason: String) -> void:
 	else:
 		exit_race()
 
+## Cars that stopped being tracked before the end (gave up on the hill
+## climb) still rank by where they ended up, not where they gave up.
+func _refresh_track_progress() -> void:
+	if not uses_finish_line:
+		return
+	for entry in _entries:
+		var car: CarAssembler.AssembledCar = entry["car"]
+		if not entry["crossed"] and is_instance_valid(car.body):
+			entry["progress"] = car.body.global_position.x
+
+## Stops every car (and its debris) where it is, so nothing keeps racing
+## behind the results screen.
+func _freeze_cars() -> void:
+	for entry in _entries:
+		var car: CarAssembler.AssembledCar = entry["car"]
+		if is_instance_valid(car.root):
+			car.root.process_mode = Node.PROCESS_MODE_DISABLED
+
+func _cycle_race_speed() -> void:
+	_race_speed_index = (_race_speed_index + 1) % RACE_SPEEDS.size()
+	var speed := RACE_SPEEDS[_race_speed_index]
+	_set_race_speed(speed)
+	_speed_button.text = "x%d" % speed
+	Sfx.play(&"race_speed_up", -8.0, 0.0).pitch_scale = 0.8 + 0.15 * speed
+
+func _set_race_speed(speed: int) -> void:
+	Engine.time_scale = speed
+	Engine.physics_ticks_per_second = _base_physics_ticks * speed
+	Engine.max_physics_steps_per_frame = _base_max_physics_steps * speed
+
+func _exit_tree() -> void:
+	_set_race_speed(1)
+
 ## Single way out of a race: back to `exit_scene_path`, or DEFAULT_EXIT_SCENE
 ## when the scene doesn't set one. Headless runs quit so test runs don't hang.
 func exit_race() -> void:
 	if _exiting:
 		return
 	_exiting = true
+	_set_race_speed(1)
 	if DisplayServer.get_name() == "headless":
 		get_tree().quit()
 		return

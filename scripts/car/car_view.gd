@@ -14,6 +14,8 @@ extends Node2D
 ## > 0: a car wider than this (before this node's own scale) is shrunk to fit,
 ## so long bodies aren't cropped. Smaller cars keep their size.
 @export var max_width: float = 0.0
+## Same as `max_width`, for tall bodies.
+@export var max_height: float = 0.0
 ## Passed to a horse (or punker) engine's `gait_rate`, so the map car's
 ## runner doesn't scurry.
 @export var horse_gait_rate: float = 1.0
@@ -253,8 +255,11 @@ func _apply_fit(raw_mounts: Array[Vector2]) -> void:
 	var scale := 1.0
 	if auto_fit_width > 0.0 and bounds.size.x > 0.0:
 		scale = auto_fit_width / bounds.size.x
-	elif max_width > 0.0 and bounds.size.x > max_width:
-		scale = max_width / bounds.size.x
+	else:
+		if max_width > 0.0 and bounds.size.x > max_width:
+			scale = max_width / bounds.size.x
+		if max_height > 0.0 and bounds.size.y > max_height:
+			scale = minf(scale, max_height / bounds.size.y)
 	_fit.scale = Vector2(scale, scale)
 	_fit.position = -bounds.get_center() * scale
 	_footprint = _measure_footprint(bounds.size.x * scale)

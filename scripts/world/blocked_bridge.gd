@@ -34,10 +34,12 @@ const UNDER_EXIT_MARGIN := 120.0
 @export var length: float = 8320.0:
 	set(value):
 		length = value
+		_water_shadow_polygons.clear()
 		queue_redraw()
 @export var deck_width: float = 216.0:
 	set(value):
 		deck_width = value
+		_water_shadow_polygons.clear()
 		queue_redraw()
 @export var pier_spacing: float = 1040.0
 @export var pier_width: float = 110.0
@@ -54,9 +56,12 @@ const UNDER_EXIT_MARGIN := 120.0
 ## How far north of the deck a car still drops in under it.
 @export var north_entry_depth: float = 120.0
 @export var sortables_path: NodePath = ^"../Sortables"
+## The land the water shadow is cut against, so it only falls on the sea.
+@export var terrain_path: NodePath = ^"../Terrain"
 
 var _north_railing: Node2D
 var _south_railing: Node2D
+var _water_shadow_polygons: Array[PackedVector2Array] = []
 
 func _ready() -> void:
 	_north_railing = _add_railing_node(_draw_north_railing)
@@ -178,7 +183,31 @@ func _draw_south_railing() -> void:
 	_draw_railing(_south_railing, 0.0)
 
 func _draw_water_shadow(half: float) -> void:
-	draw_rect(Rect2(Vector2(-length, -half) + shadow_offset, Vector2(length, deck_width + girder_height)), UiPalette.SHADOW)
+	if _water_shadow_polygons.is_empty():
+		_water_shadow_polygons = _shadow_over_water(half)
+	for polygon in _water_shadow_polygons:
+		draw_colored_polygon(polygon, UiPalette.SHADOW)
+
+## The shadow rectangle with every island cut out of it.
+func _shadow_over_water(half: float) -> Array[PackedVector2Array]:
+	var rect := Rect2(Vector2(-length, -half) + shadow_offset, Vector2(length, deck_width + girder_height))
+	var pieces: Array[PackedVector2Array] = [PackedVector2Array([
+		rect.position, Vector2(rect.end.x, rect.position.y), rect.end, Vector2(rect.position.x, rect.end.y),
+	])]
+	var terrain := get_node_or_null(terrain_path) as TerrainNetwork
+	if terrain == null:
+		return pieces
+	terrain.ensure_built()
+	var terrain_to_local := get_global_transform().affine_inverse() * terrain.get_global_transform()
+	for coastline in terrain.get_island_polygons():
+		var island := terrain_to_local * coastline
+		var remaining: Array[PackedVector2Array] = []
+		for piece in pieces:
+			for clipped in Geometry2D.clip_polygons(piece, island):
+				if not Geometry2D.is_polygon_clockwise(clipped):
+					remaining.append(clipped)
+		pieces = remaining
+	return pieces
 
 func _draw_piers(half: float) -> void:
 	var pier_count := int(length / pier_spacing)

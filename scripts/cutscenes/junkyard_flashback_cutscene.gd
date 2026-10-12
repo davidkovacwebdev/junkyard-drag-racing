@@ -7,8 +7,9 @@ extends Cutscene
 ##
 ## Then the flashback, at night (a blue tint over the yard): Grandpa rolls
 ## up to the side fence in his wheelchair, sighs that he'll have to use his
-## legs, climbs out and over the fence (the chair stays parked outside),
-## waddles to the crane on his useless legs, and
+## legs, flops out of it onto his belly (the chair stays parked outside),
+## drags himself to the fence by his arms, hauls himself up and over it,
+## crawls on his arms all the way to the crane, legs trailing, and
 ## hauls himself up the mast by his hands. The crane tips over and comes down
 ## on him, squashing him flat as a pancake. The garbage truck (also the
 ## town's ambulance) backs in, two paramedics climb out, look him over, and
@@ -63,6 +64,10 @@ const GOLD := Color(0.98, 0.84, 0.3, 1)
 @export var fence_spot := Vector2(-950.0, 470.0)
 @export var roll_from := Vector2(-1300.0, 470.0)
 @export var shine_spot := Vector2(-20.0, -150.0)
+## How far up the fence he hauls himself before he tips over it, in how
+## many pulls.
+@export var fence_height: float = 70.0
+@export var fence_pulls: int = 2
 ## How far up the mast he gets before it goes, and in how many pulls.
 @export var climb_height: float = 260.0
 @export var climb_pulls: int = 5
@@ -158,23 +163,28 @@ func play() -> void:
 	chair.global_position = parked
 	in_chair.visible = false
 	var grandpa := Cutscenes.spawn_actor(GRANDPA, parked + Vector2(30.0, 12.0), true)
-	await Cutscenes.hop(grandpa, 24.0)
+	# Straight down on his face: so much for the legs.
+	await Cutscenes.play_tween(grandpa.crawl_to(grandpa.global_position))
+	Cutscenes.sound(&"flesh_splat", -10.0, grandpa)
+	await Cutscenes.wait(0.3)
 
 	# Over the fence...
 	await _climb_fence(grandpa, fence)
-	# ...and off to the crane.
+	# ...and off to the crane, dragging himself along by his arms.
 	var crane_foot := crane.global_position + Vector2(-40.0, 30.0)
-	Cutscenes.walk(grandpa, crane_foot, 120.0)
+	var crawl := grandpa.crawl_to(crane_foot)
 	Cutscenes.camera_to((crane_foot + grandpa.global_position) * 0.5 + Vector2(0.0, -120.0), flashback_zoom, 3.0)
 	shine.visible = true
 	Cutscenes.sound(&"wink_ting", -6.0)
 	await Cutscenes.subtitle(dealer_name, operator, shine_line)
 	Cutscenes.sound(&"wink_ting", -8.0)
 	await Cutscenes.subtitle(dealer_name, operator, shiiine_line)
-	await Cutscenes.walk(grandpa, crane_foot, 120.0)
+	await Cutscenes.play_tween(crawl)
 
 	# Up the mast, hand over hand, legs dangling.
 	var mast_foot := crane.global_position + Vector2(0.0, -70.0)
+	grandpa.raise_arms(true)
+	await Cutscenes.stand_up(grandpa)
 	grandpa.global_position = mast_foot
 	Cutscenes.face(grandpa, true)
 	Cutscenes.camera_to(crane.global_position + Vector2(120.0, -240.0), flashback_zoom, 1.2)
@@ -262,19 +272,34 @@ func _sob() -> void:
 	if not Cutscenes.is_skipping():
 		Sfx.play(&"grandpa_sob", -5.0, 0.0).pitch_scale = 1.35
 
-## Up to the side fence, a rattle as he scrambles over it, and down into
-## the yard.
+## Crawls up to the side fence, hauls himself up it by his arms (rattling
+## it), tips over the top and lands flat on his face in the yard, then
+## crawls on in.
 func _climb_fence(grandpa: CutsceneActor, fence: Vector2) -> void:
-	await Cutscenes.walk(grandpa, fence + Vector2(-20.0, 0.0), 90.0)
+	var foot := fence + Vector2(-20.0, 0.0)
+	await Cutscenes.play_tween(grandpa.crawl_to(foot))
+	grandpa.raise_arms(true)
+	await Cutscenes.stand_up(grandpa)
 	Cutscenes.sound(&"gate_rattle", -4.0)
-	await Cutscenes.hop(grandpa, 80.0)
-	grandpa.global_position = fence + Vector2(30.0, 0.0)
-	await Cutscenes.walk(grandpa, fence + Vector2(90.0, 10.0), 140.0)
+	await _haul_up(grandpa, foot, fence_height, fence_pulls)
+	var over := Cutscenes.create_tween().set_trans(Tween.TRANS_QUAD)
+	over.tween_property(grandpa, "global_position", fence + Vector2(40.0, -fence_height - 20.0), 0.25).set_ease(Tween.EASE_OUT)
+	over.parallel().tween_property(grandpa, "rotation", 0.5, 0.25)
+	over.tween_property(grandpa, "global_position", fence + Vector2(40.0, 0.0), 0.25).set_ease(Tween.EASE_IN)
+	over.parallel().tween_property(grandpa, "rotation", 0.0, 0.25)
+	await Cutscenes.play_tween(over)
+	Cutscenes.sound(&"flesh_splat", -8.0, grandpa)
+	await Cutscenes.play_tween(grandpa.crawl_to(fence + Vector2(90.0, 10.0)))
 
 ## Hand over hand up the mast: a jerky pull, a clank, a swing of the legs.
 func _climb_mast(grandpa: CutsceneActor, foot: Vector2) -> void:
-	var step := climb_height / maxi(climb_pulls, 1)
-	for i in climb_pulls:
+	await _haul_up(grandpa, foot, climb_height, climb_pulls)
+
+## Up `height` above `foot` by the arms in `pulls` jerky pulls, swinging
+## side to side, a clank on each.
+func _haul_up(grandpa: CutsceneActor, foot: Vector2, height: float, pulls: int) -> void:
+	var step := height / maxi(pulls, 1)
+	for i in pulls:
 		var pull := Cutscenes.create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		pull.tween_property(grandpa, "global_position", foot + Vector2(0.0, -step * (i + 1)), 0.3)
 		pull.parallel().tween_property(grandpa, "rotation", 0.12 if i % 2 == 0 else -0.12, 0.3)

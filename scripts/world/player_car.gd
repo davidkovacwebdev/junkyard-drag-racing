@@ -343,6 +343,13 @@ func get_terrain() -> TerrainNetwork:
 func set_towed(towed: bool) -> void:
 	collision_mask = 0 if towed else _default_collision_mask
 
+## Sets the car down at `spot`, stopped and facing that way. For cutscenes,
+## while the screen is black.
+func park(spot: Vector2, facing_right: bool) -> void:
+	global_position = spot
+	velocity = Vector2.ZERO
+	_facing_right = facing_right
+
 ## Every drive/interact key goes through here, so a cutscene can take the
 ## wheel just by being active.
 ## Whether the horn is blaring right now (H held).

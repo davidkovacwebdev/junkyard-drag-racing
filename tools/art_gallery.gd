@@ -153,6 +153,7 @@ func _shoot_fitted_accessories() -> void:
 			car.accessories.append((options[(i / 2 if spot == AccessoryPartData.Spot.SKIN else i) % options.size()] as AccessoryPartData).duplicate())
 		var view := CarView.new()
 		view.max_width = PART_FIT.x
+		view.max_height = PART_FIT.y
 		holder.add_child(view)
 		view.build_from(car)
 		var cell_origin := Vector2(i % COLUMNS, i / COLUMNS) * CELL

@@ -230,7 +230,7 @@ offset_top = 240.0
 offset_right = 416.0
 offset_bottom = 320.0
 script = ExtResource("4")
-text = "Scrapper — $40"
+text = "Scrapper"
 font_size = 20
 tilt_degrees = -2.0
 jitter_seed = 51
@@ -242,7 +242,7 @@ offset_top = 240.0
 offset_right = 696.0
 offset_bottom = 320.0
 script = ExtResource("4")
-text = "Junker — $100"
+text = "Junker"
 font_size = 20
 tilt_degrees = 1.5
 jitter_seed = 52
@@ -254,7 +254,7 @@ offset_top = 340.0
 offset_right = 416.0
 offset_bottom = 420.0
 script = ExtResource("4")
-text = "Hot Rod — $220"
+text = "Hot Rod"
 font_size = 20
 tilt_degrees = 2.0
 jitter_seed = 53
@@ -266,7 +266,7 @@ offset_top = 340.0
 offset_right = 696.0
 offset_bottom = 420.0
 script = ExtResource("4")
-text = "Chop Shop — $450"
+text = "Chop Shop"
 font_size = 20
 tilt_degrees = -1.5
 jitter_seed = 54
@@ -331,6 +331,7 @@ visible = false
 position = Vector2(426, 320)
 scale = Vector2(1.4, 1.4)
 max_width = 300.0
+max_height = 200.0
 
 [node name="NamePlate" type="Control" parent="Content/DrivePage"]
 layout_mode = 0
@@ -416,48 +417,100 @@ grow_vertical = 2
 mouse_filter = 2
 visible = false
 
-[node name="Bet20Button" type="BaseButton" parent="Content/BetAmountPage"]
+[node name="Minus100Button" type="BaseButton" parent="Content/BetAmountPage"]
 layout_mode = 0
 offset_left = 116.0
-offset_top = 280.0
-offset_right = 296.0
-offset_bottom = 350.0
+offset_top = 270.0
+offset_right = 206.0
+offset_bottom = 340.0
 script = ExtResource("4")
-text = "$20"
+text = "-100"
 font_size = 22
 tilt_degrees = -2.0
 jitter_seed = 81
 
-[node name="Bet50Button" type="BaseButton" parent="Content/BetAmountPage"]
+[node name="Minus10Button" type="BaseButton" parent="Content/BetAmountPage"]
 layout_mode = 0
-offset_left = 336.0
-offset_top = 280.0
-offset_right = 516.0
-offset_bottom = 350.0
+offset_left = 216.0
+offset_top = 270.0
+offset_right = 306.0
+offset_bottom = 340.0
 script = ExtResource("4")
-text = "$50"
+text = "-10"
 font_size = 22
 tilt_degrees = 1.5
 jitter_seed = 82
 
-[node name="Bet100Button" type="BaseButton" parent="Content/BetAmountPage"]
+[node name="AmountPlate" type="Control" parent="Content/BetAmountPage"]
 layout_mode = 0
-offset_left = 556.0
-offset_top = 280.0
-offset_right = 736.0
-offset_bottom = 350.0
+offset_left = 326.0
+offset_top = 266.0
+offset_right = 526.0
+offset_bottom = 344.0
+mouse_filter = 2
+script = ExtResource("3")
+body_color = Color(0.74, 0.63, 0.47, 1)
+shade_color = Color(0.68, 0.57, 0.41, 1)
+skirt_color = Color(0.6, 0.49, 0.34, 1)
+tilt_degrees = -1.0
+jitter_seed = 86
+nails = false
+
+[node name="AmountLabel" type="Label" parent="Content/BetAmountPage/AmountPlate"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.25, 0.16, 0.08, 1)
+theme_override_font_sizes/font_size = 32
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "$0"
+
+[node name="Plus10Button" type="BaseButton" parent="Content/BetAmountPage"]
+layout_mode = 0
+offset_left = 546.0
+offset_top = 270.0
+offset_right = 636.0
+offset_bottom = 340.0
 script = ExtResource("4")
-text = "$100"
+text = "+10"
 font_size = 22
 tilt_degrees = -1.0
 jitter_seed = 83
 
+[node name="Plus100Button" type="BaseButton" parent="Content/BetAmountPage"]
+layout_mode = 0
+offset_left = 646.0
+offset_top = 270.0
+offset_right = 736.0
+offset_bottom = 340.0
+script = ExtResource("4")
+text = "+100"
+font_size = 22
+tilt_degrees = 2.0
+jitter_seed = 87
+
+[node name="AllInButton" type="BaseButton" parent="Content/BetAmountPage"]
+layout_mode = 0
+offset_left = 336.0
+offset_top = 360.0
+offset_right = 516.0
+offset_bottom = 404.0
+script = ExtResource("4")
+text = "All In"
+font_size = 22
+tilt_degrees = 1.0
+jitter_seed = 88
+
 [node name="NextButton" type="BaseButton" parent="Content/BetAmountPage"]
 layout_mode = 0
 offset_left = 316.0
-offset_top = 400.0
+offset_top = 430.0
 offset_right = 536.0
-offset_bottom = 448.0
+offset_bottom = 478.0
 script = ExtResource("4")
 text = "Next >"
 font_size = 22
@@ -530,9 +583,11 @@ jitter_seed = 92
 [connection signal="pressed" from="Content/DrivePage/NextButton" to="." method="_on_drive_next_pressed"]
 [connection signal="pressed" from="Content/DrivePage/RaceButton" to="." method="_on_race_pressed"]
 [connection signal="pressed" from="Content/DrivePage/BackButton" to="." method="_on_drive_back_pressed"]
-[connection signal="pressed" from="Content/BetAmountPage/Bet20Button" to="." method="_on_bet_amount_pressed" binds= [0]]
-[connection signal="pressed" from="Content/BetAmountPage/Bet50Button" to="." method="_on_bet_amount_pressed" binds= [1]]
-[connection signal="pressed" from="Content/BetAmountPage/Bet100Button" to="." method="_on_bet_amount_pressed" binds= [2]]
+[connection signal="pressed" from="Content/BetAmountPage/Minus100Button" to="." method="_on_bet_step_pressed" binds= [-100]]
+[connection signal="pressed" from="Content/BetAmountPage/Minus10Button" to="." method="_on_bet_step_pressed" binds= [-10]]
+[connection signal="pressed" from="Content/BetAmountPage/Plus10Button" to="." method="_on_bet_step_pressed" binds= [10]]
+[connection signal="pressed" from="Content/BetAmountPage/Plus100Button" to="." method="_on_bet_step_pressed" binds= [100]]
+[connection signal="pressed" from="Content/BetAmountPage/AllInButton" to="." method="_on_bet_all_in_pressed"]
 [connection signal="pressed" from="Content/BetAmountPage/NextButton" to="." method="_on_bet_amount_next_pressed"]
 [connection signal="pressed" from="Content/BetAmountPage/BackButton" to="." method="_on_bet_amount_back_pressed"]
 [connection signal="pressed" from="Content/BetPickPage/ConfirmButton" to="." method="_on_bet_confirm_pressed"]

@@ -70,6 +70,7 @@ offset_bottom = 60.0
 position = Vector2(220, 260)
 scale = Vector2(1.5, 1.5)
 max_width = 260.0
+max_height = 200.0
 
 [node name="NamePlate" type="Control" parent="Content"]
 layout_mode = 0
@@ -257,6 +258,18 @@ font_size = 22
 tilt_degrees = -2.0
 jitter_seed = 33
 
+[node name="SleepButton" type="BaseButton" parent="Content"]
+layout_mode = 0
+offset_left = 330.0
+offset_top = 20.0
+offset_right = 410.0
+offset_bottom = 62.0
+script = ExtResource("8")
+text = "Zz"
+font_size = 22
+tilt_degrees = 2.0
+jitter_seed = 61
+
 [node name="HintLabel" type="Label" parent="Content"]
 layout_mode = 0
 offset_left = 20.0
@@ -287,3 +300,4 @@ script = ExtResource("10")
 [connection signal="pressed" from="Content/AccessoryFilterButton" to="." method="_on_accessory_filter_pressed"]
 [connection signal="sort_changed" from="Content/SortButton" to="." method="_on_sort_changed"]
 [connection signal="pressed" from="Content/ExpandButton" to="." method="_on_expand_pressed"]
+[connection signal="pressed" from="Content/SleepButton" to="." method="_on_sleep_pressed"]

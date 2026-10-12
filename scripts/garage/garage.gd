@@ -13,6 +13,9 @@ extends Control
 ##
 ## The "+1" button buys another bay (Inventory.expand_garage), which also puts
 ## another shed by the garage in the world.
+##
+## The "Zz" button sleeps through the night (only at night): a SleepTransition
+## plays the moon going down and the sun coming up, then it's morning.
 
 @onready var _car_view: CarView = $Content/CarPreview
 @onready var _name_label: Label = $Content/NamePlate/NameLabel
@@ -29,12 +32,14 @@ extends Control
 @onready var _expand_button: ScrapButton = $Content/ExpandButton
 @onready var _hint_label: Label = $Content/HintLabel
 @onready var _back_button: BackButton = $BackButton
+@onready var _sleep_button: ScrapButton = $Content/SleepButton
 
 var _index: int = 0
 var _wheel_mount_zones: Array[WheelMountZone] = []
 var _current_category: PartData.Category = PartData.Category.BODY
 ## The "+1" button has been pressed once; the next press pays.
 var _expand_armed: bool = false
+var _sleeping: bool = false
 
 const _PART_SLOT_SCENE := preload("res://scenes/garage/part_slot.tscn")
 const _WHEEL_MOUNT_ZONE_SCENE := preload("res://scenes/garage/wheel_mount_zone.tscn")
@@ -68,6 +73,7 @@ func _ready() -> void:
 	_show_category(PartData.Category.BODY)
 
 func _process(_delta: float) -> void:
+	_refresh_sleep_button()
 	# While dragging a catalog part, light up the valid drop spots on the
 	# car (wheel mounts, engine bay, or the whole body) based on category.
 	# get_viewport() returns null while the scene is being torn down right
@@ -223,6 +229,25 @@ func _can_drive_out() -> bool:
 	_hint_label.scale = Vector2(1.25, 1.25)
 	tween.tween_property(_hint_label, "scale", Vector2.ONE, 0.5)
 	return false
+
+# --- Sleeping ----------------------------------------------------------------
+
+func _refresh_sleep_button() -> void:
+	var can_sleep := DayNightCycle.is_night() and not _sleeping
+	var tooltip := "Sleep till morning." if can_sleep else "Too early for bed. Come back after 9 PM."
+	if _sleep_button.tooltip_text == tooltip:
+		return
+	_sleep_button.disabled = not can_sleep
+	_sleep_button.tooltip_text = tooltip
+
+func _on_sleep_pressed() -> void:
+	if not DayNightCycle.is_night() or _sleeping:
+		return
+	_sleeping = true
+	var transition := SleepTransition.new()
+	add_child(transition)
+	await transition.finished
+	_sleeping = false
 
 # --- Garage bays ---------------------------------------------------------------
 

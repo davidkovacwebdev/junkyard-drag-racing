@@ -85,6 +85,7 @@ func play() -> void:
 	var middle := (player_spot + grandpa.global_position) * 0.5 + Vector2(0.0, -camera_lift)
 
 	await Cutscenes.fade_out(0.0)
+	grandpa.park_car_for_scene()
 	grandpa.hold_instead_of_beer(MUG.instantiate())
 	if PlayerProfile.character != null:
 		_player = Cutscenes.spawn_actor(PlayerProfile.character, player_spot + Vector2(80.0, 0.0), false)
