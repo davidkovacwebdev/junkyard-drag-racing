@@ -40,7 +40,7 @@ var grandpa: GrandpaNpc
 func _init() -> void:
 	id = ID
 	# The default, so the quest survives even if the .tres doesn't list it.
-	gives_quest = preload("res://quests/better_wrench.tres")
+	default_quest = preload("res://quests/better_wrench.tres")
 
 func play() -> void:
 	var car := Cutscenes.get_tree().get_first_node_in_group(PlayerCar.GROUP) as Node2D

@@ -282,7 +282,7 @@ func _start_quest(quest: QuestData) -> void:
 		return
 	if "grandpa" in scene:
 		scene.set("grandpa", self)
-	if scene.gives_quest == null:
+	if scene.quest_to_give() == null:
 		scene.gives_quest = quest
 	Cutscenes.play(scene)
 

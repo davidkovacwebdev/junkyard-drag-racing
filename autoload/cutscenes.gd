@@ -94,8 +94,8 @@ func play(cutscene: Cutscene) -> void:
 		await _slide_letterbox(true)
 	await cutscene.play()
 	await _end()
-	if cutscene.gives_quest != null:
-		Quests.give(cutscene.gives_quest)
+	if cutscene.quest_to_give() != null:
+		Quests.give(cutscene.quest_to_give())
 
 ## Plays `cutscene` unless one with the same `id` already played on this save.
 func play_once(cutscene: Cutscene) -> void:

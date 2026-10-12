@@ -29,6 +29,15 @@ var id: StringName = &""
 ## A quest this scene hands the player. It lands in the journal (J) as the
 ## scene ends, skipped or not.
 @export var gives_quest: QuestData
+## The quest a scene's script gives when its .tres sets no `gives_quest`;
+## set it in `_init()`. Setting `gives_quest` there instead doesn't survive an
+## export: the .tres is converted to binary with `gives_quest = null` written
+## out, which overwrites the `_init()` value.
+var default_quest: QuestData = null
+
+## `gives_quest`, or `default_quest` when the .tres leaves it empty.
+func quest_to_give() -> QuestData:
+	return gives_quest if gives_quest != null else default_quest
 
 func play() -> void:
 	pass

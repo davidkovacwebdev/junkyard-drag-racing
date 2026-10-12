@@ -47,7 +47,7 @@ var grandpa: GrandpaNpc
 func _init() -> void:
 	id = ID
 	# The default, so the quest survives even if the .tres doesn't list it.
-	gives_quest = preload("res://quests/talk_shop.tres")
+	default_quest = preload("res://quests/talk_shop.tres")
 
 func play() -> void:
 	if not is_instance_valid(grandpa):
