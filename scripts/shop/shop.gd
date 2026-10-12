@@ -181,7 +181,7 @@ func _ask_button() -> ScrapButton:
 	ask.offset_left = LEAVE_SIZE.x + ASK_GAP
 	ask.offset_right = LEAVE_SIZE.x + ASK_GAP + ASK_WIDTH
 	ask.offset_bottom = LEAVE_SIZE.y
-	ask.pressed.connect(func() -> void: _dialog.say(TreasureRumors.answer(SHOPKEEPER)))
+	ask.pressed.connect(func() -> void: _dialog.say(TreasureRumors.answer(TreasureRumors.SHOPKEEPER)))
 	return ask
 
 ## Browsing: the dialog's own options give way to the card grid.

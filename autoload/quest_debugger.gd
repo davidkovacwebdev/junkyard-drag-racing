@@ -104,7 +104,7 @@ static func _chain_steps(quests: Array[QuestData]) -> Dictionary:
 	for pass_index in quests.size():
 		var moved := false
 		for quest in quests:
-			for next: QuestData in quest.unlocks + quest.follow_ups:
+			for next: QuestData in quest.unlocks + quest.follow_ups + quest.side_quests:
 				if next != null and step.has(next.id) and step[next.id] < step[quest.id] + 1:
 					step[next.id] = step[quest.id] + 1
 					moved = true
@@ -129,20 +129,26 @@ func _on_give(quest: QuestData) -> void:
 	_refresh()
 
 func _on_restart(quest: QuestData) -> void:
-	Quests.rewind(_after(quest), quest)
+	var wiped := _after(quest)
+	# Their one-time scenes play again too.
+	for other in _quests:
+		if other == quest or wiped.has(other.id):
+			for scene_id in other.cutscene_ids:
+				Cutscenes.forget(scene_id)
+	Quests.rewind(wiped, quest)
 	_refresh()
 
 ## Every quest that comes after `quest` in the story: its follow-ups and
-## unlocks, and theirs, all the way down.
+## unlocks (and side quests), and theirs, all the way down.
 static func _after(quest: QuestData) -> Array[StringName]:
 	var found: Array[StringName] = []
-	var queue: Array = quest.follow_ups + quest.unlocks
+	var queue: Array = quest.follow_ups + quest.unlocks + quest.side_quests
 	while not queue.is_empty():
 		var next := queue.pop_front() as QuestData
 		if next == null or next.id == quest.id or found.has(next.id):
 			continue
 		found.append(next.id)
-		queue.append_array(next.follow_ups + next.unlocks)
+		queue.append_array(next.follow_ups + next.unlocks + next.side_quests)
 	return found
 
 func _on_finish(quest: QuestData) -> void:

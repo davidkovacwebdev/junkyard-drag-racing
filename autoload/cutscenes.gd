@@ -23,6 +23,8 @@ signal finished
 const LAYER := 50
 const BAR_HEIGHT_FRACTION := 0.13
 const BAR_TIME := 0.45
+## The letterbox bars: plain black, like the movies.
+const BAR_COLOR := Color.BLACK
 const CAMERA_RETURN_TIME := 0.7
 const CAMERA_FOLLOW_SPEED := 4.0
 ## Same size the junkyard dealer stands at in the world.
@@ -108,6 +110,10 @@ func get_seen() -> Array[StringName]:
 
 func restore_seen(ids: Array[StringName]) -> void:
 	_seen = ids.duplicate()
+
+## Lets the one-time scene `id` play again.
+func forget(id: StringName) -> void:
+	_seen.erase(id)
 
 func clear_seen() -> void:
 	_seen.clear()
@@ -437,8 +443,8 @@ func _build_screen() -> void:
 	_layer.visible = false
 	add_child(_layer)
 
-	_top_bar = _make_rect(UiPalette.INK, 0.0, BAR_HEIGHT_FRACTION)
-	_bottom_bar = _make_rect(UiPalette.INK, 1.0 - BAR_HEIGHT_FRACTION, 1.0)
+	_top_bar = _make_rect(BAR_COLOR, 0.0, BAR_HEIGHT_FRACTION)
+	_bottom_bar = _make_rect(BAR_COLOR, 1.0 - BAR_HEIGHT_FRACTION, 1.0)
 
 	_subtitle_name = _make_label(UiPalette.ACCENT_YELLOW, 18)
 	_subtitle_name.anchor_top = 0.04

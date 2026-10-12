@@ -1,0 +1,52 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_body.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/body_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_night_pickup"]
+script = ExtResource("2")
+id = &"body_night_pickup"
+display_name = "Night Pickup"
+mass = 18.0
+speed = 3.0
+
+[node name="BodyNightPickup" type="RigidBody2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_night_pickup")
+
+[node name="Shovel" type="Polygon2D" parent="."]
+color = Color(0.48, 0.36, 0.22, 1)
+polygon = PackedVector2Array(-112, -40, -104, -44, -64, -108, -72, -112)
+
+[node name="ShovelBlade" type="Polygon2D" parent="."]
+color = Color(0.55, 0.56, 0.55, 1)
+polygon = PackedVector2Array(-76, -106, -60, -130, -50, -122, -60, -100)
+
+[node name="Bed" type="Polygon2D" parent="."]
+color = Color(0.36, 0.25, 0.2, 1)
+polygon = PackedVector2Array(-140, 14, -140, -44, -10, -44, -10, 14)
+
+[node name="Cab" type="Polygon2D" parent="."]
+color = Color(0.36, 0.25, 0.2, 1)
+polygon = PackedVector2Array(-10, 14, -10, -92, 52, -92, 84, -44, 128, -38, 132, 14)
+
+[node name="Window" type="Polygon2D" parent="."]
+color = Color(0.2, 0.24, 0.26, 1)
+polygon = PackedVector2Array(4, -82, 46, -82, 70, -46, 4, -46)
+
+[node name="Shade" type="Polygon2D" parent="."]
+color = Color(0.28, 0.19, 0.15, 1)
+polygon = PackedVector2Array(-140, -6, 132, -6, 132, 14, -140, 14)
+
+[node name="Headlight" type="Polygon2D" parent="."]
+color = Color(0.95, 0.75, 0.1, 1)
+polygon = PackedVector2Array(118, -32, 132, -30, 132, -18, 118, -18)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(-140, 14, -140, -44, -10, -44, -10, -92, 52, -92, 84, -44, 128, -38, 132, 14)
+
+[node name="WheelMount0" type="Marker2D" parent="."]
+position = Vector2(-90, 14)
+
+[node name="WheelMount1" type="Marker2D" parent="."]
+position = Vector2(88, 14)

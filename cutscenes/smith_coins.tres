@@ -1,0 +1,6 @@
+[gd_resource type="Resource" script_class="SmithCoinsCutscene" format=3]
+
+[ext_resource type="Script" path="res://scripts/cutscenes/smith_coins_cutscene.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")

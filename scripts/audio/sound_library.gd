@@ -45,6 +45,8 @@ const NAMES: Array[StringName] = [
 	&"loot_lost",
 	&"pickup_skid",
 	&"tin_cup_clink",
+	&"coin_clink",
+	&"muscle_flex",
 	&"gate_rattle",
 	&"flag_kiss",
 	&"cemetery_gate_creak",
@@ -345,6 +347,8 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"loot_lost": return _loot_lost()
 		&"pickup_skid": return _pickup_skid(rng)
 		&"tin_cup_clink": return _tin_cup_clink(rng)
+		&"coin_clink": return _coin_clink(rng)
+		&"muscle_flex": return _muscle_flex(rng)
 		&"gate_rattle": return _gate_rattle(rng)
 		&"flag_kiss": return _flag_kiss(rng)
 		&"grandpa_gasp": return _grandpa_gasp(rng)
@@ -1519,6 +1523,36 @@ static func _tin_cup_clink(rng: RandomNumberGenerator) -> PackedFloat32Array:
 	out = Synth.mix_into(out, _metal_ring(0.15, 3100.0, 22.0, 0.04, rng), 0.09, 0.35)
 	out = Synth.mix_into(out, _metal_ring(0.12, 2800.0, 22.0, 0.03, rng), 0.15, 0.25)
 	return Synth.finish(out, 0.7)
+
+## Spike flexing: a strained, rising "hnnnGH" over a rubbery leather-jacket
+## creak that stretches up with it.
+static func _muscle_flex(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.tones(0.5, [[[0.0, 110.0], [0.35, 150.0], [0.5, 135.0]]], {
+		square = 0.6,
+		tremolo = [18.0, 0.3],
+		amp = [[0.0, 0.0], [0.06, 0.6], [0.35, 1.0], [0.5, 0.0]],
+	})
+	out = Synth.mix_into(out, Synth.tones(0.42, [[[0.0, 520.0], [0.42, 900.0]]], {
+		square = 0.3,
+		tremolo = [34.0, 0.7],
+		amp = [[0.0, 0.0], [0.05, 0.5], [0.3, 0.4], [0.42, 0.0]],
+	}), 0.04, 0.35)
+	out = Synth.mix_into(out, Synth.noise_sweep(0.5, {
+		freq = [[0.0, 600.0], [0.5, 900.0]],
+		q = [[0.0, 2.0]],
+		amp = [[0.0, 0.0], [0.1, 0.4], [0.35, 0.5], [0.5, 0.0]],
+	}, rng), 0.0, 0.35)
+	return Synth.finish(out, 0.65)
+
+## A few loose coins tipped into a palm: small, bright, uneven clinks.
+static func _coin_clink(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.45)
+	for i in 4:
+		var at := i * 0.055 + rng.randf() * 0.02
+		var pitch := 3300.0 + rng.randf() * 900.0
+		out = Synth.mix_into(out, Synth.thump(0.02, 3200.0, 0.001, 0.006, rng), at, 0.3)
+		out = Synth.mix_into(out, _metal_ring(0.14, pitch, 28.0, 0.03, rng), at, 0.45 - i * 0.06)
+	return Synth.finish(out, 0.6)
 
 static func _haunt_sting() -> PackedFloat32Array:
 	var voices: Array = []

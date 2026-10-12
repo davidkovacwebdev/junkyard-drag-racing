@@ -324,11 +324,14 @@ func objective_text(quest: QuestData) -> String:
 	if is_ready(quest.id):
 		if quest.giver.is_empty():
 			return "Done!"
-		if hands_over_scrap(quest):
-			return "Bring the %d scrap back to %s" % [quest.scrap_goal, quest.giver]
+		var things := PackedStringArray()
 		if hands_over_item(quest):
-			var names := PackedStringArray(goal_items(quest).map(func(item: ItemData) -> String: return item.display_name))
-			return "Bring the %s back to %s" % [" and the ".join(names), quest.giver]
+			for item in goal_items(quest):
+				things.append("the " + item.display_name)
+		if hands_over_scrap(quest):
+			things.append("the %d scrap" % quest.scrap_goal)
+		if not things.is_empty():
+			return "Bring %s back to %s" % [" and ".join(things), quest.giver]
 		if hands_over_part(quest):
 			var part := catalog_part(quest.own_part_goal)
 			return "Bring the %s back to %s" % [part.display_name if part != null else "part", quest.giver]
@@ -368,6 +371,10 @@ func tracked_target() -> String:
 		return ""
 	if is_ready(tracked.id):
 		return tracked.giver if tracked.return_to_giver else ""
+	if not tracked.items_place.is_empty():
+		for item in goal_items(tracked):
+			if not Inventory.has_item(item.id):
+				return tracked.items_place
 	return tracked.objective_place
 
 ## Where `tracked_target()` stands in the world, or Vector2.INF when there's

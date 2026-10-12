@@ -90,9 +90,12 @@ var _clerk_speech := SpeechPlayer.new()
 var _clerk_rest := Vector2.ZERO
 var _clerk_scale := Vector2.ONE
 var _time := 0.0
+## Spike's mid-flex (see `_flex()`).
+var _flexing := false
 
 func _ready() -> void:
 	add_child(_clerk_speech)
+	SpeechScroll.wrap(_clerk_speech_label)
 	if CLERKS.has(RaceProgression.menu_venue_name):
 		_clerk.set_character(CLERKS[RaceProgression.menu_venue_name])
 	_clerk_rest = _clerk.position
@@ -134,8 +137,50 @@ func _build_desk() -> void:
 	for back: ScrapButton in [$Content/DrivePage/BackButton, $Content/BetAmountPage/BackButton]:
 		back.text = "< Tier"
 
+## Each venue's clerk has heard their own bit about the treasure.
+const RUMOR_KEYS := {
+	"Rally": TreasureRumors.CLERK_RALLY,
+	"Hill Climb": TreasureRumors.CLERK_HILL,
+	"Demolition Derby": TreasureRumors.CLERK_DERBY,
+}
+
 func _on_ask_pressed() -> void:
-	_clerk_says(TreasureRumors.answer(_clerk.character_data))
+	var key: StringName = RUMOR_KEYS.get(RaceProgression.menu_venue_name, TreasureRumors.CLERK_DRAG)
+	_clerk_says(TreasureRumors.answer(key))
+	if key == TreasureRumors.CLERK_DERBY:
+		_flex()
+
+## Spike flexes his biceps once he's said his piece: his left arm swaps for
+## a raised FlexArm that pumps up twice, then drops back.
+func _flex() -> void:
+	if _flexing:
+		return
+	_flexing = true
+	while _clerk_speech.is_typing():
+		await get_tree().process_frame
+	await get_tree().create_timer(0.25).timeout
+	var own_arm := _clerk.find_child("ArmLeft", true, false) as Polygon2D
+	var arm := FlexArm.new()
+	if own_arm != null:
+		arm.sleeve = own_arm.color
+		own_arm.visible = false
+	var skull := _clerk.find_child("Skull", true, false) as Polygon2D
+	if skull != null:
+		arm.skin = skull.color
+	arm.z_index = 2
+	_clerk.add_child(arm)
+	var tween := create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	for i in 2:
+		tween.tween_callback(Sfx.play.bind(&"muscle_flex", -4.0, 0.05))
+		tween.tween_property(arm, "bulge", 1.0, 0.25)
+		tween.tween_interval(0.35)
+		tween.tween_property(arm, "bulge", 0.2, 0.2)
+	tween.tween_interval(0.3)
+	await tween.finished
+	arm.queue_free()
+	if is_instance_valid(own_arm):
+		own_arm.visible = true
+	_flexing = false
 
 ## The clerk bobs behind the counter, and squashes while talking.
 func _process(delta: float) -> void:

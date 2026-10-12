@@ -139,8 +139,13 @@ func _refresh() -> void:
 	($Dialog/Board as Control).offset_top = _board_top - (ASK_ROW if _ask_button.visible else 0.0)
 	_stats.text = "You have $%d" % Inventory.money
 
+## The first time, he shows the player a coin (FarmerCoinsCutscene).
 func _ask_about_treasure() -> void:
-	_line.text = TreasureRumors.answer(($Character as CharacterRig).character_data)
+	if TreasureRumors.has_scene(TreasureRumors.FARMER):
+		_close()
+		TreasureRumors.play_scene(TreasureRumors.FARMER, $Character as CharacterRig)
+		return
+	_line.text = TreasureRumors.answer(TreasureRumors.FARMER)
 
 func _close() -> void:
 	_actor = null

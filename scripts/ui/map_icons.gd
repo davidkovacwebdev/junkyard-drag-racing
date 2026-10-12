@@ -183,6 +183,13 @@ static func draw_landmark(canvas: CanvasItem, kind: MinimapMarker.Kind, at: Vect
 					at + Vector2(unit * x, 0), at + Vector2(unit * (x + 0.3), 0),
 					at + Vector2(unit * (x + 0.3), unit * 0.9), at + Vector2(unit * x, unit * 0.9),
 				]), BRIDGE_PIER)
+		MinimapMarker.Kind.DIG_SPOT:
+			# X marks the spot: two fat red bars.
+			for flip: float in [1.0, -1.0]:
+				canvas.draw_colored_polygon(PackedVector2Array([
+					at + Vector2(-unit * flip, -unit * 0.75), at + Vector2(-unit * 0.6 * flip, -unit),
+					at + Vector2(unit * flip, unit * 0.75), at + Vector2(unit * 0.6 * flip, unit),
+				]), UiPalette.DANGER_RED)
 		MinimapMarker.Kind.GARBAGE_TRUCK:
 			# The big green box, the cab in front of it, and the wheels under both.
 			canvas.draw_colored_polygon(PackedVector2Array([

@@ -11,6 +11,8 @@ extends CanvasLayer
 ## closing the screen mid-animation can't lose anything.
 
 signal closed
+## The "Ask Around" treasure question was picked (ForgeSmith answers it).
+signal asked_about_treasure
 
 const _PART_SLOT_SCENE := preload("res://scenes/garage/part_slot.tscn")
 const _OPTION_KEYS := [KEY_1, KEY_2, KEY_3]
@@ -70,6 +72,10 @@ func open() -> void:
 	_ask_button.visible = TreasureRumors.can_ask()
 	_refresh()
 	visible = true
+
+## Puts `line` up as the smith's.
+func say(line: String) -> void:
+	_line_label.text = line
 
 func close() -> void:
 	if not visible:
@@ -288,6 +294,7 @@ func _build() -> void:
 	_line_label.size = Vector2(BOARD_SIZE.x - 330, 60)
 	_line_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	board.add_child(_line_label)
+	SpeechScroll.wrap(_line_label)
 
 	var stash_title := _label("LOOSE PARTS (click to toss in)", 16, UiPalette.TEXT_LIGHT)
 	stash_title.position = Vector2(28, 88)
@@ -351,7 +358,7 @@ func _build() -> void:
 	buttons.add_child(_leave_button)
 	_ask_button = _button("3. %s" % TreasureRumors.ASK_LINE, Vector2(0, 48), -0.8, 23)
 	_ask_button.font_size = 18
-	_ask_button.pressed.connect(func() -> void: _line_label.text = TreasureRumors.answer(character))
+	_ask_button.pressed.connect(asked_about_treasure.emit)
 	right.add_child(_ask_button)
 
 	_flash = ColorRect.new()

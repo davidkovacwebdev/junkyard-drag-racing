@@ -5,7 +5,7 @@ extends StaticBody2D
 ## a stone statue of her on a plinth (big bouffant, one arm thrown up, a
 ## gold tiara), a trans flag flying beside it and two mourners (her parents,
 ## each holding a little trans flag) keeping her company, except between 11 PM
-## and 3 AM, when the cemetery's empty. Origin at the foot of the plinth so it Y-sorts against the car.
+## and 4 AM, when the cemetery's empty. Origin at the foot of the plinth so it Y-sorts against the car.
 ##
 ## While "Pay Your Respects" is on, driving up and pressing E plays the
 ## scene where the player leaves Grandpa's wheel here

@@ -11,7 +11,7 @@
 
 [resource]
 script = ExtResource("1")
-display_name = "Smith"
+display_name = "Gus"
 legs_scene = ExtResource("2")
 boots_scene = ExtResource("3")
 torso_scene = ExtResource("4")

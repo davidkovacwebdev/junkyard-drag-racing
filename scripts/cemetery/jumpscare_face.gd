@@ -17,12 +17,16 @@ const SHUDDER := 18.0
 
 ## Drawn flat into one CanvasGroup, so the whole face fades as one picture
 ## instead of every overlapping shape showing through the next.
+## Extra loudness on top of the usual scream (the Super Horn's haunt).
+var boost_db := 0.0
 var _group: CanvasGroup
 var _face: Node2D
 var _screen: Vector2
 
-static func scare(parent: Node) -> void:
-	parent.add_child(JumpscareFace.new())
+static func scare(parent: Node, boost_db: float = 0.0) -> void:
+	var face := JumpscareFace.new()
+	face.boost_db = boost_db
+	parent.add_child(face)
 
 func _ready() -> void:
 	layer = 50
@@ -35,7 +39,7 @@ func _ready() -> void:
 	_face = Node2D.new()
 	_face.draw.connect(_draw_face)
 	_group.add_child(_face)
-	Sfx.play(&"jumpscare_scream", 6.0, 0.0)
+	Sfx.play(&"jumpscare_scream", 6.0 + boost_db, 0.0)
 	var tween := create_tween()
 	tween.tween_property(_group, "scale", Vector2.ONE, SECONDS * 0.4) \
 			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)

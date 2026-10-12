@@ -33,6 +33,10 @@ var _player: PlayerCar
 var _terrain: TerrainNetwork
 var _world_to_map := Transform2D.IDENTITY
 var _hovered_marker: MinimapMarker
+## The tracked quest's person (a giver like the Beggar, who has no map
+## marker): their head, the same as on the minimap, on a yellow backing.
+var _target_head: Node2D = null
+var _target_giver: Node = null
 
 func _ready() -> void:
 	layer = LAYER
@@ -59,6 +63,7 @@ func open() -> void:
 	Sfx.play(&"journal_flip", -6.0, 0.05)
 
 func close() -> void:
+	_update_target_head(null)
 	if not _open:
 		return
 	_open = false
@@ -151,11 +156,13 @@ func _draw_icons() -> void:
 		return
 	var target := Quests.tracked_target()
 	_update_hovered_marker()
+	var target_is_place := false
 	for marker: MinimapMarker in get_tree().get_nodes_in_group(MinimapMarker.GROUP):
 		var at := _to_map(marker.global_position)
 		var place_name := MapIcons.marker_name(marker)
 		_icon_layer.draw_set_transform(at, 0.0, Vector2.ONE * ICON_SCALE)
 		if not target.is_empty() and place_name == target:
+			target_is_place = true
 			var glow_radius := MapIcons.HOME_GLOW_RADIUS if marker.kind == MinimapMarker.Kind.HOME else MapIcons.TARGET_GLOW_RADIUS
 			MapIcons.draw_target_glow(_icon_layer, Vector2.ZERO, glow_radius)
 		if marker.kind == MinimapMarker.Kind.HOME:
@@ -163,12 +170,42 @@ func _draw_icons() -> void:
 		else:
 			MapIcons.draw_landmark(_icon_layer, marker.kind, Vector2.ZERO)
 		_icon_layer.draw_set_transform(Vector2.ZERO)
+	_update_target_head(null if target_is_place else _giver_named(target))
 	var heading := _player.velocity.angle() if _player.velocity.length() > 1.0 else -PI * 0.5
 	_icon_layer.draw_set_transform(_to_map(_player.global_position), 0.0, Vector2.ONE * ICON_SCALE)
 	MapIcons.draw_player_arrow(_icon_layer, Vector2.ZERO, heading)
 	_icon_layer.draw_set_transform(Vector2.ZERO)
 	if _hovered_marker != null:
 		_draw_marker_name(_hovered_marker)
+
+## The person in the world (Minimap.GIVER_GROUP) called `giver_name`, or null.
+func _giver_named(giver_name: String) -> Node:
+	if giver_name.is_empty():
+		return null
+	for giver in get_tree().get_nodes_in_group(Minimap.GIVER_GROUP):
+		if String(giver.get("display_name")) == giver_name:
+			return giver
+	return null
+
+## Puts `giver`'s head on the map with the target glow behind it (or takes
+## it away for null).
+func _update_target_head(giver: Node) -> void:
+	if giver != _target_giver and _target_head != null:
+		_target_head.queue_free()
+		_target_head = null
+	_target_giver = giver
+	if giver == null:
+		return
+	if _target_head == null:
+		_target_head = Minimap.make_head(giver.get("character_data") as CharacterData)
+		(_target_head.get_node("Backing") as Polygon2D).color = UiPalette.ACCENT_YELLOW
+		_target_head.scale = Vector2.ONE * ICON_SCALE
+		_icon_layer.add_child(_target_head)
+	var at := _to_map((giver as Node2D).global_position)
+	_icon_layer.draw_set_transform(at, 0.0, Vector2.ONE * ICON_SCALE)
+	MapIcons.draw_target_glow(_icon_layer, Vector2.ZERO, MapIcons.HOME_GLOW_RADIUS)
+	_icon_layer.draw_set_transform(Vector2.ZERO)
+	_target_head.position = at
 
 func _update_hovered_marker() -> void:
 	var mouse := _icon_layer.get_local_mouse_position()

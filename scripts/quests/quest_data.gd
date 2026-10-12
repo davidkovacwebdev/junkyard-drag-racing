@@ -25,6 +25,10 @@ extends Resource
 ## building or person on the map ("Shop"). While this quest is tracked and
 ## not done yet, that place's minimap icon glows yellow.
 @export var objective_place: String = ""
+## Where the item goals come from (the "Shop"). While any of them is still
+## missing, this place glows on the minimap instead of `objective_place`.
+## Empty: just `objective_place`.
+@export var items_place: String = ""
 
 const QUEST_ARRAY_HINT := "24/17:QuestData"
 
@@ -35,6 +39,13 @@ const QUEST_ARRAY_HINT := "24/17:QuestData"
 @export_custom(PROPERTY_HINT_TYPE_STRING, QUEST_ARRAY_HINT) var unlocks: Array = []
 ## Quests handed to the player straight away when this one is finished.
 @export_custom(PROPERTY_HINT_TYPE_STRING, QUEST_ARRAY_HINT) var follow_ups: Array = []
+## Quests code hands out while this one is on (someone met along the way
+## asks a favour). Nothing gives them from here; they only tie them to this
+## quest's chain, so the F5 Restart wipes them along with it.
+@export_custom(PROPERTY_HINT_TYPE_STRING, QUEST_ARRAY_HINT) var side_quests: Array = []
+## Ids of the one-time scenes (Cutscenes.play_once) that belong to this
+## quest, forgotten by the F5 Restart so they play again.
+@export var cutscene_ids: Array[StringName] = []
 ## Holds the `follow_ups` back this many in-game days after the quest is
 ## finished (see DayNightCycle.day): they land in the log out of nowhere
 ## once the time has passed. 0: straight away.

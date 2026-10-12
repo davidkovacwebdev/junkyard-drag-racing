@@ -1,0 +1,26 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_acc_welding_mask"]
+script = ExtResource("2")
+id = &"acc_welding_mask"
+display_name = "Welding Mask"
+slot = 6
+
+[node name="AccessoryWeldingMask" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_acc_welding_mask")
+
+[node name="Plate" type="Polygon2D" parent="."]
+color = Color(0.3, 0.31, 0.29, 1)
+polygon = PackedVector2Array(-31, -242, 30, -244, 34, -196, 18, -170, -18, -170, -34, -196)
+
+[node name="Shade" type="Polygon2D" parent="."]
+color = Color(0.23, 0.24, 0.22, 1)
+polygon = PackedVector2Array(20, -243, 30, -244, 34, -196, 18, -170, 10, -170, 24, -196)
+
+[node name="Visor" type="Polygon2D" parent="."]
+color = Color(0.2, 0.42, 0.32, 1)
+polygon = PackedVector2Array(-21, -222, 21, -223, 21, -208, -21, -207)
