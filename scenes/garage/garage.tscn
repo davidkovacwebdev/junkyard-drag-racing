@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scripts/garage/garage.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/world/car_view.tscn" id="2"]
@@ -8,6 +8,7 @@
 [ext_resource type="Script" path="res://scripts/ui/scrap_panel.gd" id="7"]
 [ext_resource type="Script" path="res://scripts/ui/scrap_button.gd" id="8"]
 [ext_resource type="Script" path="res://scripts/ui/sort_button.gd" id="9"]
+[ext_resource type="Script" path="res://scripts/garage/stash_drop_zone.gd" id="10"]
 
 [node name="Garage" type="Control"]
 layout_mode = 3
@@ -69,6 +70,7 @@ offset_bottom = 60.0
 position = Vector2(220, 260)
 scale = Vector2(1.5, 1.5)
 max_width = 260.0
+max_height = 200.0
 
 [node name="NamePlate" type="Control" parent="Content"]
 layout_mode = 0
@@ -218,6 +220,78 @@ theme_override_font_sizes/font_size = 18
 text = "No spare parts — everything you own is on a car."
 horizontal_alignment = 1
 
+[node name="CapacityPlate" type="Control" parent="Content"]
+layout_mode = 0
+offset_left = 130.0
+offset_top = 494.0
+offset_right = 310.0
+offset_bottom = 532.0
+mouse_filter = 2
+script = ExtResource("7")
+tilt_degrees = 1.0
+jitter_seed = 13
+
+[node name="CapacityLabel" type="Label" parent="Content/CapacityPlate"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_right = -12.0
+offset_bottom = -6.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.25, 0.16, 0.08, 1)
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ExpandButton" type="BaseButton" parent="Content"]
+layout_mode = 0
+offset_left = 322.0
+offset_top = 490.0
+offset_right = 394.0
+offset_bottom = 536.0
+script = ExtResource("8")
+text = "+1"
+font_size = 22
+tilt_degrees = -2.0
+jitter_seed = 33
+
+[node name="SleepButton" type="BaseButton" parent="Content"]
+layout_mode = 0
+offset_left = 330.0
+offset_top = 20.0
+offset_right = 410.0
+offset_bottom = 62.0
+script = ExtResource("8")
+text = "Zz"
+font_size = 22
+tilt_degrees = 2.0
+jitter_seed = 61
+
+[node name="HintLabel" type="Label" parent="Content"]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 548.0
+offset_right = 420.0
+offset_bottom = 600.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.25, 0.16, 0.08, 1)
+theme_override_font_sizes/font_size = 17
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="StashDropZone" type="Control" parent="Content"]
+visible = false
+layout_mode = 0
+offset_left = 450.0
+offset_top = 76.0
+offset_right = 1130.0
+offset_bottom = 610.0
+script = ExtResource("10")
+
 [connection signal="pressed" from="Content/PrevButton" to="." method="_on_prev_pressed"]
 [connection signal="pressed" from="Content/NextButton" to="." method="_on_next_pressed"]
 [connection signal="pressed" from="Content/BodyFilterButton" to="." method="_on_body_filter_pressed"]
@@ -225,3 +299,5 @@ horizontal_alignment = 1
 [connection signal="pressed" from="Content/WheelFilterButton" to="." method="_on_wheel_filter_pressed"]
 [connection signal="pressed" from="Content/AccessoryFilterButton" to="." method="_on_accessory_filter_pressed"]
 [connection signal="sort_changed" from="Content/SortButton" to="." method="_on_sort_changed"]
+[connection signal="pressed" from="Content/ExpandButton" to="." method="_on_expand_pressed"]
+[connection signal="pressed" from="Content/SleepButton" to="." method="_on_sleep_pressed"]

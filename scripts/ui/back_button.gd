@@ -9,8 +9,13 @@ extends ScrapButton
 const MENU_DIRECTORY := "res://scenes/menu/"
 
 @export_file("*.tscn") var target_scene: String = "res://scenes/world/main.tscn"
+## Optional `func() -> bool` the screen sets to keep the player from leaving
+## (the garage, while the car can't drive). It does its own telling-off.
+var leave_check: Callable
 
 func _pressed() -> void:
+	if leave_check.is_valid() and not leave_check.call():
+		return
 	# No-ops if there's no active session (e.g. Settings reached straight
 	# from the main menu) — see SaveSystem's own guard.
 	SaveSystem.save_game()

@@ -301,7 +301,7 @@ func _settle() -> void:
 ## The visible title of every row currently in the parts list.
 func _row_labels(garage: Garage) -> Array:
 	var labels := []
-	for child in garage.get_node("PartsScroll/PartsList").get_children():
+	for child in garage.get_node("Content/PartsScroll/PartsList").get_children():
 		if child is PartSlot:
 			labels.append((child as PartSlot)._title_label.text)
 	return labels

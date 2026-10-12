@@ -34,6 +34,14 @@ const HOME_GLOW_RADIUS := 15.0
 const TARGET_PULSE_SPEED := 5.0
 const TARGET_GLOW := Color(0.95, 0.75, 0.10, 0.55)
 
+## Every bridge deck as a flat bar along its span, at least `min_width` wide
+## (in the canvas's own units) so it still reads when the map is zoomed out.
+static func draw_bridge_decks(canvas: CanvasItem, min_width: float) -> void:
+	for node in canvas.get_tree().get_nodes_in_group(BlockedBridge.GROUP):
+		var bridge := node as BlockedBridge
+		canvas.draw_line(bridge.global_position, bridge.to_global(Vector2(-bridge.length, 0.0)),
+				BRIDGE_DECK, maxf(bridge.deck_width, min_width))
+
 ## The name of the place a marker sits on (its parent's display name).
 static func marker_name(marker: MinimapMarker) -> String:
 	return marker.place_name()

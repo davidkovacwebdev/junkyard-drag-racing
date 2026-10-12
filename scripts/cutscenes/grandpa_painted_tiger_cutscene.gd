@@ -22,7 +22,7 @@ const FENCE := preload("res://scenes/items/icons/item_fence_piece.tscn")
 @export var player_offset := Vector2(110.0, -40.0)
 ## First a close look at Tiger, then the camera pulls back to the three.
 @export var tiger_zoom: float = 2.4
-@export var wide_zoom: float = 1.7
+@export var wide_zoom: float = 1.5
 @export var camera_lift: float = 70.0
 ## How many carrot crunches the close-up lingers on.
 @export var crunches: int = 3
@@ -53,6 +53,7 @@ func play() -> void:
 	var middle := (player_spot + tiger.global_position) * 0.5 + Vector2(0.0, -camera_lift)
 
 	await Cutscenes.fade_out(0.0)
+	grandpa.park_car_for_scene()
 	tiger.visible = true
 	tiger.set_painted(true)
 	var player: CutsceneActor = null

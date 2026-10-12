@@ -256,7 +256,8 @@ var _settle: float = 0.0
 func _ready() -> void:
 	_rebuild()
 	if not Engine.is_editor_hint():
-		_build_shore_collision()
+		# Deferred so every bridge has joined its group and can cut its gap.
+		_build_shore_collision.call_deferred()
 	if Engine.is_editor_hint():
 		# Dragging a Path2D's curve or a biome marker doesn't notify us, so poll
 		# a cheap snapshot of the inputs and rebuild when it changes. That's what
@@ -325,18 +326,46 @@ func _rebuild() -> void:
 
 ## Built once: an outline of segments per coastline, pushed `wade_depth` out to
 ## sea so the car can roll into the shallows (and get stuck there, see
-## `PlayerCar`) but never drive off across the ocean.
+## `PlayerCar`) but never drive off across the ocean. Bridge decks cut a gap
+## in it so the car can drive out onto them.
 func _build_shore_collision() -> void:
 	var shore_body := StaticBody2D.new()
 	shore_body.name = "ShoreCollision"
 	shore_body.add_to_group(SHORE_GROUP)
+	var bridge_gaps := _bridge_deck_polygons()
 	for coastline in _coastlines:
 		for wall in Geometry2D.offset_polygon(coastline, wade_depth, Geometry2D.JOIN_ROUND):
-			var outline := CollisionPolygon2D.new()
-			outline.build_mode = CollisionPolygon2D.BUILD_SEGMENTS
-			outline.polygon = wall
+			var outline := CollisionShape2D.new()
+			outline.shape = _wall_segments_shape(wall, bridge_gaps)
 			shore_body.add_child(outline)
 	add_child(shore_body)
+
+func _bridge_deck_polygons() -> Array[PackedVector2Array]:
+	var polygons: Array[PackedVector2Array] = []
+	for bridge in get_tree().get_nodes_in_group(BlockedBridge.GROUP):
+		var local_polygon := PackedVector2Array()
+		for corner in (bridge as BlockedBridge).deck_polygon():
+			local_polygon.append(to_local(corner))
+		polygons.append(local_polygon)
+	return polygons
+
+func _wall_segments_shape(wall: PackedVector2Array, gaps: Array[PackedVector2Array]) -> ConcavePolygonShape2D:
+	var closed_wall := wall.duplicate()
+	closed_wall.append(wall[0])
+	var pieces: Array[PackedVector2Array] = [closed_wall]
+	for gap in gaps:
+		var outside_gap: Array[PackedVector2Array] = []
+		for piece in pieces:
+			outside_gap.append_array(Geometry2D.clip_polyline_with_polygon(piece, gap))
+		pieces = outside_gap
+	var segments := PackedVector2Array()
+	for piece in pieces:
+		for i in piece.size() - 1:
+			segments.append(piece[i])
+			segments.append(piece[i + 1])
+	var shape := ConcavePolygonShape2D.new()
+	shape.segments = segments
+	return shape
 
 func _add_island(coastline: PackedVector2Array) -> void:
 	_coastlines.append(coastline)
@@ -550,21 +579,31 @@ func ensure_built() -> void:
 func get_island_polygons() -> Array[PackedVector2Array]:
 	return _coastlines
 
-## True if `point` is on land. Points past a shoreline are water.
+## True if `point` is on land. Points past a shoreline are water, except
+## up on a bridge deck, which counts as land.
 func is_on_land(point: Vector2) -> bool:
 	for coastline in _coastlines:
 		if Geometry2D.is_point_in_polygon(point, coastline):
 			return true
-	return false
+	return _is_on_bridge_deck(point)
 
-## True if `point` is past the surf, out in the blue. Reads the drawn foam
-## band, so it matches where the water visibly starts.
+## True if `point` is past the surf, out in the blue, and not up on a bridge
+## deck.
 func is_in_water(point: Vector2) -> bool:
+	return is_in_sea(point) and not _is_on_bridge_deck(point)
+
+## True if `point` is past the surf, bridges or not (the sea under a bridge
+## still counts). Reads the drawn foam band, so it matches where the water
+## visibly starts.
+func is_in_sea(point: Vector2) -> bool:
 	for island in _islands:
 		for surf in island.foam:
 			if Geometry2D.is_point_in_polygon(point, surf):
 				return false
 	return true
+
+func _is_on_bridge_deck(point: Vector2) -> bool:
+	return is_inside_tree() and BlockedBridge.any_deck_under(get_tree(), to_global(point))
 
 ## Which biome owns the land here, or -1 if there are no markers. Reads the
 ## cells and drift patches themselves, so it agrees with what's drawn even

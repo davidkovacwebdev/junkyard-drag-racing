@@ -22,7 +22,18 @@ extends Node
 ## a part can't be fitted twice, one body can't be worn by two cars, and a
 ## swapped-out part can't silently vanish.
 
-var garage_capacity: int = 2
+## The house and its shed: room for two cars on a new game.
+const BASE_GARAGE_CAPACITY := 2
+## Each bay bought adds a shed by Grandpa's garage (see GrandpasGarage), and
+## there's only room on the lot for three.
+const MAX_GARAGE_CAPACITY := 5
+## The first bay costs this, and each one after costs this much more again.
+const GARAGE_BAY_PRICE_STEP := 500
+
+var garage_capacity: int = BASE_GARAGE_CAPACITY
+## Picks where this save's bays stand (see GrandpasGarage), so every
+## playthrough's yard looks a bit different but a save's never changes.
+var garage_layout_seed: int = 0
 var owned_cars: Array[CarModelData] = []
 var selected_index: int = 0
 ## Loose trash hauled out of roadside bins. Sold to the scrap dealer at the
@@ -317,6 +328,8 @@ func reset() -> void:
 	scrap = 0
 	money = 0
 	spare_parts.clear()
+	garage_capacity = BASE_GARAGE_CAPACITY
+	garage_layout_seed = roll_garage_layout_seed()
 	owned_cars.append(_build_starter_car())
 
 func get_selected_car() -> CarModelData:
@@ -346,6 +359,29 @@ static func build_car(body_path: String, engine_path: String, wheel_path: String
 	for i in PartDatabase.wheel_mount_count(car.body):
 		car.wheels.append(wheel.duplicate())
 	return car
+
+## A fresh, non-zero layout seed (0 marks a save from before bays had one).
+static func roll_garage_layout_seed() -> int:
+	return randi_range(1, 2147483647)
+
+## Bays bought on top of the house and the shed.
+func garage_bays_bought() -> int:
+	return garage_capacity - BASE_GARAGE_CAPACITY
+
+func can_expand_garage() -> bool:
+	return garage_capacity < MAX_GARAGE_CAPACITY
+
+## $500 for the first bay, $1000 for the second, and so on.
+func next_garage_bay_price() -> int:
+	return GARAGE_BAY_PRICE_STEP * (garage_bays_bought() + 1)
+
+## Pays for one more bay. False, with nothing charged, when the lot is full or
+## the player can't afford it.
+func expand_garage() -> bool:
+	if not can_expand_garage() or not spend_money(next_garage_bay_price()):
+		return false
+	garage_capacity += 1
+	return true
 
 ## Parks a whole car in the garage, next to the ones already there.
 func give_car(car: CarModelData) -> void:
@@ -476,6 +512,33 @@ func _fit_wheel(car: CarModelData, wheel_part: PartData, mount: int) -> bool:
 	car.wheels[target] = home.part as WheelPartData
 	return true
 
+## Take a fitted part off `car` and put it in the spare stash. `slot` is the
+## wheel mount for a wheel and the AccessoryPartData.Spot for an accessory.
+## The body never comes off: it IS the car. False when the slot is empty.
+##
+## This is what lets a car sit in the garage half built (see
+## CarModelData.is_drivable), so nothing here refills the slot.
+func unfit_part(car: CarModelData, category: PartData.Category, slot: int = -1) -> bool:
+	if car == null:
+		return false
+	var removed: PartData = null
+	match category:
+		PartData.Category.ENGINE:
+			removed = car.engine
+			car.engine = null
+		PartData.Category.WHEEL:
+			if slot >= 0 and slot < car.wheels.size():
+				removed = car.wheels[slot]
+				car.wheels[slot] = null
+		PartData.Category.ACCESSORY:
+			removed = car.accessory_in(slot)
+			if removed != null:
+				car.remove_accessory(slot)
+	if removed == null:
+		return false
+	stow_part(removed)
+	return true
+
 ## Which mount a whole-car wheel drop lands on: the first that isn't already
 ## wearing this same wheel. With every mount already on it, mount 0 — so the
 ## drop reads as "already fitted" instead of quietly cloning the tire.
@@ -500,16 +563,18 @@ func _fit_wheels_to_body(car: CarModelData) -> void:
 		var surplus: PartData = car.wheels.pop_back()
 		stow_part(surplus)
 
-## Make sure every mount up to `count` has a wheel in it, filling the empty
-## ones with the basic tire. Only ever called when the body has just changed
-## (see _fit_wheels_to_body) — a wheel the player drops in is fitted by
-## _fit_wheel, which leaves the other mounts alone rather than minting.
+## Give a body with more mounts than the car had wheels a basic tire on each
+## new mount. Only ever called when the body has just changed (see
+## _fit_wheels_to_body). Mounts the car already had are left alone, even
+## empty ones: the player took that wheel off (unfit_part), and refilling it
+## would mint a free tire on every body swap.
 func _ensure_wheel_count(car: CarModelData, count: int) -> void:
-	if car.wheels.size() < count:
-		car.wheels.resize(count)
-	for i in count:
-		if car.wheels[i] == null:
-			car.wheels[i] = _default_wheel()
+	var old_count := car.wheels.size()
+	if old_count >= count:
+		return
+	car.wheels.resize(count)
+	for i in range(old_count, count):
+		car.wheels[i] = _default_wheel()
 
 ## The tire an empty mount gets: a standard wheel out of the player's stash if
 ## they have one going spare — a bigger body should draw on the pile rather

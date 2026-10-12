@@ -41,6 +41,7 @@ func play() -> void:
 	var middle := (player_spot + grandpa.tiger.global_position) * 0.5 + Vector2(0.0, -camera_lift)
 
 	await Cutscenes.fade_out(0.0)
+	grandpa.park_car_for_scene()
 	if PlayerProfile.character != null:
 		_player = Cutscenes.spawn_actor(PlayerProfile.character, player_spot + Vector2(80.0, 0.0), false)
 	Cutscenes.cut_to(middle, zoom)

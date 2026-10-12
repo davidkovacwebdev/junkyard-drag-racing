@@ -14,6 +14,8 @@ extends Node2D
 ## > 0: a car wider than this (before this node's own scale) is shrunk to fit,
 ## so long bodies aren't cropped. Smaller cars keep their size.
 @export var max_width: float = 0.0
+## Same as `max_width`, for tall bodies.
+@export var max_height: float = 0.0
 ## Passed to a horse (or punker) engine's `gait_rate`, so the map car's
 ## runner doesn't scurry.
 @export var horse_gait_rate: float = 1.0
@@ -169,6 +171,25 @@ func _mirrored_center(footprint: Rect2) -> Vector2:
 func get_wheel_mounts() -> Array[Vector2]:
 	return _mounts_local.duplicate()
 
+## The fitted engine's art box in this node's local space, so the garage can
+## tell a drag that starts on it. Empty without an engine.
+func engine_rect() -> Rect2:
+	return _art_rect(_engine)
+
+## Same, for the accessory bolted into `spot`.
+func accessory_rect(spot: AccessoryPartData.Spot) -> Rect2:
+	for accessory in _accessories:
+		if accessory.part_data != null and accessory.part_data.spot == spot:
+			return _art_rect(accessory)
+	return Rect2()
+
+func _art_rect(part: Node2D) -> Rect2:
+	if part == null:
+		return Rect2()
+	var points := PackedVector2Array()
+	_collect_part_art(part, get_global_transform().affine_inverse() * part.get_global_transform(), points)
+	return _bounds_of(points) if not points.is_empty() else Rect2()
+
 ## The current body's lamps. Their global transforms already include the fit
 ## scale, the facing mirror and the tilt, so a beam can be aimed straight off them.
 func get_headlights() -> Array[HeadlightMount]:
@@ -234,8 +255,11 @@ func _apply_fit(raw_mounts: Array[Vector2]) -> void:
 	var scale := 1.0
 	if auto_fit_width > 0.0 and bounds.size.x > 0.0:
 		scale = auto_fit_width / bounds.size.x
-	elif max_width > 0.0 and bounds.size.x > max_width:
-		scale = max_width / bounds.size.x
+	else:
+		if max_width > 0.0 and bounds.size.x > max_width:
+			scale = max_width / bounds.size.x
+		if max_height > 0.0 and bounds.size.y > max_height:
+			scale = minf(scale, max_height / bounds.size.y)
 	_fit.scale = Vector2(scale, scale)
 	_fit.position = -bounds.get_center() * scale
 	_footprint = _measure_footprint(bounds.size.x * scale)

@@ -63,10 +63,12 @@ const NAMES: Array[StringName] = [
 	&"ignition_click",
 	&"headlight_click",
 	&"binocular_focus",
+	&"race_speed_up",
 	&"knockout_bell",
 	&"derby_kill",
 	&"summit_cowbell",
 	&"gondola_bell",
+	&"cart_squeak",
 	&"engine_stall",
 	&"backfire",
 	&"race_stalled",
@@ -90,6 +92,7 @@ const NAMES: Array[StringName] = [
 	&"track_clank",
 	&"radiator_clang",
 	&"gondola_clang",
+	&"cart_rattle",
 	&"anchor_clonk",
 	&"bicycle_rattle",
 	&"tractor_thud",
@@ -107,6 +110,8 @@ const NAMES: Array[StringName] = [
 	&"denied",
 	&"trash_rummage",
 	&"wrench_clunk",
+	&"part_unbolt",
+	&"garage_expand",
 	&"crane_clang",
 	&"crane_miss",
 	&"crane_shove",
@@ -147,6 +152,7 @@ const NAMES: Array[StringName] = [
 	&"axe_chop",
 	&"balloon_squeak",
 	&"tape_rip",
+	&"ticket_tear",
 	&"windup_ratchet",
 	&"anchor_drag_loop",
 	&"ufo_warble",
@@ -187,6 +193,8 @@ const NAMES: Array[StringName] = [
 	&"paper_unfold",
 	&"morgue_hum_loop",
 	&"lightning_strike",
+	&"crawl_drag",
+	&"sleep_snore",
 ]
 
 const LOOPING: Array[StringName] = [
@@ -227,6 +235,7 @@ const CAR_SOUNDS: Array[StringName] = [
 	&"track_clank",
 	&"radiator_clang",
 	&"gondola_clang",
+	&"cart_rattle",
 	&"anchor_clonk",
 	&"bicycle_rattle",
 	&"tractor_thud",
@@ -265,6 +274,7 @@ const UI_SOUNDS: Array[StringName] = [
 	&"quest_complete",
 	&"trunk_open",
 	&"trunk_close",
+	&"race_speed_up",
 ]
 
 const AMBIENT_SOUNDS: Array[StringName] = [
@@ -367,10 +377,12 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"ignition_click": return _ignition_click(rng)
 		&"headlight_click": return _headlight_click(rng)
 		&"binocular_focus": return _binocular_focus(rng)
+		&"race_speed_up": return _race_speed_up(rng)
 		&"knockout_bell": return _knockout_bell(rng)
 		&"derby_kill": return _derby_kill(rng)
 		&"summit_cowbell": return _summit_cowbell(rng)
 		&"gondola_bell": return _gondola_bell(rng)
+		&"cart_squeak": return _cart_squeak(rng)
 		&"engine_stall": return _engine_stall(rng)
 		&"backfire": return _backfire(rng)
 		&"race_stalled": return _race_stalled()
@@ -394,6 +406,7 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"track_clank": return _track_clank(rng)
 		&"radiator_clang": return _radiator_clang(rng)
 		&"gondola_clang": return _gondola_clang(rng)
+		&"cart_rattle": return _cart_rattle(rng)
 		&"anchor_clonk": return _anchor_clonk(rng)
 		&"bicycle_rattle": return _bicycle_rattle(rng)
 		&"tractor_thud": return _tractor_thud(rng)
@@ -411,6 +424,8 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"denied": return _denied()
 		&"trash_rummage": return _trash_rummage(rng)
 		&"wrench_clunk": return _wrench_clunk(rng)
+		&"part_unbolt": return _part_unbolt(rng)
+		&"garage_expand": return _garage_expand(rng)
 		&"crane_clang": return _crane_clang(rng)
 		&"crane_miss": return _crane_miss(rng)
 		&"crane_shove": return _crane_shove(rng)
@@ -451,6 +466,7 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"axe_chop": return _axe_chop(rng)
 		&"balloon_squeak": return _balloon_squeak()
 		&"tape_rip": return _tape_rip(rng)
+		&"ticket_tear": return _ticket_tear(rng)
 		&"windup_ratchet": return _windup_ratchet(rng)
 		&"ufo_warble": return _ufo_warble(rng)
 		&"ufo_hum_loop": return _ufo_hum_loop()
@@ -487,10 +503,12 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"phone_pickup": return _phone_pickup(rng)
 		&"crane_collapse": return _crane_collapse(rng)
 		&"pancake_splat": return _pancake_splat(rng)
+		&"crawl_drag": return _crawl_drag(rng)
 		&"flesh_splat": return _flesh_splat(rng)
 		&"paper_unfold": return _paper_unfold(rng)
 		&"morgue_hum_loop": return _morgue_hum_loop(rng)
 		&"lightning_strike": return _lightning_strike(rng)
+		&"sleep_snore": return _sleep_snore(rng)
 	push_error("SoundLibrary: unknown sound '%s'" % sound_name)
 	return Synth.silence(0.05)
 
@@ -519,6 +537,24 @@ static func _binocular_focus(rng: RandomNumberGenerator) -> PackedFloat32Array:
 	for i in range(1, 3):
 		ticks = Synth.mix_into(ticks, Synth.thump(0.03, 1900.0 + i * 250.0, 0.001, 0.012, rng), i * 0.045, 0.8)
 	return Synth.finish(ticks, 0.5)
+
+## A cassette deck's fast-forward: a key clunk, then the tape whirring up.
+## Played higher the faster the race is set to go.
+static func _race_speed_up(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.thump(0.05, 1200.0, 0.001, 0.02, rng)
+	var whirr := Synth.tones(0.3, [[[0.0, 220.0], [0.3, 660.0]]], {
+		square = 0.4,
+		amp = [[0.0, 0.0], [0.03, 0.6], [0.22, 0.5], [0.3, 0.0]],
+	})
+	var hiss := Synth.noise_sweep(0.3, {
+		freq = [[0.0, 1500.0], [0.3, 4000.0]],
+		q = [[0.0, 2.0]],
+		amp = [[0.0, 0.0], [0.05, 0.5], [0.3, 0.0]],
+	}, rng)
+	out = Synth.mix_into(Synth.silence(0.36), out, 0.0, 1.0)
+	out = Synth.mix_into(out, whirr, 0.03, 0.5)
+	out = Synth.mix_into(out, hiss, 0.03, 0.4)
+	return Synth.finish(out, 0.55)
 
 ## A cheap boxing bell rung twice: a car is out of the derby.
 static func _knockout_bell(rng: RandomNumberGenerator) -> PackedFloat32Array:
@@ -943,6 +979,32 @@ static func _gondola_clang(rng: RandomNumberGenerator) -> PackedFloat32Array:
 	for i in 3:
 		out = Synth.mix_into(out, Synth.thump(0.03, 2400.0, 0.001, 0.008, rng), 0.06 + i * 0.045, 0.25 - i * 0.06)
 	return Synth.finish(out)
+
+## A shopping cart knocked: a light tinny thud and the wire basket shivering
+## like a cage full of loose cans.
+static func _cart_rattle(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.thump(0.12, 1100.0, 0.001, 0.04, rng)
+	out = Synth.concat([out, Synth.silence(0.25)])
+	out = Synth.mix_into(out, _metal_ring(0.3, 880.0, 16.0, 0.08, rng), 0.0, 0.35)
+	for i in 5:
+		out = Synth.mix_into(out, _metal_ring(0.07, rng.randf_range(2200.0, 3400.0), 18.0, 0.02, rng),
+				0.02 + i * 0.04, 0.3 - i * 0.04)
+	return Synth.finish(out)
+
+## Pulling a dumped shopping cart out from under the bridge: the wonky front
+## caster squealing round, then a rattle as it bumps loose.
+static func _cart_squeak(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(1.0)
+	for i in 3:
+		var length := 0.14
+		var pitch := 1700.0 - i * 120.0
+		out = Synth.mix_into(out, Synth.tones(length, [[[0.0, pitch], [length * 0.6, pitch * 1.3], [length, pitch * 0.9]]], {
+			square = 0.25,
+			tremolo = [32.0, 0.6],
+			amp = [[0.0, 0.0], [0.015, 1.0], [length, 0.0]],
+		}), i * 0.17, 0.45)
+	out = Synth.mix_into(out, _cart_rattle(rng), 0.55, 0.7)
+	return Synth.finish(out, 0.5)
 
 ## A ship's anchor rolling into something: a deep, dead iron clonk with
 ## barely any ring, and a short jangle of the chain stub.
@@ -1917,6 +1979,43 @@ static func _wrench_clunk(rng: RandomNumberGenerator) -> PackedFloat32Array:
 	Synth.mix_into(out, _metal_ring(0.25, 2100.0, 25.0, 0.05, rng), 0.0, 0.25)
 	return Synth.finish(out)
 
+## Wrench backing a part off the car: a few loose ratchet clicks, then the
+## part coming free with a lighter clunk than the one that fits it.
+static func _part_unbolt(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.5)
+	for i in 4:
+		var offset := i * 0.06 + rng.randf_range(0.0, 0.01)
+		out = Synth.mix_into(out, _metal_ring(0.03, 2600.0, 15.0, 0.006, rng), offset, 0.6)
+		out = Synth.mix_into(out, Synth.thump(0.02, 1300.0, 0.001, 0.01, rng), offset, 0.4)
+	out = Synth.mix_into(out, Synth.thump(0.25, 420.0, 0.004, 0.1, rng), 0.28, 1.0)
+	out = Synth.mix_into(out, _metal_ring(0.2, 1700.0, 18.0, 0.05, rng), 0.28, 0.3)
+	return Synth.finish(out)
+
+## A new garage bay going up: three hammer knocks on a wooden frame, a short
+## saw rasp, then a sheet of tin roof dropped on with a wobbly bong.
+static func _garage_expand(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(1.5)
+	for knock in 3:
+		var offset := knock * 0.17 + rng.randf_range(0.0, 0.02)
+		out = Synth.mix_into(out, Synth.thump(0.15, 650.0, 0.002, 0.05, rng), offset, 0.8)
+		out = Synth.mix_into(out, _metal_ring(0.08, 2300.0, 20.0, 0.02, rng), offset, 0.2)
+	var saw := Synth.noise_sweep(0.35, {
+		freq = [[0.0, 1800.0], [0.35, 2400.0]],
+		q = [[0.0, 2.5]],
+		amp = [[0.0, 0.0], [0.03, 1.0], [0.3, 0.8], [0.35, 0.0]],
+	}, rng)
+	for i in saw.size():
+		var t := float(i) / Synth.SAMPLE_RATE
+		saw[i] *= 0.35 + 0.65 * absf(sin(TAU * 7.0 * t))
+	out = Synth.mix_into(out, saw, 0.55, 0.45)
+	var roof := _metal_ring(0.6, 310.0, 25.0, 0.3, rng)
+	for i in roof.size():
+		var t := float(i) / Synth.SAMPLE_RATE
+		roof[i] *= 0.7 + 0.3 * sin(TAU * 9.0 * t)
+	out = Synth.mix_into(out, Synth.thump(0.3, 260.0, 0.004, 0.14, rng), 0.95, 0.9)
+	out = Synth.mix_into(out, roof, 0.95, 0.6)
+	return Synth.finish(out)
+
 ## Big steel jaws biting into the heap.
 static func _crane_clang(rng: RandomNumberGenerator) -> PackedFloat32Array:
 	var out := Synth.thump(0.7, 200.0, 0.005, 0.35, rng)
@@ -2466,6 +2565,23 @@ static func _tape_rip(rng: RandomNumberGenerator) -> PackedFloat32Array:
 		out[i] *= 0.6 + 0.4 * signf(sin(TAU * 60.0 * t))
 	return Synth.finish(out, 0.6)
 
+## A bet ticket torn in half, then torn again: two short dry paper rips,
+## each a crackly noise burst rising in pitch.
+static func _ticket_tear(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.5)
+	for i in 2:
+		var rip := Synth.noise_sweep(0.18, {
+			freq = [[0.0, 2200.0], [0.18, 4400.0]],
+			q = [[0.0, 1.4]],
+			amp = [[0.0, 0.0], [0.01, 1.0], [0.14, 0.7], [0.18, 0.0]],
+		}, rng)
+		var crackle_hz := 110.0 + i * 40.0
+		for s in rip.size():
+			var t := float(s) / Synth.SAMPLE_RATE
+			rip[s] *= 0.4 + 0.6 * signf(sin(TAU * crackle_hz * t))
+		out = Synth.mix_into(out, rip, i * 0.24, 1.0 - i * 0.2)
+	return Synth.finish(out, 0.6)
+
 ## A toy wind-up key cranked: a run of little ratchet clicks.
 static func _windup_ratchet(rng: RandomNumberGenerator) -> PackedFloat32Array:
 	var out := Synth.silence(0.45)
@@ -2921,6 +3037,18 @@ static func _crane_collapse(rng: RandomNumberGenerator) -> PackedFloat32Array:
 				hit + 0.12 + i * rng.randf_range(0.07, 0.14), 0.45 - i * 0.05)
 	return Synth.finish(out, 0.9)
 
+## One pull of a belly crawl: a palm slapped down in the dirt, then the
+## body scuffing along after it.
+static func _crawl_drag(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.45)
+	out = Synth.mix_into(out, Synth.thump(0.08, 900.0, 0.001, 0.025, rng), 0.0, 0.7)
+	out = Synth.mix_into(out, Synth.noise_sweep(0.36, {
+		freq = [[0.0, 520.0], [0.2, 760.0], [0.36, 380.0]],
+		q = [[0.0, 1.2]],
+		amp = [[0.0, 0.0], [0.08, 1.0], [0.24, 0.7], [0.36, 0.0]],
+	}, rng), 0.06, 0.55)
+	return Synth.finish(out, 0.6)
+
 ## Squashed flat, cartoon style: a wet squelch and a little falling "bwoop".
 static func _pancake_splat(rng: RandomNumberGenerator) -> PackedFloat32Array:
 	var out := Synth.thump(0.12, 600.0, 0.002, 0.04, rng)
@@ -3000,3 +3128,27 @@ static func _lightning_strike(rng: RandomNumberGenerator) -> PackedFloat32Array:
 	out = Synth.mix_into(out, Synth.thump(1.4, 160.0, 0.02, 0.6, rng), 0.08, 1.0)
 	out = Synth.mix_into(out, Synth.thump(1.0, 120.0, 0.08, 0.45, rng), 0.8, 0.7)
 	return Synth.finish(out, 0.95)
+
+## A big cartoon snore: a rattly, buzzing inhale through the nose, then a
+## breathy "pfff" out with a little whistle on the end.
+static func _sleep_snore(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(1.5)
+	out = Synth.mix_into(out, Synth.tones(0.7, [[[0.0, 82.0], [0.7, 96.0]]], {
+		square = 0.5,
+		tremolo = [26.0, 0.9],
+		amp = [[0.0, 0.0], [0.25, 0.9], [0.55, 0.8], [0.7, 0.0]],
+	}), 0.0, 0.7)
+	out = Synth.mix_into(out, Synth.noise_sweep(0.7, {
+		freq = [[0.0, 420.0], [0.7, 620.0]],
+		q = [[0.0, 3.0]],
+		amp = [[0.0, 0.0], [0.3, 0.7], [0.7, 0.0]],
+	}, rng), 0.0, 0.5)
+	out = Synth.mix_into(out, Synth.noise_sweep(0.6, {
+		freq = [[0.0, 1900.0], [0.6, 1200.0]],
+		q = [[0.0, 1.5]],
+		amp = [[0.0, 0.0], [0.06, 0.8], [0.6, 0.0]],
+	}, rng), 0.85, 0.45)
+	out = Synth.mix_into(out, Synth.tones(0.35, [[[0.0, 900.0], [0.35, 1350.0]]], {
+		amp = [[0.0, 0.0], [0.1, 0.5], [0.35, 0.0]],
+	}), 1.05, 0.2)
+	return Synth.finish(out, 0.55)

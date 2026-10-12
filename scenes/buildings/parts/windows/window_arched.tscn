@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/building_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/building_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_window_arched"]
+script = ExtResource("2")
+id = &"window_arched"
+display_name = "Arched Windows"
+slot = 3
+
+[node name="ArchedWindows" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_window_arched")
+
+[node name="TrimLeft" type="Polygon2D" parent="."]
+color = Color(0.96, 0.93, 0.85, 1)
+polygon = PackedVector2Array(-80, -104, -80, -138, -72, -152, -60, -156, -48, -152, -40, -138, -40, -104)
+
+[node name="GlassLeft" type="Polygon2D" parent="."]
+color = Color(0.62, 0.79, 0.86, 1)
+polygon = PackedVector2Array(-75, -108, -75, -136, -69, -147, -60, -150, -51, -147, -45, -136, -45, -108)
+
+[node name="SillLeft" type="Polygon2D" parent="."]
+color = Color(0.96, 0.93, 0.85, 1)
+polygon = PackedVector2Array(-85, -106, -35, -106, -35, -98, -85, -98)
+
+[node name="TrimRight" type="Polygon2D" parent="."]
+color = Color(0.96, 0.93, 0.85, 1)
+polygon = PackedVector2Array(40, -104, 40, -138, 48, -152, 60, -156, 72, -152, 80, -138, 80, -104)
+
+[node name="GlassRight" type="Polygon2D" parent="."]
+color = Color(0.62, 0.79, 0.86, 1)
+polygon = PackedVector2Array(45, -108, 45, -136, 51, -147, 60, -150, 69, -147, 75, -136, 75, -108)
+
+[node name="SillRight" type="Polygon2D" parent="."]
+color = Color(0.96, 0.93, 0.85, 1)
+polygon = PackedVector2Array(35, -106, 85, -106, 85, -98, 35, -98)

@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/building_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/building_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_decoration_flamingo"]
+script = ExtResource("2")
+id = &"decoration_flamingo"
+display_name = "Lawn Flamingo"
+slot = 4
+
+[node name="LawnFlamingo" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_decoration_flamingo")
+
+[node name="Shadow" type="Polygon2D" parent="."]
+color = Color(0, 0, 0, 0.35)
+polygon = PackedVector2Array(120, 0, 115.3, 2.8, 104, 4, 92.7, 2.8, 88, 0, 92.7, -2.8, 104, -4, 115.3, -2.8)
+
+[node name="Leg" type="Polygon2D" parent="."]
+color = Color(0.3, 0.3, 0.31, 1)
+polygon = PackedVector2Array(102, -26, 106, -26, 106, 0, 102, 0)
+
+[node name="Body" type="Polygon2D" parent="."]
+color = Color(0.88, 0.5, 0.58, 1)
+polygon = PackedVector2Array(88, -36, 96, -44, 114, -42, 122, -34, 112, -24, 94, -26)
+
+[node name="Neck" type="Polygon2D" parent="."]
+color = Color(0.88, 0.5, 0.58, 1)
+polygon = PackedVector2Array(114, -42, 118, -62, 124, -62, 120, -40)
+
+[node name="Head" type="Polygon2D" parent="."]
+color = Color(0.88, 0.5, 0.58, 1)
+polygon = PackedVector2Array(116, -62, 118, -70, 128, -70, 130, -64, 124, -60)
+
+[node name="Beak" type="Polygon2D" parent="."]
+color = Color(0.2, 0.19, 0.18, 1)
+polygon = PackedVector2Array(128, -68, 136, -62, 130, -64)

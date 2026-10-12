@@ -26,6 +26,13 @@ extends Node
 ## which the save slots screen picks; the last one played is remembered in
 ## settings.cfg so the slots screen highlights it. Each slot also gets a tiny summary
 ## file so the slots screen never has to load a whole save.
+##
+## Ctrl+Shift+1/2/3 jumps straight into that slot from the menus or mid-game.
+## The target save is read and checked before anything changes, the current
+## slot is saved first, and all saving is held off until the new slot's world
+## is up, so a switch can't write one slot's progress into another.
+## Ctrl+Shift+R asks first, then restarts the current slot from day one with
+## the same player.
 
 const MENU_SCENES_DIR := "res://scenes/menu/"
 const SLOT_COUNT := 3
@@ -35,12 +42,15 @@ const SUMMARY_PATH_PATTERN := "user://save_%d_summary.cfg"
 const LEGACY_SAVE_PATH := "user://save.tres"
 const SETTINGS_PATH := "user://settings.cfg"
 const AUTOSAVE_INTERVAL := 10.0
+const WORLD_SCENE := "res://scenes/world/main.tscn"
+const SWITCH_SLOT_KEYS := [KEY_1, KEY_2, KEY_3]
 
 var _saving_disabled := "--no-save" in OS.get_cmdline_user_args()
 var current_slot: int = 0
 
 var _autosave_timer: float = 0.0
 var _background_save_task: int = -1
+var _switching_slot := false
 
 func _ready() -> void:
 	current_slot = _load_last_slot()
@@ -57,6 +67,67 @@ func _process(delta: float) -> void:
 
 func _exit_tree() -> void:
 	_wait_for_background_save()
+
+func _shortcut_input(event: InputEvent) -> void:
+	if not (event is InputEventKey and event.pressed and not event.echo):
+		return
+	if not (event.is_command_or_control_pressed() and event.shift_pressed):
+		return
+	if event.physical_keycode == KEY_R:
+		get_viewport().set_input_as_handled()
+		reset_current_slot()
+		return
+	var slot := SWITCH_SLOT_KEYS.find(event.physical_keycode)
+	if slot == -1:
+		return
+	get_viewport().set_input_as_handled()
+	switch_to_slot(slot)
+
+## Saves the current slot, then loads `slot` straight into the world behind
+## the loading board. Refused (with a denied sound) when the slot is empty or
+## unreadable, or mid-cutscene, mid-load or mid-switch.
+func switch_to_slot(slot: int) -> void:
+	if slot == current_slot and not _on_menu_screen():
+		return
+	var data := _read_slot(slot)
+	if data == null or _switching_slot or SceneLoader.is_loading() or Cutscenes.is_active():
+		Sfx.play(&"denied", -6.0)
+		return
+	save_game()
+	_switching_slot = true
+	select_slot(slot)
+	await SceneLoader.change_scene(WORLD_SCENE, _apply_save.bind(data))
+	_switching_slot = false
+
+## Asks, then restarts the current slot from the opening as if the player had
+## just been created. The old save stays on disk until the fresh one replaces it.
+func reset_current_slot() -> void:
+	if _on_menu_screen() or _switching_slot or SceneLoader.is_loading() or Cutscenes.is_active():
+		Sfx.play(&"denied", -6.0)
+		return
+	_switching_slot = true
+	var confirmed := await ConfirmPrompt.ask(get_tree(), "Reset Save?",
+			"Slot %d starts over from day one. Everything done in it is gone for good." % (current_slot + 1),
+			"Reset")
+	if not confirmed:
+		_switching_slot = false
+		return
+	Sfx.play(&"profile_scrapped", -4.0)
+	await SceneLoader.change_scene(WORLD_SCENE, reset_progress)
+	_switching_slot = false
+	save_game()
+
+## Fresh-game state for everything the save holds except the player profile.
+func reset_progress() -> void:
+	Inventory.reset()
+	WorldState.clear()
+	WorldState.remember_player(StoryDirector.OPENING_CAR_SPOT)
+	RaceProgression.reset()
+	DayNightCycle.reset()
+	Cutscenes.clear_seen()
+	Quests.reset()
+	Funeral.reset()
+	Drunk.reset()
 
 func has_save() -> bool:
 	return slot_has_save(current_slot)
@@ -92,13 +163,13 @@ func slot_summary(slot: int) -> Dictionary:
 	return summary
 
 func save_game() -> void:
-	if _saving_disabled or _on_menu_screen():
+	if _saving_disabled or _switching_slot or _on_menu_screen():
 		return
 	_wait_for_background_save()
 	_write_save(_snapshot(), current_slot)
 
 func _save_in_background() -> void:
-	if _on_menu_screen() or _background_save_task != -1:
+	if _switching_slot or _on_menu_screen() or _background_save_task != -1:
 		return
 	var data := _snapshot()
 	_background_save_task = WorkerThreadPool.add_task(_write_save.bind(data, current_slot))
@@ -119,6 +190,7 @@ func _snapshot() -> SaveData:
 	data.owned_cars = cars
 	data.selected_index = Inventory.selected_index
 	data.garage_capacity = Inventory.garage_capacity
+	data.garage_layout_seed = Inventory.garage_layout_seed
 	data.scrap = Inventory.scrap
 	data.money = Inventory.money
 	data.spare_parts = Inventory.spare_parts.duplicate()
@@ -179,14 +251,24 @@ func _summary_of(data: SaveData) -> Dictionary:
 ## Loads the save into Inventory/WorldState. False (and leaves both
 ## untouched) if there's nothing to load or it fails to read.
 func load_game() -> bool:
-	if not has_save():
-		return false
-	var data := ResourceLoader.load(SAVE_PATH_PATTERN % current_slot, "SaveData", ResourceLoader.CACHE_MODE_IGNORE) as SaveData
+	var data := _read_slot(current_slot)
 	if data == null:
 		return false
+	_apply_save(data)
+	return true
+
+func _read_slot(slot: int) -> SaveData:
+	if not slot_has_save(slot):
+		return null
+	return ResourceLoader.load(SAVE_PATH_PATTERN % slot, "SaveData", ResourceLoader.CACHE_MODE_IGNORE) as SaveData
+
+func _apply_save(data: SaveData) -> void:
 	Inventory.owned_cars = data.owned_cars
 	Inventory.selected_index = data.selected_index
 	Inventory.garage_capacity = data.garage_capacity
+	# Saves from before bays had layouts get one now; it's kept from the next save on.
+	Inventory.garage_layout_seed = data.garage_layout_seed if data.garage_layout_seed != 0 \
+			else Inventory.roll_garage_layout_seed()
 	Inventory.scrap = data.scrap
 	Inventory.money = data.money
 	Inventory.spare_parts = data.spare_parts
@@ -209,7 +291,6 @@ func load_game() -> bool:
 	Quests.restore(data.quests_active, data.quests_completed, data.quests_ready,
 			data.quests_available, data.tracked_quest, data.quest_notes, data.quest_counts,
 			data.quest_horn_times, data.quest_delayed)
-	return true
 
 ## Called by New Game so starting over doesn't leave a stale save
 ## sitting there claiming to be continuable.

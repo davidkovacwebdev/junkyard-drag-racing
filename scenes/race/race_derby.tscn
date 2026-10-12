@@ -28,6 +28,7 @@ exit_scene_path = "res://scenes/world/main.tscn"
 timer_hud_path = NodePath("../UI/RaceTimerHud")
 results_screen_path = NodePath("../UI/ResultsScreen")
 surrender_button_path = NodePath("../UI/SurrenderButton")
+speed_button_path = NodePath("../UI/SpeedButton")
 end_delay = 4.0
 
 [node name="MainCamera" type="Camera2D" parent="."]
@@ -66,5 +67,22 @@ text = "Surrender"
 font_size = 20
 tilt_degrees = -2.0
 jitter_seed = 55
+
+[node name="SpeedButton" type="BaseButton" parent="UI"]
+anchors_preset = -1
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -104.0
+offset_top = -64.0
+offset_right = -24.0
+offset_bottom = -24.0
+focus_mode = 0
+script = ExtResource("7")
+text = "x1"
+font_size = 20
+tilt_degrees = 2.0
+jitter_seed = 71
 
 [node name="ResultsScreen" parent="UI" instance=ExtResource("6")]

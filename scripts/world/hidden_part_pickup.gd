@@ -20,6 +20,9 @@ const BUBBLE_RADIUS := 5.0
 ## Out at sea: drawn faint and sea-tinted under everything on the surface, with
 ## no shadow, and only a couple of rising bubbles giving it away.
 @export var submerged := false
+## On the ground under a bridge deck: drawn beneath the bridge, and only a car
+## that has driven in under it can grab it (not one passing overhead).
+@export var under_bridge := false
 
 func _ready() -> void:
 	var hidden_part := _find_part()
@@ -33,7 +36,14 @@ func _ready() -> void:
 		_orb_offset = _rest_offset
 		modulate = SUBMERGED_TINT
 		z_index = -1
+	if under_bridge:
+		z_index = PlayerCar.UNDER_BRIDGE_Z_INDEX
 	super()
+
+func collect(by: Node = null) -> void:
+	if under_bridge and by is PlayerCar and not (by as PlayerCar).is_under_bridge():
+		return
+	super(by)
 
 func grant() -> void:
 	WorldState.mark_claimed(claim_id)

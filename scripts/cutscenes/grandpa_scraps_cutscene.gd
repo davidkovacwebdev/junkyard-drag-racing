@@ -27,8 +27,9 @@ const GRANDPA := preload("res://characters/grandpa.tres")
 ]
 
 @export_group("Staging")
-## Where the player's own character stands, relative to their car.
-@export var player_offset := Vector2(5.0, -25.0)
+## Where the player's own character stands, relative to Grandpa (their car
+## parks past them, see GrandpaNpc.SCENE_CAR_OFFSET).
+@export var player_offset := Vector2(110.0, -40.0)
 @export var zoom: float = 1.9
 ## Aims above the pair's feet so heads (and the flag) stay in frame.
 @export var camera_lift: float = 70.0
@@ -43,15 +44,16 @@ func _init() -> void:
 	gives_quest = preload("res://quests/gather_scraps.tres")
 
 func play() -> void:
-	var car := Cutscenes.get_tree().get_first_node_in_group(PlayerCar.GROUP) as Node2D
-	if car == null or not is_instance_valid(grandpa):
+	if not is_instance_valid(grandpa):
 		return
-	var middle := (car.global_position + grandpa.global_position) * 0.5 + Vector2(0.0, -camera_lift)
+	var player_spot := grandpa.global_position + player_offset
+	var middle := (player_spot + grandpa.global_position) * 0.5 + Vector2(0.0, -camera_lift)
 
 	await Cutscenes.fade_out(0.0)
+	grandpa.park_car_for_scene()
 	var player: CutsceneActor = null
 	if PlayerProfile.character != null:
-		player = Cutscenes.spawn_actor(PlayerProfile.character, car.global_position + player_offset, false)
+		player = Cutscenes.spawn_actor(PlayerProfile.character, player_spot, false)
 	Cutscenes.cut_to(middle, zoom)
 	await Cutscenes.fade_in(1.0)
 

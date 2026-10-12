@@ -109,6 +109,9 @@ var last_bet_car_name: String = ""
 ## Whether that bet was on Roge Roger (see `roger_spec()`), for Grandpa's
 ## "Sure Thing" quest.
 var last_bet_on_roger: bool = false
+## Set when the player tears up their ticket mid-race (the bet race's
+## Tear Ticket button), so the menu settles it as a loss with no winner.
+var last_bet_torn: bool = false
 
 ## Roge Roger: back in town and racing in the top division, in a car that
 ## belongs at the bottom of it. While Grandpa's "Sure Thing" is on, he's one

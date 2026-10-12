@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="BuildingData" format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/walls/wall_school_bus.tscn" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/roofs/roof_garden.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/doors/door_dutch.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/windows/window_arched.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/parts/decorations/decoration_mailbox.tscn" id="5"]
+[ext_resource type="Script" path="res://scripts/world/building_data.gd" id="script"]
+
+[resource]
+script = ExtResource("script")
+display_name = "Garden Bus"
+wall_scene = ExtResource("1")
+roof_scene = ExtResource("2")
+door_scene = ExtResource("3")
+window_scene = ExtResource("4")
+decoration_scene = ExtResource("5")

@@ -30,6 +30,7 @@ func _ready() -> void:
 	collision.shape = shape
 	add_child(collision)
 	_collision = collision
+	collision_layer = BlockedBridge.DECK_LAYER
 
 func _process(_delta: float) -> void:
 	if Engine.is_editor_hint():

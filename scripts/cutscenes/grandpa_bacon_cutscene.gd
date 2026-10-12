@@ -55,6 +55,7 @@ func play() -> void:
 	var middle := grandpa.global_position + Vector2(-60.0, -camera_lift)
 
 	await Cutscenes.fade_out(0.0)
+	grandpa.park_car_for_scene()
 	var player: CutsceneActor = null
 	var chains: Node2D = null
 	if PlayerProfile.character != null:

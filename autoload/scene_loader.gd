@@ -54,7 +54,9 @@ func _input(_event: InputEvent) -> void:
 	if _busy:
 		get_viewport().set_input_as_handled()
 
-func change_scene(path: String) -> void:
+## `before_swap` runs once the old scene is paused and the new one is loaded,
+## right before they swap, so it can safely replace autoload state.
+func change_scene(path: String, before_swap := Callable()) -> void:
 	if _busy:
 		return
 	_busy = true
@@ -65,7 +67,7 @@ func change_scene(path: String) -> void:
 		get_tree().paused = false
 		await _hide()
 		return
-	await _swap_to(packed)
+	await _swap_to(packed, before_swap)
 
 func change_scene_packed(packed: PackedScene) -> void:
 	if _busy:
@@ -98,13 +100,15 @@ func _load_in_background(path: String) -> PackedScene:
 		await get_tree().process_frame
 	return null
 
-func _swap_to(packed: PackedScene) -> void:
+func _swap_to(packed: PackedScene, before_swap := Callable()) -> void:
 	_track.progress = maxf(_track.progress, LOAD_SHARE)
 	# Let the board draw at its latest fill before the build stalls the frame.
 	await get_tree().process_frame
 	await get_tree().process_frame
 	# A paused tree stays paused across the change, so the new scene would
 	# load frozen.
+	if before_swap.is_valid():
+		before_swap.call()
 	get_tree().paused = false
 	get_tree().change_scene_to_packed(packed)
 	await get_tree().process_frame

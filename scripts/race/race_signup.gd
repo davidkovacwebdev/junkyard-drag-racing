@@ -81,6 +81,14 @@ func hook_up(race_controller: RaceController) -> void:
 	race_controller.race_ended.connect(_on_race_ended)
 	if tier > 0:
 		race_controller.exit_scene_path = MENU_SCENE
+	if not include_player and tier > 0:
+		race_controller.repurpose_surrender_button("Tear Ticket", _tear_ticket)
+
+## Walks out on a bet race: the stake is lost and the menu says so.
+func _tear_ticket() -> void:
+	Sfx.play(&"ticket_tear", -4.0)
+	RaceProgression.last_bet_torn = true
+	_race_controller.exit_race()
 
 func _on_race_ended(winner_name: String) -> void:
 	if not include_player:

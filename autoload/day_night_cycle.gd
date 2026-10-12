@@ -88,6 +88,10 @@ func advance_seconds(seconds: float) -> void:
 func get_hour() -> float:
 	return time_of_day / SECONDS_PER_HOUR
 
+## Plain clock night, NIGHT_START to NIGHT_END: when the player may sleep.
+func is_night() -> bool:
+	return time_of_day >= NIGHT_START or time_of_day < NIGHT_END
+
 ## 0 = full day, 1 = full night, ramping linearly across the two
 ## TRANSITION-second windows centred on dusk (NIGHT_START) and dawn
 ## (NIGHT_END). Both windows sit comfortably clear of the 0/DAY_LENGTH

@@ -44,7 +44,7 @@ const PLAYER_MARK := "> "
 
 @export_group("Staging")
 @export var player_offset := Vector2(110.0, -40.0)
-@export var zoom: float = 1.7
+@export var zoom: float = 1.5
 @export var camera_lift: float = 70.0
 ## Where Tiger walks in from, relative to its own spot, and how long it takes.
 @export var tiger_from := Vector2(-420.0, 30.0)
@@ -67,6 +67,7 @@ func play() -> void:
 	var middle := (player_spot + tiger.global_position) * 0.5 + Vector2(0.0, -camera_lift)
 
 	await Cutscenes.fade_out(0.0)
+	grandpa.park_car_for_scene()
 	if PlayerProfile.character != null:
 		_player = Cutscenes.spawn_actor(PlayerProfile.character, player_spot + Vector2(80.0, 0.0), false)
 	Cutscenes.cut_to(middle, zoom)
@@ -101,9 +102,8 @@ static func _squint(player: CutsceneActor) -> void:
 	if eyes == null:
 		return
 	var squint := SQUINT_EYES.instantiate() as Node2D
-	eyes.get_parent().add_child(squint)
+	eyes.add_sibling(squint)
 	squint.transform = eyes.transform
-	squint.z_index = eyes.z_index
 	eyes.visible = false
 
 func _say(line: String) -> void:

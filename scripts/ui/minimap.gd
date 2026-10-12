@@ -16,6 +16,9 @@ extends Control
 ## place like the Shop, or the giver once it's time to hand in) is lit up: a
 ## pulsing yellow disc behind its icon, or a yellow backing behind the
 ## giver's head, and pinned to the rim too.
+##
+## The faster the car goes, the further the map zooms out, so there's more
+## road ahead to see at speed.
 
 @export var world_to_map_scale: float = 0.035
 @export var rim_width: float = 11.0
@@ -23,6 +26,10 @@ extends Control
 @export var circle_sides: int = 22
 @export var jitter_pixels: float = 1.2
 @export var jitter_seed: int = 4417
+## The map's scale at the car's top speed, as a fraction of the standstill scale.
+@export var top_speed_zoom: float = 0.7
+## How quickly the zoom catches up with the car's speed.
+@export var zoom_smoothing: float = 2.0
 
 const MOVING_SPEED := 10.0
 ## Quest-giver heads: how small the character is drawn, which point of the
@@ -32,6 +39,8 @@ const HEAD_SCALE := 0.17
 const HEAD_CENTER_Y := -200.0
 const HEAD_BACK_RADIUS := 11.0
 const GIVER_GROUP := &"quest_giver"
+## How far the zoom drifts before the roads are redrawn at their new width.
+const ROAD_REDRAW_ZOOM_STEP := 0.02
 
 var _map_disc: Control
 var _road_layer: Node2D
@@ -40,6 +49,8 @@ var _player: PlayerCar
 var _player_heading: float = 0.0
 ## Quest giver node -> its head on the map.
 var _heads: Dictionary = {}
+var _zoom: float = 1.0
+var _road_drawn_zoom: float = 1.0
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -66,14 +77,26 @@ func _bind_player() -> void:
 	_player = get_tree().get_first_node_in_group(PlayerCar.GROUP) as PlayerCar
 	_road_layer.queue_redraw()
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	if _player == null:
 		return
 	if _player.velocity.length() > MOVING_SPEED:
 		_player_heading = _player.velocity.angle()
-	_road_layer.position = _center() - _player.global_position * world_to_map_scale
+	_update_zoom(delta)
+	_road_layer.position = _center() - _player.global_position * _map_scale()
 	_icon_layer.queue_redraw()
 	_update_quest_heads()
+
+func _update_zoom(delta: float) -> void:
+	var speed_fraction := clampf(_player.velocity.length() / maxf(_player.max_speed, 1.0), 0.0, 1.0)
+	var target_zoom := lerpf(1.0, top_speed_zoom, speed_fraction)
+	_zoom = lerpf(_zoom, target_zoom, 1.0 - exp(-zoom_smoothing * delta))
+	_road_layer.scale = Vector2.ONE * _map_scale()
+	if absf(_zoom - _road_drawn_zoom) > ROAD_REDRAW_ZOOM_STEP:
+		_road_layer.queue_redraw()
+
+func _map_scale() -> float:
+	return world_to_map_scale * _zoom
 
 func _center() -> Vector2:
 	return size * 0.5
@@ -108,10 +131,12 @@ func _draw_roads() -> void:
 	if roads == null:
 		return
 	roads.ensure_built()
-	var width := road_width_pixels / world_to_map_scale
+	_road_drawn_zoom = _zoom
+	var width := road_width_pixels / _map_scale()
 	for polyline in roads.get_draw_polylines():
 		if polyline.size() >= 2:
 			_road_layer.draw_polyline(roads.global_transform * polyline, MapIcons.ROAD_COLOR, width)
+	MapIcons.draw_bridge_decks(_road_layer, width)
 
 func _draw_icons() -> void:
 	if _player == null:
@@ -122,7 +147,7 @@ func _draw_icons() -> void:
 	var home_is_target := false
 	var target := Quests.tracked_target()
 	for marker: MinimapMarker in get_tree().get_nodes_in_group(MinimapMarker.GROUP):
-		var offset := (marker.global_position - _player.global_position) * world_to_map_scale
+		var offset := (marker.global_position - _player.global_position) * _map_scale()
 		if marker.kind == MinimapMarker.Kind.HOME:
 			home_position = center + offset.limit_length(map_radius - MapIcons.HOME_ICON_SIZE - 2.0)
 			home_is_target = home_is_target or (not target.is_empty() and MapIcons.marker_name(marker) == target)
@@ -160,7 +185,7 @@ func _update_quest_heads() -> void:
 		head.visible = waiting
 		(head.get_node("Backing") as Polygon2D).color = UiPalette.ACCENT_YELLOW if is_target else UiPalette.INK
 		if waiting:
-			var offset := ((giver as Node2D).global_position - _player.global_position) * world_to_map_scale
+			var offset := ((giver as Node2D).global_position - _player.global_position) * _map_scale()
 			head.position = center + offset.limit_length(reach)
 
 ## Just the head, hair, eyes and accessory of `character`, shrunk onto a dark

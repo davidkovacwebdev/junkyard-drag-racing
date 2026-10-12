@@ -173,15 +173,7 @@ func _start() -> void:
 		Sfx.play(&"denied", -6.0)
 		_name_edit.grab_focus()
 		return
-	Inventory.reset()
-	WorldState.clear()
-	WorldState.remember_player(StoryDirector.OPENING_CAR_SPOT)
-	RaceProgression.reset()
-	DayNightCycle.reset()
-	Cutscenes.clear_seen()
-	Quests.reset()
-	Funeral.reset()
-	Drunk.reset()
+	SaveSystem.reset_progress()
 	SaveSystem.delete_save()
 	_character.display_name = player_name
 	PlayerProfile.player_name = player_name

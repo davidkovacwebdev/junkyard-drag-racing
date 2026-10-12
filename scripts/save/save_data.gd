@@ -10,6 +10,9 @@ extends Resource
 @export var owned_cars: Array[CarModelData] = []
 @export var selected_index: int = 0
 @export var garage_capacity: int = 2
+## Where this save's garage bays stand in the world (Inventory.garage_layout_seed).
+## 0 on saves from before bays existed.
+@export var garage_layout_seed: int = 0
 @export var scrap: int = 0
 @export var money: int = 0
 ## Parts the junkyard crane has fished out of the heap for the player.

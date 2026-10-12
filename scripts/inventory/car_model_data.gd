@@ -22,6 +22,30 @@ var display_name: String:
 var body_color: Color:
 	get: return body.color if body != null else Color.WHITE
 
+## Whether the car can leave the garage: a body, an engine and a wheel on
+## every mount. Parts can be taken off in the garage, so a car can sit there
+## half built.
+func is_drivable() -> bool:
+	return missing_parts().is_empty()
+
+## What's keeping the car off the road, as "no engine, 2 wheels". Empty when
+## nothing is.
+func missing_parts() -> String:
+	if body == null:
+		return "no body"
+	var missing: PackedStringArray = []
+	if engine == null:
+		missing.append("no engine")
+	var empty_mounts := 0
+	for i in PartDatabase.wheel_mount_count(body):
+		if i >= wheels.size() or wheels[i] == null:
+			empty_mounts += 1
+	if empty_mounts == 1:
+		missing.append("a wheel missing")
+	elif empty_mounts > 1:
+		missing.append("%d wheels missing" % empty_mounts)
+	return ", ".join(missing)
+
 func accessory_in(spot: AccessoryPartData.Spot) -> AccessoryPartData:
 	for accessory in accessories:
 		if accessory != null and accessory.spot == spot:

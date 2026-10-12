@@ -71,7 +71,8 @@ func _process(_delta: float) -> void:
 		_close()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not _is_open() or not event is InputEventKey or not event.pressed or event.echo:
+	if not _is_open() or not event is InputEventKey or not event.pressed or event.echo \
+			or event.is_command_or_control_pressed():
 		return
 	var options := [_buy_button, _leave_button, _ask_button] if _ask_button.visible else [_buy_button, _leave_button]
 	var index := _OPTION_KEYS.find(event.keycode)

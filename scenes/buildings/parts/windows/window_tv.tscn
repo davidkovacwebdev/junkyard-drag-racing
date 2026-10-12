@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/building_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/building_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_window_tv"]
+script = ExtResource("2")
+id = &"window_tv"
+display_name = "Old TV Windows"
+slot = 3
+
+[node name="TvWindows" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_window_tv")
+
+[node name="CabinetLeft" type="Polygon2D" parent="."]
+color = Color(0.45, 0.32, 0.22, 1)
+polygon = PackedVector2Array(-84, -148, -36, -148, -36, -104, -84, -104)
+
+[node name="ScreenLeft" type="Polygon2D" parent="."]
+color = Color(0.5, 0.66, 0.68, 1)
+polygon = PackedVector2Array(-79, -142, -51, -142, -51, -110, -79, -110)
+
+[node name="KnobLeft" type="Polygon2D" parent="."]
+color = Color(0.85, 0.7, 0.35, 1)
+polygon = PackedVector2Array(-47, -134, -41, -134, -41, -128, -47, -128)
+
+[node name="CabinetRight" type="Polygon2D" parent="."]
+color = Color(0.45, 0.32, 0.22, 1)
+polygon = PackedVector2Array(36, -148, 84, -148, 84, -104, 36, -104)
+
+[node name="ScreenRight" type="Polygon2D" parent="."]
+color = Color(0.5, 0.66, 0.68, 1)
+polygon = PackedVector2Array(41, -142, 69, -142, 69, -110, 41, -110)
+
+[node name="KnobRight" type="Polygon2D" parent="."]
+color = Color(0.85, 0.7, 0.35, 1)
+polygon = PackedVector2Array(73, -134, 79, -134, 79, -128, 73, -128)
