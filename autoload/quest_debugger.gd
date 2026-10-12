@@ -32,7 +32,6 @@ const ROW_GAP := 12.0
 const SCROLLBAR_GUTTER := 26.0
 const OVERLAY_ALPHA := 0.55
 
-var _enabled: bool = false
 var _open: bool = false
 var _quests: Array[QuestData] = []
 
@@ -43,11 +42,10 @@ var _scroll: ScrollContainer
 func _ready() -> void:
 	layer = LAYER
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	_enabled = OS.is_debug_build()
 	_build()
 
 func _input(event: InputEvent) -> void:
-	if not _enabled or not (event is InputEventKey and event.pressed and not event.echo):
+	if not (event is InputEventKey and event.pressed and not event.echo):
 		return
 	var key: Key = event.physical_keycode
 	if _open and (key == KEY_F5 or key == KEY_ESCAPE):

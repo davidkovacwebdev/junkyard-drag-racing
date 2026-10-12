@@ -17,8 +17,8 @@ extends CanvasLayer
 ## world. In a menu or a building interior the list still browses; it just cannot
 ## drop anything, and says so.
 ##
-## Registered as the `DevMenu` autoload, and switched off outside debug builds -
-## see `set_enabled()`.
+## Registered as the `DevMenu` autoload. On in every build, exports included, so
+## players can use the cheats too.
 
 ## The five things the menu hands out. Scrap is not a part, so it gets a tab of
 ## its own rather than a fake PartData.
@@ -66,8 +66,7 @@ const _PART_SLOT_SCENE := preload("res://scenes/garage/part_slot.tscn")
 @onready var _scrap_tab: ScrapButton = $Backdrop/Panel/ScrapTab
 @onready var _sort_button: SortButton = $Backdrop/Panel/SortButton
 
-## Off unless this is a debug build (see `set_enabled`).
-var _enabled := false
+var _enabled := true
 ## Which tab is open. Kept across opens: coming back to the tab you were last
 ## using is one less click for the thing you do most.
 var _tab: int = Tab.BODY
@@ -95,7 +94,6 @@ func _ready() -> void:
 	for button in [_body_tab, _engine_tab, _wheel_tab, _accessory_tab, _scrap_tab, _clear_button]:
 		button.focus_mode = Control.FOCUS_NONE
 	_build_scrap_buttons()
-	set_enabled(OS.is_debug_build())
 
 ## Live feedback, so a dev can watch scrap tick up as the car sweeps a pile and
 ## can see how much litter is still standing.
@@ -108,10 +106,7 @@ func _process(_delta: float) -> void:
 
 # --- Opening and closing -------------------------------------------------------
 
-## Master switch. Debug builds default to on, which is what makes F1 available in
-## the editor and free in an export; the headless smoke test calls this with
-## `true`, since a bare `godot --headless` run is not guaranteed to report the
-## same debug/export split an editor session does.
+## Master switch, on by default.
 func set_enabled(value: bool) -> void:
 	_enabled = value
 	if not _enabled:
