@@ -29,13 +29,10 @@ extends CharacterBody2D
 ## Truck", the quest's `objective_place`.
 
 @export var speed: float = 260.0
-## Junction radius: when the road it's on runs out, any other road with an
-## end within this distance counts as "connects here" and gets a chance to be
-## driven onto instead of just turning around in place.
-@export var hop_radius: float = 90.0
 ## Junction exits that turn sharper than this off the way the truck arrives
 ## are skipped. A road leaving a fork almost alongside the one it came in on
 ## is a hairpin the truck can't make, and it ends up circling the junction.
+## Only when every exit is that sharp does it take the gentlest one.
 @export var max_junction_turn: float = deg_to_rad(120.0)
 ## Same resolution convention PlayerCar/TrashSpawner use: the exported path
 ## first, falling back to searching the scene for any RoadNetwork.
@@ -117,6 +114,11 @@ const PACKAGE_QUEST := preload("res://quests/special_delivery.tres")
 const PACKAGE := preload("res://items/grandpas_package.tres")
 ## Where the hit count floats up from, above the truck's box.
 const RAM_TEXT_LIFT := 150.0
+## How far either side of a junction the road's heading is read, so a single
+## jittery vertex doesn't skew it.
+const JUNCTION_REACH := 60.0
+## A junction exit needs at least this much road ahead to count.
+const MIN_EXIT_ROOM := 40.0
 
 @onready var _visual: CarView = $Visual as CarView
 
@@ -124,19 +126,25 @@ var _road_network: RoadNetwork = null
 var _skid_marks: SkidMarksLayer = null
 var _rng := RandomNumberGenerator.new()
 
-## One RoadTrack per drivable road, built once from the network's decimated
-## polylines. The full-fidelity ones carry a point every 5 px, and walking
-## those from the start each physics frame cost several ms on a long road.
+## One RoadTrack per drivable road, with its junctions (see RoadGraph), built
+## from the network's decimated polylines. The full-fidelity ones carry a point
+## every 5 px, and walking those each physics frame cost several ms on a long road.
 var _tracks: Array[RoadTrack] = []
 var _current_road: RoadTrack = null
 ## Arc length along _current_road of the point closest to the truck.
 var _travelled: float = 0.0
 var _forward: bool = true
-## Where the route continues after _current_road runs out — picked as soon as
-## the lookahead first spills past its end, so the aim point flows around the
-## junction instead of pinning to the road's last vertex.
+## Junctions at or behind this arc length (going the way it drives) are
+## already done with — the one it just turned in at, or turned around past.
+var _passed_station: float = 0.0
+## Where the route continues at the next junction — picked as soon as the
+## lookahead first spills past it, so the aim point flows around the junction
+## instead of pinning to it. It leaves _current_road at _junction_station and
+## joins _next_road at _next_station.
 var _next_road: RoadTrack = null
 var _next_forward: bool = true
+var _next_station: float = 0.0
+var _junction_station: float = 0.0
 
 var _facing_right: bool = true
 var _tilt: float = 0.0
@@ -161,14 +169,8 @@ func _ready() -> void:
 	_setup_engine_sound()
 	_drop_timer = _rng.randf_range(drop_check_interval_min, drop_check_interval_max)
 	if _road_network != null:
-		_road_network.ensure_built()
-		for road in _road_network.get_draw_polylines():
-			if road.size() >= 2:
-				_tracks.append(RoadTrack.new(road))
+		_tracks = RoadGraph.for_network(_road_network).tracks
 		_pick_new_road()
-		if _current_road != null:
-			_travelled = _rng.randf_range(0.0, _current_road.length)
-			global_position = _current_road.sample(_travelled)
 
 func _build_visual() -> void:
 	var body := PartDatabase.load_part_data(
@@ -257,75 +259,119 @@ func _advance_along_road(delta: float) -> void:
 		_try_honk()
 
 ## The point `lookahead_distance` further along the route, spilling onto
-## _next_road (chosen on demand) once it runs past this road's end.
+## _next_road (chosen on demand) once it runs past the next junction.
 func _aim_point() -> Vector2:
-	if _lookahead_spill() > 0.0 and _next_road == null:
+	if _next_road == null and _lookahead_spill() > 0.0:
 		_choose_next_road()
 	var spill := _lookahead_spill()
-	if spill <= 0.0:
+	if _next_road == null or spill <= 0.0:
 		var ahead := _travelled + lookahead_distance if _forward else _travelled - lookahead_distance
 		return _current_road.sample(ahead)
-	var next_length := _next_road.length
-	var on_next := clampf(spill if _next_forward else next_length - spill, 0.0, next_length)
-	return _next_road.sample(on_next)
+	var on_next := _next_station + spill if _next_forward else _next_station - spill
+	return _next_road.sample(clampf(on_next, 0.0, _next_road.length))
 
-## How far the lookahead runs past the end of the current road (≤ 0 while
-## it's still on it).
+## How far the lookahead runs past the next junction, or the road's end if
+## there's none (≤ 0 while it's still short of it).
 func _lookahead_spill() -> float:
-	var remaining := _current_road.length - _travelled if _forward else _travelled
+	var remaining := _branch_station() - _travelled if _forward else _travelled - _branch_station()
 	return lookahead_distance - remaining
 
-## Prefer another road whose end sits within `hop_radius` of where this one
-## runs out — a real junction — picked at random. A dead end instead turns
-## the truck around on this same road right away, so it swings back before
-## the end rather than nosing into it.
+func _branch_station() -> float:
+	if _next_road != null:
+		return _junction_station
+	var stop := _upcoming_stop()
+	if not stop.is_empty():
+		return stop["station"]
+	return _current_road.length if _forward else 0.0
+
+func _upcoming_stop() -> Dictionary:
+	var from := maxf(_travelled, _passed_station) if _forward else minf(_travelled, _passed_station)
+	return _current_road.stop_after(from, _forward)
+
+## Every way out of the coming junction, both directions along each road
+## through it, bar the way the truck came in and any with no road left. One
+## that doesn't turn too sharply is picked at random. A road end with no
+## junction is a dead end: the truck turns around there, swinging back
+## before the end rather than nosing into it.
 func _choose_next_road() -> void:
-	var end_point := _road_end_point()
-	var arrival_dir := _current_road.direction_at_end(not _forward)
-	var candidates: Array[Dictionary] = []
-	for track in _tracks:
-		if track == _current_road:
-			continue
-		var forward: bool
-		if track.first_point().distance_to(end_point) <= hop_radius:
-			forward = true
-		elif track.last_point().distance_to(end_point) <= hop_radius:
-			forward = false
-		else:
-			continue
-		var leaving_dir := -track.direction_at_end(forward)
-		if absf(arrival_dir.angle_to(leaving_dir)) <= max_junction_turn:
-			candidates.append({"road": track, "forward": forward})
-	if candidates.is_empty():
-		_forward = not _forward
+	var stop := _upcoming_stop()
+	if stop.is_empty():
+		_turn_around()
 		return
-	var chosen := _pick_exit(candidates)
+	var junction_station: float = stop["station"]
+	var back := -JUNCTION_REACH if _forward else JUNCTION_REACH
+	var arrival_dir := _current_road.heading(junction_station + back, junction_station)
+	var candidates: Array[Dictionary] = []
+	var sharp: Array[Dictionary] = []
+	for exit in (stop["junction"] as RoadGraph.Junction).exits:
+		var road: RoadTrack = exit["road"]
+		var station: float = exit["station"]
+		for forward in [true, false]:
+			var room := road.length - station if forward else station
+			if room < MIN_EXIT_ROOM:
+				continue
+			if road == _current_road and forward != _forward \
+					and absf(station - junction_station) < RoadGraph.JOIN_RADIUS * 2.0:
+				continue
+			var reach := minf(JUNCTION_REACH, room)
+			var leaving_dir := road.heading(station, station + reach if forward else station - reach)
+			var candidate := {"road": road, "forward": forward, "station": station,
+					"turn": absf(arrival_dir.angle_to(leaving_dir))}
+			if candidate["turn"] <= max_junction_turn:
+				candidates.append(candidate)
+			else:
+				sharp.append(candidate)
+	var chosen: Dictionary
+	if not candidates.is_empty():
+		chosen = _pick_exit(candidates)
+	elif not sharp.is_empty():
+		sharp.sort_custom(func(a, b): return a["turn"] < b["turn"])
+		chosen = sharp[0]
+	else:
+		_turn_around()
+		return
 	_next_road = chosen["road"]
 	_next_forward = chosen["forward"]
+	_next_station = chosen["station"]
+	_junction_station = junction_station
 
-## Which junction exit to take, out of `candidates` ({road, forward}). Any of
-## them, at random; NightDiggerTruck steers it toward the graveyard.
+## Which junction exit to take, out of `candidates` ({road, forward, station}).
+## Any of them, at random; NightDiggerTruck steers it toward the graveyard.
 func _pick_exit(candidates: Array[Dictionary]) -> Dictionary:
 	return candidates[_rng.randi_range(0, candidates.size() - 1)]
 
-## Junction roads can meet anywhere within `hop_radius` of each other, so
-## the handover happens once the truck is nearer the next road's entry than
-## this road's end, not only when it literally reaches the end.
+func _turn_around() -> void:
+	_forward = not _forward
+	_passed_station = _travelled
+	_next_road = null
+
+## The truck cuts junction corners, so its progress along this road can
+## stall short of the junction while it's already swinging onto the next.
+## The handover happens once it's nearer the next road than this one, or
+## right at the junction, whichever comes first.
 func _reached_next_road() -> bool:
 	if _next_road == null:
 		return false
-	var entry := _next_road.first_point() if _next_forward else _next_road.last_point()
-	var remaining := _current_road.length - _travelled if _forward else _travelled
-	return remaining <= 20.0 \
-			or global_position.distance_to(entry) <= global_position.distance_to(_road_end_point())
+	var remaining := _junction_station - _travelled if _forward else _travelled - _junction_station
+	if remaining <= 20.0:
+		return true
+	var on_next := _next_road.sample(_closest_on_next_road())
+	return global_position.distance_to(on_next) \
+			<= global_position.distance_to(_current_road.sample(_travelled))
 
-func _road_end_point() -> Vector2:
-	return _current_road.last_point() if _forward else _current_road.first_point()
+func _closest_on_next_road() -> float:
+	return _next_road.closest_travelled(global_position, _next_station, lookahead_distance)
 
 func _switch_to_next_road() -> void:
-	_current_road = _next_road
-	_forward = _next_forward
-	_travelled = 0.0 if _forward else _current_road.length
+	var joined_at := _closest_on_next_road()
+	_place_on(_next_road, joined_at, _next_forward)
+	_passed_station = _next_station
+
+func _place_on(road: RoadTrack, travelled: float, forward: bool) -> void:
+	_current_road = road
+	_travelled = travelled
+	_passed_station = travelled
+	_forward = forward
 	_next_road = null
 
 ## Called every physics frame the player's car is touching the truck (see
@@ -462,9 +508,9 @@ func _pick_new_road() -> void:
 			usable.append(track)
 	if usable.is_empty():
 		return
-	_current_road = usable[_rng.randi_range(0, usable.size() - 1)]
-	_forward = true
-	_travelled = 0.0
+	var road := usable[_rng.randi_range(0, usable.size() - 1)]
+	_place_on(road, _rng.randf_range(0.0, road.length), _rng.randf() < 0.5)
+	global_position = road.sample(_travelled)
 
 ## Any full bin/dumpster (see TrashProp, group "trash") close enough right
 ## now gets emptied — quietly, no orbs spilled. The reward for a bin is
@@ -564,72 +610,6 @@ func _spawn_skid_segment(a: Vector2, b: Vector2) -> void:
 	tween.tween_interval(skid_mark_hold_time)
 	tween.tween_property(line, "modulate:a", 0.0, skid_mark_fade_time)
 	tween.tween_callback(line.queue_free)
-
-## A road polyline with the arc length at each of its points, so sampling
-## and closest-point lookups binary-search to the right segment instead of
-## walking from the road's start.
-class RoadTrack:
-	var points: PackedVector2Array
-	var distances := PackedFloat32Array()
-	var length := 0.0
-
-	func _init(road_points: PackedVector2Array) -> void:
-		points = road_points
-		distances.resize(points.size())
-		for i in range(1, points.size()):
-			length += points[i - 1].distance_to(points[i])
-			distances[i] = length
-
-	func first_point() -> Vector2:
-		return points[0]
-
-	func last_point() -> Vector2:
-		return points[points.size() - 1]
-
-	## Which way the road points as it runs out of its start or end, sampled
-	## a short way in so a single jittery vertex doesn't skew it.
-	func direction_at_end(at_start: bool) -> Vector2:
-		var reach := minf(60.0, length)
-		if at_start:
-			return sample(reach).direction_to(first_point())
-		return sample(length - reach).direction_to(last_point())
-
-	## Point `distance` along the road, clamped to its ends.
-	func sample(distance: float) -> Vector2:
-		if distance <= 0.0:
-			return points[0]
-		if distance >= length:
-			return last_point()
-		var i := _segment_at(distance)
-		var segment := distances[i + 1] - distances[i]
-		if segment <= 0.0:
-			return points[i]
-		return points[i].lerp(points[i + 1], (distance - distances[i]) / segment)
-
-	## Arc length of the point closest to `position`, only looking within
-	## `window` of `around` so a road that doubles back past itself can't make
-	## the truck's progress jump to the wrong stretch.
-	func closest_travelled(position: Vector2, around: float, window: float) -> float:
-		var best_distance := INF
-		var best_travelled := around
-		var first := _segment_at(around - window)
-		var last := _segment_at(around + window)
-		for i in range(first, last + 1):
-			var a := points[i]
-			var b := points[i + 1]
-			var segment := distances[i + 1] - distances[i]
-			if segment <= 0.0:
-				continue
-			var t := clampf((position - a).dot(b - a) / (segment * segment), 0.0, 1.0)
-			var distance := position.distance_squared_to(a.lerp(b, t))
-			if distance < best_distance:
-				best_distance = distance
-				best_travelled = distances[i] + t * segment
-		return best_travelled
-
-	## Index of the segment containing arc length `distance`, clamped.
-	func _segment_at(distance: float) -> int:
-		return clampi(distances.bsearch(distance, true) - 1, 0, points.size() - 2)
 
 ## Same resolution convention as PlayerCar/TrashSpawner: the exported path
 ## first, falling back to searching the scene for any RoadNetwork.

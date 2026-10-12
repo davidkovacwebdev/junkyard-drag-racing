@@ -77,6 +77,7 @@ const _WHEEL_SCENES := [
 	"res://scenes/parts/wheels/wheel_tank_track.tscn",
 	"res://scenes/parts/wheels/wheel_helmet.tscn",
 	"res://scenes/parts/wheels/wheel_anchor.tscn",
+	"res://scenes/parts/wheels/wheel_anvil.tscn",
 	"res://scenes/parts/wheels/wheel_bigfoot_leg.tscn",
 	"res://scenes/parts/wheels/wheel_wheelchair.tscn",
 ]

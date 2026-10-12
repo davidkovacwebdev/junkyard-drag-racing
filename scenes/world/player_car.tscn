@@ -116,7 +116,14 @@ mouse_filter = 2
 alignment = 2
 theme_override_constants/separation = 6
 
-[node name="ScrapIcon" type="Control" parent="UI/Resources"]
+[node name="ScrapReadout" type="HBoxContainer" parent="UI/Resources"]
+layout_mode = 2
+mouse_filter = 1
+tooltip_text = "SCRAP
+Sell it to the scrap dealer at the Junkyard."
+theme_override_constants/separation = 6
+
+[node name="ScrapIcon" type="Control" parent="UI/Resources/ScrapReadout"]
 custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
 size_flags_vertical = 4
@@ -124,7 +131,7 @@ mouse_filter = 2
 script = ExtResource("9")
 kind = 0
 
-[node name="ScrapLabel" type="Label" parent="UI/Resources"]
+[node name="ScrapLabel" type="Label" parent="UI/Resources/ScrapReadout"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
@@ -138,7 +145,14 @@ custom_minimum_size = Vector2(14, 0)
 layout_mode = 2
 mouse_filter = 2
 
-[node name="MoneyIcon" type="Control" parent="UI/Resources"]
+[node name="MoneyReadout" type="HBoxContainer" parent="UI/Resources"]
+layout_mode = 2
+mouse_filter = 1
+tooltip_text = "MONEY
+Spend it on races, the crane and more."
+theme_override_constants/separation = 6
+
+[node name="MoneyIcon" type="Control" parent="UI/Resources/MoneyReadout"]
 custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
 size_flags_vertical = 4
@@ -146,7 +160,7 @@ mouse_filter = 2
 script = ExtResource("9")
 kind = 1
 
-[node name="MoneyLabel" type="Label" parent="UI/Resources"]
+[node name="MoneyLabel" type="Label" parent="UI/Resources/MoneyReadout"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)

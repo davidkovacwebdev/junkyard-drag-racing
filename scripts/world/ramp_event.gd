@@ -33,6 +33,15 @@ const RUN_QUESTS: Array[StringName] = [&"ramp_check", &"ramp_again"]
 const LOCKED_MESSAGE := "Ramp: Nobody's told you about this one yet"
 const LOCKED_COLOR := Color(0.95, 0.2, 0.2, 1)
 
+## Driving right at the launch deck this fast, in its lane, sends the map car
+## up it and off the lip (RampJump) instead of bumping into the footprint.
+## Works locked or not: it's just a ramp.
+const JUMP_MIN_SPEED := 200.0
+## How far left of the deck's foot the car is caught, so its nose never
+## touches the footprint first.
+const JUMP_CATCH_REACH := 110.0
+const JUMP_LANE_SLACK := 10.0
+
 ## Whether the player may take a run at it.
 static func unlocked() -> bool:
 	return Quests.has_quest(UNLOCK_QUEST) or Quests.is_complete(UNLOCK_QUEST)
@@ -53,6 +62,37 @@ func interact(_actor: Node = null) -> void:
 	if interior_scene is PackedScene:
 		Sfx.play(&"door_close", -4.0)
 		SceneLoader.change_scene_packed(interior_scene)
+
+## How high the ramp's top surface stands at `local_x` (this node's space,
+## measured up from the ground line): the launch deck, the landing ramp, or
+## flat ground. The gap between them is ground.
+func surface_height(local_x: float) -> float:
+	var ground_y := size.y / 2.0
+	if local_x >= LAUNCH_START_X and local_x <= LAUNCH_LIP.x:
+		return (ground_y - LAUNCH_LIP.y) * inverse_lerp(LAUNCH_START_X, LAUNCH_LIP.x, local_x)
+	if local_x >= LANDING_TOP.x and local_x <= LANDING_END_X:
+		return (ground_y - LANDING_TOP.y) * inverse_lerp(LANDING_END_X, LANDING_TOP.x, local_x)
+	return 0.0
+
+## Rise per pixel along x of `surface_height()` at `local_x`.
+func surface_slope(local_x: float) -> float:
+	var ground_y := size.y / 2.0
+	if local_x >= LAUNCH_START_X and local_x <= LAUNCH_LIP.x:
+		return (ground_y - LAUNCH_LIP.y) / (LAUNCH_LIP.x - LAUNCH_START_X)
+	if local_x >= LANDING_TOP.x and local_x <= LANDING_END_X:
+		return (ground_y - LANDING_TOP.y) / (LANDING_TOP.x - LANDING_END_X)
+	return 0.0
+
+func _physics_process(_delta: float) -> void:
+	if Engine.is_editor_hint() or Cutscenes.is_active():
+		return
+	var car := get_tree().get_first_node_in_group(PlayerCar.GROUP) as PlayerCar
+	if car == null or car.velocity.x < JUMP_MIN_SPEED:
+		return
+	var local := to_local(car.global_position)
+	var in_lane := local.y >= DECK_BACK.y - JUMP_LANE_SLACK and local.y <= JUMP_LANE_SLACK
+	if in_lane and local.x >= LAUNCH_START_X - JUMP_CATCH_REACH and local.x < LAUNCH_START_X:
+		car.start_ramp_jump(self)
 
 func _draw() -> void:
 	draw_set_transform(art_origin())

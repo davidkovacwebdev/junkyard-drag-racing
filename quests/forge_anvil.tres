@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"forge_anvil"
+title = "Hammer Time"
+giver = "Gus"
+description = "Gus the smith can't forge a thing: his anvil's gone. He swears it was right there on the stump.
+
+Anvils turn up in the junk now and then. One's far too heavy for the trunk, so the only way to get it to him is to bolt it on as a wheel and drive it over."
+objective = "Find an anvil in the junk and bolt it on as a wheel"
+fit_part_goal = "res://scenes/parts/wheels/wheel_anvil.tscn"
+reminder_line = "No anvil, no forge. Bolt one on and roll it over here. I ain't carryin' it."

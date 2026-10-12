@@ -1,10 +1,10 @@
 class_name CoinsCutscene
 extends Cutscene
 ## The staging "Ask Around" scenes share (FarmerCoinsCutscene,
-## SmithCoinsCutscene): the player hops out of the car and walks up to an NPC
-## who shows them some treasure coins, held up in a CoinCloseup to inspect.
-## The NPC's own rig in the world hides while a CutsceneActor stands in for
-## them, and comes back at the end.
+## SmithCoinsCutscene; ForgeAnvilCutscene borrows it): the player hops out of
+## the car and walks up to an NPC who shows them some treasure coins, held up
+## in a CoinCloseup to inspect. The NPC's own rig in the world hides while a
+## CutsceneActor stands in for them, and comes back at the end.
 
 const NICKEL := preload("res://scenes/items/icons/item_old_nickel.tscn")
 

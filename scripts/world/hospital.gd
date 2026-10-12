@@ -5,29 +5,36 @@ extends ComposedBuilding
 ## while "Bad News" is on: then E walks in to the morgue
 ## (scenes/hospital/hospital.tscn), where Grandpa lies under a sheet.
 ##
-## Out front, right of the door, a "no honking" sign, and around it the quiet
-## zone that calls the police on a player who leans on the horn
-## (HospitalQuietZone). Both are added from here rather than placed in
-## main.tscn.
+## Out front, a red-cross sign left of the door and a "no honking" sign right
+## of it, and around them the quiet zone that calls the police on a player who
+## leans on the horn (HospitalQuietZone). All added from here rather than
+## placed in main.tscn, after the building has settled onto its ground line.
+## The hospital y-sorts its children so each sign sorts at its own post base.
 
 const QUEST_ID := &"hospital_visit"
 const MORGUE_SCENE := "res://scenes/hospital/hospital.tscn"
 const LOCKED_COLOR := Color(0.75, 0.75, 0.72)
+const CROSS_SIGN := preload("res://scenes/world/hospital_sign.tscn")
 const NO_HORN_SIGN := preload("res://scenes/world/no_horn_sign.tscn")
-## Mirrors the red-cross sign on the other side of the door.
-const NO_HORN_SIGN_SPOT := Vector2(165.0, 110.0)
+const CROSS_SIGN_SPOT := Vector2(-165.0, 47.0)
+const NO_HORN_SIGN_SPOT := Vector2(165.0, 47.0)
 
 func _ready() -> void:
 	super()
 	if Engine.is_editor_hint():
 		return
-	var sign := NO_HORN_SIGN.instantiate() as Node2D
-	sign.name = "NoHornSign"
-	sign.position = NO_HORN_SIGN_SPOT
-	add_child(sign)
+	y_sort_enabled = true
+	_add_sign(CROSS_SIGN, "CrossSign", CROSS_SIGN_SPOT)
+	_add_sign(NO_HORN_SIGN, "NoHornSign", NO_HORN_SIGN_SPOT)
 	var zone := HospitalQuietZone.new()
 	zone.name = "QuietZone"
 	add_child(zone)
+
+func _add_sign(scene: PackedScene, sign_name: String, spot: Vector2) -> void:
+	var sign := scene.instantiate() as Node2D
+	sign.name = sign_name
+	sign.position = spot
+	add_child(sign)
 
 func is_open() -> bool:
 	return Quests.has_quest(QUEST_ID)

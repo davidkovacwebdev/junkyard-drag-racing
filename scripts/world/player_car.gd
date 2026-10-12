@@ -220,8 +220,8 @@ const SCENE_HINT_LIFT := 44.0
 @onready var _tooltip_label: Label = $UI/TooltipLabel
 @onready var _hold_bar_bg: Control = $UI/HoldBarBg
 @onready var _hold_bar_fill: Control = $UI/HoldBarBg/HoldBarFill
-@onready var _scrap_label: Label = $UI/Resources/ScrapLabel
-@onready var _money_label: Label = $UI/Resources/MoneyLabel
+@onready var _scrap_label: Label = $UI/Resources/ScrapReadout/ScrapLabel
+@onready var _money_label: Label = $UI/Resources/MoneyReadout/MoneyLabel
 @onready var _day_label: Label = $UI/DayCounter/DayLabel
 
 var _road_network: RoadNetwork = null
@@ -272,6 +272,7 @@ var _default_collision_mask: int = 1
 var _under_bridge := false
 var _default_collision_layer: int = 1
 var _traveling: bool = false
+var _ramp_jump: RampJump = null
 
 const TOW_RESCUE := preload("res://cutscenes/tow_truck_rescue.tres")
 const SCRAP_PICKUP := preload("res://scenes/world/scrap_pickup.tscn")
@@ -297,6 +298,8 @@ func _ready() -> void:
 	add_to_group(GROUP)
 	Cutscenes.started.connect(_set_hud_visible.bind(false))
 	Cutscenes.finished.connect(_set_hud_visible.bind(true))
+	for readout: Control in [$UI/Resources/ScrapReadout, $UI/Resources/MoneyReadout]:
+		readout.mouse_entered.connect(Sfx.play.bind(&"ui_hover", Sfx.UI_HOVER_VOLUME_DB))
 	_road_network = _resolve_in_scene(roads_path, RoadNetwork) as RoadNetwork
 	_skid_marks = _resolve_in_scene(skid_marks_path, SkidMarksLayer) as SkidMarksLayer
 	_puddles = _resolve_in_scene(puddles_path, PuddleField) as PuddleField
@@ -436,6 +439,43 @@ func set_traveling(traveling: bool) -> void:
 	collision_mask = _default_collision_mask
 	Sfx.play(&"gravel_crunch", -2.0, 0.05)
 
+## Sends the car up `ramp`'s launch deck and off the lip (see RampJump),
+## steering locked until it's down and clear of the ramp. Ignored while the
+## car can't drive or is already mid-jump.
+func start_ramp_jump(ramp: RampEvent) -> void:
+	if is_instance_valid(_ramp_jump) or _traveling or _stuck or _sink > 0.0 \
+			or is_instance_valid(_fishing) or collision_mask == 0:
+		return
+	_ramp_jump = RampJump.new(ramp, velocity.x)
+	add_child(_ramp_jump)
+	move_child(_ramp_jump, _visual.get_index())
+	add_collision_exception_with(ramp)
+	_facing_right = true
+	_visual.scale.x = 1.0
+	_visual.mirror_collision(_collision, _walker_collision)
+
+## Wobbles the car's soft body (see CarView.jiggle()), e.g. on a crash landing.
+func jiggle_visual() -> void:
+	_visual.jiggle()
+
+func _ride_ramp_jump(delta: float) -> void:
+	velocity = Vector2(_ramp_jump.speed, 0.0)
+	move_and_slide()
+	_ramp_jump.step(delta, get_slide_collision_count() > 0)
+	z_index = 1
+	_visual.position = Vector2(0.0, -_ramp_jump.height)
+	_visual.rotation = _ramp_jump.rotation_angle()
+	_visual.animate_wheels(_ramp_jump.speed * delta, delta)
+	_update_sounds(delta, Vector2.RIGHT, false, 0.0)
+	_process_interaction(delta)
+	if not _ramp_jump.done:
+		return
+	remove_collision_exception_with(_ramp_jump.ramp)
+	velocity = Vector2(_ramp_jump.speed, 0.0)
+	_tilt = 0.0
+	_ramp_jump.queue_free()
+	_ramp_jump = null
+
 func _read_input_dir() -> Vector2:
 	var input_dir := Vector2.ZERO
 	if _is_key_held(KEY_A) or _is_key_held(KEY_LEFT):
@@ -494,6 +534,9 @@ func _is_spot_clear(spot: Vector2) -> bool:
 func _physics_process(delta: float) -> void:
 	if _traveling:
 		_travel(delta)
+		return
+	if is_instance_valid(_ramp_jump):
+		_ride_ramp_jump(delta)
 		return
 	var input_dir := _read_input_dir()
 
