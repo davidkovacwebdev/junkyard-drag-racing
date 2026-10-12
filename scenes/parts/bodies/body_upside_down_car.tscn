@@ -22,14 +22,6 @@ impact_sound = &"metal_scrape"
 script = ExtResource("1")
 part_data = SubResource("Resource_upside_down_car")
 
-[node name="DeadTyreBack" type="Polygon2D" parent="."]
-color = Color(0.15, 0.15, 0.16, 1)
-polygon = PackedVector2Array(-85.22, -35.88, -93.88, -27.22, -106.12, -27.22, -114.78, -35.88, -114.78, -48.12, -106.12, -56.78, -93.88, -56.78, -85.22, -48.12)
-
-[node name="DeadTyreFront" type="Polygon2D" parent="."]
-color = Color(0.15, 0.15, 0.16, 1)
-polygon = PackedVector2Array(114.78, -35.88, 106.12, -27.22, 93.88, -27.22, 85.22, -35.88, 85.22, -48.12, 93.88, -56.78, 106.12, -56.78, 114.78, -48.12)
-
 [node name="Polygon2D" type="Polygon2D" parent="."]
 color = Color(0.3, 0.42, 0.55, 1)
 polygon = PackedVector2Array(-130, -42, 130, -42, 130, -22, 112, -16, 72, -12, 58, -12, 44, 16, -46, 16, -56, -12, -72, -12, -112, -16, -130, -22)

@@ -1,6 +1,6 @@
 class_name MainMenu
 extends Control
-## The main menu, shown once LoadingScreen has finished rendering the music. Play
+## The main menu, loaded in the background by BootScreen. Play
 ## opens the save slots screen (load a profile, or start a new game in an empty
 ## one). Settings/Credits are real
 ## screens, just placeholder content for now.
