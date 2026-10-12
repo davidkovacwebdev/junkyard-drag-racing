@@ -20,6 +20,9 @@ extends Node
 
 ## In a giver's lines, becomes the quest's note (see `notes`).
 const NOTE_TOKEN := "{part}"
+## How far past the screen's edge a giver still counts as in view, so a
+## held-back follow-up never changes them in front of the player.
+const GIVER_VIEW_MARGIN := 200.0
 
 signal quest_added(quest: QuestData)
 ## The goal is met and the player should go back to the giver.
@@ -46,8 +49,8 @@ var notes: Dictionary = {}
 var counts: Dictionary = {}
 ## Quest id -> seconds of horn honked toward its `horn_goal_seconds`.
 var horn_times: Dictionary = {}
-## Quest id -> the in-game day it lands in the log: follow-ups held back by
-## a finished quest's `follow_up_delay_days`.
+## Quest id -> the game time (Funeral.now()) it lands in the log: follow-ups
+## held back by a finished quest's `follow_up_delay_days`.
 var delayed: Dictionary = {}
 
 func _process(_delta: float) -> void:
@@ -459,20 +462,37 @@ func _already_past(quest: QuestData) -> bool:
 
 ## Puts `next` on hold for `days` in-game days, unless it's already waiting
 ## (or already the player's).
-func _hold_back(next: QuestData, days: int) -> void:
+func _hold_back(next: QuestData, days: float) -> void:
 	if next == null or delayed.has(next.id) or has_quest(next.id) or is_complete(next.id):
 		return
-	delayed[next.id] = DayNightCycle.day + days
+	delayed[next.id] = Funeral.now() + days * DayNightCycle.DAY_LENGTH
 
-## Gives every held-back follow-up whose day has come.
+## Gives every held-back follow-up whose time has come, once the giver of
+## the quest that held it back is out of sight ("Grandpa?" makes Grandpa
+## vanish, which shouldn't happen in front of the player).
 func _give_due_follow_ups() -> void:
 	for quest in completed:
-		if quest.follow_up_delay_days <= 0:
+		if quest.follow_up_delay_days <= 0.0:
 			continue
 		for next in quest.follow_ups:
-			if next != null and delayed.has(next.id) and DayNightCycle.day >= int(delayed[next.id]):
+			if next != null and delayed.has(next.id) and Funeral.now() >= float(delayed[next.id]) \
+					and not _giver_in_view(quest.giver):
 				delayed.erase(next.id)
 				give(next)
+
+## Whether the giver called `giver_name` is on screen right now.
+func _giver_in_view(giver_name: String) -> bool:
+	if giver_name.is_empty():
+		return false
+	var viewport := get_viewport()
+	var view := (viewport.get_canvas_transform().affine_inverse() * viewport.get_visible_rect()) \
+			.grow(GIVER_VIEW_MARGIN)
+	for giver in get_tree().get_nodes_in_group(Minimap.GIVER_GROUP):
+		var body := giver as Node2D
+		if body != null and String(body.get("display_name")) == giver_name \
+				and body.is_visible_in_tree() and view.has_point(body.global_position):
+			return true
+	return false
 
 static func _find(quests: Array[QuestData], id: StringName) -> QuestData:
 	for quest in quests:
