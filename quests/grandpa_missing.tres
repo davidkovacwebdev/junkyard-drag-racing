@@ -1,6 +1,7 @@
-[gd_resource type="Resource" script_class="QuestData" format=3]
+[gd_resource type="Resource" script_class="QuestData" format=3 uid="uid://bvj5ffvca5hxd"]
 
 [ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://b4kssi28o6a3g" path="res://scripts/items/item_data.gd" id="2_ihcka"]
 [ext_resource type="Resource" path="res://quests/hospital_visit.tres" id="2_next"]
 
 [resource]
@@ -11,5 +12,5 @@ description = "You haven't heard Grandpa yell at you in hours. No \"SCRAPS!\", n
 Go check on him at the Garage."
 objective = "Check on Grandpa at the Garage"
 objective_place = "Garage"
-follow_ups = Array[ExtResource("1_script")]([ExtResource("2_next")])
+follow_ups = [ExtResource("2_next")]
 return_to_giver = false

@@ -44,6 +44,8 @@ The debug profile is optimised (`opt-level = 3` in `Cargo.toml`), so the editor 
 - **Windows:** `junk_native.dll`. Build on Windows with the same commands (MSVC Rust is fine). Cross-compiling from Linux needs `rustup target add x86_64-pc-windows-gnu`, mingw-w64 (`x86_64-w64-mingw32-gcc`), and `cargo build --release --target x86_64-pc-windows-gnu`. In that case copy the `.dll` to `rust/target/release/`, or point the `windows.*` lines of the `.gdextension` at `rust/target/x86_64-pc-windows-gnu/release/`.
 - **macOS:** `libjunk_native.dylib`, built on a Mac.
 
+- **Windows from a Mac:** run `rust/build_windows.sh`. It cross-builds with `cargo-zigbuild` (Zig as the linker, installed as the `ziglang` Python package, no Homebrew needed) and copies `junk_native.dll` into `rust/target/release/` and `rust/target/debug/`. One-time setup is listed at the top of the script. The DLL only needs system DLLs that ship with Windows 10/11.
+
 **Before exporting, build the release library for the export's platform.** The "Windows Desktop" preset needs `junk_native.dll`, or the exported game won't start.
 
 ## Checking a change still matches
