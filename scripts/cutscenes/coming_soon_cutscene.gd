@@ -15,5 +15,5 @@ func _init() -> void:
 
 func play() -> void:
 	await Cutscenes.fade_out(0.6)
-	Cutscenes.sound(&"quest_complete", -4.0)
+	Cutscenes.sound(&"quest_complete", -2.0)
 	await Cutscenes.title_card(card_text, seconds)

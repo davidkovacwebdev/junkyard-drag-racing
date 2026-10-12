@@ -15,7 +15,7 @@ At the Drag Strip, pick the Chop Shop tier, choose Bet and back Roge Roger. Then
 objective = "Bet on Roge Roger in the Chop Shop tier at the Drag Strip"
 objective_place = "Drag Strip"
 follow_ups = Array[ExtResource("1_script")]([ExtResource("2_next")])
-follow_up_delay_days = 2
+follow_up_delay_days = 0.25
 start_cutscene = "res://cutscenes/grandpa_roge.tres"
 start_money = 100
 reminder_line = "Roge Roger, {player}! Top division! Put the money on Roge!"

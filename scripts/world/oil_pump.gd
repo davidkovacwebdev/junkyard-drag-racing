@@ -47,7 +47,7 @@ func _ready() -> void:
 	_creak = AudioStreamPlayer2D.new()
 	_creak.stream = Sfx.stream(&"pumpjack_creak")
 	_creak.bus = SoundLibrary.bus_for(&"pumpjack_creak")
-	_creak.volume_db = -10.0
+	_creak.volume_db = -10.0 + Sfx.level_trim_db(&"pumpjack_creak")
 	_creak.max_distance = CREAK_HEARING_RANGE
 	_creak.position = PIVOT
 	add_child(_creak)

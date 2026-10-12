@@ -49,7 +49,7 @@ func _close(confirmed: bool) -> void:
 	if _closing:
 		return
 	_closing = true
-	Sfx.play(&"ui_click", -6.0)
+	Sfx.play(&"ui_click", Sfx.UI_CLICK_VOLUME_DB + 2.0)
 	var tween := create_tween().set_parallel()
 	tween.tween_property(_overlay, "color:a", 0.0, FADE_TIME)
 	tween.tween_property(_board, "scale", Vector2(1.06, 0.0), FADE_TIME)

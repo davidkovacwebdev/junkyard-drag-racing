@@ -24,3 +24,4 @@ gust_level = 0.2
 gust_rate = 1.2
 idle_volume = 0.3
 max_volume = 0.8
+level_db = 3.0

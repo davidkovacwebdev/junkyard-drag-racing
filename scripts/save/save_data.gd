@@ -47,7 +47,7 @@ extends Resource
 @export var quest_counts: Dictionary = {}
 ## Quest id -> seconds of horn honked for it (see Quests.add_horn_time()).
 @export var quest_horn_times: Dictionary = {}
-## Quest id -> the day a held-back follow-up lands (see Quests.delayed).
+## Quest id -> the game time a held-back follow-up lands (see Quests.delayed).
 @export var quest_delayed: Dictionary = {}
 ## Tools and gadgets bought at the shop (see ItemData).
 @export var owned_items: Array[ItemData] = []

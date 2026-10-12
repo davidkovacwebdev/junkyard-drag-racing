@@ -20,3 +20,4 @@ whine_level = 0.5
 whine_ratio = 2.0
 idle_volume = 0.2
 max_volume = 0.55
+level_db = 3.0

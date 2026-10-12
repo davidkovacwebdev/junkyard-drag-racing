@@ -101,10 +101,7 @@ func _move_out_of_sight() -> void:
 	if pool.is_empty():
 		return
 	var chosen: Dictionary = pool[_rng.randi_range(0, pool.size() - 1)]
-	_current_road = chosen["road"]
-	_forward = _rng.randf() < 0.5
-	_travelled = chosen["travelled"]
-	_next_road = null
+	_place_on(chosen["road"], chosen["travelled"], _rng.randf() < 0.5)
 	global_position = _current_road.sample(_travelled)
 
 ## Of the junction's exits, the one that keeps him nearest the graveyard
@@ -134,8 +131,7 @@ func _keep_near_graveyard() -> void:
 	var step := LEASH_LOOK if _forward else -LEASH_LOOK
 	var ahead := _current_road.sample(clampf(_travelled + step, 0.0, _current_road.length))
 	if ahead.distance_to(gate) > here:
-		_forward = not _forward
-		_next_road = null
+		_turn_around()
 
 func _graveyard() -> Vector2:
 	var gate := get_tree().get_first_node_in_group(GraveyardGate.GROUP) as Node2D

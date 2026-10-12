@@ -33,6 +33,7 @@ func _ready() -> void:
 	bus = AudioSettings.CARS
 	if profile == null:
 		return
+	volume_db += profile.level_db
 	var generator := AudioStreamGenerator.new()
 	generator.mix_rate = Synth.SAMPLE_RATE
 	generator.buffer_length = BUFFER_SECONDS

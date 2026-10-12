@@ -28,7 +28,7 @@ const BEAM_SHADER := preload("res://shaders/headlight_beam.gdshader")
 @export_range(0.0, 1.0) var switch_off_night_factor: float = 0.18
 ## How long a lamp takes to warm up, stuttering on the way like an old bulb.
 @export var warm_up_seconds: float = 0.35
-@export var click_volume_db: float = -8.0
+@export var click_volume_db: float = -12.0
 
 @export var car_view_path: NodePath = ^"../Visual"
 

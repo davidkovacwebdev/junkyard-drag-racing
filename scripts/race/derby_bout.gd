@@ -6,14 +6,17 @@ extends RefCounted
 ## if it's behind, rear first like a real derby driver), and pick again every
 ## couple of seconds or when about to hit a wall.
 ##
-## A car is out when its body breaks, it lies on its roof, it loses every
-## wheel, or it sits still too long. A knockout is credited to the last rival
+## A car is out when its body breaks, it lies on its roof with a rival still
+## on it, it loses every wheel, or it sits still too long. A car left alone on
+## its roof is dropped back in upright at the far end of the pit instead. A knockout is credited to the last rival
 ## that touched the car within KILL_CREDIT_TIME. Used by the derby race
 ## (DerbySetup), which calls step() every physics frame.
 
 signal knocked_out(driver: Driver, reason: String, killer: Driver)
 ## Every rival is out and `driver` is the only car left running.
 signal last_one_standing(driver: Driver)
+## A car left alone on its roof was dropped back in at the far end of the pit.
+signal respawned(driver: Driver)
 
 ## The cars' own layer: they hit each other, the floor and the walls.
 const CAR_LAYER := 128
@@ -24,6 +27,12 @@ const WALL_TURN_DISTANCE := 260.0
 ## Lying past this angle for ROOF_TIME seconds counts as on its roof.
 const ROOF_ANGLE := 2.0
 const ROOF_TIME := 3.0
+## Once ROOF_TIME is up, a car no rival has touched for this long is dropped
+## back in rather than knocked out, so a lone flip isn't the end of a bout.
+const ROOF_QUIET_TIME := 2.0
+## How far in from a wall, and how high up, a flipped car is dropped back in.
+const RESPAWN_WALL_INSET := 350.0
+const RESPAWN_DROP_HEIGHT := 120.0
 const STUCK_SPEED := 30.0
 const STUCK_TIME := 7.0
 ## Share of each part's durability it enters the pit with. Head-on hits in
@@ -44,6 +53,8 @@ class Driver:
 	var kills := 0
 	var last_hitter: Driver = null
 	var last_hit_time := -INF
+	## The body's height when it was standing on the pit floor.
+	var floor_y := 0.0
 
 var drivers: Array[Driver] = []
 var elapsed := 0.0
@@ -70,6 +81,7 @@ func add_car(car_name: String, car: CarAssembler.AssembledCar) -> Driver:
 	var driver := Driver.new()
 	driver.car_name = car_name
 	driver.car = car
+	driver.floor_y = car.body.global_position.y
 	for part in [car.body] + car.wheels:
 		_driver_of_part[part] = driver
 	for wheel in car.wheels:
@@ -86,7 +98,9 @@ func step(delta: float) -> void:
 		if driver.out:
 			continue
 		var reason := _knockout_reason(driver, delta)
-		if not reason.is_empty():
+		if reason == "on its roof" and elapsed - driver.last_hit_time >= ROOF_QUIET_TIME:
+			_respawn(driver)
+		elif not reason.is_empty():
 			_knock_out(driver, reason)
 			continue
 		_drive(driver, delta)
@@ -169,6 +183,55 @@ func _knockout_reason(driver: Driver, delta: float) -> String:
 	if driver.stuck_time > STUCK_TIME:
 		return "stuck"
 	return ""
+
+## Lifts the whole car (body, wheels and anything jointed to them) upright to
+## the end of the pit furthest from any rival and lets it drop, already
+## driving back towards the middle.
+func _respawn(driver: Driver) -> void:
+	var body := driver.car.body
+	var x := _respawn_x(driver)
+	var upright := Transform2D(0.0, body.global_transform.get_scale(), 0.0, Vector2(x, driver.floor_y - RESPAWN_DROP_HEIGHT))
+	var from_body := body.global_transform.affine_inverse()
+	for part in _rigid_parts(driver):
+		var moved := upright * from_body * part.global_transform
+		PhysicsServer2D.body_set_state(part.get_rid(), PhysicsServer2D.BODY_STATE_TRANSFORM, moved)
+		part.global_transform = moved
+		part.linear_velocity = Vector2.ZERO
+		part.angular_velocity = 0.0
+	driver.roof_time = 0.0
+	driver.stuck_time = 0.0
+	driver.last_hitter = null
+	driver.last_hit_time = -INF
+	driver.direction = signf((_arena_left + _arena_right) * 0.5 - x)
+	driver.retarget_in = RETARGET_TIME.y
+	_set_spin(driver, driver.direction)
+	respawned.emit(driver)
+
+## The drop-in spot by whichever wall has its nearest rival further away.
+func _respawn_x(driver: Driver) -> float:
+	var left_x := _arena_left + RESPAWN_WALL_INSET
+	var right_x := _arena_right - RESPAWN_WALL_INSET
+	var left_gap := INF
+	var right_gap := INF
+	for other in running():
+		if other == driver or not is_instance_valid(other.car.body):
+			continue
+		var other_x := other.car.body.global_position.x
+		left_gap = minf(left_gap, absf(other_x - left_x))
+		right_gap = minf(right_gap, absf(other_x - right_x))
+	return left_x if left_gap > right_gap else right_x
+
+## Body, wheels and the accessories hung off them, but not the debris of
+## broken parts, which lies loose under the car's root.
+func _rigid_parts(driver: Driver) -> Array[RigidBody2D]:
+	var parts: Array[RigidBody2D] = []
+	for part in [driver.car.body] + driver.car.wheels:
+		if not is_instance_valid(part):
+			continue
+		parts.append(part)
+		for child in (part as Node).find_children("*", "RigidBody2D", true, false):
+			parts.append(child as RigidBody2D)
+	return parts
 
 func _knock_out(driver: Driver, reason: String) -> void:
 	stop(driver)

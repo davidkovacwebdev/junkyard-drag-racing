@@ -327,11 +327,7 @@ func _refresh_drive_car() -> void:
 	var car: CarModelData = cars[_car_index]
 	_drive_car_view.build_from(car)
 	_drive_name_label.text = "%s  (%d/%d)\nEntry fee: $%d" % [car.display_name, _car_index + 1, cars.size(), fee]
-	# A car stripped in the garage stays parked until it's put back together.
-	var missing := car.missing_parts()
-	if not missing.is_empty():
-		_drive_name_label.text = "%s  (%d/%d)\nCan't race: %s" % [car.display_name, _car_index + 1, cars.size(), missing]
-	_drive_race_button.disabled = not Inventory.can_afford(fee) or not missing.is_empty()
+	_drive_race_button.disabled = not Inventory.can_afford(fee)
 
 func _on_race_pressed() -> void:
 	var fee := RaceProgression.entry_fee_for_tier(_tier)

@@ -39,7 +39,7 @@ func _ready() -> void:
 	_face = Node2D.new()
 	_face.draw.connect(_draw_face)
 	_group.add_child(_face)
-	Sfx.play(&"jumpscare_scream", 6.0 + boost_db, 0.0)
+	Sfx.play(&"jumpscare_scream", 12.0 + boost_db, 0.0)
 	var tween := create_tween()
 	tween.tween_property(_group, "scale", Vector2.ONE, SECONDS * 0.4) \
 			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)

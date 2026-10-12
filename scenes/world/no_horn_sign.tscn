@@ -1,7 +1,14 @@
 [gd_scene format=3]
 
-[node name="NoHornSign" type="Node2D"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_footprint"]
+size = Vector2(14, 8)
+
+[node name="NoHornSign" type="StaticBody2D"]
 rotation = 0.04
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -4)
+shape = SubResource("RectangleShape2D_footprint")
 
 [node name="Pole" type="Polygon2D" parent="."]
 color = Color(0.3, 0.3, 0.32, 1)

@@ -12,7 +12,7 @@ extends Node2D
 const CAR_COUNT := 5
 ## Arena floor x's the cars start on, left to right.
 const SPAWN_XS: Array[float] = [500.0, 950.0, 1400.0, 1850.0, 2300.0]
-const KILL_CALLOUT_OFFSET := Vector2(0.0, -140.0)
+const CALLOUT_OFFSET := Vector2(0.0, -140.0)
 
 var _race_controller: RaceController
 var _bout: DerbyBout
@@ -26,6 +26,7 @@ func _ready() -> void:
 			(track.get_node("RightWall") as Node2D).global_position.x)
 	_bout.knocked_out.connect(_on_knocked_out)
 	_bout.last_one_standing.connect(_on_last_one_standing)
+	_bout.respawned.connect(_on_respawned)
 	var cars := Node2D.new()
 	cars.name = "Cars"
 	add_child(cars)
@@ -82,11 +83,16 @@ func _on_knocked_out(driver: DerbyBout.Driver, reason: String, killer: DerbyBout
 		return
 	print("    %s gets the kill" % killer.car_name)
 	if is_instance_valid(killer.car.body):
-		Pickup.spawn_callout(self, killer.car.body.global_position + KILL_CALLOUT_OFFSET, "KILL!")
+		Pickup.spawn_callout(self, killer.car.body.global_position + CALLOUT_OFFSET, "KILL!")
 	if _race_controller != null:
 		_race_controller.credit_kill(killer.car_name)
 	if killer.car_name.begins_with("Player_"):
 		Sfx.play(&"derby_kill", -4.0, 0.03)
+
+func _on_respawned(driver: DerbyBout.Driver) -> void:
+	print("    %s is dropped back in" % driver.car_name)
+	Sfx.play(&"derby_drop_in", -6.0, 0.05)
+	Pickup.spawn_callout(self, driver.car.body.global_position + CALLOUT_OFFSET, "BACK IN!")
 
 func _on_last_one_standing(driver: DerbyBout.Driver) -> void:
 	if _race_controller != null:

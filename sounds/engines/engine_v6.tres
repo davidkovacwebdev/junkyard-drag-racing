@@ -18,3 +18,4 @@ cutoff_max = 1500.0
 resonance_frequency = 1400.0
 resonance_q = 4.0
 resonance_gain = 0.12
+level_db = -2.5

@@ -213,7 +213,7 @@ func _input(event: InputEvent) -> void:
 	get_viewport().set_input_as_handled()
 	var card := _cards[index]
 	if not card.owned:
-		Sfx.play(&"ui_click", -8.0)
+		Sfx.play(&"ui_click", Sfx.UI_CLICK_VOLUME_DB)
 		_on_item_picked(card.item)
 
 func _on_item_picked(item: ItemData) -> void:
@@ -251,7 +251,7 @@ func _play_buy_sound(sound_name: StringName, volume_db: float) -> void:
 	var player := AudioStreamPlayer.new()
 	player.stream = Sfx.stream(sound_name)
 	player.bus = SoundLibrary.bus_for(sound_name)
-	player.volume_db = volume_db
+	player.volume_db = volume_db + Sfx.level_trim_db(sound_name)
 	add_child(player)
 	player.play()
 	get_tree().create_timer(BUY_SOUND_SECONDS).timeout.connect(player.queue_free)

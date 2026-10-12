@@ -218,7 +218,7 @@ func _deliver_load() -> void:
 func _on_heap_settled() -> void:
 	_crane.controls_enabled = true
 	_refresh()
-	Sfx.play(&"crane_ready", -8.0, 0.0)
+	Sfx.play(&"crane_ready", -6.0, 0.0)
 	if _searching:
 		_set_line("Chad's paying for the digs. Drop the claw into the heap to stir it up, then press E to search the junk under the claw.")
 		return

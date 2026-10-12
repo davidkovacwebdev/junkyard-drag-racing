@@ -29,6 +29,10 @@ extends Node2D
 @export var fence_color: Color = Color(0.4, 0.31, 0.22, 1)
 @export var fence_top_color: Color = Color(0.47, 0.37, 0.25, 1)
 
+const RAIL_HEIGHTS: Array[float] = [20.0, 54.0, 86.0]
+const RAIL_THICKNESS := 5.0
+const POST_WIDTH := 10.0
+
 func _draw() -> void:
 	var margin_vec := Vector2.ONE * margin
 	draw_rect(Rect2(-yard_size / 2.0 - margin_vec, yard_size + margin_vec * 2.0), dirt_color)
@@ -80,7 +84,7 @@ func _draw_side(from: Vector2, to: Vector2, with_gate: bool) -> void:
 		var p := from.lerp(to, t)
 		if with_gate and absf(p.x) < gate_half_width:
 			continue
-		draw_rect(Rect2(p.x - 5.0, p.y - fence_height, 10.0, fence_height), fence_color)
+		draw_rect(_post_rect(p), fence_color)
 	if with_gate and gate_half_width > 0.0:
 		_draw_rails(from, Vector2(-gate_half_width, from.y))
 		_draw_rails(Vector2(gate_half_width, from.y), to)
@@ -88,9 +92,40 @@ func _draw_side(from: Vector2, to: Vector2, with_gate: bool) -> void:
 		_draw_rails(from, to)
 
 func _draw_rails(from: Vector2, to: Vector2) -> void:
-	var up := Vector2(0.0, -1.0)
-	for offset in PackedFloat32Array([20.0, 54.0, 86.0]):
-		draw_colored_polygon(FlatProps.sliver(from + up * offset, to + up * offset, 5.0), fence_color)
+	for height in RAIL_HEIGHTS:
+		draw_colored_polygon(_rail(from, to, height), fence_color)
+
+func _post_rect(foot: Vector2) -> Rect2:
+	return Rect2(foot.x - POST_WIDTH * 0.5, foot.y - fence_height, POST_WIDTH, fence_height)
+
+func _rail(from: Vector2, to: Vector2, height: float) -> PackedVector2Array:
+	var up := Vector2(0.0, -height)
+	return FlatProps.sliver(from + up, to + up, RAIL_THICKNESS)
+
+## The front fence from `from_x` to `to_x` again, as polygons on a node
+## standing on the fence line (in yard space). Put it in the Y-sorted `Yard`
+## and it covers whatever goes behind that stretch of fence, which the fence
+## painted here never can.
+func front_fence_section(from_x: float, to_x: float) -> Node2D:
+	var section := Node2D.new()
+	section.position = Vector2(0.0, yard_size.y / 2.0)
+	var half_x := yard_size.x / 2.0
+	var steps := maxi(1, int(yard_size.x / post_spacing))
+	for i in steps + 1:
+		var x := lerpf(-half_x, half_x, float(i) / float(steps))
+		if x >= from_x and x <= to_x and absf(x) >= gate_half_width:
+			var rect := _post_rect(Vector2(x, 0.0))
+			_add_fence_polygon(section, PackedVector2Array([rect.position,
+					Vector2(rect.end.x, rect.position.y), rect.end, Vector2(rect.position.x, rect.end.y)]))
+	for height in RAIL_HEIGHTS:
+		_add_fence_polygon(section, _rail(Vector2(from_x, 0.0), Vector2(to_x, 0.0), height))
+	return section
+
+func _add_fence_polygon(section: Node2D, points: PackedVector2Array) -> void:
+	var polygon := Polygon2D.new()
+	polygon.polygon = points
+	polygon.color = fence_color
+	section.add_child(polygon)
 
 ## Two taller, lighter posts framing the way in.
 func _draw_gate_posts(front_y: float) -> void:

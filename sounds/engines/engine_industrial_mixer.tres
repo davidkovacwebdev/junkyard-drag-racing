@@ -20,3 +20,4 @@ cutoff_idle = 650.0
 cutoff_max = 1500.0
 idle_volume = 0.4
 max_volume = 0.8
+level_db = 5.0

@@ -14,6 +14,9 @@ extends RefCounted
 ## keep changing the caller's array in place.
 
 const SAMPLE_RATE := 22050
+## Loudness is measured over this long: short enough to catch a knock's punch,
+## long enough that a click measures quieter than a held tone, as it sounds.
+const LOUDNESS_WINDOW := 0.15
 
 ## Resonant band-pass (biquad). `tune()` then `step()` when the settings are
 ## fixed for a stretch; `process()` retunes every sample for sweeps.
@@ -118,6 +121,12 @@ static func mix_into(samples: PackedFloat32Array, other: PackedFloat32Array, off
 static func finish(samples: PackedFloat32Array, peak: float = 0.85, fade_time: float = 0.005) -> PackedFloat32Array:
 	_replace_contents(samples, SynthDsp.finished(samples, peak, fade_time))
 	return samples
+
+## How loud `samples` sound, in LUFS, over their loudest `window` seconds
+## (K-weighted, as ears hear it). Peak level says little about this: a
+## peak-normalised click and a peak-normalised hiss differ by 20 dB.
+static func loudness(samples: PackedFloat32Array, window: float = LOUDNESS_WINDOW) -> float:
+	return SynthDsp.loudness(samples, window)
 
 static func _replace_contents(target: PackedFloat32Array, source: PackedFloat32Array) -> void:
 	target.clear()

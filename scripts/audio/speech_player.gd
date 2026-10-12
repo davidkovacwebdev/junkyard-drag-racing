@@ -21,7 +21,7 @@ var _typing: bool = false
 
 func _ready() -> void:
 	bus = AudioSettings.UI
-	volume_db = -8.0
+	volume_db = -6.0
 
 func speak(target: Label, line: String, character: CharacterData) -> void:
 	_label = target

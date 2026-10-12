@@ -1,7 +1,14 @@
 [gd_scene format=3]
 
-[node name="HospitalSign" type="Node2D"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_footprint"]
+size = Vector2(80, 10)
+
+[node name="HospitalSign" type="StaticBody2D"]
 rotation = -0.03
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -5)
+shape = SubResource("RectangleShape2D_footprint")
 
 [node name="PostLeft" type="Polygon2D" parent="."]
 color = Color(0.3, 0.3, 0.32, 1)

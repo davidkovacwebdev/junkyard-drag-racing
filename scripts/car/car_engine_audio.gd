@@ -29,5 +29,5 @@ func _process(delta: float) -> void:
 	var body := get_parent() as CarBody
 	if body != null and body.boost_force != 0.0:
 		rpm = BOOST_RPM
-	volume_db = RaceCarAudio.ENGINE_VOLUME_DB + RaceCarAudio.mix_db(self)
+	volume_db = RaceCarAudio.ENGINE_VOLUME_DB + RaceCarAudio.mix_db(self) + (profile.level_db if profile != null else 0.0)
 	super(delta)

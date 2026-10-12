@@ -16,7 +16,7 @@ const ID := &"dig_site"
 const CHAD := preload("res://characters/chad.tres")
 ## His ringtone: the baked race song, from the top.
 const RINGTONE_SONG := &"bonk_club"
-const RINGTONE_DB := -4.0
+const RINGTONE_DB := Music.VOLUME_DB
 
 @export var dig_line: String = "I guess we need to dig now."
 @export var acre_line: String = "You're gonna dig the entire acre?"
@@ -106,11 +106,11 @@ func play() -> void:
 	await _phone(true)
 	_chad.swaying = true
 	await _chad_says(hey_line)
-	await _sound_for(&"phone_mimimi", -4.0, 1.3)
+	await _sound_for(&"phone_mimimi", -6.0, 1.3)
 	for i in call_lines.size():
 		await _chad_says(call_lines[i])
 		if i < call_lines.size() - 1:
-			await _sound_for(&"phone_mimimi", -4.0, 1.3)
+			await _sound_for(&"phone_mimimi", -6.0, 1.3)
 	# A smooch down the line, and he hangs up.
 	_chad.pucker(0.8)
 	Cutscenes.sound(&"flag_kiss", -4.0, _chad)

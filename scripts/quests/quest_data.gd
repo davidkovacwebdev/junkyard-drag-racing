@@ -47,9 +47,9 @@ const QUEST_ARRAY_HINT := "24/17:QuestData"
 ## quest, forgotten by the F5 Restart so they play again.
 @export var cutscene_ids: Array[StringName] = []
 ## Holds the `follow_ups` back this many in-game days after the quest is
-## finished (see DayNightCycle.day): they land in the log out of nowhere
-## once the time has passed. 0: straight away.
-@export var follow_up_delay_days: int = 0
+## finished (0.25 is six hours): they land in the log out of nowhere once the
+## time has passed and the giver is off screen. 0: straight away.
+@export var follow_up_delay_days: float = 0.0
 ## The scene played when the player takes this quest from its giver. It
 ## should give this quest (its Gives Quest). Empty: the quest is just given.
 @export_file("*.tres") var start_cutscene: String = ""

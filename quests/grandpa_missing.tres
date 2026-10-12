@@ -7,7 +7,7 @@
 script = ExtResource("1_script")
 id = &"grandpa_missing"
 title = "Grandpa?"
-description = "You haven't heard Grandpa yell at you in days. No \"SCRAPS!\", no wrench, no beer burps. That's not like him.
+description = "You haven't heard Grandpa yell at you in hours. No \"SCRAPS!\", no wrench, no beer burps. That's not like him.
 Go check on him at the Garage."
 objective = "Check on Grandpa at the Garage"
 objective_place = "Garage"

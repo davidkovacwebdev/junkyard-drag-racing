@@ -1,9 +1,9 @@
 @tool
 class_name ForgeProp
 extends StaticBody2D
-## One piece of the scrap forge landmark: the anvil on its stump, the quench
-## barrel, a heap of scrap waiting to be melted, or the sooty concrete pad under
-## it all. Flat polygons, origin on the ground so it Y-sorts against the car
+## One piece of the scrap forge landmark: the anvil on its stump (or the bare
+## stump, see `anvil_on_stump`), the quench barrel, a heap of scrap waiting to
+## be melted, or the sooty concrete pad under it all. Flat polygons, origin on the ground so it Y-sorts against the car
 ## (the pad's origin is its top-left corner, like FarmProp's yard).
 
 enum Kind { ANVIL, QUENCH_BARREL, SCRAP_HEAP, PAD }
@@ -15,6 +15,11 @@ enum Kind { ANVIL, QUENCH_BARREL, SCRAP_HEAP, PAD }
 @export var pad_size: Vector2 = Vector2(700, 380):
 	set(value):
 		pad_size = value
+		queue_redraw()
+## Off: just the bare stump. Gus's anvil is gone until "Hammer Time".
+@export var anvil_on_stump := true:
+	set(value):
+		anvil_on_stump = value
 		queue_redraw()
 
 const STUMP := Color(0.45, 0.32, 0.2)
@@ -63,6 +68,8 @@ func _draw_anvil() -> void:
 	draw_colored_polygon(FlatProps.octagon(Vector2(4.0, 0.0), 30.0, 8.0), UiPalette.SHADOW)
 	draw_rect(Rect2(-18.0, -34.0, 36.0, 34.0), STUMP)
 	draw_rect(Rect2(8.0, -34.0, 10.0, 34.0), STUMP_DARK)
+	if not anvil_on_stump:
+		return
 	draw_colored_polygon(PackedVector2Array([
 		Vector2(-10.0, -34.0), Vector2(10.0, -34.0), Vector2(14.0, -44.0), Vector2(26.0, -44.0),
 		Vector2(26.0, -56.0), Vector2(-22.0, -56.0), Vector2(-34.0, -52.0), Vector2(-16.0, -44.0), Vector2(-14.0, -44.0),

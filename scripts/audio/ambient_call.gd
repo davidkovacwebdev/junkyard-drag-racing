@@ -13,6 +13,7 @@ var _wait: float = 0.0
 
 func _ready() -> void:
 	stream = Sfx.stream(sound_name)
+	volume_db += Sfx.level_trim_db(sound_name)
 	bus = SoundLibrary.bus_for(sound_name)
 	_wait = randf_range(0.0, interval_range.y)
 

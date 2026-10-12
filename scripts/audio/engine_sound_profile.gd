@@ -54,6 +54,9 @@ const PROFILE_DIRECTORY := "res://sounds/engines/"
 @export var max_volume: float = 0.9
 ## Extra loudness and brightness while throttle is held, on top of rpm.
 @export var throttle_boost: float = 0.25
+## Volume trim so every engine is about as loud flat out (-11 LUFS, see
+## tools/sound_level_probe.gd, which suggests the value).
+@export var level_db: float = 0.0
 
 static var _loaded: Dictionary = {}
 
