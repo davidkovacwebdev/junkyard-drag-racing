@@ -190,6 +190,7 @@ func _snapshot() -> SaveData:
 	data.owned_cars = cars
 	data.selected_index = Inventory.selected_index
 	data.garage_capacity = Inventory.garage_capacity
+	data.garage_layout_seed = Inventory.garage_layout_seed
 	data.scrap = Inventory.scrap
 	data.money = Inventory.money
 	data.spare_parts = Inventory.spare_parts.duplicate()
@@ -265,6 +266,9 @@ func _apply_save(data: SaveData) -> void:
 	Inventory.owned_cars = data.owned_cars
 	Inventory.selected_index = data.selected_index
 	Inventory.garage_capacity = data.garage_capacity
+	# Saves from before bays had layouts get one now; it's kept from the next save on.
+	Inventory.garage_layout_seed = data.garage_layout_seed if data.garage_layout_seed != 0 \
+			else Inventory.roll_garage_layout_seed()
 	Inventory.scrap = data.scrap
 	Inventory.money = data.money
 	Inventory.spare_parts = data.spare_parts

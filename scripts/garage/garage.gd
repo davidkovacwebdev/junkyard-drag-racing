@@ -6,6 +6,13 @@ extends Control
 ## you drag a wheel). The preview IS the car: it's assembled from the
 ## selected car's real part scenes, so what you see here is exactly what
 ## you drive in the world.
+##
+## Parts come off the same way: drag a wheel, the engine or an accessory off
+## the car onto the parts board. The body stays, it IS the car. A car missing
+## parts can sit here, but the player can't drive out in it.
+##
+## The "+1" button buys another bay (Inventory.expand_garage), which also puts
+## another shed by the garage in the world.
 
 @onready var _car_view: CarView = $Content/CarPreview
 @onready var _name_label: Label = $Content/NamePlate/NameLabel
@@ -17,13 +24,29 @@ extends Control
 @onready var _accessory_filter_button: ScrapButton = $Content/AccessoryFilterButton
 @onready var _sort_button: SortButton = $Content/SortButton
 @onready var _car_drop_zone: CarDropZone = $Content/CarDropZone
+@onready var _stash_drop_zone: StashDropZone = $Content/StashDropZone
+@onready var _capacity_label: Label = $Content/CapacityPlate/CapacityLabel
+@onready var _expand_button: ScrapButton = $Content/ExpandButton
+@onready var _hint_label: Label = $Content/HintLabel
+@onready var _back_button: BackButton = $BackButton
 
 var _index: int = 0
 var _wheel_mount_zones: Array[WheelMountZone] = []
 var _current_category: PartData.Category = PartData.Category.BODY
+## The "+1" button has been pressed once; the next press pays.
+var _expand_armed: bool = false
 
 const _PART_SLOT_SCENE := preload("res://scenes/garage/part_slot.tscn")
 const _WHEEL_MOUNT_ZONE_SCENE := preload("res://scenes/garage/wheel_mount_zone.tscn")
+const _PART_ICON_SCENE := preload("res://scenes/garage/part_icon.tscn")
+## How far outside an engine's or accessory's art a drag still grabs it.
+const _GRAB_MARGIN := 10.0
+const _HINT := "Drag a part off the car onto the board to take it off"
+## Accessories that sit somewhere on the car are grabbed before the engine;
+## a skin (paint) covers the whole body, so it's grabbed only when nothing else is.
+const _GRAB_ORDER: Array[AccessoryPartData.Spot] = [
+	AccessoryPartData.Spot.FRONT, AccessoryPartData.Spot.TOP, AccessoryPartData.Spot.REAR,
+]
 
 ## Shown in place of the part rows when a tab has nothing to offer, so an empty
 ## list reads as "you have no spares" rather than "the garage is broken".
@@ -36,6 +59,10 @@ const _EMPTY_HINTS := {
 
 func _ready() -> void:
 	_car_drop_zone.garage = self
+	_stash_drop_zone.garage = self
+	_back_button.leave_check = _can_drive_out
+	_expand_button.mouse_exited.connect(_disarm_expand)
+	_refresh_capacity()
 	_index = clampi(Inventory.selected_index, 0, maxi(Inventory.owned_cars.size() - 1, 0))
 	_refresh()
 	_show_category(PartData.Category.BODY)
@@ -49,7 +76,9 @@ func _process(_delta: float) -> void:
 	if viewport == null:
 		return
 	var drag: Variant = viewport.gui_get_drag_data()
-	if typeof(drag) == TYPE_DICTIONARY and drag.has("category"):
+	var dragging_fitted: bool = typeof(drag) == TYPE_DICTIONARY and drag.get("fitted", false)
+	_stash_drop_zone.visible = dragging_fitted
+	if typeof(drag) == TYPE_DICTIONARY and drag.has("category") and not dragging_fitted:
 		var dragged_accessory := drag.get("part") as AccessoryPartData
 		_car_view.set_highlight(int(drag["category"]), dragged_accessory.spot if dragged_accessory != null else -1)
 	else:
@@ -75,12 +104,22 @@ func _refresh() -> void:
 		_name_label.text = "No cars in the garage yet"
 		_car_view.visible = false
 		_clear_wheel_mount_zones()
+		_refresh_hint()
 		return
 	_car_view.visible = true
 	var car: CarModelData = cars[_index]
 	_car_view.build_from(car)
 	_name_label.text = "%s  (%d/%d)" % [car.display_name, _index + 1, cars.size()]
 	_rebuild_wheel_mount_zones()
+	_refresh_hint()
+
+## The tip about taking parts off, or, in red, what the viewed car is missing.
+func _refresh_hint() -> void:
+	var car := _selected_car()
+	var missing := car.missing_parts() if car != null else ""
+	_hint_label.text = _HINT if missing.is_empty() else "Can't drive: %s" % missing
+	_hint_label.add_theme_color_override(&"font_color",
+			UiPalette.TEXT_BROWN if missing.is_empty() else UiPalette.DANGER_RED)
 
 func _rebuild_wheel_mount_zones() -> void:
 	_clear_wheel_mount_zones()
@@ -109,16 +148,116 @@ func equip_part(category: PartData.Category, part: PartData, wheel_index: int = 
 	var car := _selected_car()
 	if car == null or not Inventory.fit_part(car, category, part, wheel_index):
 		return
-	# A wheel or a bolt-on is a minute's work; a body or an engine is most of a day.
-	var quick_job := category == PartData.Category.WHEEL or category == PartData.Category.ACCESSORY
-	DayNightCycle.advance_hours(1.0 if quick_job else 4.0)
+	DayNightCycle.advance_hours(_job_hours(category))
 	Sfx.play(part.equip_sound if part is AccessoryPartData else &"wrench_clunk", -4.0)
+	_after_parts_changed()
+
+## Called by the stash drop zone when a part dragged off the car lands on the
+## parts board: off it comes, into the spare stash. `slot` is the wheel mount
+## or the accessory spot.
+func unfit_part(category: PartData.Category, slot: int) -> void:
+	var car := _selected_car()
+	if car == null or not Inventory.unfit_part(car, category, slot):
+		return
+	DayNightCycle.advance_hours(_job_hours(category))
+	Sfx.play(&"part_unbolt", -4.0)
+	# Flip to the part's own tab, so the player sees where it went.
+	_current_category = category
+	_after_parts_changed()
+
+## A wheel or a bolt-on is a minute's work; a body or an engine is most of a day.
+static func _job_hours(category: PartData.Category) -> float:
+	var quick_job := category == PartData.Category.WHEEL or category == PartData.Category.ACCESSORY
+	return 1.0 if quick_job else 4.0
+
+func _after_parts_changed() -> void:
 	_refresh()
 	_car_view.jiggle()
 	# Ownership changed — a copy moved out of the stash onto the car, or
 	# between two cars — so the list has to be rebuilt with fresh counts
 	# rather than left showing whatever was true a moment ago.
 	_show_category(_current_category)
+
+## Drag data for pulling the engine or an accessory off the car at
+## `global_point`, or null when the drag didn't start on one.
+func fitted_drag_at(source: Control, global_point: Vector2) -> Variant:
+	var car := _selected_car()
+	if car == null:
+		return null
+	var point := _car_view.to_local(global_point)
+	for spot in _GRAB_ORDER:
+		var accessory := car.accessory_in(spot)
+		if accessory != null and _car_view.accessory_rect(spot).grow(_GRAB_MARGIN).has_point(point):
+			return _start_fitted_drag(source, PartData.Category.ACCESSORY, accessory, spot)
+	if car.engine != null and _car_view.engine_rect().grow(_GRAB_MARGIN).has_point(point):
+		return _start_fitted_drag(source, PartData.Category.ENGINE, car.engine, -1)
+	var skin := car.accessory_in(AccessoryPartData.Spot.SKIN)
+	if skin != null:
+		return _start_fitted_drag(source, PartData.Category.ACCESSORY, skin, AccessoryPartData.Spot.SKIN)
+	return null
+
+## Drag data for pulling the wheel off `wheel_index`, or null on an empty mount.
+func fitted_wheel_drag(source: Control, wheel_index: int) -> Variant:
+	var car := _selected_car()
+	if car == null or wheel_index < 0 or wheel_index >= car.wheels.size() or car.wheels[wheel_index] == null:
+		return null
+	return _start_fitted_drag(source, PartData.Category.WHEEL, car.wheels[wheel_index], wheel_index)
+
+## The part follows the cursor as its own icon, like a drag from the list.
+func _start_fitted_drag(source: Control, category: PartData.Category, part: PartData, slot: int) -> Dictionary:
+	var preview: PartIcon = _PART_ICON_SCENE.instantiate()
+	preview.modulate = Color(1, 1, 1, 0.85)
+	source.set_drag_preview(preview)
+	preview.show_part(part)
+	return {"category": category, "part": part, "slot": slot, "fitted": true}
+
+## BackButton's leave check: the car the player drives out in has to run.
+func _can_drive_out() -> bool:
+	var car := _selected_car()
+	if car == null or car.is_drivable():
+		return true
+	Sfx.play(&"denied", -6.0, 0.0)
+	_refresh_hint()
+	var tween := create_tween().set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+	_hint_label.pivot_offset = _hint_label.size / 2.0
+	_hint_label.scale = Vector2(1.25, 1.25)
+	tween.tween_property(_hint_label, "scale", Vector2.ONE, 0.5)
+	return false
+
+# --- Garage bays ---------------------------------------------------------------
+
+func _refresh_capacity() -> void:
+	_capacity_label.text = "%d / %d cars" % [Inventory.owned_cars.size(), Inventory.garage_capacity]
+	if not Inventory.can_expand_garage():
+		_expand_button.disabled = true
+		_expand_button.text = "+1"
+		_expand_button.tooltip_text = "No room on the lot for another bay."
+		return
+	var price := Inventory.next_garage_bay_price()
+	_expand_button.text = "Buy?" if _expand_armed else "+1"
+	_expand_button.tooltip_text = "Build another bay: $%d\nRoom for one more car.\nThe next one costs more." % price
+
+func _on_expand_pressed() -> void:
+	if not Inventory.can_expand_garage():
+		return
+	if not Inventory.can_afford(Inventory.next_garage_bay_price()):
+		Sfx.play(&"denied", -6.0, 0.0)
+		return
+	if not _expand_armed:
+		_expand_armed = true
+		_refresh_capacity()
+		return
+	_expand_armed = false
+	if Inventory.expand_garage():
+		Sfx.play(&"cash_register", -4.0, 0.0)
+		Sfx.play(&"garage_expand", -4.0, 0.0)
+		SaveSystem.save_game()
+	_refresh_capacity()
+
+func _disarm_expand() -> void:
+	if _expand_armed:
+		_expand_armed = false
+		_refresh_capacity()
 
 ## The car the garage is showing, and the one PlayerCar drives in the world.
 func _selected_car() -> CarModelData:

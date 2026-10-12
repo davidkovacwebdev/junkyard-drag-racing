@@ -107,6 +107,8 @@ const NAMES: Array[StringName] = [
 	&"denied",
 	&"trash_rummage",
 	&"wrench_clunk",
+	&"part_unbolt",
+	&"garage_expand",
 	&"crane_clang",
 	&"crane_miss",
 	&"crane_shove",
@@ -412,6 +414,8 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"denied": return _denied()
 		&"trash_rummage": return _trash_rummage(rng)
 		&"wrench_clunk": return _wrench_clunk(rng)
+		&"part_unbolt": return _part_unbolt(rng)
+		&"garage_expand": return _garage_expand(rng)
 		&"crane_clang": return _crane_clang(rng)
 		&"crane_miss": return _crane_miss(rng)
 		&"crane_shove": return _crane_shove(rng)
@@ -1912,6 +1916,43 @@ static func _wrench_clunk(rng: RandomNumberGenerator) -> PackedFloat32Array:
 	var out := Synth.thump(0.3, 320.0, 0.004, 0.15, rng)
 	Synth.mix_into(out, _metal_ring(0.3, 1400.0, 20.0, 0.08, rng), 0.0, 0.4)
 	Synth.mix_into(out, _metal_ring(0.25, 2100.0, 25.0, 0.05, rng), 0.0, 0.25)
+	return Synth.finish(out)
+
+## Wrench backing a part off the car: a few loose ratchet clicks, then the
+## part coming free with a lighter clunk than the one that fits it.
+static func _part_unbolt(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.5)
+	for i in 4:
+		var offset := i * 0.06 + rng.randf_range(0.0, 0.01)
+		out = Synth.mix_into(out, _metal_ring(0.03, 2600.0, 15.0, 0.006, rng), offset, 0.6)
+		out = Synth.mix_into(out, Synth.thump(0.02, 1300.0, 0.001, 0.01, rng), offset, 0.4)
+	out = Synth.mix_into(out, Synth.thump(0.25, 420.0, 0.004, 0.1, rng), 0.28, 1.0)
+	out = Synth.mix_into(out, _metal_ring(0.2, 1700.0, 18.0, 0.05, rng), 0.28, 0.3)
+	return Synth.finish(out)
+
+## A new garage bay going up: three hammer knocks on a wooden frame, a short
+## saw rasp, then a sheet of tin roof dropped on with a wobbly bong.
+static func _garage_expand(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(1.5)
+	for knock in 3:
+		var offset := knock * 0.17 + rng.randf_range(0.0, 0.02)
+		out = Synth.mix_into(out, Synth.thump(0.15, 650.0, 0.002, 0.05, rng), offset, 0.8)
+		out = Synth.mix_into(out, _metal_ring(0.08, 2300.0, 20.0, 0.02, rng), offset, 0.2)
+	var saw := Synth.noise_sweep(0.35, {
+		freq = [[0.0, 1800.0], [0.35, 2400.0]],
+		q = [[0.0, 2.5]],
+		amp = [[0.0, 0.0], [0.03, 1.0], [0.3, 0.8], [0.35, 0.0]],
+	}, rng)
+	for i in saw.size():
+		var t := float(i) / Synth.SAMPLE_RATE
+		saw[i] *= 0.35 + 0.65 * absf(sin(TAU * 7.0 * t))
+	out = Synth.mix_into(out, saw, 0.55, 0.45)
+	var roof := _metal_ring(0.6, 310.0, 25.0, 0.3, rng)
+	for i in roof.size():
+		var t := float(i) / Synth.SAMPLE_RATE
+		roof[i] *= 0.7 + 0.3 * sin(TAU * 9.0 * t)
+	out = Synth.mix_into(out, Synth.thump(0.3, 260.0, 0.004, 0.14, rng), 0.95, 0.9)
+	out = Synth.mix_into(out, roof, 0.95, 0.6)
 	return Synth.finish(out)
 
 ## Big steel jaws biting into the heap.

@@ -43,6 +43,10 @@ var _skipping: bool = false
 ## Space was pressed: hurry the current subtitle along.
 var _next_line_requested: bool = false
 var _seen: Array[StringName] = []
+## Running with `-- --no-cutscenes` (probes, tools, screenshot runs) plays every
+## cutscene instantly and invisibly in skip mode, so its side effects (quests,
+## items, cars) still happen but the screen is never taken over.
+var _cutscenes_disabled := "--no-cutscenes" in OS.get_cmdline_user_args()
 
 var _layer: CanvasLayer
 var _top_bar: ColorRect
@@ -81,10 +85,11 @@ func play(cutscene: Cutscene) -> void:
 		push_warning("Cutscenes: already playing one, ignoring the new one.")
 		return
 	_active = true
-	_skipping = false
+	_skipping = _cutscenes_disabled
 	started.emit()
-	Sfx.play(&"cutscene_whoosh", -6.0, 0.03)
-	await _slide_letterbox(true)
+	if not _cutscenes_disabled:
+		Sfx.play(&"cutscene_whoosh", -6.0, 0.03)
+		await _slide_letterbox(true)
 	await cutscene.play()
 	await _end()
 	if cutscene.gives_quest != null:
@@ -132,11 +137,15 @@ func _end() -> void:
 			actor.queue_free()
 	_actors.clear()
 	await _restore_camera()
-	if _fade.color.a > 0.0:
-		_skipping = false
-		await fade_in(0.4)
-	Sfx.play(&"cutscene_whoosh", -9.0, 0.03).pitch_scale *= 1.2
-	await _slide_letterbox(false)
+	if _cutscenes_disabled:
+		_fade.color.a = 0.0
+		_layer.visible = false
+	else:
+		if _fade.color.a > 0.0:
+			_skipping = false
+			await fade_in(0.4)
+		Sfx.play(&"cutscene_whoosh", -9.0, 0.03).pitch_scale *= 1.2
+		await _slide_letterbox(false)
 	_skipping = false
 	_active = false
 	finished.emit()
