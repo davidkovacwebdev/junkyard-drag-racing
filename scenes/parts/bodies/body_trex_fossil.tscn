@@ -6,6 +6,7 @@
 [sub_resource type="Resource" id="Resource_trex_fossil"]
 script = ExtResource("2")
 id = &"body_trex_fossil"
+found_in_junk = false
 display_name = "T-Rex Fossil"
 mass = 11.0
 durability = 60.0

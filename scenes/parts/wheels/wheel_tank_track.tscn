@@ -6,6 +6,8 @@
 [sub_resource type="Resource" id="Resource_tank_track"]
 script = ExtResource("2")
 id = &"wheel_tank_track"
+found_in_junk = false
+found_fishing = true
 display_name = "Tank Track"
 mass = 12.0
 durability = 170.0

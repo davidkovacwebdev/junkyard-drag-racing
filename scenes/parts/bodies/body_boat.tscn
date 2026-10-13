@@ -6,6 +6,8 @@
 [sub_resource type="Resource" id="Resource_boat"]
 script = ExtResource("2")
 id = &"body_boat"
+found_in_junk = false
+found_fishing = true
 display_name = "Boat"
 suspension_sag = 7.0
 suspension_travel = 14.0

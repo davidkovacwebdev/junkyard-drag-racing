@@ -30,6 +30,7 @@ script = ExtResource("2")
 size = Vector2(390, 90)
 display_name = "Junkyard"
 interior_scene = ExtResource("3")
+closes_at_night = true
 collision_height_fraction = 1.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Entrance"]

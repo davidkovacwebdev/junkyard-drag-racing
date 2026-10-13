@@ -15,9 +15,8 @@ extends StaticBody2D
 ## the orb and not here: nothing is yours until you've actually run over it.
 ##
 ## Whether a prop is full outlives the map. The spawner gives each one a
-## `loot_id`, and WorldState remembers which are empty and refills every one of
-## them in a single pass each morning (sometime between 8 and 9 AM) — the city
-## starts mostly picked-over, so a full bin is worth a detour. See
+## `loot_id`, and WorldState remembers which are empty and gives each a chance
+## to refill in a single pass each morning (sometime between 8 and 9 AM). See
 ## WorldState.is_prop_full() and WorldState.restocked.
 ##
 ## **Art space**: origin at the prop's ground contact point, everything drawn
@@ -163,7 +162,7 @@ func _ready() -> void:
 	_apply_state()
 	WorldState.restocked.connect(_on_world_restocked)
 
-## The morning restock just refilled the whole city — pick up the change
+## The morning restock just refilled some of the city — pick up the change
 ## immediately instead of waiting for the next map reload, so a prop the
 ## player emptied yesterday visibly reopens while they're still driving
 ## around today.

@@ -6,6 +6,8 @@
 [sub_resource type="Resource" id="Resource_bull_horns"]
 script = ExtResource("2")
 id = &"accessory_bull_horns"
+found_in_junk = false
+found_fishing = true
 display_name = "Bull Horns"
 category = 3
 spot = 0

@@ -13,17 +13,11 @@ extends Obstacle
 ## it draws itself in _draw() instead. Obstacle._ready() tolerates the missing
 ## rect and still sizes the collision shape from `size`.
 ##
-## Only staffed 8 AM to 8 PM. Outside those hours it overrides the default
-## "Press space to enter" prompt with a red closed notice (get_interact_prompt/
-## get_interact_prompt_color, both duck-typed hooks PlayerCar's tooltip reads)
-## and implements interact() itself so it can refuse to switch scenes — the
-## default Obstacle/PlayerCar activation path has no refusal hook at all, only
-## a target with its own interact() gets to say no.
+## Only staffed during DayNightCycle's business hours: outside them is_closed()
+## has PlayerCar show the red closed notice and refuse entry. Until it unlocks
+## it words its own red prompt (get_interact_prompt/get_interact_prompt_color,
+## duck-typed hooks PlayerCar's tooltip reads) and refuses in interact().
 
-## When the booth is open, local clock hours [OPEN_HOUR, CLOSE_HOUR).
-const OPEN_HOUR := 8.0
-const CLOSE_HOUR := 20.0  ## 8 PM.
-const CLOSED_MESSAGE := "Closes at 8PM, open at 8AM"
 const CLOSED_COLOR := Color(0.95, 0.2, 0.2, 1)
 const OPEN_COLOR := Color(1, 1, 1, 1)
 
@@ -71,28 +65,25 @@ func _is_unlocked() -> bool:
 	return Quests.has_quest(opens_with_quest) or Quests.is_complete(opens_with_quest)
 
 func _is_open() -> bool:
-	if not _is_unlocked():
-		return false
-	var hour := DayNightCycle.get_hour()
-	return hour >= OPEN_HOUR and hour < CLOSE_HOUR
+	return _is_unlocked() and DayNightCycle.is_business_hours()
 
-## Overrides PlayerCar's default prompt while closed; empty string when open
-## falls back to the default "Drag Strip: Press space to enter".
+## Locked reads as locked, not as closed for the night.
+func is_closed() -> bool:
+	return _is_unlocked() and not DayNightCycle.is_business_hours()
+
+## Overrides PlayerCar's default prompt while locked; empty string falls back
+## to the default "Drag Strip: Press space to enter".
 func get_interact_prompt() -> String:
-	if not _is_unlocked():
-		return "%s: %s" % [display_name, LOCKED_MESSAGE]
-	return "" if _is_open() else CLOSED_MESSAGE
+	return "" if _is_unlocked() else "%s: %s" % [display_name, LOCKED_MESSAGE]
 
 func get_interact_prompt_color() -> Color:
 	return OPEN_COLOR if _is_open() else CLOSED_COLOR
 
-## Owns activation outright (rather than letting PlayerCar's default
-## interior_scene switch run unconditionally) so it can refuse entry
-## overnight.
+## Owns activation outright so it can refuse entry while locked and hand the
+## race menu its venue.
 func interact(_actor: Node = null) -> void:
 	if not _is_open():
-		if not _is_unlocked():
-			Sfx.play(&"denied", -6.0, 0.0)
+		Sfx.play(&"denied", -6.0, 0.0)
 		return
 	print(display_name)
 	RaceProgression.menu_race_scene = race_scene_path

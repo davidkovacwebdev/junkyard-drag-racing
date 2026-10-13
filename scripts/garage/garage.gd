@@ -19,6 +19,7 @@ extends Control
 
 @onready var _car_view: CarView = $Content/CarPreview
 @onready var _name_label: Label = $Content/NamePlate/NameLabel
+@onready var _car_stats_card: CarStatsCard = $Content/CarStatsCard
 @onready var _parts_list: GridContainer = $Content/PartsScroll/PartsList
 @onready var _parts_empty_label: Label = $Content/PartsEmptyLabel
 @onready var _body_filter_button: ScrapButton = $Content/BodyFilterButton
@@ -28,6 +29,7 @@ extends Control
 @onready var _sort_button: SortButton = $Content/SortButton
 @onready var _car_drop_zone: CarDropZone = $Content/CarDropZone
 @onready var _stash_drop_zone: StashDropZone = $Content/StashDropZone
+@onready var _capacity_plate: ScrapPanel = $Content/CapacityPlate
 @onready var _capacity_label: Label = $Content/CapacityPlate/CapacityLabel
 @onready var _expand_button: ScrapButton = $Content/ExpandButton
 @onready var _hint_label: Label = $Content/HintLabel
@@ -110,12 +112,14 @@ func _refresh() -> void:
 		_name_label.text = "No cars in the garage yet"
 		_car_view.visible = false
 		_clear_wheel_mount_zones()
+		_car_stats_card.show_car(null)
 		_refresh_hint()
 		return
 	_car_view.visible = true
 	var car: CarModelData = cars[_index]
 	_car_view.build_from(car)
 	_name_label.text = "%s  (%d/%d)" % [car.display_name, _index + 1, cars.size()]
+	_car_stats_card.show_car(car)
 	_rebuild_wheel_mount_zones()
 	_refresh_hint()
 
@@ -252,15 +256,34 @@ func _on_sleep_pressed() -> void:
 # --- Garage bays ---------------------------------------------------------------
 
 func _refresh_capacity() -> void:
-	_capacity_label.text = "%d / %d cars" % [Inventory.owned_cars.size(), Inventory.garage_capacity]
+	var car_count := Inventory.owned_cars.size()
+	_capacity_label.text = "%d / %d cars" % [car_count, Inventory.garage_capacity]
+	_capacity_plate.tooltip_text = "%d of %d spaces at Grandpa's taken.\nThe \"+1\" button builds another bay, up to %d." % [
+		car_count, Inventory.garage_capacity, Inventory.MAX_GARAGE_CAPACITY,
+	]
 	if not Inventory.can_expand_garage():
 		_expand_button.disabled = true
 		_expand_button.text = "+1"
-		_expand_button.tooltip_text = "No room on the lot for another bay."
+		_expand_button.tooltip_text = "All %d bays built.\nNo room on the lot for another." % Inventory.MAX_GARAGE_CAPACITY
 		return
-	var price := Inventory.next_garage_bay_price()
 	_expand_button.text = "Buy?" if _expand_armed else "+1"
-	_expand_button.tooltip_text = "Build another bay: $%d\nRoom for one more car.\nThe next one costs more." % price
+	_expand_button.tooltip_text = _expand_tooltip()
+
+func _expand_tooltip() -> String:
+	var price := Inventory.next_garage_bay_price()
+	if _expand_armed:
+		return "Click again to pay $%d." % price
+	var lines: PackedStringArray = [
+		"Build another bay: $%d" % price,
+		"Room for one more car, and a new shed by the garage.",
+	]
+	if not Inventory.can_afford(price):
+		lines.append("You have $%d. Sell scrap at the junkyard." % Inventory.money)
+	elif Inventory.garage_capacity + 1 < Inventory.MAX_GARAGE_CAPACITY:
+		lines.append("The one after costs $%d." % (price + Inventory.GARAGE_BAY_PRICE_STEP))
+	else:
+		lines.append("The last one the lot has room for.")
+	return "\n".join(lines)
 
 func _on_expand_pressed() -> void:
 	if not Inventory.can_expand_garage():

@@ -6,6 +6,8 @@
 [sub_resource type="Resource" id="Resource_outboard_motor"]
 script = ExtResource("2")
 id = &"engine_outboard_motor"
+found_in_junk = false
+found_fishing = true
 display_name = "Outboard Boat Motor"
 mass = 11.0
 durability = 60.0

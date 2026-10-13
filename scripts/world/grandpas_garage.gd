@@ -27,8 +27,8 @@ const BUILDING_SCENE := preload("res://scenes/world/composed_building.tscn")
 ## Inventory.garage_layout_seed and fills them in that order, so buying a bay
 ## never moves the ones already standing.
 const BAY_SPOTS: Array[Vector2] = [
-	Vector2(-215.0, -70.0), Vector2(-330.0, -35.0), Vector2(-410.0, -130.0),
-	Vector2(-370.0, 200.0), Vector2(-460.0, 150.0), Vector2(-660.0, 170.0),
+	Vector2(-90.0, -270.0), Vector2(-330.0, -35.0), Vector2(-410.0, -130.0),
+	Vector2(-256.0, -298.0), Vector2(-900.0, 0.0), Vector2(-660.0, 120.0),
 ]
 ## Each bay is a half-size shed like the one on the right, give or take.
 const BAY_SCALE_MIN := 0.45

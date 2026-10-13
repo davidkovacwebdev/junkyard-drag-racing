@@ -12,6 +12,9 @@ extends StaticBody2D
 ## car he's talking to rolls in on an anvil wheel he takes it back
 ## (ForgeAnvilCutscene).
 ##
+## Keeps business hours (DayNightCycle.is_business_hours()): outside them
+## he's still standing there but the forge is shut and he won't talk.
+##
 ## At night while the player is asking around about the treasure (until he's
 ## caught) he's out in his pickup (NightDiggerSpawner.digger_out()): he isn't
 ## at the forge, can't be talked to, and is back in the morning.
@@ -97,6 +100,9 @@ static func has_anvil() -> bool:
 ## Whether he's out in his pickup rather than at the forge.
 func is_away() -> bool:
 	return _away
+
+func is_closed() -> bool:
+	return not DayNightCycle.is_business_hours()
 
 func get_interact_prompt() -> String:
 	if not has_anvil():

@@ -118,6 +118,8 @@ const LOG_INTERVAL := 1.0
 ## Fast-forward steps. Physics ticks scale along with the speed so every step
 ## stays the same size: a sped-up race plays out exactly as it would at x1.
 const RACE_SPEEDS: Array[int] = [1, 2, 4]
+## Number keys that jump straight to each RACE_SPEEDS step.
+const RACE_SPEED_KEYS: Array[Key] = [KEY_1, KEY_2, KEY_3]
 var _speed_button: ScrapButton = null
 var _race_speed_index := 0
 var _base_physics_ticks := Engine.physics_ticks_per_second
@@ -136,6 +138,7 @@ func _ready() -> void:
 	_speed_button = get_node_or_null(speed_button_path) as ScrapButton
 	if _speed_button != null:
 		_speed_button.text = "x1"
+		_speed_button.tooltip_text = "Race speed (keys 1, 2, 3)"
 		_speed_button.pressed.connect(_cycle_race_speed)
 	# CarRig children finish assembling in their own _ready() before this
 	# one runs (Godot calls _ready bottom-up), so `assembled` is populated.
@@ -184,6 +187,9 @@ func register_car(car_name: String, car: CarAssembler.AssembledCar) -> void:
 ## it's a deliberate "I'm done looking" UI action.
 func _input(event: InputEvent) -> void:
 	if not event.is_pressed() or event.is_echo():
+		return
+	if _handle_race_speed_key(event):
+		get_viewport().set_input_as_handled()
 		return
 	var showing_results := _race_over and _results_screen != null
 	var is_cancel: bool = (
@@ -492,8 +498,25 @@ func _freeze_cars() -> void:
 		if is_instance_valid(car.root):
 			car.root.process_mode = Node.PROCESS_MODE_DISABLED
 
+## 1, 2 and 3 pick a race speed outright, while the speed button is up.
+## Ctrl+number is left alone: that's the F-key alias.
+func _handle_race_speed_key(event: InputEvent) -> bool:
+	var key_event := event as InputEventKey
+	if key_event == null or _speed_button == null or not _speed_button.visible or _race_over \
+			or key_event.is_command_or_control_pressed() or key_event.shift_pressed or key_event.alt_pressed:
+		return false
+	var speed_index := RACE_SPEED_KEYS.find(key_event.physical_keycode)
+	if speed_index == -1:
+		return false
+	if speed_index != _race_speed_index:
+		_select_race_speed(speed_index)
+	return true
+
 func _cycle_race_speed() -> void:
-	_race_speed_index = (_race_speed_index + 1) % RACE_SPEEDS.size()
+	_select_race_speed((_race_speed_index + 1) % RACE_SPEEDS.size())
+
+func _select_race_speed(speed_index: int) -> void:
+	_race_speed_index = speed_index
 	var speed := RACE_SPEEDS[_race_speed_index]
 	_set_race_speed(speed)
 	_speed_button.text = "x%d" % speed

@@ -212,6 +212,7 @@ const TOOLTIP_BOTTOM := -20.0
 const HOLD_BAR_TOP := -78.0
 const HOLD_BAR_BOTTOM := -64.0
 const SCENE_HINT_LIFT := 44.0
+const CLOSED_PROMPT_COLOR := Color(0.95, 0.2, 0.2, 1)
 
 @onready var _visual: CarView = $Visual as CarView
 @onready var _collision: CollisionShape2D = $CollisionShape2D
@@ -946,7 +947,8 @@ func _is_open_water(point: Vector2) -> bool:
 			and not (_road_network != null and _road_network.is_on_road(point))
 
 ## Whatever was on the hook flies out of the sea into the car: an old boot, a
-## car part, or (most of the time) a handful of scrap.
+## fishing-only part (PartData.found_fishing), or (most of the time) a
+## handful of scrap.
 func _on_fishing_finished(caught: bool, spot: Vector2) -> void:
 	_fishing = null
 	if not caught:
@@ -957,12 +959,9 @@ func _on_fishing_finished(caught: bool, spot: Vector2) -> void:
 		Pickup.spawn_float_text(get_parent(), spot + Vector2(0.0, -60.0), "Just an old boot.")
 		return
 	var orb: Pickup
-	var pools := [PartDatabase.junk_wheels, PartDatabase.junk_bodies, PartDatabase.junk_engines].filter(
-			func(pool: Array) -> bool: return not pool.is_empty())
-	if roll < catch_boot_chance + catch_part_chance and not pools.is_empty():
-		var pool: Array = pools.pick_random()
+	if roll < catch_boot_chance + catch_part_chance and not PartDatabase.fishing_parts.is_empty():
 		var part_orb := PART_PICKUP.instantiate() as PartPickup
-		part_orb.configure(pool.pick_random())
+		part_orb.configure(PartDatabase.fishing_parts.pick_random())
 		orb = part_orb
 	else:
 		var scrap_orb := SCRAP_PICKUP.instantiate() as ScrapPickup
@@ -1235,6 +1234,8 @@ func _lift_prompt_above_scene_hint() -> void:
 ## thing to say about a click-only target, so a target can write its own
 ## (the dealer's doubles as the "how much scrap have I got" readout).
 func _interact_prompt(target: Object) -> String:
+	if _is_closed(target):
+		return "%s: %s" % [target.display_name, DayNightCycle.CLOSED_MESSAGE]
 	if target.has_method("get_interact_prompt"):
 		var line: Variant = target.call("get_interact_prompt")
 		if typeof(line) == TYPE_STRING and line != "":
@@ -1242,15 +1243,23 @@ func _interact_prompt(target: Object) -> String:
 	var verb_prompt := "Hold" if _hold_duration_for(target) > 0.0 else "Press"
 	return "%s: %s E to %s" % [target.display_name, verb_prompt, _interact_verb(target)]
 
-## Tooltip color. Defaults to the label's own authored white; a target can
-## override via the duck-typed get_interact_prompt_color() (the registration
-## booth turns its prompt red while closed overnight).
+## Tooltip color. Defaults to the label's own authored white, red while the
+## target is closed; a target can override via the duck-typed
+## get_interact_prompt_color() (the ramp turns its prompt red while locked).
 func _interact_prompt_color(target: Object) -> Color:
+	if _is_closed(target):
+		return CLOSED_PROMPT_COLOR
 	if target != null and target.has_method("get_interact_prompt_color"):
 		var color: Variant = target.call("get_interact_prompt_color")
 		if typeof(color) == TYPE_COLOR:
 			return color
 	return Color(1, 1, 1, 1)
+
+## A staffed place shut for the night says so through the duck-typed
+## is_closed() (see Obstacle.closes_at_night): the prompt turns red with its
+## hours and E is refused.
+func _is_closed(target: Object) -> bool:
+	return target != null and target.has_method("is_closed") and bool(target.call("is_closed"))
 
 ## 0 means instant activation (buildings you just walk into); a target can
 ## opt into a hold-to-activate delay (roadside trash props do, so a
@@ -1286,6 +1295,9 @@ func _interact_verb(target: Object) -> String:
 ## fall back to the place behaviour: print the name and switch to its interior
 ## scene, if it has one.
 func _activate(target: Object) -> void:
+	if _is_closed(target):
+		Sfx.play(&"denied", -6.0, 0.0)
+		return
 	if target.has_method("interact"):
 		target.call("interact", self)
 		return

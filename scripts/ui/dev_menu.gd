@@ -45,6 +45,8 @@ const _DROP_TIME := 0.5
 const _SCRAP_AMOUNTS := [1, 5, 25, 100, 1000]
 const _DEV_MONEY_AMOUNT := 1000
 const _DEV_PART_COPIES := 99
+## Clicking a row plays its part's own sound, at pickup level.
+const _PART_CLICK_VOLUME_DB := -6.0
 
 const _PART_PICKUP_SCENE := preload("res://scenes/world/part_pickup.tscn")
 const _SCRAP_PICKUP_SCENE := preload("res://scenes/world/scrap_pickup.tscn")
@@ -293,7 +295,13 @@ func _add_row(part: PartData) -> void:
 func _on_row_input(event: InputEvent, slot: PartSlot) -> void:
 	if event is InputEventMouseButton and event.pressed \
 			and event.button_index == MOUSE_BUTTON_LEFT:
+		_play_part_sound(slot.part)
 		_spawn_part(slot.part)
+
+func _play_part_sound(part: PartData) -> void:
+	var sound := part.signature_sound() if part != null else &""
+	if sound != &"":
+		Sfx.play(sound, _PART_CLICK_VOLUME_DB)
 
 # --- Spawning ------------------------------------------------------------------
 

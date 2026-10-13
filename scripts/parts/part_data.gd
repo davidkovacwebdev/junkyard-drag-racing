@@ -21,6 +21,8 @@ enum MaterialType { METAL, WOOD, PLASTIC, CERAMIC, RUBBER, GLASS, FABRIC }
 @export var material_type: MaterialType = MaterialType.METAL
 ## SoundLibrary sound this part makes when it knocks into something.
 @export var impact_sound: StringName = &"bump"
+## Only ever comes up on the fishing line (and never from bins or junk heaps).
+@export var found_fishing: bool = false
 ## Scene this part's actual visual/physics rig lives in — set by whatever
 ## loads the part (PartDatabase), not authored on the resource itself.
 @export var scene_path: String = ""
@@ -97,6 +99,11 @@ func mass_rating_fraction() -> float:
 ## tooltip. Empty for parts that only have stats.
 func effect_summary() -> String:
 	return ""
+
+## The sound that is this part's own (a squish, a neigh...), or empty when it
+## only has the generic one every part shares.
+func signature_sound() -> StringName:
+	return impact_sound if impact_sound != &"bump" else &""
 
 static func tier_color(tier_value: int) -> Color:
 	return TIER_COLORS[clampi(tier_value, 1, TIER_COUNT) - 1]

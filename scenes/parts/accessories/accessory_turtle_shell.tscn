@@ -16,6 +16,7 @@ durability_multiplier = 1.4
 speed_multiplier = 0.92
 body_impact_sound = &"shell_knock"
 equip_sound = &"shell_knock"
+found_in_junk = false
 
 [node name="AccessoryTurtleShell" type="Node2D"]
 script = ExtResource("1")
