@@ -77,6 +77,7 @@ const NAMES: Array[StringName] = [
 	&"headlight_click",
 	&"binocular_focus",
 	&"race_speed_up",
+	&"dice_roll",
 	&"knockout_bell",
 	&"derby_kill",
 	&"derby_drop_in",
@@ -291,6 +292,7 @@ const UI_SOUNDS: Array[StringName] = [
 	&"trunk_open",
 	&"trunk_close",
 	&"race_speed_up",
+	&"dice_roll",
 ]
 
 const AMBIENT_SOUNDS: Array[StringName] = [
@@ -416,6 +418,7 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"headlight_click": return _headlight_click(rng)
 		&"binocular_focus": return _binocular_focus(rng)
 		&"race_speed_up": return _race_speed_up(rng)
+		&"dice_roll": return _dice_roll(rng)
 		&"knockout_bell": return _knockout_bell(rng)
 		&"derby_kill": return _derby_kill(rng)
 		&"derby_drop_in": return _derby_drop_in(rng)
@@ -595,6 +598,27 @@ static func _race_speed_up(rng: RandomNumberGenerator) -> PackedFloat32Array:
 	out = Synth.mix_into(out, whirr, 0.03, 0.5)
 	out = Synth.mix_into(out, hiss, 0.03, 0.4)
 	return Synth.finish(out, 0.55)
+
+## A couple of plastic dice rattled in a fist and thrown on a tin table:
+## clicky knocks, then two dice skittering to a stop. The random race reroll.
+static func _dice_roll(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.7)
+	for i in 5:
+		out = Synth.mix_into(out, Synth.thump(0.03, rng.randf_range(2800.0, 4200.0), 0.001, 0.008, rng),
+				i * 0.045 + rng.randf_range(0.0, 0.015), 0.5)
+	for die in 2:
+		var bounce_time := 0.3 + die * 0.03
+		var gap := 0.09
+		var gain := 0.9
+		for bounce in 5:
+			out = Synth.mix_into(out, Synth.thump(0.04, rng.randf_range(1800.0, 2600.0), 0.001, 0.012, rng),
+					bounce_time, gain)
+			out = Synth.mix_into(out, _metal_ring(0.06, rng.randf_range(900.0, 1300.0), 18.0, 0.015, rng),
+					bounce_time, gain * 0.25)
+			bounce_time += gap
+			gap *= 0.7
+			gain *= 0.65
+	return Synth.finish(out, 0.6)
 
 ## A cheap boxing bell rung twice: a car is out of the derby.
 static func _knockout_bell(rng: RandomNumberGenerator) -> PackedFloat32Array:

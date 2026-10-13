@@ -29,7 +29,7 @@ func _ready() -> void:
 	cars_container.name = "Cars"
 	add_child(cars_container)
 
-	var car_data := DebugRace.random_car() if DebugRace.consume() else Inventory.get_selected_car()
+	var car_data := DebugRace.field(1, RaceProgression.Course.DRAG)[0] if DebugRace.consume() else Inventory.get_selected_car()
 	_player_car = CarAssembler.assemble_from_car_data(car_data, cars_container, SPAWN_POSITION)
 	if _player_car == null:
 		return
