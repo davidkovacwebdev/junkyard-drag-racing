@@ -8,6 +8,41 @@ extends SubViewportContainer
 
 @onready var _viewport: SubViewport = $SubViewport
 
+## Nearest ancestor that clips its children (a ScrollContainer), or null.
+var _clipping_ancestor: Control = null
+var _on_screen := true
+
+func _enter_tree() -> void:
+	_clipping_ancestor = _find_clipping_ancestor()
+
+## Long lists (F1 menu, garage) hold hundreds of icons, each a live SubViewport
+## with animated part scripts. Ones that are hidden or scrolled out of view stop
+## rendering and processing until they come back.
+func _process(_delta: float) -> void:
+	var on_screen := _is_on_screen()
+	if on_screen == _on_screen:
+		return
+	_on_screen = on_screen
+	_viewport.render_target_update_mode = SubViewport.UPDATE_WHEN_VISIBLE if on_screen else SubViewport.UPDATE_DISABLED
+	_viewport.process_mode = Node.PROCESS_MODE_INHERIT if on_screen else Node.PROCESS_MODE_DISABLED
+
+func _is_on_screen() -> bool:
+	if not is_visible_in_tree():
+		return false
+	var rect := get_global_rect()
+	if is_instance_valid(_clipping_ancestor) and not rect.intersects(_clipping_ancestor.get_global_rect()):
+		return false
+	var screen_rect := get_global_transform_with_canvas() * Rect2(Vector2.ZERO, size)
+	return screen_rect.intersects(get_viewport_rect())
+
+func _find_clipping_ancestor() -> Control:
+	var node := get_parent()
+	while node != null:
+		if node is Control and node.clip_contents:
+			return node
+		node = node.get_parent()
+	return null
+
 ## The live-rendered contents of this icon, reusable elsewhere (e.g. as a
 ## drag preview) without re-instancing the part scene a second time.
 func get_preview_texture() -> Texture2D:

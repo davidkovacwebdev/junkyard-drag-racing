@@ -11,8 +11,8 @@ extends Node
 ##
 ## It also remembers the state of the city's roadside trash, which is the other
 ## thing that has to outlive a map reload: which bins are empty, and which have
-## come back. The city starts mostly picked-over, and every emptied prop
-## refills in one pass each morning, sometime between 8 and 9 AM — see
+## come back. Most of the city starts full, and each morning, sometime between
+## 8 and 9 AM, every emptied prop gets a chance to refill — see
 ## `is_prop_full()` and `restocked`.
 
 ## Last known player position in world (map) coordinates.
@@ -49,12 +49,12 @@ var crane_fell_day: int = 0
 ## never come back.
 var _claimed: Dictionary = {}
 
-## Chance a prop is full the first time the world is ever generated. Kept low on
-## purpose: the city starts mostly picked-over, so finding a full bin is worth a
-## detour rather than being the default state.
-const INITIAL_FULL_CHANCE := 0.2
-## Every emptied prop refills in one pass sometime in this window each
-## morning — a spread rather than a fixed instant, so the whole city doesn't
+## Chance a prop is full the first time the world is ever generated.
+const INITIAL_FULL_CHANCE := 0.6
+## Chance each emptied prop refills at the morning restock. One that misses
+## stays empty and rolls again the next morning.
+const RESTOCK_REFILL_CHANCE := 0.6
+## The restock runs in one pass sometime in this window each morning — a spread rather than a fixed instant, so the whole city doesn't
 ## visibly snap full at once.
 const RESTOCK_WINDOW_START := 8.0
 const RESTOCK_WINDOW_END := 9.0
@@ -85,7 +85,7 @@ func is_prop_full(id: String) -> bool:
 	# stably from the id so the same prop starts the same way on every reload.
 	return _starts_full(id)
 
-## Record that a prop was emptied on the current day. It comes back the next
+## Record that a prop was emptied on the current day. It may come back the next
 ## time the morning restock window passes.
 func mark_emptied(id: String) -> void:
 	if id.is_empty():
@@ -187,8 +187,11 @@ func _check_restock() -> void:
 		_restocked_today = false
 	if not _restocked_today and DayNightCycle.get_hour() >= _restock_hour:
 		_restocked_today = true
-		if not _empty_since.is_empty():
-			for key in _empty_since.keys():
+		var any_refilled := false
+		for key in _empty_since.keys():
+			if randf() < RESTOCK_REFILL_CHANCE:
 				_refilled[String(key)] = today
-			_empty_since.clear()
+				_empty_since.erase(key)
+				any_refilled = true
+		if any_refilled:
 			restocked.emit()

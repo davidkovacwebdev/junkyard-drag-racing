@@ -16,6 +16,9 @@ var junk_engines: Array[EnginePartData] = []
 var accessories: Array[AccessoryPartData] = []
 ## The accessories that turn up as loot in bins and junk heaps.
 var junk_accessories: Array[AccessoryPartData] = []
+## Parts of any category that only come up on the fishing line.
+var fishing_parts: Array[PartData] = []
+var _car_stat_ranges: CarStatRanges = null
 
 const _BODY_SCENES := [
 	"res://scenes/parts/bodies/body_classic.tscn",
@@ -165,6 +168,14 @@ func _ready() -> void:
 	junk_wheels.assign(wheels.filter(func(wheel: WheelPartData) -> bool: return wheel.found_in_junk))
 	junk_engines.assign(engines.filter(func(engine: EnginePartData) -> bool: return engine.found_in_junk))
 	junk_accessories.assign(accessories.filter(func(accessory: AccessoryPartData) -> bool: return accessory.found_in_junk))
+	for category in [bodies, wheels, engines, accessories]:
+		fishing_parts.append_array(category.filter(func(part: PartData) -> bool: return part.found_fishing))
+
+## Worst and best whole-car stats the catalog can build, worked out on first use.
+func car_stat_ranges() -> CarStatRanges:
+	if _car_stat_ranges == null:
+		_car_stat_ranges = CarStatRanges.from_catalog(bodies, engines, wheels, accessories)
+	return _car_stat_ranges
 
 ## Ranks a category's parts by performance_score() and splits them into
 ## PartData.TIER_COUNT roughly-even groups — a tier is a quartile within

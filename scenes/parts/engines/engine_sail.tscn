@@ -6,6 +6,8 @@
 [sub_resource type="Resource" id="Resource_sail"]
 script = ExtResource("2")
 id = &"engine_sail"
+found_in_junk = false
+found_fishing = true
 display_name = "Sail"
 mass = 4.0
 durability = 20.0

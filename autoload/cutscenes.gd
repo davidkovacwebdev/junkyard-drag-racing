@@ -34,6 +34,9 @@ const BAR_HEIGHT_FRACTION := 0.13
 const BAR_TIME := 0.45
 ## The letterbox bars: plain black, like the movies.
 const BAR_COLOR := Color.BLACK
+## Extra black past the screen edge, as a fraction of bar height, so the
+## slide's overshoot never opens a gap between the bar and the edge.
+const BAR_OVERHANG_FRACTION := 0.5
 const CAMERA_RETURN_TIME := 0.7
 const CAMERA_FOLLOW_SPEED := 4.0
 ## Same size the junkyard dealer stands at in the world.
@@ -558,6 +561,8 @@ func _build_screen() -> void:
 
 	_top_bar = _make_rect(BAR_COLOR, 0.0, BAR_HEIGHT_FRACTION)
 	_bottom_bar = _make_rect(BAR_COLOR, 1.0 - BAR_HEIGHT_FRACTION, 1.0)
+	_add_bar_overhang(_top_bar, -BAR_OVERHANG_FRACTION, 0.0)
+	_add_bar_overhang(_bottom_bar, 1.0, 1.0 + BAR_OVERHANG_FRACTION)
 
 	_subtitle_name = _make_label(UiPalette.ACCENT_YELLOW, 18)
 	_subtitle_name.anchor_top = 0.04
@@ -605,6 +610,15 @@ func _make_rect(color: Color, anchor_top: float, anchor_bottom: float) -> ColorR
 	_layer.add_child(rect)
 	return rect
 
+func _add_bar_overhang(bar: ColorRect, anchor_top: float, anchor_bottom: float) -> void:
+	var overhang := ColorRect.new()
+	overhang.color = BAR_COLOR
+	overhang.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	overhang.anchor_right = 1.0
+	overhang.anchor_top = anchor_top
+	overhang.anchor_bottom = anchor_bottom
+	bar.add_child(overhang)
+
 func _make_label(color: Color, font_size: int) -> Label:
 	var label := Label.new()
 	label.add_theme_color_override("font_color", color)
@@ -619,7 +633,7 @@ func _make_label(color: Color, font_size: int) -> Label:
 ## Bars slide in from off-screen top and bottom, and back out again.
 func _slide_letterbox(show: bool) -> void:
 	_layer.visible = true
-	var hidden_offset := -_top_bar.size.y
+	var hidden_offset := -_top_bar.size.y * (1.0 + BAR_OVERHANG_FRACTION)
 	var tween := create_tween().set_parallel().set_trans(Tween.TRANS_BACK)
 	tween.set_ease(Tween.EASE_OUT if show else Tween.EASE_IN)
 	var start := hidden_offset if show else 0.0

@@ -23,6 +23,12 @@ const DEBUG_FAST_FORWARD_SCALE := 24.0
 ## Testing aid: Ctrl+K skips straight to the next morning (START_TIME).
 const DEBUG_SKIP_TO_MORNING_KEY := KEY_K
 
+## Opening hours, [BUSINESS_OPEN_HOUR, BUSINESS_CLOSE_HOUR), kept by every
+## staffed place: race sign-ups, the shop, the junkyard and the forge.
+const BUSINESS_OPEN_HOUR := 8.0
+const BUSINESS_CLOSE_HOUR := 20.0 ## 8 PM.
+const CLOSED_MESSAGE := "Closes at 8PM, open at 8AM"
+
 ## Every new day starts at 8 AM (right as night ends) rather than midnight.
 const START_TIME := NIGHT_END
 
@@ -87,6 +93,10 @@ func advance_seconds(seconds: float) -> void:
 ## fading with the light.
 func get_hour() -> float:
 	return time_of_day / SECONDS_PER_HOUR
+
+func is_business_hours() -> bool:
+	var hour := get_hour()
+	return hour >= BUSINESS_OPEN_HOUR and hour < BUSINESS_CLOSE_HOUR
 
 ## Plain clock night, NIGHT_START to NIGHT_END: when the player may sleep.
 func is_night() -> bool:

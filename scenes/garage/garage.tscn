@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://scripts/garage/garage.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/world/car_view.tscn" id="2"]
@@ -9,6 +9,7 @@
 [ext_resource type="Script" path="res://scripts/ui/scrap_button.gd" id="8"]
 [ext_resource type="Script" path="res://scripts/ui/sort_button.gd" id="9"]
 [ext_resource type="Script" path="res://scripts/garage/stash_drop_zone.gd" id="10"]
+[ext_resource type="PackedScene" path="res://scenes/garage/car_stats_card.tscn" id="11"]
 
 [node name="Garage" type="Control"]
 layout_mode = 3
@@ -71,6 +72,14 @@ position = Vector2(220, 260)
 scale = Vector2(1.5, 1.5)
 max_width = 260.0
 max_height = 200.0
+
+[node name="CarStatsCard" parent="Content" instance=ExtResource("11")]
+offset_left = 30.0
+offset_top = 70.0
+offset_right = 410.0
+offset_bottom = 128.0
+tilt_degrees = 1.0
+jitter_seed = 15
 
 [node name="NamePlate" type="Control" parent="Content"]
 layout_mode = 0
@@ -226,7 +235,7 @@ offset_left = 130.0
 offset_top = 494.0
 offset_right = 310.0
 offset_bottom = 532.0
-mouse_filter = 2
+mouse_filter = 1
 script = ExtResource("7")
 tilt_degrees = 1.0
 jitter_seed = 13

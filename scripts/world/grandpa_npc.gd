@@ -78,11 +78,10 @@ const EYES_CENTER := Vector2(0.0, -214.0)
 const LAUGH_LEAN := 0.12
 const LAUGH_BOUNCES_PER_SECOND := 7.0
 const LAUGH_PIXELS := 5.0
-## Tiger, his horse (see GrandpaHorse), stands this far from him: down on
-## the grass off his left, in front of the bacon smoker so it's never hidden
-## behind it, left of the driveway and clear of every garage bay spot
-## (GrandpasGarage.BAY_SPOTS).
-const TIGER_OFFSET := Vector2(-130.0, 100.0)
+## Tiger, his horse (see GrandpaHorse), stands this far from him: down the
+## grass in front of him, right of the bacon smoker, left of the driveway and
+## clear of every garage bay spot (GrandpasGarage.BAY_SPOTS).
+const TIGER_OFFSET := Vector2(-10.0, 130.0)
 ## Where his scenes park the player's car: off his right, past the spot the
 ## player stands to talk (110, -40), so the character never ends up on it.
 const SCENE_CAR_OFFSET := Vector2(250.0, -15.0)
@@ -214,7 +213,7 @@ func get_interact_prompt() -> String:
 		return "%s: Press E to talk (new quest)" % display_name
 	return "%s: Press E to talk" % display_name
 
-## He sits right by the garage door: talking to him wins over walking in.
+## He sits in the garage yard: talking to him wins over walking in.
 func get_interact_priority() -> int:
 	return 1
 

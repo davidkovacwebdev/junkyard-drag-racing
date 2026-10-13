@@ -50,6 +50,9 @@ func speed_rating_fraction() -> float:
 func mass_rating_fraction() -> float:
 	return _normalize(mass, ACCESSORY_MASS_RANGE)
 
+func signature_sound() -> StringName:
+	return equip_sound if equip_sound != &"wrench_clunk" else &""
+
 func effect_summary() -> String:
 	var stat_changes: Array[String] = []
 	if not is_equal_approx(durability_multiplier, 1.0):

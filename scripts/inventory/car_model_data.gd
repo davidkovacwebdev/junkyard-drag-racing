@@ -83,6 +83,63 @@ func accessory_mass() -> float:
 			total += accessory.mass
 	return total
 
+# --- Car-wide stats (the garage's stats card) ---------------------------------
+
+## The fitted body, engine and wheels: the parts that carry durability and speed.
+func _structural_parts() -> Array[PartData]:
+	var parts: Array[PartData] = []
+	for part: PartData in [body, engine]:
+		if part != null:
+			parts.append(part)
+	for wheel in wheels:
+		if wheel != null:
+			parts.append(wheel)
+	return parts
+
+## Average durability of the fitted parts, with the accessories' bonus on top.
+func average_durability() -> float:
+	var parts := _structural_parts()
+	if parts.is_empty():
+		return 0.0
+	var total := 0.0
+	for part in parts:
+		total += part.durability
+	return total / parts.size() * durability_multiplier()
+
+## What the engine spins the wheels to, with the accessories' bonus on top.
+func engine_power() -> float:
+	return engine.power * speed_multiplier() if engine != null else 0.0
+
+## How well the wheels turn that spin into ground speed.
+func average_wheel_speed() -> float:
+	var total := 0.0
+	var count := 0
+	for wheel in wheels:
+		if wheel != null:
+			total += wheel.speed
+			count += 1
+	return total / count if count > 0 else 0.0
+
+func total_mass() -> float:
+	var total := accessory_mass()
+	for part in _structural_parts():
+		total += part.mass
+	return maxf(total, 0.0)
+
+## The rating fractions run from the worst car the catalog can build (0) to
+## the best (1), see CarStatRanges.
+func durability_rating_fraction() -> float:
+	return PartData._normalize(average_durability(), PartDatabase.car_stat_ranges().durability)
+
+## Engine and wheels count half each: a jet on toilet bowls goes nowhere.
+func speed_rating_fraction() -> float:
+	var ranges := PartDatabase.car_stat_ranges()
+	return (PartData._normalize(engine_power(), ranges.engine_power)
+			+ PartData._normalize(average_wheel_speed(), ranges.wheel_speed)) / 2.0
+
+func mass_rating_fraction() -> float:
+	return PartData._normalize(total_mass(), PartDatabase.car_stat_ranges().mass)
+
 ## The first non-empty override any fitted accessory sets for `property`
 ## (horn_sound, body_impact_sound), or `fallback`.
 func accessory_sound(property: StringName, fallback: StringName) -> StringName:

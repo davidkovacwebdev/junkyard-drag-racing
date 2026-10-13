@@ -13,3 +13,6 @@ extends PartData
 
 func _init() -> void:
 	category = Category.ENGINE
+
+func signature_sound() -> StringName:
+	return start_sound if start_sound != &"ignition_click" else &""

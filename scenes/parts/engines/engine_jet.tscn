@@ -6,6 +6,8 @@
 [sub_resource type="Resource" id="Resource_jet"]
 script = ExtResource("2")
 id = &"engine_jet"
+found_in_junk = false
+found_fishing = true
 display_name = "Jet Engine"
 mass = 16.0
 durability = 90.0

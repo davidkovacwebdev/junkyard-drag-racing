@@ -54,9 +54,9 @@ func set_part(new_part: PartData, count: int = 1) -> void:
 	var effect := part.effect_summary() if part != null else ""
 	_effect_badge.visible = not effect.is_empty()
 	tooltip_text = effect
-	_durability_bar.set_rating(_rating(part.durability_rating_fraction()) if part != null else 0)
-	_speed_bar.set_rating(_rating(part.speed_rating_fraction()) if part != null else 0)
-	_mass_bar.set_rating(_rating(part.mass_rating_fraction()) if part != null else 0)
+	_durability_bar.set_rating(StatBar.rating_for(part.durability_rating_fraction()) if part != null else 0)
+	_speed_bar.set_rating(StatBar.rating_for(part.speed_rating_fraction()) if part != null else 0)
+	_mass_bar.set_rating(StatBar.rating_for(part.mass_rating_fraction()) if part != null else 0)
 	queue_redraw()
 
 ## Update just the copy count in the title, without re-rendering the icon.
@@ -73,9 +73,6 @@ static func _title_for(shown: PartData, show_count: int) -> String:
 	if show_count <= 1:
 		return shown.display_name
 	return "%s x%d" % [shown.display_name, show_count]
-
-static func _rating(fraction: float) -> int:
-	return clampi(int(round(fraction * 4.0)) + 1, 1, 5)
 
 func _draw() -> void:
 	var seed := hash(part.id) if part != null else 0

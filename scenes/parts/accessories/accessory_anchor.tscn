@@ -6,6 +6,8 @@
 [sub_resource type="Resource" id="Resource_anchor"]
 script = ExtResource("2")
 id = &"accessory_anchor"
+found_in_junk = false
+found_fishing = true
 display_name = "Anchor"
 category = 3
 spot = 2

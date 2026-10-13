@@ -7,6 +7,8 @@
 script = ExtResource("2")
 color = Color(0.9, 0.88, 0.82, 1)
 id = &"body_airplane"
+found_in_junk = false
+found_fishing = true
 display_name = "Little Prop Plane"
 suspension_sag = 8.0
 suspension_travel = 18.0

@@ -21,6 +21,9 @@ extends StaticBody2D
 ## Optional: if set, activating this also switches to that scene (e.g.
 ## the garage interior).
 @export var interior_scene: PackedScene
+## A staffed place (the shop, the junkyard): outside DayNightCycle's business
+## hours PlayerCar shows it as closed and won't let the player in.
+@export var closes_at_night: bool = false
 ## Optional: a race scene that T opens as a debug race, with fully random
 ## cars and nothing recorded (see DebugRace).
 @export var debug_race_scene: PackedScene
@@ -55,6 +58,9 @@ func _ready() -> void:
 	$CollisionShape2D.position = Vector2(0.0, size.y / 2.0 - collision_height / 2.0)
 	if not Engine.is_editor_hint():
 		_sort_at_ground()
+
+func is_closed() -> bool:
+	return closes_at_night and not Engine.is_editor_hint() and not DayNightCycle.is_business_hours()
 
 ## Where the box centre sits in local space, for a subclass's _draw().
 func art_origin() -> Vector2:

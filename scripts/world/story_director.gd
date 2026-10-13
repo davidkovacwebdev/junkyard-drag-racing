@@ -12,11 +12,12 @@ extends Node
 ## Where a new game's car starts: in front of Grandpa's garage door, clear of
 ## the dumpsters on either side. Character creation parks the car here.
 const OPENING_CAR_SPOT := Vector2(310.0, -105.0)
-## Grandpa sits just left of the car, wrench side towards it.
-const GRANDPA_SPOT := OPENING_CAR_SPOT + Vector2(-105.0, 15.0)
-## His bacon smoker stands off to his left (it hides itself until he's
-## built it; see BaconSmoker).
-const SMOKER_SPOT := GRANDPA_SPOT + Vector2(-210.0, -10.0)
+## Grandpa sits by the garage's left corner, far enough from the door that
+## pulling up to it doesn't reach him too.
+const GRANDPA_SPOT := OPENING_CAR_SPOT + Vector2(-260.0, -15.0)
+## His bacon smoker stands down the yard off his left, by the road and clear
+## of the bay spots (it hides itself until he's built it; see BaconSmoker).
+const SMOKER_SPOT := OPENING_CAR_SPOT + Vector2(-450.0, 120.0)
 ## Over the west bridge, on the big island: Chad's house, and Chad out front
 ## of it, just north of where the bridge lands (-16800, 2000), out of the
 ## car's way.
