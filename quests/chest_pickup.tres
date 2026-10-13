@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://items/treasure_chest.tres" id="2_chest"]
+[ext_resource type="Resource" path="res://quests/chest_junkyard.tres" id="3_next"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"chest_pickup"
+title = "Finders Keepers"
+description = "A treasure chest, right where Grandpa's leg was. Get it out of the hole and into your trunk."
+objective = "Pick up the treasure chest (E)"
+objective_place = "Treasure Area Spot"
+follow_ups = Array[ExtResource("1_script")]([ExtResource("3_next")])
+item_goal = ExtResource("2_chest")
+hand_over_item = false
+return_to_giver = false

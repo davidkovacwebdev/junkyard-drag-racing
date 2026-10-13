@@ -139,11 +139,11 @@ func _thanks() -> void:
 ## been paid he just tells it again.
 func _ask_about_treasure() -> void:
 	if Quests.is_complete(INFO_QUEST.id):
-		_dialog.say(info_line)
+		_dialog.say_about(INFO_QUEST.id, info_line)
 	elif Quests.has_quest(INFO_QUEST.id):
-		_dialog.say(INFO_QUEST.reminder_line)
+		_dialog.say_about(INFO_QUEST.id, INFO_QUEST.reminder_line)
 	else:
-		_dialog.say(price_line)
+		_dialog.say_about(INFO_QUEST.id, price_line, TreasureRumors.ASK_LINE)
 		Quests.give(INFO_QUEST)
 		SaveSystem.save_game()
 	_refresh()
@@ -170,7 +170,7 @@ func _hand_over() -> void:
 		return
 	Sfx.play_at(&"tin_cup_clink", global_position + CUP_AT, -4.0)
 	Sfx.play(&"beer_crack", -4.0, 0.05)
-	_dialog.say(info_line)
+	_dialog.say_about(INFO_QUEST.id, info_line)
 	_refresh()
 	SaveSystem.save_game()
 

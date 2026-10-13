@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="QuestData" format=3 uid="uid://frhqsg142qm8"]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://b4kssi28o6a3g" path="res://scripts/items/item_data.gd" id="2_n0w2i"]
+[ext_resource type="Resource" path="res://quests/dig_gear.tres" id="2_next"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"treasure_sweep"
+title = "Beep Beep"
+description = "Grandpa's metal detector works again. Somewhere around the X west of the docks, something big and metal is buried.
+
+Drive out there, switch the detector on from your trunk (I) and listen. It's old, so it beeps at nothing now and then. Near the real thing it beeps steadily, faster the closer you get. When it's going nuts, press E to mark the spot."
+objective = "Sweep around the X with the metal detector (I) and press E where it beeps fastest"
+objective_place = "Treasure Area Spot"
+follow_ups = [ExtResource("2_next")]
+cutscene_ids = Array[StringName]([&"mark_spot"])
+return_to_giver = false

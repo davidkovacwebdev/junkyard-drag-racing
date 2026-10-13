@@ -43,6 +43,7 @@ const LEAVE_SIZE := Vector2(150.0, 46.0)
 ## The "Ask Around" button, right of Leave.
 const ASK_GAP := 16.0
 const ASK_WIDTH := 500.0
+const ASK_SHORT_WIDTH := 260.0
 ## The longest an item's `buy_sound` goes off for when it's bought.
 const BUY_SOUND_SECONDS := 1.2
 
@@ -57,6 +58,14 @@ const BUY_SOUND_SECONDS := 1.2
 @export var full_line: String = "Your trunk's full, pal. Make some room first."
 @export var broke_line: String = "Come back when you got the cash, pal."
 @export var owned_line: String = "You already got one of those."
+## "Juice": asked for batteries for the metal detector, he has a laugh, and
+## sprouts eyebrows (BushyBrows) when the player tells him where to go.
+@export var batteries_asked_line: String = "Got any batteries?"
+@export var shipments_line: String = "Oh yeah, in this small town we get daily shipments of batteries for metal detectors."
+@export var really_line: String = "Really?"
+@export var improvise_line: String = "No... I guess you'll have to improvise."
+@export var screw_you_line: String = "Screw you and your eyebrows."
+@export var brows_seconds: float = 2.0
 
 var _leaving: bool = false
 var _shelf_icons: Dictionary = {}  # item id -> Node2D
@@ -164,25 +173,55 @@ func _build_grid() -> void:
 	leave.offset_bottom = LEAVE_SIZE.y
 	leave.pressed.connect(_dialog.close)
 	_grid_root.add_child(leave)
+	var asks := 0
 	if TreasureRumors.can_ask():
-		_grid_root.add_child(_ask_button())
+		_grid_root.add_child(_ask_button(TreasureRumors.ASK_LINE, 78, asks, func() -> void:
+				_dialog.say_about(TreasureRumors.QUEST, TreasureRumors.answer(TreasureRumors.SHOPKEEPER),
+						TreasureRumors.ASK_LINE)))
+		asks += 1
+	if Quests.has_quest(TreasureStory.BATTERIES):
+		_grid_root.add_child(_ask_button(batteries_asked_line, 79, asks, _ask_for_batteries))
 
-## "Ask Around": asking about the Junkyard Treasure, next to Leave.
-func _ask_button() -> ScrapButton:
+## A question for the shopkeeper next to Leave ("Ask Around"'s treasure
+## question, "Juice"'s batteries); the `slot`th one along.
+func _ask_button(text: String, jitter_seed: int, slot: int, on_pressed: Callable) -> ScrapButton:
 	var ask := ScrapButton.new()
-	ask.text = TreasureRumors.ASK_LINE
+	ask.text = text
 	ask.font_size = 18
-	ask.tilt_degrees = 1.0
-	ask.jitter_seed = 78
+	ask.tilt_degrees = 1.0 if slot % 2 == 0 else -1.0
+	ask.jitter_seed = jitter_seed
 	ask.anchor_left = LEAVE_POSITION.x
 	ask.anchor_top = LEAVE_POSITION.y
 	ask.anchor_right = LEAVE_POSITION.x
 	ask.anchor_bottom = LEAVE_POSITION.y
-	ask.offset_left = LEAVE_SIZE.x + ASK_GAP
-	ask.offset_right = LEAVE_SIZE.x + ASK_GAP + ASK_WIDTH
+	var left := LEAVE_SIZE.x + ASK_GAP + slot * (ASK_WIDTH + ASK_GAP)
+	ask.offset_left = left
+	ask.offset_right = left + (ASK_WIDTH if slot == 0 or text.length() > 24 else ASK_SHORT_WIDTH)
 	ask.offset_bottom = LEAVE_SIZE.y
-	ask.pressed.connect(func() -> void: _dialog.say(TreasureRumors.answer(TreasureRumors.SHOPKEEPER)))
+	ask.pressed.connect(on_pressed)
 	return ask
+
+## "Juice": the shelves give way to a little back and forth. The player's
+## replies are the options.
+func _ask_for_batteries() -> void:
+	_browsing = false
+	_grid_root.visible = false
+	_show_preview(null)
+	_dialog.say_about(TreasureStory.BATTERIES, shipments_line, batteries_asked_line)
+	_dialog.set_options([CharacterDialog.Option.new(really_line, _batteries_really)], true)
+
+func _batteries_really() -> void:
+	Sfx.play(&"denied", -6.0, 0.0)
+	_dialog.say_about(TreasureStory.BATTERIES, improvise_line, really_line)
+	_dialog.set_options([CharacterDialog.Option.new(screw_you_line, _batteries_screw_you)], true)
+
+## The brows, and "Juice" is done: "Scrap Juice" (the junkyard) follows.
+func _batteries_screw_you() -> void:
+	Quests.log_line(TreasureStory.BATTERIES, PlayerProfile.display_name(), screw_you_line)
+	BushyBrows.sprout(_dialog.portrait_rig(), brows_seconds)
+	Quests.complete(TreasureStory.BATTERIES)
+	SaveSystem.save_game()
+	_dialog.set_options([CharacterDialog.Option.new("Something else", _on_browse_pressed)], true)
 
 ## Browsing: the dialog's own options give way to the card grid.
 func _show_stock(_animate: bool = false) -> void:

@@ -43,6 +43,8 @@ extends Resource
 @export var quests_available: Array[QuestData] = []
 ## Quest id -> what the player did for it (see Quests.set_note()).
 @export var quest_notes: Dictionary = {}
+## Quest id -> what's been said about it (see Quests.dialogue).
+@export var quest_dialogue: Dictionary = {}
 ## Quest id -> its count so far (see Quests.add_count()).
 @export var quest_counts: Dictionary = {}
 ## Quest id -> seconds of horn honked for it (see Quests.add_horn_time()).

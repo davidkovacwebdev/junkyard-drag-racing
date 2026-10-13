@@ -88,6 +88,9 @@ var _fall_time: float = 0.0
 ## True until the load has been delivered: `_ready()` with `tip_on_ready`, or
 ## the end of `dump_from()`. Nothing counts as settled before that.
 var _awaiting_load: bool = true
+## Particular parts to tip in with the next load (`queue_extra()`), each
+## with what to call once it's in: [PartData, Callable].
+var _extras: Array = []
 
 func _ready() -> void:
 	if not tip_on_ready:
@@ -260,10 +263,20 @@ func dump_from(mouth: Vector2, toward: float) -> void:
 	for i in top_count:
 		tiers.append(1)
 	var start := to_local(mouth)
-	for tier in tiers:
+	# The extras go in partway through the top layer, so they end up in the
+	# heap rather than lying on top of it.
+	var extras_at := deep_count + top_count / 2
+	for i in tiers.size() + _extras.size():
 		if not is_inside_tree():
 			return
-		var body := _build_part(rng, tier)
+		var body: RigidBody2D = null
+		var tipped := Callable()
+		if i >= extras_at and i < extras_at + _extras.size():
+			var extra: Array = _extras[i - extras_at]
+			body = _build_given(extra[0])
+			tipped = extra[1]
+		else:
+			body = _build_part(rng, tiers[i if i < extras_at else i - _extras.size()])
 		if body != null:
 			_tip(body, start + Vector2(rng.randf_range(-6.0, 6.0), rng.randf_range(-10.0, 10.0)))
 			body.rotation = rng.randf_range(0.0, TAU)
@@ -274,9 +287,32 @@ func dump_from(mouth: Vector2, toward: float) -> void:
 			body.linear_velocity = Vector2(reach * 1.6, -lift)
 			body.angular_velocity = rng.randf_range(-6.0, 6.0)
 			_ghost(body)
+			if tipped.is_valid():
+				tipped.call(body)
 		await get_tree().create_timer(dump_interval, false, true).timeout
+	_extras.clear()
 	_awaiting_load = false
 	dumped.emit()
+
+## Tips `part` in with the next `dump_from()` load, and calls `tipped` with
+## its body once it's in (the crane pen marks it out).
+func queue_extra(part: PartData, tipped: Callable) -> void:
+	_extras.append([part, tipped])
+
+## `part` itself as a loose piece, ready to be tipped in, or null.
+func _build_given(part: PartData) -> RigidBody2D:
+	var node := _instantiate(part)
+	if node == null:
+		return null
+	PartScale.apply_to(node)
+	var body := node as RigidBody2D
+	if body == null:
+		body = _wrap(node)
+	if body == null:
+		node.free()
+		return null
+	body.physics_material_override = _junk_material()
+	return body
 
 ## Let a freshly dumped piece pass through the other pieces in flight for
 ## `dump_ghost_time`: its own layer goes to 2 (still colliding with the floor,

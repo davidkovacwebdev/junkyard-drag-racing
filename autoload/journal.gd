@@ -2,7 +2,8 @@ extends CanvasLayer
 ## The journal (autoload `Journal`): J opens a board listing the player's
 ## quests, pausing the game like the pause menu does; J or Esc closes it.
 ## Pick a quest on the left to read it, and hit Track to pin it to the
-## on-screen tracker in the top-left corner.
+## on-screen tracker in the top-left corner. Dialogue flips the page to
+## everything said about the quest so far (Quests.dialogue), and Notes back.
 ##
 ## Also owns the two bits of quest HUD that show outside the journal: the
 ## tracker (with a live count for quests that have one), and the card that
@@ -46,6 +47,12 @@ var _description_label: Label
 var _objective_label: Label
 var _reward_label: Label
 var _track_button: ScrapButton
+var _dialogue_button: ScrapButton
+## The Dialogue page: one name and line per thing said.
+var _dialogue_list: VBoxContainer
+## Whether the page shows the dialogue rather than the quest's notes; kept
+## while flicking between quests.
+var _showing_dialogue := false
 var _selected: QuestData = null
 
 var _tracker: ScrapPanel
@@ -246,7 +253,14 @@ func _build_panel() -> void:
 	_description_label = _make_label("", 20, UiPalette.TEXT_BROWN)
 	_description_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_description_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_description_scroll.add_child(_description_label)
+	var page := VBoxContainer.new()
+	page.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_description_scroll.add_child(page)
+	page.add_child(_description_label)
+	_dialogue_list = VBoxContainer.new()
+	_dialogue_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_dialogue_list.add_theme_constant_override("separation", 6)
+	page.add_child(_dialogue_list)
 	_objective_label = _make_label("", 20, UiPalette.TEXT_BROWN)
 	_objective_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_detail.add_child(_objective_label)
@@ -260,7 +274,18 @@ func _build_panel() -> void:
 	_track_button.tilt_degrees = -1.5
 	_track_button.jitter_seed = 141
 	_track_button.pressed.connect(_on_track_pressed)
-	_detail.add_child(_track_button)
+	var buttons := HBoxContainer.new()
+	buttons.add_theme_constant_override("separation", 16)
+	_detail.add_child(buttons)
+	buttons.add_child(_track_button)
+	_dialogue_button = ScrapButton.new()
+	_dialogue_button.custom_minimum_size = Vector2(170.0, 46.0)
+	_dialogue_button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_dialogue_button.font_size = 22
+	_dialogue_button.tilt_degrees = 1.2
+	_dialogue_button.jitter_seed = 143
+	_dialogue_button.pressed.connect(_on_dialogue_pressed)
+	buttons.add_child(_dialogue_button)
 
 	_empty_label = _make_label("No quests yet. Go talk to people.", 22, UiPalette.TEXT_BROWN)
 	_empty_label.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -309,14 +334,52 @@ func _show_detail() -> void:
 	_giver_label.visible = not _selected.giver.is_empty()
 	_description_label.text = PlayerProfile.fill(_selected.description)
 	_description_scroll.scroll_vertical = 0
+	var lines := Quests.lines_of(_selected.id)
+	var dialogue := _showing_dialogue and not lines.is_empty()
+	_fill_dialogue(lines if dialogue else [])
+	_description_label.visible = not dialogue
+	_dialogue_button.disabled = lines.is_empty()
+	_dialogue_button.selected = false
+	_dialogue_button.text = "Notes" if dialogue else "Dialogue"
 	_objective_label.text = "Done!" if done else "To do: %s" % Quests.objective_text(_selected)
+	_objective_label.visible = not dialogue
 	var reward := Quests.reward_text(_selected)
 	_reward_label.text = "Reward: %s" % reward
-	_reward_label.visible = not reward.is_empty() and not done
+	_reward_label.visible = not reward.is_empty() and not done and not dialogue
 	_track_button.visible = not done
 	var tracking := Quests.tracked == _selected
 	_track_button.selected = tracking
 	_track_button.text = "Tracking" if tracking else "Track"
+
+## Fills the Dialogue page: each speaker's name over their lines, with a gap
+## where one scene ends and the next begins.
+func _fill_dialogue(lines: Array) -> void:
+	for child in _dialogue_list.get_children():
+		child.queue_free()
+	var last_scene: Variant = null
+	var last_speaker := ""
+	for entry: Dictionary in lines:
+		var scene: StringName = entry.get("scene", &"")
+		var speaker := String(entry.get("speaker", ""))
+		var new_scene: bool = last_scene != null and scene != last_scene
+		if new_scene:
+			var gap := Control.new()
+			gap.custom_minimum_size = Vector2(0.0, 14.0)
+			_dialogue_list.add_child(gap)
+		if new_scene or last_scene == null or speaker != last_speaker:
+			var name_label := _make_label(speaker.to_upper(), 15, UiPalette.SURFACE_DARK)
+			_dialogue_list.add_child(name_label)
+		var line_label := _make_label(String(entry.get("line", "")), 19, UiPalette.TEXT_BROWN)
+		line_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		line_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_dialogue_list.add_child(line_label)
+		last_scene = scene
+		last_speaker = speaker
+
+func _on_dialogue_pressed() -> void:
+	_showing_dialogue = not _showing_dialogue
+	Sfx.play(&"journal_flip", -9.0, 0.05)
+	_show_detail()
 
 func _on_track_pressed() -> void:
 	if _selected == null:

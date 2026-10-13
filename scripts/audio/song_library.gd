@@ -14,6 +14,8 @@ const SONGS := {
 	&"goblin_gumbo_wobble": preload("res://scripts/audio/songs/goblin_gumbo_wobble.gd"),
 	&"blorp_hup_hup_stampede": preload("res://scripts/audio/songs/blorp_hup_hup_stampede.gd"),
 	&"bonk_club": preload("res://scripts/audio/songs/bonk_club.gd"),
+	# A five-second sting for the digger's montage, not on a playlist.
+	&"digger_montage": preload("res://scripts/audio/songs/digger_montage.gd"),
 }
 
 ## Songs per scene group, played in order; each one hands over to the next when

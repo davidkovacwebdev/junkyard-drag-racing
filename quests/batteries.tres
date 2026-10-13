@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="QuestData" format=3 uid="uid://c3vcc3qi0u7gy"]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://b4kssi28o6a3g" path="res://scripts/items/item_data.gd" id="2_jfqty"]
+[ext_resource type="Resource" path="res://quests/junkyard_batteries.tres" id="2_next"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"batteries"
+title = "Juice"
+description = "Grandpa's metal detector warbles for half a second and dies. The battery's flat.
+
+The Shop sells a bit of everything. Go see if they've got batteries."
+objective = "Get a battery for the metal detector (try the Shop)"
+objective_place = "Shop"
+follow_ups = [ExtResource("2_next")]
+return_to_giver = false

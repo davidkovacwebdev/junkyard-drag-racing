@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://b4kssi28o6a3g" path="res://scripts/items/item_data.gd" id="1_12283"]
 [ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://quests/metal_head.tres" id="2_next"]
 
 [resource]
 script = ExtResource("1_script")
@@ -13,5 +14,6 @@ description = "Gus found his real treasure coin west of the docks and marked the
 Chad's riding along. Drive out to the Treasure Area Spot."
 objective = "Drive to the Treasure Area Spot (the X on your map)"
 objective_place = "Treasure Area Spot"
-cutscene_ids = Array[StringName]([&"dig_site", &"coming_soon"])
+follow_ups = [ExtResource("2_next")]
+cutscene_ids = Array[StringName]([&"dig_site"])
 return_to_giver = false

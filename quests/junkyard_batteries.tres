@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="QuestData" format=3 uid="uid://cyx8bw7blhto3"]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://b4kssi28o6a3g" path="res://scripts/items/item_data.gd" id="2_mj815"]
+[ext_resource type="Resource" path="res://quests/toy_motor.tres" id="2_next"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"junkyard_batteries"
+title = "Scrap Juice"
+description = "No batteries at the Shop. \"Improvise,\" says the shopkeeper. Thanks, pal.
+
+The junkyard's full of dead junk. There's bound to be a battery in there somewhere. Go ask at the counter."
+objective = "Ask at the Junkyard counter about batteries"
+objective_place = "Junkyard"
+follow_ups = [ExtResource("2_next")]
+cutscene_ids = Array[StringName]([&"battery_ask"])
+return_to_giver = false

@@ -1,6 +1,8 @@
-[gd_resource type="Resource" script_class="QuestData" format=3]
+[gd_resource type="Resource" script_class="QuestData" format=3 uid="uid://cs35duqfmpgny"]
 
+[ext_resource type="Script" uid="uid://b4kssi28o6a3g" path="res://scripts/items/item_data.gd" id="1_30dcu"]
 [ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" uid="uid://ck0b7qbp8fan" path="res://quests/dig_site.tres" id="2_dig"]
 
 [resource]
 script = ExtResource("1_script")
@@ -12,5 +14,6 @@ description = "Chad's husband looked the fake coins over: freshly smelted, poure
 Chad's riding along. Drive to Gus's Scrap Forge and have a word with him."
 objective = "Drive to the Scrap Forge with Chad"
 objective_place = "Gus"
+side_quests = [ExtResource("2_dig")]
 cutscene_ids = Array[StringName]([&"smithy_raid"])
 return_to_giver = false

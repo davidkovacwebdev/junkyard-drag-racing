@@ -28,6 +28,13 @@ extends Node2D
 ## Then Chad walks in to look at it (GoldFakeCutscene): it's a fake, and the
 ## quest is done.
 ##
+## **Fishing out the toy car motor** ("Fish It Out", after asking at the
+## counter for a battery): the digs are free, the day's load has the
+## Battery-Powered Toy Car Motor in it, and a pulsing yellow glow and arrow
+## (PenTargetMarker) point it out. Hauling it up plays MotorBatteryCutscene:
+## the man from the counter takes it, and Grandpa's metal detector, to wire
+## the battery in by tomorrow.
+##
 ## Fitting the pit out is a two-part contract, the same one junkyard_yard.gd has
 ## with its walls: `pit_rect` here is what gets painted, and the pen's own
 ## StaticBody2D walls are what actually holds the junk in. Move one, move the
@@ -75,6 +82,11 @@ const SEARCH_SCRAP := Vector2i(1, 3)
 const GOLD_REACH := 110.0
 const GOLD_HINT_AFTER := 2
 const GOLD_FAKE_SCENE := "res://cutscenes/gold_fake.tres"
+## "Fish It Out" (see the top of this file).
+const MOTOR_QUEST := &"toy_motor"
+const MOTOR_PART := "res://scenes/parts/engines/engine_toy_car_motor.tscn"
+const MOTOR_SCENE := "res://cutscenes/motor_battery.tres"
+const DETECTOR := &"metal_detector"
 const NOTHING_LINES: Array[String] = [
 	"Just junk under there. Stir it up some more.",
 	"Rust, a shoe, half a toaster. Keep stirring.",
@@ -154,6 +166,9 @@ var _gold: PenGold = null
 var _gold_misses := 0
 ## What a dig costs when Chad isn't paying.
 var _paid_grab_cost := 0
+## "Fish It Out": the motor's on its way up out of the heap, and its marker.
+var _fishing := false
+var _marker: PenTargetMarker = null
 
 func _ready() -> void:
 	# Welded back together after it fell, if it did.
@@ -169,6 +184,13 @@ func _ready() -> void:
 		_crane.grab_cost = 0
 		_gold_after = randi_range(GOLD_AFTER_STIRS.x, GOLD_AFTER_STIRS.y)
 		_hint.text = "A / D  roll the claw over the heap     Space  drop the claw to stir the junk     E  search under the claw     Esc  leave"
+	elif Quests.has_quest(MOTOR_QUEST) and Quests.catalog_part(MOTOR_PART) != null:
+		# On the house.
+		_fishing = true
+		_paid_grab_cost = _crane.grab_cost
+		_crane.grab_cost = 0
+		_heap.queue_extra(Quests.catalog_part(MOTOR_PART), _mark_motor)
+		_hint.text = "A / D  roll the claw over the heap     Space  drop the claw (free), Space again to shut it early     Esc  leave"
 	else:
 		_hint.text = "A / D  roll the claw over the heap     Space  drop the claw ($%d a go), Space again to shut it early     Esc  leave" % _crane.grab_cost
 	# The load is still raining in when the pen opens: no digging until it has
@@ -219,6 +241,9 @@ func _on_heap_settled() -> void:
 	_crane.controls_enabled = true
 	_refresh()
 	Sfx.play(&"crane_ready", -6.0, 0.0)
+	if _fishing:
+		_set_line("There's the toy car motor, lit up in the heap. Fish it out with the claw - the digs are on the house.")
+		return
 	if _searching:
 		_set_line("Chad's paying for the digs. Drop the claw into the heap to stir it up, then press E to search the junk under the claw.")
 		return
@@ -273,11 +298,66 @@ func _on_dig_finished(caught: int) -> void:
 			Quests.set_note(fish_quest, _haul_parts[0].display_name if not _haul_parts.is_empty() else "")
 			Quests.goal_met(fish_quest)
 	_refresh()
+	var motor: PartData = null
+	if _fishing:
+		for part in _haul_parts:
+			if part.scene_path == MOTOR_PART:
+				motor = part
 	_haul.clear()
 	_haul_parts.clear()
 	_haul_scrap = 0
 	if _searching:
 		_stir()
+	if motor != null:
+		_motor_caught(motor)
+	SaveSystem.save_game()
+
+# --- Fishing out the toy car motor ---------------------------------------------------
+
+func _mark_motor(body: RigidBody2D) -> void:
+	_marker = PenTargetMarker.new(body)
+	($Yard as Node2D).add_child(_marker)
+
+## The motor's up: the man from the counter comes over for it and the
+## detector, and "Fish It Out" is done. The digs cost money again.
+func _motor_caught(motor: PartData) -> void:
+	_fishing = false
+	_crane.grab_cost = _paid_grab_cost
+	_crane.controls_enabled = false
+	if is_instance_valid(_marker):
+		_marker.clear()
+	var operator := CraneWorkerGenerator.current_operator()
+	var scene := ResourceLoader.load(MOTOR_SCENE, "", ResourceLoader.CACHE_MODE_REPLACE) as MotorBatteryCutscene
+	# The haul's part card would sit right over the two of them.
+	_cards.visible = false
+	if scene != null:
+		scene.cab_at = _crane.global_position
+		scene.operator = operator
+		scene.operator_at = _crane.global_position + Vector2(700.0, 0.0)
+		# He walks over from his spot by the crane, if he's standing there.
+		var standing: PenBystander = null
+		for node in find_children("*", "PenBystander", true, false):
+			var bystander := node as PenBystander
+			if bystander.visible and bystander.character_data != null \
+					and bystander.character_data.display_name == operator.display_name:
+				standing = bystander
+		if standing != null:
+			scene.operator_at = standing.global_position
+			standing.visible = false
+		scene.cab_at.y = scene.operator_at.y
+		await Cutscenes.play(scene)
+		if standing != null and is_instance_valid(standing):
+			standing.visible = true
+	# He keeps the motor and takes the detector to wire it up.
+	Inventory.take_stashed(motor.scene_path)
+	for card in _cards.get_children():
+		card.queue_free()
+	_cards.visible = true
+	Inventory.remove_item(DETECTOR)
+	_set_line("The motor and the metal detector are in good hands. Come back to the counter tomorrow.")
+	_crane.controls_enabled = true
+	_hint.text = "A / D  roll the claw over the heap     Space  drop the claw ($%d a go), Space again to shut it early     Esc  leave" % _crane.grab_cost
+	Quests.complete(MOTOR_QUEST)
 	SaveSystem.save_game()
 
 # --- Searching for the gold -------------------------------------------------------

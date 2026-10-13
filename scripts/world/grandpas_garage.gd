@@ -8,7 +8,10 @@ extends ComposedBuilding
 ##   - "Under the Mattress": E plays the search for the old nickel
 ##     (GrandpaMattressCutscene) and puts it in the trunk, which finishes
 ##     that quest (its item goal). With the trunk full the nickel stays put
-##     and the player can come back for it.
+##     and the player can come back for it;
+##   - "Grandpa's Shed": E plays the night spent digging through his tool
+##     shed (GrandpasShedCutscene) and puts the metal detector in the trunk,
+##     the same way.
 ##
 ## Every garage bay the player buys (Inventory.garage_bays_bought) shows up as
 ## another little shed in a row to the left of the house, each one another
@@ -19,6 +22,9 @@ const SCENE_PATH := "res://cutscenes/grandpa_gone.tres"
 const MATTRESS_QUEST := &"mattress_nickel"
 const MATTRESS_SCENE_PATH := "res://cutscenes/grandpa_mattress.tres"
 const NICKEL := preload("res://items/old_nickel.tres")
+const SHED_QUEST := &"grandpas_shed"
+const SHED_SCENE_PATH := "res://cutscenes/grandpas_shed.tres"
+const DETECTOR := preload("res://items/metal_detector.tres")
 const BAY_DATA := preload("res://buildings/player_garage_bay.tres")
 const BUILDING_SCENE := preload("res://scenes/world/composed_building.tscn")
 ## Every clear spot a bay can go up on, as its ground point from the house's
@@ -71,6 +77,8 @@ func get_interact_prompt() -> String:
 		return "%s: Press E to look for Grandpa" % display_name
 	if _mattress_waiting():
 		return "%s: Press E to look under Grandpa's mattress" % display_name
+	if _shed_waiting():
+		return "%s: Press E to search Grandpa's tool shed" % display_name
 	return ""
 
 ## Called by PlayerCar on E or a click.
@@ -80,6 +88,9 @@ func interact(_actor: Node = null) -> void:
 		return
 	if _mattress_waiting():
 		_look_under_mattress()
+		return
+	if _shed_waiting():
+		_search_tool_shed()
 		return
 	if interior_scene != null:
 		Sfx.play(&"door_close", -4.0)
@@ -91,6 +102,23 @@ func _searching() -> bool:
 func _mattress_waiting() -> bool:
 	return Quests.has_quest(MATTRESS_QUEST) and not Inventory.has_item(NICKEL.id) \
 			and not Cutscenes.is_active()
+
+func _shed_waiting() -> bool:
+	return Quests.has_quest(SHED_QUEST) and not Inventory.has_item(DETECTOR.id) \
+			and not Cutscenes.is_active()
+
+func _search_tool_shed() -> void:
+	if Inventory.is_trunk_full():
+		Sfx.play(&"denied", -6.0, 0.0)
+		Pickup.spawn_float_text(get_parent(), global_position + Vector2(0.0, -40.0), "Trunk's full!")
+		return
+	var scene := ResourceLoader.load(SHED_SCENE_PATH, "", ResourceLoader.CACHE_MODE_REPLACE) as GrandpasShedCutscene
+	if scene != null:
+		scene.garage = self
+		await Cutscenes.play(scene)
+	if Inventory.give_item(DETECTOR):
+		Sfx.play(&"part_pickup", -6.0, 0.0)
+	SaveSystem.save_game()
 
 func _look_for_grandpa() -> void:
 	# He's gone before the player gets out, even if they were parked here

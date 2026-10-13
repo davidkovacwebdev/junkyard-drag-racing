@@ -12,6 +12,11 @@ extends Node
 ## For "Dig Deeper", once the crane is fixed and the player has met Chad on
 ## the island, Chad waits in the yard by the crane (ChadNpc, `at_junkyard`).
 ##
+## "Show and Tell": driving in with the treasure chest in the trunk opens
+## it (ChestOpeningCutscene, with the man at the counter and Chad): the
+## chest's gone, the Treasure Boat Engine goes in the spare parts, the gold
+## nuggets pay $3000, and the quest is done.
+##
 ## The quest finishes when the scene does, not when the note is owned: a
 ## note already in the trunk (say, from testing with the F5 board) mustn't
 ## finish the quest before the player has even been here.
@@ -25,6 +30,9 @@ const GOLD_QUEST := &"junkyard_gold"
 const MET_CHAD_QUEST := &"west_bridge"
 ## Where Chad waits, between the crane and the counter.
 const CHAD_SPOT := Vector2(330.0, 470.0)
+const CHEST_QUEST := &"chest_junkyard"
+const CHEST := &"treasure_chest"
+const CHEST_SCENE_PATH := "res://cutscenes/chest_opening.tres"
 
 func _enter_tree() -> void:
 	# Before anything else is ready, so nothing sees the crane standing.
@@ -51,6 +59,8 @@ func _ready() -> void:
 	_place_chad()
 	if Quests.has_quest(QUEST_ID):
 		_tell.call_deferred()
+	elif Quests.has_quest(CHEST_QUEST) and Inventory.has_item(CHEST):
+		_open_chest.call_deferred()
 	elif Quests.is_complete(QUEST_ID) and not Inventory.has_item(NOTE.id):
 		_hand_over_note.call_deferred()
 
@@ -65,6 +75,22 @@ func _place_chad() -> void:
 	chad.at_junkyard = true
 	chad.position = CHAD_SPOT
 	yard.add_child.call_deferred(chad)
+
+func _open_chest() -> void:
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var scene := ResourceLoader.load(CHEST_SCENE_PATH, "", ResourceLoader.CACHE_MODE_REPLACE) as ChestOpeningCutscene
+	if scene == null:
+		return
+	scene.npc_rig = get_parent().get_node_or_null(^"Yard/Dealer/Character") as CharacterRig
+	Music.hush(true, 1.0)
+	await Cutscenes.play_once(scene)
+	Music.hush(false)
+	Inventory.remove_item(CHEST)
+	Inventory.add_part(PartDatabase.load_part_data(ChestOpeningCutscene.ENGINE_PATH))
+	Inventory.money += scene.gold_money
+	Quests.complete(CHEST_QUEST)
+	SaveSystem.save_game()
 
 func _tell() -> void:
 	# Let the car and its camera settle into place first.

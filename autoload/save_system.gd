@@ -220,6 +220,7 @@ func _snapshot() -> SaveData:
 	data.quests_available = Quests.available.duplicate()
 	data.quest_notes = Quests.notes.duplicate()
 	data.quest_counts = Quests.counts.duplicate()
+	data.quest_dialogue = Quests.dialogue.duplicate(true)
 	data.quest_horn_times = Quests.horn_times.duplicate()
 	data.quest_delayed = Quests.delayed.duplicate()
 	return data
@@ -290,7 +291,7 @@ func _apply_save(data: SaveData) -> void:
 	PlayerProfile.character = data.player_character
 	Quests.restore(data.quests_active, data.quests_completed, data.quests_ready,
 			data.quests_available, data.tracked_quest, data.quest_notes, data.quest_counts,
-			data.quest_horn_times, data.quest_delayed)
+			data.quest_horn_times, data.quest_delayed, data.quest_dialogue)
 
 ## Called by New Game so starting over doesn't leave a stale save
 ## sitting there claiming to be continuable.

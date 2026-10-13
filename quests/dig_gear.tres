@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://quests/treasure_dig.tres" id="2_next"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"dig_gear"
+title = "Heavy Machinery"
+description = "The spot's marked, with Grandpa's leg of all things. Now somebody has to dig, and it's not going to be you with your bare hands.
+
+The junkyard's bound to have something. Go ask at the counter."
+objective = "Ask at the Junkyard counter for something to dig with"
+objective_place = "Junkyard"
+follow_ups = Array[ExtResource("1_script")]([ExtResource("2_next")])
+cutscene_ids = Array[StringName]([&"digger_reveal"])
+return_to_giver = false

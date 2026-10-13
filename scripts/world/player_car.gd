@@ -38,6 +38,19 @@ const LANDOWNER_SCENE_PATH := "res://cutscenes/landowner.tres"
 ## Top speed multiplier while Shift is held, stacking on top of the
 ## on/off-road multiplier above.
 @export var sprint_speed_multiplier: float = 3.0
+## "Dig It": while it's on, the player drives the junkyard's digger
+## (DiggerRig) instead of their car: this much slower, and no sprint.
+@export var digger_speed_multiplier: float = 0.55
+
+@export_group("Boat")
+## With the Treasure Boat Engine fitted the car floats: it goes through the
+## shore wall and out on the water, sitting this far down in it.
+@export var boat_float_level: float = 0.35
+## How far out from land the boat goes freely, and over how much further
+## the screen fades to black (DemoSeaEdge) up to the line it can't cross.
+@export var boat_free_distance: float = 300.0
+@export var boat_fade_distance: float = 700.0
+@export_group("")
 ## How hard Space bites, as a fraction of current speed shed per second
 ## (exponential decay, not a fixed px/s^2) — a hard stop from a sprint
 ## bleeds off far more speed per frame than easing off a crawl, and the
@@ -245,6 +258,17 @@ var _tire_screech: SustainedSound
 var _bump_cooldown: float = 0.0
 var _bump_sound: StringName = &"bump"
 var _boost_sound: StringName = &"backfire"
+## The digger standing in for the car during "Dig It" (or on loan), or null.
+var _digger: DiggerRig = null
+## The Treasure Boat Engine is fitted: the car floats (see the Boat exports).
+const BOAT_ENGINE := &"engine_treasure_propeller"
+const SEA_CHECK_SECONDS := 0.12
+var _boat := false
+var _afloat := false
+var _shore_passable := false
+var _sea_check := 0.0
+var _last_dry_spot := Vector2.ZERO
+var _demo_edge: DemoSeaEdge = null
 ## Rough total mass of the equipped body + wheels + engine, fed to a
 ## GarbageTruck every frame the car touches it so how much it can push (or
 ## get pushed off course by) scales with what's actually bolted on (see
@@ -318,12 +342,14 @@ func _ready() -> void:
 		_visual.audible_accessories = true
 		_visual.build_from(car)
 		_car_mass = _compute_car_mass(car)
+		_boat = car.engine != null and car.engine.id == BOAT_ENGINE and _terrain != null
 	_visual.fit_collision(_collision, _walker_collision)
 	_setup_sounds(car)
 	# Coming back from a place (garage, drag strip race): reappear where we
 	# left the map instead of at the scene's default spawn.
 	if remember_position and WorldState.has_player_position:
 		global_position = WorldState.player_position
+	_last_dry_spot = global_position
 	# If E was still held when the previous scene ended, don't let it count
 	# as a fresh press here — that would instantly re-enter the place we
 	# just exited.
@@ -553,7 +579,11 @@ func _physics_process(delta: float) -> void:
 			or (not _under_bridge and BlockedBridge.any_deck_under(get_tree(), global_position))
 	var on_puddle := _puddles != null and _puddles.is_on_puddle(global_position)
 	var in_water := not on_road and _terrain != null and _is_in_water_here()
-	_update_wading(delta, in_water)
+	# A boat floats: no sinking, no wading slowdown.
+	var wading := in_water and not _boat
+	_update_wading(delta, wading)
+	if _boat:
+		_update_boat(delta, in_water)
 	if _stuck:
 		input_dir = Vector2.ZERO
 	if is_instance_valid(_fishing):
@@ -565,6 +595,10 @@ func _physics_process(delta: float) -> void:
 		if _fishing_seconds >= fishing_patience and not Cutscenes.is_active():
 			_evict_from_fishing()
 
+	_update_digger()
+	if _digger != null and _digger.is_digging():
+		input_dir = Vector2.ZERO
+
 	if input_dir.x > 0.0:
 		_facing_right = true
 	elif input_dir.x < 0.0:
@@ -573,6 +607,8 @@ func _physics_process(delta: float) -> void:
 	if _visual.scale.x != facing_scale:
 		_visual.scale.x = facing_scale
 		_visual.mirror_collision(_collision, _walker_collision)
+	if _digger != null:
+		_digger.scale.x = facing_scale
 
 	# Compared against velocity as it stood BEFORE this frame's move_toward
 	# touches it — "the car was already heading this way" — against the
@@ -583,14 +619,16 @@ func _physics_process(delta: float) -> void:
 	var target_velocity := Vector2.ZERO
 	if input_dir != Vector2.ZERO and not braking:
 		var speed_multiplier := on_road_speed_multiplier if on_road else off_road_speed_multiplier
-		if _is_key_held(KEY_SHIFT):
+		if _digger != null:
+			speed_multiplier *= digger_speed_multiplier
+		elif _is_key_held(KEY_SHIFT):
 			speed_multiplier *= sprint_speed_multiplier
-		if in_water:
+		if wading:
 			speed_multiplier *= wade_speed_multiplier * (1.0 - _sink)
 		target_velocity = input_dir.normalized() * max_speed * speed_multiplier
 		target_velocity += Drunk.sway() * max_speed * drunk_sway_speed * speed_multiplier
 	var handling_multiplier := on_road_handling_multiplier if on_road else off_road_handling_multiplier
-	if in_water:
+	if wading:
 		handling_multiplier *= wade_handling_multiplier
 	if on_puddle:
 		# Grip, not speed: the car can still carry its momentum, it just
@@ -606,7 +644,7 @@ func _physics_process(delta: float) -> void:
 	else:
 		var base_rate := friction if input_dir == Vector2.ZERO else acceleration
 		velocity = velocity.move_toward(target_velocity, base_rate * handling_multiplier * delta)
-	if in_water:
+	if wading:
 		velocity *= exp(-water_drag * delta)
 	var velocity_before_move := velocity
 	move_and_slide()
@@ -804,9 +842,57 @@ func _update_sounds(delta: float, input_dir: Vector2, skidding: bool, impact_spe
 		_bump_cooldown = 0.3
 
 	var sprint_pressed := _is_key_held(KEY_SHIFT)
-	if sprint_pressed and not _sprint_pressed_last and input_dir != Vector2.ZERO and _engine_sound != null:
+	if sprint_pressed and not _sprint_pressed_last and input_dir != Vector2.ZERO and _engine_sound != null \
+			and _digger == null:
 		Sfx.play(_boost_sound, -6.0)
 	_sprint_pressed_last = sprint_pressed
+
+## The Treasure Boat Engine: the shore wall lets the car through, it bobs
+## in the water instead of sinking (splashing as it goes in), and out past
+## `boat_free_distance` from land the screen fades to the demo's end
+## (DemoSeaEdge), until at the far line it won't go any further.
+func _update_boat(delta: float, in_water: bool) -> void:
+	if not _shore_passable:
+		_shore_passable = true
+		for shore in get_tree().get_nodes_in_group(TerrainNetwork.SHORE_GROUP):
+			add_collision_exception_with(shore)
+	if in_water and not _afloat:
+		Sfx.play(&"car_splash", splash_volume_db, 0.05)
+	_afloat = in_water
+	_water_line.level = boat_float_level if in_water else 0.0
+	if _demo_edge == null:
+		_demo_edge = DemoSeaEdge.new()
+		add_child(_demo_edge)
+	_sea_check -= delta
+	if _sea_check > 0.0:
+		return
+	_sea_check = SEA_CHECK_SECONDS
+	# The terrain's drawn scaled up: its distances are in its own units.
+	var out := _terrain.distance_to_land(_terrain.to_local(global_position)) * _terrain.global_scale.x \
+			if in_water else 0.0
+	var depth := (out - boat_free_distance) / boat_fade_distance
+	_demo_edge.depth = depth
+	if depth >= 1.0:
+		global_position = _last_dry_spot
+		velocity = Vector2.ZERO
+	else:
+		_last_dry_spot = global_position
+
+## "Dig It" on, or the digger borrowed: the car's own look goes and the
+## digger stands in for it. Off again: back to the car.
+func _update_digger() -> void:
+	var digging := DiggerRig.in_use()
+	if digging == (_digger != null):
+		return
+	if digging:
+		_digger = DiggerRig.new()
+		_digger.driven = true
+		add_child(_digger)
+		_visual.visible = false
+	else:
+		_digger.queue_free()
+		_digger = null
+		_visual.visible = true
 
 ## Lean the whole car into its vertical movement: climbing (W/Up) tips the
 ## nose up, descending (S/Down) tips it down, easing back to level the moment

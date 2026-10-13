@@ -52,6 +52,11 @@ var horn_times: Dictionary = {}
 ## Quest id -> the game time (Funeral.now()) it lands in the log: follow-ups
 ## held back by a finished quest's `follow_up_delay_days`.
 var delayed: Dictionary = {}
+## Quest id -> everything said about it so far, oldest first, for the
+## journal's Dialogue page: an Array of {speaker, line, scene} Dictionaries.
+## `scene` is the cutscene id the line came from ("" for a dialog popup).
+## See `log_line()`.
+var dialogue: Dictionary = {}
 
 func _process(_delta: float) -> void:
 	if not delayed.is_empty():
@@ -112,6 +117,7 @@ func reset() -> void:
 	counts.clear()
 	horn_times.clear()
 	delayed.clear()
+	dialogue.clear()
 	available_changed.emit()
 	tracked = null
 	tracked_changed.emit(null)
@@ -398,8 +404,10 @@ func tracked_target_position() -> Vector2:
 func restore(saved_active: Array[QuestData], saved_completed: Array[QuestData],
 		saved_ready: Array[StringName], saved_available: Array[QuestData],
 		saved_tracked: QuestData, saved_notes: Dictionary = {}, saved_counts: Dictionary = {},
-		saved_horn_times: Dictionary = {}, saved_delayed: Dictionary = {}) -> void:
+		saved_horn_times: Dictionary = {}, saved_delayed: Dictionary = {},
+		saved_dialogue: Dictionary = {}) -> void:
 	notes = saved_notes.duplicate()
+	dialogue = saved_dialogue.duplicate(true)
 	delayed = saved_delayed.duplicate()
 	counts = saved_counts.duplicate()
 	horn_times = saved_horn_times.duplicate()
@@ -426,6 +434,37 @@ func restore(saved_active: Array[QuestData], saved_completed: Array[QuestData],
 	tracked = _find(active, saved_tracked.id) if saved_tracked != null else null
 	tracked_changed.emit(tracked)
 
+## Writes a line `speaker` said into `quest_id`'s Dialogue page in the
+## journal. A popup line (no `scene`) that's already there isn't written
+## twice, so a reminder asked for again doesn't pile up; `always` writes it
+## anyway (the question before a new answer).
+func log_line(quest_id: StringName, speaker: String, line: String, scene: StringName = &"",
+		always: bool = false) -> void:
+	if quest_id.is_empty() or line.strip_edges().is_empty():
+		return
+	var entry := {"speaker": speaker, "line": line, "scene": scene}
+	var lines: Array = dialogue.get(quest_id, [])
+	if scene.is_empty() and not always and lines.has(entry):
+		return
+	lines.append(entry)
+	dialogue[quest_id] = lines
+
+## Drops the lines cutscene `scene` wrote into `quest_id`'s page, before it
+## writes them again (a scene replayed after the F5 Restart).
+func forget_scene_lines(quest_id: StringName, scene: StringName) -> void:
+	if not dialogue.has(quest_id):
+		return
+	dialogue[quest_id] = (dialogue[quest_id] as Array).filter(
+			func(entry: Dictionary) -> bool: return entry.get("scene", &"") != scene)
+
+## Whether `speaker` already said `line` about `quest_id` in a popup.
+func has_line(quest_id: StringName, speaker: String, line: String) -> bool:
+	return lines_of(quest_id).has({"speaker": speaker, "line": line, "scene": &""})
+
+## Everything said about `quest_id` so far (see `dialogue`).
+func lines_of(quest_id: StringName) -> Array:
+	return dialogue.get(quest_id, [])
+
 ## Winds the story back: every quest in `forget` drops out of the log as if
 ## it never happened (active, done, waiting, counts and notes), and
 ## `restart` is handed over again, fresh and tracked. Missing Grandpa's
@@ -444,6 +483,7 @@ func rewind(forget: Array, restart: QuestData) -> void:
 		counts.erase(id)
 		horn_times.erase(id)
 		delayed.erase(id)
+		dialogue.erase(id)
 	available_changed.emit()
 	if tracked != null and ids.has(tracked.id):
 		set_tracked(null)

@@ -1,0 +1,24 @@
+[gd_scene format=3]
+
+[node name="MetalDetectorIcon" type="Node2D"]
+rotation = 0.05
+
+[node name="Shaft" type="Polygon2D" parent="."]
+color = Color(0.64, 0.68, 0.74, 1)
+polygon = PackedVector2Array(-15, 15, 18, -24, 23, -20, -10, 19)
+
+[node name="Coil" type="Polygon2D" parent="."]
+color = Color(0.3, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-30, 21, -25, 15, -14, 13, -2, 15, 2, 21, -3, 26, -14, 28, -25, 26)
+
+[node name="CoilShade" type="Polygon2D" parent="."]
+color = Color(0.22, 0.22, 0.24, 1)
+polygon = PackedVector2Array(2, 21, -3, 26, -14, 28, -25, 26, -30, 21, -25, 23, -14, 24, -3, 23)
+
+[node name="Box" type="Polygon2D" parent="."]
+color = Color(0.82, 0.6, 0.2, 1)
+polygon = PackedVector2Array(2, -12, 13, -22, 22, -12, 11, -2)
+
+[node name="Grip" type="Polygon2D" parent="."]
+color = Color(0.15, 0.14, 0.13, 1)
+polygon = PackedVector2Array(18, -27, 24, -33, 29, -28, 23, -22)
