@@ -234,10 +234,10 @@ func interact(talker: Node = null) -> void:
 		var empty_handed := Quests.empty_handed(quest)
 		var reward := Quests.turn_in(quest.id)
 		if empty_handed:
-			_dialog.say(Quests.fill(quest, quest.empty_handed_line))
+			_dialog.say_about(quest.id, Quests.fill(quest, quest.empty_handed_line))
 			_weep()
 		else:
-			_dialog.say(Quests.fill(quest, _line_or(quest.turn_in_line, default_turn_in_line)))
+			_dialog.say_about(quest.id, Quests.fill(quest, _line_or(quest.turn_in_line, default_turn_in_line)))
 		var note := ""
 		if not quest.turn_in_sound.is_empty():
 			Sfx.play_at(quest.turn_in_sound, global_position, -4.0, 0.05)
@@ -256,7 +256,7 @@ func interact(talker: Node = null) -> void:
 		_dialog.set_note(note)
 	elif not Quests.quests_from(display_name).is_empty():
 		var current := Quests.quests_from(display_name)[0]
-		_dialog.say(Quests.fill(current, _line_or(current.reminder_line, default_reminder_line)))
+		_dialog.say_about(current.id, Quests.fill(current, _line_or(current.reminder_line, default_reminder_line)))
 	else:
 		_dialog.say(PlayerProfile.fill(CHARACTER.idle_line(idle_line)))
 	var options := [CharacterDialog.Option.new("Walk away", _dialog.close)]

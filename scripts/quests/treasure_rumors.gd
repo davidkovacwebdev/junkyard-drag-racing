@@ -49,7 +49,7 @@ static func answer(npc: StringName = &"") -> String:
 
 ## The dialog option, for a CharacterDialog: `dialog` says `npc`'s answer.
 static func option(dialog: CharacterDialog, npc: StringName = &"") -> CharacterDialog.Option:
-	return CharacterDialog.Option.new(ASK_LINE, func() -> void: dialog.say(answer(npc)))
+	return CharacterDialog.Option.new(ASK_LINE, func() -> void: dialog.say_about(QUEST, answer(npc), ASK_LINE))
 
 ## Whether `npc` still has a scene to play instead of a plain answer.
 static func has_scene(npc: StringName) -> bool:

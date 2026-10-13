@@ -60,6 +60,7 @@ const TALK_SQUASH := 0.025
 var _option_buttons: Array[ScrapButton] = []
 var _options: Array = []
 var _speaker: CharacterData = null
+var _speaker_name := ""
 var _speech: SpeechPlayer
 var _time: float = 0.0
 var _portrait_rest := Vector2.ZERO
@@ -84,6 +85,7 @@ func is_open() -> bool:
 ## their own voice.
 func open(speaker_name: String, character: CharacterData) -> void:
 	_speaker = character
+	_speaker_name = speaker_name
 	_name_label.text = speaker_name.to_upper()
 	_build_portrait(character)
 	if _tween != null:
@@ -116,6 +118,18 @@ func portrait_rig() -> CharacterRig:
 ## `{player}` in the line becomes the player's name (see PlayerProfile).
 func say(line: String) -> void:
 	_speech.speak(_line_label, PlayerProfile.fill(line), _speaker)
+
+## `say()` for a line that matters to quest `quest_id`: it's also written
+## into that quest's Dialogue page in the journal (Quests.log_line()), after
+## `asked` in the player's name when it answers a question they picked.
+func say_about(quest_id: StringName, line: String, asked: String = "") -> void:
+	say(line)
+	var filled := PlayerProfile.fill(line)
+	if Quests.has_line(quest_id, _speaker_name, filled):
+		return
+	if not asked.is_empty():
+		Quests.log_line(quest_id, PlayerProfile.display_name(), PlayerProfile.fill(asked), &"", true)
+	Quests.log_line(quest_id, _speaker_name, filled)
 
 ## Small print under the line (a wallet readout, a price list). Empty hides it.
 func set_note(text: String) -> void:

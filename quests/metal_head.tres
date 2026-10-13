@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://quests/grandpas_shed.tres" id="2_next"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"metal_head"
+title = "Metal Head"
+description = "Digging up the whole acre is a non-starter. A metal detector would sniff the treasure out, but Chad hasn't a clue where to get one.
+
+The junkyard has a bit of everything. Go ask at the counter."
+objective = "Ask at the Junkyard counter about a metal detector"
+objective_place = "Junkyard"
+follow_ups = Array[ExtResource("1_script")]([ExtResource("2_next")])
+cutscene_ids = Array[StringName]([&"detector_ask"])
+return_to_giver = false

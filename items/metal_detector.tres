@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" uid="uid://b4kssi28o6a3g" path="res://scripts/items/item_data.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/items/icons/item_metal_detector.tscn" id="2_icon"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"metal_detector"
+display_name = "Metal Detector"
+description = "Grandpa's old metal detector, dug out of his tool shed. It warbles, sags and dies: the battery's flat. Find it a fresh one and it'll sniff out the treasure."
+icon_scene = ExtResource("2_icon")

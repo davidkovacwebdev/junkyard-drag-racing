@@ -39,6 +39,8 @@ const CHORD_INTERVALS := {
 	"maj7": [0, 4, 7, 11], "dim": [0, 3, 6], "aug": [0, 4, 8], "6": [0, 4, 7, 9],
 	"9": [0, 4, 10, 14], "7#9": [0, 4, 10, 15],
 	"sus4": [0, 5, 7], "m6": [0, 3, 7, 9], "7b9": [0, 4, 10, 13], "aug7": [0, 4, 8, 10],
+	# A power chord (`E5`): root, fifth, octave. Its "third" is the fifth.
+	"5": [0, 7, 12],
 }
 ## Formants (F1, F2, F3 in Hz) of each sung vowel. Other vowel spellings glide
 ## from their first letter's vowel to their last ("ai", "ou", "oi").

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"chest_junkyard"
+title = "Show and Tell"
+description = "The Junkyard Treasure is real, and it's in your trunk. Eugen spent forty years at that junkyard dreaming about it.
+
+Take it there and open it up."
+objective = "Bring the treasure chest to the Junkyard"
+objective_place = "Junkyard"
+cutscene_ids = Array[StringName]([&"chest_opening", &"coming_soon_chest"])
+return_to_giver = false

@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" uid="uid://b4kssi28o6a3g" path="res://scripts/items/item_data.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/items/icons/item_metal_detector.tscn" id="2_icon"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"metal_detector_charged"
+display_name = "Metal Detector"
+description = "Grandpa's old metal detector, running on a battery pulled out of a toy car motor. Use it to switch it on (or off): it beeps faster the closer it gets to buried metal. And now and then at nothing at all."
+use_effect = &"metal_detector"
+reusable = true
+closes_trunk = true
+icon_scene = ExtResource("2_icon")

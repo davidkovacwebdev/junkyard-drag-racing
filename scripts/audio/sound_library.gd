@@ -54,6 +54,11 @@ const NAMES: Array[StringName] = [
 	&"phone_dial",
 	&"phone_busy",
 	&"phone_beep",
+	&"detector_dud",
+	&"brow_sprout",
+	&"detector_beep",
+	&"detector_tick",
+	&"digger_scoop",
 	&"phone_mimimi",
 	&"cemetery_gate_creak",
 	&"funeral_bell",
@@ -387,6 +392,11 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"phone_dial": return _phone_dial()
 		&"phone_busy": return _phone_busy()
 		&"phone_beep": return _phone_beep()
+		&"detector_dud": return _detector_dud(rng)
+		&"brow_sprout": return _brow_sprout(rng)
+		&"detector_beep": return _detector_beep()
+		&"detector_tick": return _detector_tick()
+		&"digger_scoop": return _digger_scoop(rng)
 		&"phone_mimimi": return _phone_mimimi(rng)
 		&"grandpa_gasp": return _grandpa_gasp(rng)
 		&"cemetery_gate_creak": return _cemetery_gate_creak(rng)
@@ -1818,6 +1828,87 @@ static func _phone_beep() -> PackedFloat32Array:
 		amp = [[0.0, 0.0], [0.004, 1.0], [0.1, 0.6], [0.14, 0.0]],
 		peak = 0.45,
 	})
+
+## A metal detector switched on with a flat battery: its warble tries to
+## climb, sags and wobbles down like a dying toy, then fizzles out in a
+## crackle and a click.
+static func _detector_dud(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(1.2)
+	Synth.mix_into(out, Synth.tones(0.85, [[[0.0, 620.0], [0.18, 980.0], [0.4, 760.0], [0.85, 240.0]]], {
+		square = 0.35,
+		tremolo = [14.0, 0.55],
+		amp = [[0.0, 0.0], [0.02, 1.0], [0.3, 0.8], [0.7, 0.35], [0.85, 0.0]],
+	}), 0.0, 0.7)
+	Synth.mix_into(out, Synth.noise_sweep(0.22, {
+		freq = [[0.0, 3200.0], [0.22, 1400.0]],
+		q = [[0.0, 2.0]],
+		amp = [[0.0, 0.0], [0.01, 0.8], [0.06, 0.2], [0.1, 0.7], [0.22, 0.0]],
+	}, rng), 0.8, 0.45)
+	Synth.mix_into(out, Synth.thump(0.05, 2500.0, 0.001, 0.02, rng), 1.08, 0.5)
+	return Synth.finish(out, 0.5)
+
+## The metal detector alive again: its warble climbs and holds, and three
+## quick beeps on top, like it's found something already.
+static func _detector_beep() -> PackedFloat32Array:
+	var out := Synth.silence(1.0)
+	Synth.mix_into(out, Synth.tones(0.55, [[[0.0, 520.0], [0.25, 980.0], [0.55, 1000.0]]], {
+		square = 0.3,
+		tremolo = [16.0, 0.4],
+		amp = [[0.0, 0.0], [0.02, 0.8], [0.45, 0.8], [0.55, 0.0]],
+	}), 0.0, 0.5)
+	for at: float in [0.55, 0.7, 0.85]:
+		Synth.mix_into(out, Synth.tones(0.09, [[[0.0, 1560.0]]], {
+			square = 0.35,
+			amp = [[0.0, 0.0], [0.005, 1.0], [0.07, 0.7], [0.09, 0.0]],
+		}), at, 0.6)
+	return Synth.finish(out, 0.5)
+
+## One beep of the metal detector sweeping: short, square and tinny. Played
+## pitched up the closer it gets (DetectorSweep).
+static func _detector_tick() -> PackedFloat32Array:
+	return Synth.tones(0.08, [[[0.0, 1250.0], [0.08, 1200.0]]], {
+		square = 0.4,
+		amp = [[0.0, 0.0], [0.004, 1.0], [0.06, 0.6], [0.08, 0.0]],
+		peak = 0.45,
+	})
+
+## The digger's arm taking a scoop: a buzzy hydraulic whine going down, a
+## gritty crunch as the bucket bites, and the whine climbing back up.
+static func _digger_scoop(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(1.1)
+	Synth.mix_into(out, Synth.tones(0.42, [[[0.0, 210.0], [0.42, 160.0]]], {
+		square = 0.5,
+		tremolo = [30.0, 0.3],
+		amp = [[0.0, 0.0], [0.04, 0.7], [0.36, 0.6], [0.42, 0.0]],
+	}), 0.0, 0.45)
+	Synth.mix_into(out, Synth.thump(0.12, 900.0, 0.002, 0.06, rng), 0.4, 0.8)
+	Synth.mix_into(out, Synth.noise_sweep(0.3, {
+		freq = [[0.0, 1800.0], [0.3, 700.0]],
+		q = [[0.0, 1.2]],
+		amp = [[0.0, 0.0], [0.01, 1.0], [0.08, 0.5], [0.3, 0.0]],
+	}, rng), 0.4, 0.55)
+	Synth.mix_into(out, Synth.tones(0.45, [[[0.0, 150.0], [0.45, 230.0]]], {
+		square = 0.5,
+		tremolo = [30.0, 0.3],
+		amp = [[0.0, 0.0], [0.04, 0.7], [0.38, 0.6], [0.45, 0.0]],
+	}), 0.62, 0.45)
+	return Synth.finish(out, 0.55)
+
+## Eyebrows sprouting out of nowhere (BushyBrows): a fuzzy "fwump" and a
+## wobbly cartoon boing that springs up and settles.
+static func _brow_sprout(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.6)
+	Synth.mix_into(out, Synth.noise_sweep(0.16, {
+		freq = [[0.0, 700.0], [0.16, 2600.0]],
+		q = [[0.0, 1.5]],
+		amp = [[0.0, 0.0], [0.02, 1.0], [0.16, 0.0]],
+	}, rng), 0.0, 0.5)
+	Synth.mix_into(out, Synth.tones(0.5, [[[0.0, 170.0], [0.07, 430.0], [0.2, 360.0], [0.5, 390.0]]], {
+		square = 0.2,
+		tremolo = [24.0, 0.5],
+		amp = [[0.0, 0.0], [0.02, 1.0], [0.25, 0.5], [0.5, 0.0]],
+	}), 0.04, 0.7)
+	return Synth.finish(out, 0.5)
 
 ## Someone talking on the other end of a phone, the cartoon way: a squeaky
 ## little "mi mi mimimi", high, quick and tinny.

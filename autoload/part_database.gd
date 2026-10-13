@@ -115,6 +115,7 @@ const _ENGINE_SCENES := [
 	"res://scenes/parts/engines/engine_toy_car_motor.tscn",
 	"res://scenes/parts/engines/engine_generator.tscn",
 	"res://scenes/parts/engines/engine_outboard_motor.tscn",
+	"res://scenes/parts/engines/engine_treasure_propeller.tscn",
 	"res://scenes/parts/engines/engine_go_kart.tscn",
 	"res://scenes/parts/engines/engine_chainsaw_motor.tscn",
 	"res://scenes/parts/engines/engine_industrial_mixer.tscn",

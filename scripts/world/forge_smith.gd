@@ -118,9 +118,9 @@ func interact(actor: Node = null) -> void:
 		return
 	_dialog.open(display_name, character_data)
 	if Quests.has_quest(ANVIL_QUEST.id):
-		_dialog.say(ANVIL_QUEST.reminder_line)
+		_dialog.say_about(ANVIL_QUEST.id, ANVIL_QUEST.reminder_line)
 	else:
-		_dialog.say(no_anvil_line)
+		_dialog.say_about(ANVIL_QUEST.id, no_anvil_line)
 		Quests.give(ANVIL_QUEST)
 		SaveSystem.save_game()
 	_refresh_dialog()
@@ -163,6 +163,9 @@ func _ask_about_treasure() -> void:
 		return
 	var answer := TreasureRumors.answer(TreasureRumors.SMITH)
 	if _dialog.is_open():
-		_dialog.say(answer)
+		_dialog.say_about(TreasureRumors.QUEST, answer, TreasureRumors.ASK_LINE)
 	else:
 		_screen.say(answer)
+		if not Quests.has_line(TreasureRumors.QUEST, display_name, answer):
+			Quests.log_line(TreasureRumors.QUEST, PlayerProfile.display_name(), TreasureRumors.ASK_LINE, &"", true)
+			Quests.log_line(TreasureRumors.QUEST, display_name, answer)

@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://quests/detector_pickup.tres" id="2_next"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"toy_motor"
+title = "Fish It Out"
+description = "Today's load in the crane pen has a battery-powered toy car motor in it, and that's a battery.
+
+Take the crane out back and fish it out of the heap. The digs are on the house this time."
+objective = "Fish the toy car motor out of the crane pen's heap (digs are free)"
+objective_place = "Junkyard"
+follow_ups = Array[ExtResource("1_script")]([ExtResource("2_next")])
+cutscene_ids = Array[StringName]([&"motor_battery"])
+follow_up_delay_days = 1.0
+return_to_giver = false

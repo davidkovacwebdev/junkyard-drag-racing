@@ -32,6 +32,9 @@ extends StaticBody2D
 ## crane, Grandpa's old buddy, and he doesn't rent it to strangers. Talking to him with that quest in
 ## the log finishes it and opens the crane for good.
 ##
+## During "Metal Head" he has one more option: asking him where to get a metal
+## detector plays DetectorAskCutscene at the counter, which finishes it.
+##
 ## The dialog is the standard CharacterDialog (scenes/ui/character_dialog.tscn)
 ## instanced into this scene, so the whole dealer (art, collision, dialog) is
 ## still one `instantiate()` for anyone building a second yard.
@@ -60,11 +63,32 @@ extends StaticBody2D
 ## Said while the crane is down after it came down on Grandpa (CraneWreck).
 ## `%s` becomes how long until it's fixed ("2 days").
 @export var wrecked_line: String = "Crane's busted, pal. Fell over. You heard. Repair guy says it'll be fixed in %s."
+@export var digger_lent_line: String = "She's all yours. Bring her back when you're done."
+@export var digger_back_line: String = "Back in one piece. Mostly. Thanks."
+@export var digger_broke_line: String = "It's $%d to borrow her, pal. Come back with the cash."
+## Handing back Grandpa's metal detector, battery wired in ("Charged Up").
+@export var detector_ready_line: String = "There ya go. Battery's in, and she beeps. Good as new. Well, good as old."
 ## Said when the player turns up with Grandpa's quest: the crane opens.
 @export var grandpa_sent_line: String = "Eugen sent ya? Ha! That old drunk. Forty years we ran that crane together. Alright: $%d a go, crane's out back. Whatever the claw comes up with, it's yours."
 
 ## The quest that opens the crane.
 const CRANE_QUEST := &"crane_guy"
+## "Metal Head": asking him where to get a metal detector (DetectorAskCutscene).
+const DETECTOR_QUEST := &"metal_head"
+const DETECTOR_SCENE_PATH := "res://cutscenes/detector_ask.tres"
+## "Scrap Juice": asking him for a battery (BatteryAskCutscene). "Fish It
+## Out" makes the crane free; "Charged Up" is picking the detector up here.
+const BATTERY_QUEST := &"junkyard_batteries"
+const BATTERY_SCENE_PATH := "res://cutscenes/battery_ask.tres"
+const MOTOR_QUEST := &"toy_motor"
+const PICKUP_QUEST := &"detector_pickup"
+const CHARGED_DETECTOR := preload("res://items/metal_detector_charged.tres")
+## "Heavy Machinery": asking him for something to dig with
+## (DiggerRevealCutscene), which lends the player the yard's digger.
+const DIG_GEAR_QUEST := &"dig_gear"
+const DIGGER_SCENE_PATH := "res://cutscenes/digger_reveal.tres"
+## Once the treasure's dug up, the digger's his to lend: this much a go.
+@export var digger_rent: int = 100
 
 const POPUP_RISE := 54.0
 const POPUP_LIFETIME := 1.4
@@ -133,6 +157,8 @@ func _open() -> void:
 	if Quests.has_quest(CRANE_QUEST):
 		Quests.complete(CRANE_QUEST)
 		_dialog.say(grandpa_sent_line % crane_cost)
+	elif Quests.has_quest(PICKUP_QUEST):
+		_hand_back_detector()
 	elif CraneWreck.is_down():
 		var days := CraneWreck.days_left()
 		_dialog.say(wrecked_line % ("%d day%s" % [days, "" if days == 1 else "s"]))
@@ -163,6 +189,17 @@ func _refresh(animate: bool = false) -> void:
 	]
 	if TreasureRumors.can_ask():
 		options.append(TreasureRumors.option(_dialog, TreasureRumors.SCRAP_DEALER))
+	if Quests.has_quest(DETECTOR_QUEST):
+		options.append(CharacterDialog.Option.new("Ask about a metal detector", _ask_about_detector))
+	if Quests.has_quest(BATTERY_QUEST):
+		options.append(CharacterDialog.Option.new("Ask about batteries", _ask_about_batteries))
+	if Quests.has_quest(DIG_GEAR_QUEST):
+		options.append(CharacterDialog.Option.new("Ask for something to dig with", _ask_about_digging))
+	if WorldState.is_claimed(DiggerRig.RENTED):
+		options.append(CharacterDialog.Option.new("Give the digger back", _return_digger))
+	elif Quests.is_complete(DiggerRig.DIG_QUEST):
+		options.append(CharacterDialog.Option.new("Borrow the digger ($%d)" % digger_rent, _rent_digger,
+				Inventory.money < digger_rent))
 	options.append(CharacterDialog.Option.new("Walk away", _on_leave_pressed))
 	_dialog.set_options(options, animate)
 	_dialog.set_note("Scrap %d   $%d   Spare parts %d" % [
@@ -176,7 +213,64 @@ func _crane_option() -> CharacterDialog.Option:
 				_on_crane_pressed, true)
 	if not crane_unlocked():
 		return CharacterDialog.Option.new("The crane (not for rent)", _on_crane_pressed, true)
+	if Quests.has_quest(MOTOR_QUEST):
+		return CharacterDialog.Option.new("Take the crane out back (free, for the toy motor)", _on_crane_pressed)
 	return CharacterDialog.Option.new("Take the crane out back ($%d a dig)" % crane_cost, _on_crane_pressed)
+
+## "Metal Head": the two of them talk it over at the counter, and he sends
+## the player home to Grandpa's tool shed.
+func _ask_about_detector() -> void:
+	await _counter_scene(DETECTOR_SCENE_PATH, DETECTOR_QUEST)
+
+## "Scrap Juice": he points the player at the toy car motor in today's load.
+func _ask_about_batteries() -> void:
+	await _counter_scene(BATTERY_SCENE_PATH, BATTERY_QUEST)
+
+## "Heavy Machinery": he lends the player the digger.
+func _ask_about_digging() -> void:
+	await _counter_scene(DIGGER_SCENE_PATH, DIG_GEAR_QUEST)
+
+## The digger on loan: the player drives it instead of their car until
+## they bring it back.
+func _rent_digger() -> void:
+	if not Inventory.spend_money(digger_rent):
+		Sfx.play(&"denied", -6.0, 0.0)
+		_dialog.say(digger_broke_line % digger_rent)
+		return
+	Sfx.play(&"cash_register", -4.0, 0.0)
+	WorldState.mark_claimed(DiggerRig.RENTED)
+	_dialog.say(digger_lent_line)
+	_refresh()
+	SaveSystem.save_game()
+
+func _return_digger() -> void:
+	WorldState.unclaim(DiggerRig.RENTED)
+	Sfx.play(&"door_close", -4.0, 0.0)
+	_dialog.say(digger_back_line)
+	_refresh()
+	SaveSystem.save_game()
+
+## Plays the counter talk at `path` with him in it, then finishes `quest_id`.
+func _counter_scene(path: String, quest_id: StringName) -> void:
+	_close()
+	var scene := ResourceLoader.load(path, "", ResourceLoader.CACHE_MODE_REPLACE) as CoinsCutscene
+	if scene != null:
+		scene.npc_rig = _character
+		await Cutscenes.play(scene)
+	Quests.complete(quest_id)
+	SaveSystem.save_game()
+
+## "Charged Up": the detector comes back with the toy motor's battery in it.
+func _hand_back_detector() -> void:
+	if Inventory.is_trunk_full():
+		Sfx.play(&"denied", -6.0, 0.0)
+		_dialog.say("Got your detector here, but your trunk's full. Make some room.")
+		return
+	Inventory.give_item(CHARGED_DETECTOR)
+	Sfx.play(&"detector_beep", -6.0, 0.0)
+	_dialog.say_about(PICKUP_QUEST, detector_ready_line)
+	Quests.complete(PICKUP_QUEST)
+	SaveSystem.save_game()
 
 func _set_line(text: String) -> void:
 	_dialog.say(text)

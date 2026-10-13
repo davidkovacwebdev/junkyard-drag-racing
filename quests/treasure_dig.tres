@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://quests/chest_pickup.tres" id="2_next"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"treasure_dig"
+title = "Dig It"
+description = "Vern's lent you the junkyard's little digger. It's slow, and there's no flooring it, but it digs.
+
+Drive it out to Grandpa's leg by the X and dig right there with F. Three scoops make a hole."
+objective = "Drive the digger to Grandpa's leg and dig there (F): three scoops make a hole"
+objective_place = "Treasure Area Spot"
+follow_ups = Array[ExtResource("1_script")]([ExtResource("2_next")])
+return_to_giver = false

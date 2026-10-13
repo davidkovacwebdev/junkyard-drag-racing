@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://quests/treasure_sweep.tres" id="2_next"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"detector_pickup"
+title = "Charged Up"
+description = "A day's gone by. The battery should be out of the toy motor and wired into Grandpa's metal detector by now.
+
+Go pick it up at the Junkyard counter."
+objective = "Pick up the metal detector at the Junkyard counter"
+objective_place = "Junkyard"
+follow_ups = Array[ExtResource("1_script")]([ExtResource("2_next")])
+return_to_giver = false

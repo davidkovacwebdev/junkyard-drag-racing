@@ -587,6 +587,21 @@ func is_on_land(point: Vector2) -> bool:
 			return true
 	return _is_on_bridge_deck(point)
 
+## How far `point` (local) is out to sea from the nearest coastline, in this
+## node's own (unscaled) units: 0 on land. The boat engine's demo edge (PlayerCar) reads it a few times a
+## second; it walks every coastline segment, so don't call it every frame.
+func distance_to_land(point: Vector2) -> float:
+	if not is_in_water(point):
+		return 0.0
+	var best := INF
+	for coastline in _coastlines:
+		var count := coastline.size()
+		for i in count:
+			var a := coastline[i]
+			var b := coastline[(i + 1) % count]
+			best = minf(best, point.distance_squared_to(Geometry2D.get_closest_point_to_segment(point, a, b)))
+	return sqrt(best) if best < INF else 0.0
+
 ## True if `point` is past the surf, out in the blue, and not up on a bridge
 ## deck.
 func is_in_water(point: Vector2) -> bool:

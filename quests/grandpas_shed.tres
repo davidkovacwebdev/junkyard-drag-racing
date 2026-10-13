@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://items/metal_detector.tres" id="2_detector"]
+[ext_resource type="Resource" path="res://quests/batteries.tres" id="3_next"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"grandpas_shed"
+title = "Grandpa's Shed"
+description = "The man at the junkyard counter reckons Eugen had a metal detector. If he did, it's in his tool shed with the rest of his junk.
+
+Go home and dig through the Garage."
+objective = "Look for a metal detector in Grandpa's tool shed (the Garage)"
+objective_place = "Garage"
+follow_ups = Array[ExtResource("1_script")]([ExtResource("3_next")])
+cutscene_ids = Array[StringName]([&"grandpas_shed"])
+item_goal = ExtResource("2_detector")
+hand_over_item = false
+return_to_giver = false

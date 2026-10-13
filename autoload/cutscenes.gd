@@ -16,6 +16,15 @@ extends Node
 ## Actors are cleaned up when the cutscene ends. A cutscene's `gives_quest`
 ## goes into the quest log once the bars are gone. Which one-time scenes have
 ## played is saved (see `play_once()`, SaveSystem).
+##
+## Every subtitle is also written into the journal's Dialogue page of the
+## quest the scene belongs to (Quests.log_line(), skipped lines too). Which
+## quest that is gets settled as the scene ends, first match wins: the one
+## SCENE_QUESTS names; a quest that lists the scene in its
+## `cutscene_ids`; one finished (or made ready)
+## during the scene or just after it, so a "how did it go" scene lands on the
+## quest it reports on; the quest the scene hands out; the quest tracked when
+## it started.
 
 signal started
 signal finished
@@ -42,6 +51,27 @@ const SKIP_STEP_SECONDS := 1000.0
 const PART_CARD := preload("res://scenes/garage/part_slot.tscn")
 ## As wide as the crane pen's part cards.
 const PART_CARD_WIDTH := 330.0
+## How long after a scene a quest finishing still claims its lines (callers
+## finish the quest a scene was about once `play()` returns).
+const TRANSCRIPT_GRACE_MSEC := 500
+## How sure the transcript is of its quest (see `_file_transcript()`); a
+## later quest finishing only takes the lines from a weaker guess.
+enum Claim { NONE, TRACKED, GIVEN, SETTLED, OWNER }
+## Scenes no quest names as its start, turn-in or `cutscene_ids` scene, and
+## the quest whose Dialogue page their lines go on.
+const SCENE_QUESTS := {
+	&"grandpa_scraps": &"gather_scraps",
+	&"chad_meet": &"west_bridge",
+	&"chad_report": &"chad_meetup",
+	&"gold_fake": &"junkyard_gold",
+	&"junkyard_flashback": &"junkyard_truth",
+	&"grandpa_gone": &"grandpa_missing",
+	&"grandpa_mattress": &"mattress_nickel",
+	&"hospital_morgue": &"hospital_visit",
+	&"funeral": &"hospital_visit",
+	&"forge_anvil": &"forge_anvil",
+	&"drag_queen_grave": &"pay_respects",
+}
 
 var _active: bool = false
 var _skipping: bool = false
@@ -71,11 +101,23 @@ var _shake_left: float = 0.0
 var _actors: Array[CutsceneActor] = []
 var _tweens: Array[Tween] = []
 
+## The current (or last) scene's lines for the journal: [speaker, line] pairs.
+var _transcript: Array = []
+var _transcript_scene: StringName = &""
+var _transcript_quest: StringName = &""
+var _transcript_claim := Claim.NONE
+var _transcript_open_until := 0
+## Quests finished or made ready while the scene played.
+var _settled: Array[StringName] = []
+var _tracked_at_start: StringName = &""
+
 func _ready() -> void:
 	_build_screen()
 	_speech = SpeechPlayer.new()
 	_speech.characters_per_second = SUBTITLE_CHARACTERS_PER_SECOND
 	add_child(_speech)
+	Quests.quest_completed.connect(_on_quest_settled)
+	Quests.quest_ready.connect(_on_quest_settled)
 
 func is_active() -> bool:
 	return _active
@@ -91,12 +133,14 @@ func play(cutscene: Cutscene) -> void:
 		return
 	_active = true
 	_skipping = _cutscenes_disabled
+	_begin_transcript(cutscene)
 	started.emit()
 	if not _cutscenes_disabled:
 		Sfx.play(&"cutscene_whoosh", -6.0, 0.03)
 		await _slide_letterbox(true)
 	await cutscene.play()
 	await _end()
+	_file_transcript(cutscene)
 	if cutscene.quest_to_give() != null:
 		Quests.give(cutscene.quest_to_give())
 
@@ -158,6 +202,59 @@ func _end() -> void:
 	_skipping = false
 	_active = false
 	finished.emit()
+
+# --- Transcript (the journal's Dialogue page) -----------------------------------
+
+func _begin_transcript(cutscene: Cutscene) -> void:
+	_transcript = []
+	_transcript_scene = cutscene.id if not cutscene.id.is_empty() \
+			else StringName(cutscene.get_script().resource_path.get_file().get_basename())
+	_transcript_quest = &""
+	_transcript_claim = Claim.NONE
+	_transcript_open_until = 0
+	_settled.clear()
+	_tracked_at_start = Quests.tracked.id if Quests.tracked != null else &""
+
+## Picks the quest the scene's lines belong to and writes them into its page.
+func _file_transcript(cutscene: Cutscene) -> void:
+	_transcript_open_until = Time.get_ticks_msec() + TRANSCRIPT_GRACE_MSEC
+	var owner: StringName = SCENE_QUESTS.get(_transcript_scene, &"")
+	if owner.is_empty():
+		owner = _owning_quest(_transcript_scene)
+	if not owner.is_empty():
+		_write_transcript(owner, Claim.OWNER)
+	elif not _settled.is_empty():
+		_write_transcript(_settled[0], Claim.SETTLED)
+	elif cutscene.quest_to_give() != null:
+		_write_transcript(cutscene.quest_to_give().id, Claim.GIVEN)
+	elif not _tracked_at_start.is_empty():
+		_write_transcript(_tracked_at_start, Claim.TRACKED)
+
+## The newest quest the player has that lists `scene` in its `cutscene_ids`.
+func _owning_quest(scene: StringName) -> StringName:
+	for list: Array[QuestData] in [Quests.active, Quests.completed]:
+		for i in range(list.size() - 1, -1, -1):
+			if list[i].cutscene_ids.has(scene):
+				return list[i].id
+	return &""
+
+func _write_transcript(quest_id: StringName, claim: Claim) -> void:
+	if _transcript.is_empty():
+		return
+	if not _transcript_quest.is_empty():
+		Quests.forget_scene_lines(_transcript_quest, _transcript_scene)
+	Quests.forget_scene_lines(quest_id, _transcript_scene)
+	for pair: Array in _transcript:
+		Quests.log_line(quest_id, pair[0], pair[1], _transcript_scene)
+	_transcript_quest = quest_id
+	_transcript_claim = claim
+
+func _on_quest_settled(quest: QuestData) -> void:
+	if _active:
+		if not _settled.has(quest.id):
+			_settled.append(quest.id)
+	elif Time.get_ticks_msec() <= _transcript_open_until and _transcript_claim < Claim.SETTLED:
+		_write_transcript(quest.id, Claim.SETTLED)
 
 # --- Steps: time and sound ----------------------------------------------------------
 
@@ -274,6 +371,8 @@ func _free_part_card() -> void:
 ## until the next one replaces it (or the cutscene ends), so back-to-back
 ## lines flow into each other instead of blinking off in between.
 func subtitle(speaker_name: String, character: CharacterData, line: String, actor: CutsceneActor = null) -> void:
+	if _active:
+		_transcript.append([speaker_name, PlayerProfile.fill(line)])
 	if _skipping:
 		return
 	_subtitle_name.text = speaker_name.to_upper()
@@ -405,6 +504,11 @@ func _fade_to(alpha: float, seconds: float) -> void:
 	var tween := create_tween()
 	tween.tween_property(_fade, "color:a", alpha, seconds)
 	await _await_tween(tween)
+
+## Takes the last subtitle off screen now rather than when the next one
+## comes (a cut away to something else).
+func clear_subtitle() -> void:
+	_hide_subtitle()
 
 func _hide_subtitle() -> void:
 	_subtitle_name.visible = false
