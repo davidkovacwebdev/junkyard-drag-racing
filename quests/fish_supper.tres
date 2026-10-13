@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://quests/fish_escape.tres" id="2_next"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"fish_supper"
+title = "Fish Supper"
+giver = "Grandpa"
+description = "Grandpa's spent all his money on beer and needs his dinner. He wants to go fishing. No rods, no bait, no plan he's telling you about.
+
+Follow him. He's in his wheelchair, so try not to lose him."
+objective = "Follow Grandpa to the fishing pier"
+objective_place = "Grandpa"
+reminder_line = "Just follow me, lad."
+follow_ups = Array[ExtResource("1_script")]([ExtResource("2_next")])
+start_cutscene = "res://cutscenes/grandpa_dinner.tres"
+cutscene_ids = Array[StringName]([&"dynamite_fishing"])
+return_to_giver = false

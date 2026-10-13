@@ -127,6 +127,10 @@ var _dialog: CharacterDialog
 ## The car that opened the dialog, so it closes when that car drives off.
 var _talker: Node2D = null
 var _vanished: bool = false
+## Seconds until ramming him gets another earful (`car_rammed()`).
+var _ram_cooldown := 0.0
+const RAM_COOLDOWN := 2.5
+const RAM_LINES: Array[String] = ["OI! WATCH IT!", "MY HIP!", "I'M IN A WHEELCHAIR, LAD!", "YOU TRYIN' TO FINISH ME OFF?!"]
 
 func _ready() -> void:
 	add_to_group(GIVER_GROUP)
@@ -189,6 +193,7 @@ func vanish() -> void:
 func _process(delta: float) -> void:
 	if _vanished:
 		return
+	_ram_cooldown = maxf(_ram_cooldown - delta, 0.0)
 	if is_gone():
 		vanish()
 		return
@@ -205,6 +210,17 @@ func _process(delta: float) -> void:
 		sip()
 
 ## PlayerCar's prompt: says so when there's a quest to hand in.
+## The car hit him hard (PlayerCar's duck-typed ram hook): he jolts, twitches
+## and gives the driver a piece of his mind. Not mid-cutscene, and not twice
+## in quick succession.
+func car_rammed(_car: Node, _impact_speed: float) -> void:
+	if _vanished or Cutscenes.is_active() or _ram_cooldown > 0.0:
+		return
+	_ram_cooldown = RAM_COOLDOWN
+	twitch(0.6, -4.0)
+	Pickup.spawn_float_text(get_parent(), global_position + Vector2(0.0, -150.0),
+			RAM_LINES[randi() % RAM_LINES.size()])
+
 func get_interact_prompt() -> String:
 	var quest := _ready_quest()
 	if quest != null:

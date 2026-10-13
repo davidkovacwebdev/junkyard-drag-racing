@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" uid="uid://c8ndemt2vanmq" path="res://quests/first_race.tres" id="2_next"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"fish_escape"
+title = "Catch and Run"
+giver = "Grandpa"
+description = "Dynamite fishing is very much illegal, and somebody heard the bang. Sirens, getting closer.
+
+Follow Grandpa home. Fast."
+objective = "Follow Grandpa home before the cops catch up"
+objective_place = "Grandpa"
+reminder_line = "NO TIME TO TALK, LAD! DRIVE!"
+unlocks = Array[ExtResource("1_script")]([ExtResource("2_next")])
+return_to_giver = false

@@ -59,6 +59,7 @@ const NAMES: Array[StringName] = [
 	&"detector_beep",
 	&"detector_tick",
 	&"digger_scoop",
+	&"dynamite_boom",
 	&"phone_mimimi",
 	&"cemetery_gate_creak",
 	&"funeral_bell",
@@ -395,6 +396,7 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"detector_beep": return _detector_beep()
 		&"detector_tick": return _detector_tick()
 		&"digger_scoop": return _digger_scoop(rng)
+		&"dynamite_boom": return _dynamite_boom(rng)
 		&"phone_mimimi": return _phone_mimimi(rng)
 		&"grandpa_gasp": return _grandpa_gasp(rng)
 		&"cemetery_gate_creak": return _cemetery_gate_creak(rng)
@@ -1869,6 +1871,29 @@ static func _digger_scoop(rng: RandomNumberGenerator) -> PackedFloat32Array:
 		amp = [[0.0, 0.0], [0.04, 0.7], [0.38, 0.6], [0.45, 0.0]],
 	}), 0.62, 0.45)
 	return Synth.finish(out, 0.55)
+
+## Dynamite going off under the water: a deep muffled boom that thumps the
+## chest, the water heaving up in a rushing spray, and it all raining back
+## down in a patter of splashes.
+static func _dynamite_boom(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(1.8)
+	Synth.mix_into(out, Synth.thump(0.9, 160.0, 0.003, 0.35, rng), 0.0, 1.0)
+	Synth.mix_into(out, Synth.tones(0.6, [[[0.0, 70.0], [0.6, 38.0]]], {
+		square = 0.2,
+		amp = [[0.0, 0.0], [0.01, 1.0], [0.25, 0.5], [0.6, 0.0]],
+	}), 0.0, 0.7)
+	Synth.mix_into(out, Synth.noise_sweep(0.9, {
+		freq = [[0.0, 500.0], [0.2, 2400.0], [0.9, 900.0]],
+		q = [[0.0, 0.8]],
+		amp = [[0.0, 0.0], [0.08, 1.0], [0.4, 0.5], [0.9, 0.0]],
+	}, rng), 0.05, 0.6)
+	for i in 7:
+		Synth.mix_into(out, Synth.noise_sweep(0.12, {
+			freq = [[0.0, 2600.0], [0.12, 1200.0]],
+			q = [[0.0, 2.0]],
+			amp = [[0.0, 0.0], [0.01, 1.0], [0.12, 0.0]],
+		}, rng), 0.8 + i * 0.12 + rng.randf_range(0.0, 0.06), 0.25)
+	return Synth.finish(out, 0.9)
 
 ## Eyebrows sprouting out of nowhere (BushyBrows): a fuzzy "fwump" and a
 ## wobbly cartoon boing that springs up and settles.
