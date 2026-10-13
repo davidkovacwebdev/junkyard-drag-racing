@@ -33,8 +33,9 @@ func _ready() -> void:
 
 	var entrants: Array[Dictionary] = []
 	if DebugRace.consume():
+		var field := DebugRace.field(CAR_COUNT, RaceProgression.Course.DERBY)
 		for i in CAR_COUNT:
-			var car_data := DebugRace.random_car()
+			var car_data := field[i]
 			var car_name := "Player_%s" % car_data.display_name if i == 0 else "Car%d_%s" % [i, car_data.display_name]
 			entrants.append({"name": car_name, "model": car_data})
 	else:

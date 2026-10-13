@@ -778,12 +778,13 @@ func _spawn_sparks(at: Vector2, color: Color) -> void:
 
 ## On the lane's own road surface. World space, not lane-local: the cars are
 ## not parented to the lanes.
-## Every lane, the player's included, gets a fully random car, and the
-## result isn't recorded (no _on_race_ended), so testing never touches the
-## campaign or money.
+## Every lane, the player's included, gets a DebugRace car, and the result
+## isn't recorded (no _on_race_ended), so testing never touches the campaign
+## or money.
 func _add_debug_field(cars: Node2D, race_controller: RaceController, camera_targets: Array[Node2D]) -> void:
+	var field := DebugRace.field(CAR_COUNT, course)
 	for lane in CAR_COUNT:
-		var car_data := DebugRace.random_car()
+		var car_data := field[lane]
 		var car := CarAssembler.assemble_from_car_data(car_data, cars, _spawn_position(lane))
 		var car_name := "Player_%s" % car_data.display_name if lane == 0 else "Car%d_%s" % [lane, car_data.display_name]
 		_register_car(car_name, lane, car, race_controller, camera_targets)
