@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="QuestData" format=3 uid="uid://c4uksnqsix1h6"]
+
+[ext_resource type="Script" uid="uid://b4kssi28o6a3g" path="res://scripts/items/item_data.gd" id="1_20b81"]
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" uid="uid://5r3j5dnmtdgj" path="res://quests/pay_respects.tres" id="2_next"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"ex_revenge"
+title = "Visiting Hours (Again)"
+giver = "Grandpa"
+description = "Grandpa's riding shotgun again, cackling, with the loudest horn money can buy bolted to your car. Back to the hospital. His ex is going to hear about it."
+objective = "Drive Grandpa back to the Hospital and lean on that horn"
+objective_place = "Hospital"
+unlocks = [ExtResource("2_next")]
+cutscene_ids = Array[StringName]([&"ex_police_beating"])
+return_to_giver = false

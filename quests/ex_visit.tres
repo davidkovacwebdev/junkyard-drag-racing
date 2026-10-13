@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://quests/ex_horn.tres" id="2_next"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"ex_visit"
+title = "Visiting Hours"
+giver = "Grandpa"
+description = "Grandpa's ex is in the hospital. He's not sorry she's ill, he's sorry he hasn't the legs to go and make fun of her. So he's riding with you.
+
+Drive him to the Hospital. He'll tell you the way. And then what to do."
+objective = "Drive Grandpa to the Hospital and do what he says"
+objective_place = "Hospital"
+start_cutscene = "res://cutscenes/grandpa_ex.tres"
+follow_ups = Array[ExtResource("1_script")]([ExtResource("2_next")])
+cutscene_ids = Array[StringName]([&"ex_police_excuse"])
+return_to_giver = false

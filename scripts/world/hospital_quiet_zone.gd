@@ -4,7 +4,8 @@ extends Node2D
 ## (no_horn_sign.tscn). Every second the player leans on the horn within
 ## `radius` counts, and once it adds up to more than `allowed_seconds` the
 ## police turn up in their garbage truck and fine them (PoliceFineCutscene).
-## The count starts over after each fine.
+## The count starts over after each fine. While Grandpa's put the player up
+## to it ("Visiting Hours", ExStory) the police come for his scenes instead.
 
 const SCENE_PATH := "res://cutscenes/police_fine.tres"
 
@@ -27,12 +28,19 @@ func _process(delta: float) -> void:
 	if car.global_position.distance_to(global_position) > radius:
 		return
 	honked += delta
-	if honked > allowed_seconds:
+	var story := get_tree().get_first_node_in_group(ExStory.GROUP) as ExStory
+	var allowed := story.honk_allowance(allowed_seconds) if story != null else allowed_seconds
+	if honked > allowed:
 		_call_police()
 
 func _call_police() -> void:
 	_busy = true
 	honked = 0.0
+	var story := get_tree().get_first_node_in_group(ExStory.GROUP) as ExStory
+	if story != null and story.takes_over_police():
+		await story.call_police()
+		_busy = false
+		return
 	var scene := ResourceLoader.load(SCENE_PATH, "", ResourceLoader.CACHE_MODE_REPLACE) as PoliceFineCutscene
 	if scene != null:
 		scene.sign_node = get_node_or_null(sign_path) as Node2D

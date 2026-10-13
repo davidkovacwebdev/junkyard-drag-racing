@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://items/super_horn.tres" id="2_horn"]
+[ext_resource type="Resource" path="res://quests/ex_revenge.tres" id="3_next"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"ex_horn"
+title = "Make Some Noise"
+giver = "Grandpa"
+description = "The cops bought Grandpa's story. Grandpa did not learn his lesson. He wants to go to the store, and he's riding along.
+
+He's after the loudest horn they sell, and he's paying."
+objective = "Drive Grandpa to the Shop and buy the loudest horn there"
+objective_place = "Shop"
+follow_ups = Array[ExtResource("1_script")]([ExtResource("3_next")])
+item_goal = ExtResource("2_horn")
+hand_over_item = false
+return_to_giver = false

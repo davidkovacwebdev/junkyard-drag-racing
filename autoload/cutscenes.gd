@@ -281,6 +281,11 @@ func fade_out(seconds: float = 0.6) -> void:
 func fade_in(seconds: float = 0.6) -> void:
 	await _fade_to(0.0, seconds)
 
+## Darkens the screen part of the way to black (`alpha` 0 to 1), e.g. a step
+## at a time as the player's knocked senseless.
+func darken_to(alpha: float, seconds: float = 0.3) -> void:
+	await _fade_to(clampf(alpha, 0.0, 1.0), seconds)
+
 ## Big centred text ("MEANWHILE..."), popped in, held, then gone.
 func title_card(text: String, seconds: float = 2.0) -> void:
 	if _skipping:
@@ -537,7 +542,11 @@ func _restore_camera() -> void:
 	if is_instance_valid(_original_camera):
 		var return_time := 0.01 if _skipping else CAMERA_RETURN_TIME
 		var tween := create_tween().set_parallel().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-		tween.tween_property(_camera, "global_position", _original_camera.get_screen_center_position(), return_time)
+		# Where it looks now, not its screen centre: that's stale while another
+		# camera is current, and a scene may have moved the car (and the
+		# camera on it) somewhere else entirely.
+		var looking_at := _original_camera.global_position + _original_camera.offset
+		tween.tween_property(_camera, "global_position", looking_at, return_time)
 		tween.tween_property(_camera, "zoom", _original_camera.zoom, return_time)
 		await tween.finished
 		if is_instance_valid(_original_camera):

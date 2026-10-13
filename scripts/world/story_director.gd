@@ -53,6 +53,7 @@ func _ready() -> void:
 	add_child(digger)
 	add_child(TreasureStory.new())
 	add_child(DinnerStory.new())
+	add_child(ExStory.new())
 	# Saves from before character creation have no player character; they
 	# skip the intro rather than meeting Grandpa mid-game.
 	if PlayerProfile.character == null or Cutscenes.has_seen(GrandpaScrapsCutscene.ID):

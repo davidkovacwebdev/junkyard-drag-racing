@@ -2,7 +2,8 @@
 
 [ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
 [ext_resource type="Resource" uid="uid://c0s7kqbr5yejs" path="res://items/six_pack.tres" id="2_beer"]
-[ext_resource type="Resource" uid="uid://5r3j5dnmtdgj" path="res://quests/pay_respects.tres" id="3_next"]
+[ext_resource type="Script" uid="uid://b4kssi28o6a3g" path="res://scripts/items/item_data.gd" id="2_csvcg"]
+[ext_resource type="Resource" path="res://quests/ex_visit.tres" id="3_next"]
 
 [resource]
 script = ExtResource("1_script")
@@ -14,7 +15,7 @@ description = "Even bloodier the second time. Grandpa laughed until he cried, th
 He gave you $40. Buy a six-pack at the Shop, for yourself and for him, and bring it back."
 objective = "Buy a six-pack at the Shop"
 objective_place = "Shop"
-unlocks = Array[ExtResource("1_script")]([ExtResource("3_next")])
+unlocks = [ExtResource("3_next")]
 start_cutscene = "res://cutscenes/grandpa_beer.tres"
 start_money = 40
 item_goal = ExtResource("2_beer")
