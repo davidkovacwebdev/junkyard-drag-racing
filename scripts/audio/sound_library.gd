@@ -60,6 +60,10 @@ const NAMES: Array[StringName] = [
 	&"detector_tick",
 	&"digger_scoop",
 	&"dynamite_boom",
+	&"heli_parts_pop",
+	&"mini_heli_rotor_loop",
+	&"heli_sputter",
+	&"heli_crash",
 	&"phone_mimimi",
 	&"cemetery_gate_creak",
 	&"funeral_bell",
@@ -225,9 +229,12 @@ const LOOPING: Array[StringName] = [
 	&"ufo_hum_loop",
 	&"boat_putter_loop",
 	&"morgue_hum_loop",
+	&"mini_heli_rotor_loop",
 ]
 
 const CAR_SOUNDS: Array[StringName] = [
+	&"mini_heli_rotor_loop",
+	&"heli_sputter",
 	&"ignition_click",
 	&"headlight_click",
 	&"engine_stall",
@@ -399,6 +406,10 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"detector_tick": return _detector_tick()
 		&"digger_scoop": return _digger_scoop(rng)
 		&"dynamite_boom": return _dynamite_boom(rng)
+		&"heli_parts_pop": return _heli_parts_pop(rng)
+		&"mini_heli_rotor_loop": return _mini_heli_rotor_loop(rng)
+		&"heli_sputter": return _heli_sputter(rng)
+		&"heli_crash": return _heli_crash(rng)
 		&"phone_mimimi": return _phone_mimimi(rng)
 		&"grandpa_gasp": return _grandpa_gasp(rng)
 		&"cemetery_gate_creak": return _cemetery_gate_creak(rng)
@@ -1990,6 +2001,69 @@ static func _wood_clonk(rng: RandomNumberGenerator) -> PackedFloat32Array:
 
 ## A piece of fence giving way: a hard wooden thud, a dry splintering crack
 ## that tears apart in a burst of snaps, and the loose rail clattering down.
+## The crashed helicopter giving up its engine and tail rotor: a hollow
+## sheet-metal bang, the little rotor flung loose and whirring down as it
+## spins, and a couple of tinny bits clattering after it.
+static func _heli_parts_pop(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(1.3)
+	out = Synth.mix_into(out, Synth.thump(0.3, 220.0, 0.002, 0.12, rng), 0.0, 0.9)
+	out = Synth.mix_into(out, _metal_ring(0.8, 420.0, 16.0, 0.3, rng), 0.0, 0.45)
+	out = Synth.mix_into(out, _metal_ring(0.5, 1180.0, 24.0, 0.16, rng), 0.0, 0.25)
+	out = Synth.mix_into(out, Synth.tones(0.9, [[[0.0, 520.0], [0.9, 190.0]]], {
+		square = 0.3,
+		tremolo = [18.0, 0.8],
+		amp = [[0.0, 0.0], [0.04, 0.7], [0.6, 0.4], [0.9, 0.0]],
+	}), 0.12, 0.35)
+	for i in 3:
+		out = Synth.mix_into(out, _metal_ring(0.12, rng.randf_range(1800.0, 2900.0), 18.0, 0.04, rng),
+				0.7 + i * rng.randf_range(0.1, 0.16), 0.3)
+	return Synth.finish(out, 0.8)
+
+## Grandpa's homemade helicopter in the air: twelve soft blade "whup"s a
+## second over a buzzy little motor. Exactly 1 s, and 90 / 180 Hz finish whole
+## cycles in it, so the loop point is seamless.
+static func _mini_heli_rotor_loop(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(1.0)
+	for i in 12:
+		out = Synth.mix_into(out, Synth.thump(0.07, 520.0, 0.004, 0.03, rng), i / 12.0, 0.8)
+	out = Synth.mix_into(out, Synth.tones(1.0, [[[0.0, 90.0]], [[0.0, 180.0]]], {
+		square = 0.5,
+		amp = [[0.0, 1.0]],
+	}), 0.0, 0.18)
+	return Synth.finish(out, 0.85, 0.0)
+
+## The homemade helicopter's motor giving out: three wet coughs with a pop
+## in each, and the buzz under them sagging.
+static func _heli_sputter(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.8)
+	out = Synth.mix_into(out, Synth.tones(0.7, [[[0.0, 120.0], [0.7, 62.0]]], {
+		square = 0.6,
+		amp = [[0.0, 0.0], [0.03, 0.6], [0.5, 0.4], [0.7, 0.0]],
+	}), 0.0, 0.35)
+	for at: float in [0.0, 0.21, 0.47]:
+		out = Synth.mix_into(out, Synth.thump(0.12, 380.0, 0.002, 0.05, rng), at, 0.9)
+		out = Synth.mix_into(out, Synth.noise_sweep(0.05, {
+			freq = [[0.0, 1800.0]],
+			q = [[0.0, 1.0]],
+			amp = [[0.0, 1.0], [0.05, 0.0]],
+		}, rng), at, 0.4)
+	return Synth.finish(out, 0.8)
+
+## The homemade helicopter hitting the ground: a deep crunch, the tin tub
+## ringing, a clatter of loose bits, and the rotor blade going "ting, ting,
+## ting" as it bounces off on its own.
+static func _heli_crash(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(1.8)
+	out = Synth.mix_into(out, Synth.thump(0.5, 160.0, 0.002, 0.22, rng), 0.0, 1.0)
+	out = Synth.mix_into(out, _metal_ring(0.9, 330.0, 14.0, 0.35, rng), 0.0, 0.5)
+	out = Synth.mix_into(out, _metal_ring(0.6, 940.0, 20.0, 0.2, rng), 0.02, 0.35)
+	for i in 6:
+		out = Synth.mix_into(out, _metal_ring(0.1, rng.randf_range(1600.0, 3200.0), 18.0, 0.03, rng),
+				0.15 + i * rng.randf_range(0.05, 0.09), 0.3)
+	for i in 3:
+		out = Synth.mix_into(out, _metal_ring(0.35, 1500.0, 40.0, 0.12, rng), 0.75 + i * (0.22 - i * 0.04), 0.4 - i * 0.1)
+	return Synth.finish(out, 0.85)
+
 static func _fence_crack(rng: RandomNumberGenerator) -> PackedFloat32Array:
 	var out := Synth.silence(0.9)
 	out = Synth.mix_into(out, Synth.thump(0.2, 800.0, 0.002, 0.07, rng), 0.0, 0.9)

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" uid="uid://b4kssi28o6a3g" path="res://scripts/items/item_data.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/items/icons/item_heli_engine.tscn" id="2_icon"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"heli_engine"
+display_name = "Helicopter Engine"
+description = "Rammed out of the crashed helicopter down south. Still smells of fuel. Grandpa wants it."
+icon_scene = ExtResource("2_icon")

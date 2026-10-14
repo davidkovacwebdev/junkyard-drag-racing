@@ -6,6 +6,9 @@ extends StaticBody2D
 ## gag is the bent rotor blade still on the mast, swinging in the wind and
 ## creaking (`rotor_creak`, via an AmbientCall in the scene). Flat polygons,
 ## origin on the ground under the cabin so it Y-sorts against the car.
+##
+## Rams (PlayerCar's duck-typed `car_rammed()`) go to HeliStory, which counts
+## them during "Up, Up and Away"; `shudder()` rocks the wreck for a hit.
 
 const BODY := Color(0.78, 0.46, 0.2)
 const BOOM := Color(0.66, 0.38, 0.17)
@@ -16,13 +19,20 @@ const MAST_TOP := Vector2(-6.0, -150.0)
 const BLADE_LENGTH := 150.0
 const BLADE_SWING_DEGREES := 6.0
 const BLADE_SWING_SPEED := 0.35
+const GROUP := &"crashed_helicopter"
+## A hit's shudder: this long, this far side to side, this fast.
+const SHUDDER_SECONDS := 0.35
+const SHUDDER_PIXELS := 6.0
+const SHUDDER_SPEED := 70.0
 
 var _time := 0.0
+var _shudder := 0.0
 
 func _ready() -> void:
 	add_to_group(OffscreenCuller.GROUP)
 	if Engine.is_editor_hint():
 		return
+	add_to_group(GROUP)
 	var shape := RectangleShape2D.new()
 	shape.size = Vector2(260.0, 30.0)
 	var collision := CollisionShape2D.new()
@@ -34,12 +44,26 @@ func _process(delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
 	_time += delta
+	_shudder = maxf(_shudder - delta, 0.0)
 	queue_redraw()
+
+## The car hit it hard: HeliStory decides whether that counts.
+func car_rammed(car: Node, impact_speed: float) -> void:
+	var story := get_tree().get_first_node_in_group(HeliStory.GROUP) as HeliStory
+	if story != null:
+		story.helicopter_rammed(self, car, impact_speed)
+
+## Rocks the whole wreck side to side for a moment, as from a hit.
+func shudder() -> void:
+	_shudder = SHUDDER_SECONDS
 
 ## Back to front: snapped-off blade in the sand behind, the drooping boom and
 ## fin, the tipped-forward cabin with its bubble window, the one skid, then the
 ## sand heaped over the nose. The swinging blade goes on top.
 func _draw() -> void:
+	if _shudder > 0.0:
+		var sway := sin(_time * SHUDDER_SPEED) * SHUDDER_PIXELS * _shudder / SHUDDER_SECONDS
+		draw_set_transform(Vector2(sway, 0.0))
 	draw_colored_polygon(FlatProps.octagon(Vector2(0.0, 0.0), 170.0, 22.0), UiPalette.SHADOW)
 	draw_colored_polygon(FlatProps.sliver(Vector2(130.0, 4.0), Vector2(190.0, -120.0), 14.0), BLADE)
 	draw_colored_polygon(PackedVector2Array([
