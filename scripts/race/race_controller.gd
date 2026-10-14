@@ -95,6 +95,10 @@ var _entries: Array[Dictionary] = []
 ## player already knows by name (the bet cards' drivers). Anyone else gets a
 ## random placeholder name.
 var driver_names: Dictionary = {}
+## Placeholder driver names, shuffled when the first car registers and handed
+## out in registration order. That happens while the race is being set up, so
+## a seeded race (DebugRace) names the same cars the same way every time.
+var _placeholder_names: Array[String] = []
 var _elapsed := 0.0
 var _race_over := false
 var _winner_name := ""
@@ -153,8 +157,12 @@ func _ready() -> void:
 
 func register_car(car_name: String, car: CarAssembler.AssembledCar) -> void:
 	var body_part_data: PartData = car.body.part_data if car.body != null else null
+	if _placeholder_names.is_empty():
+		_placeholder_names = NameGen.random_names(NameGen.NAMES.size())
+	var ai_count := _entries.filter(func(entry: Dictionary) -> bool: return not _is_player(entry)).size()
 	_entries.append({
 		"name": car_name,
+		"placeholder_driver": _placeholder_names[ai_count % _placeholder_names.size()],
 		"car": car,
 		"finished": false,
 		# Set true only by _finish_car() — actually crossing finish_x, as
@@ -410,17 +418,14 @@ func _compute_standings(force_player_last: bool = false) -> Array[Dictionary]:
 
 ## The top 3 standings, plus the player's own place when they finished lower,
 ## turned into what ResultsScreen shows: the player is "You", an AI car in
-## `driver_names` keeps that name, and every other one gets a random,
-## distinct placeholder driver name (see name_gen.gd) picked fresh each race.
+## `driver_names` keeps that name, and every other one gets the placeholder
+## driver name it was given when it registered (see name_gen.gd).
 func _build_results_data(standings: Array[Dictionary]) -> Array[Dictionary]:
 	var places: Array[int] = []
 	for i in standings.size():
 		if i < 3 or _is_player(standings[i]):
 			places.append(i)
-	var ai_count := places.filter(func(i: int) -> bool: return not _is_player(standings[i])).size()
-	var random_names := NameGen.random_names(ai_count)
 	var result: Array[Dictionary] = []
-	var name_i := 0
 	for i in places:
 		var entry := standings[i]
 		var display_name: String
@@ -429,8 +434,7 @@ func _build_results_data(standings: Array[Dictionary]) -> Array[Dictionary]:
 		elif driver_names.has(entry["name"]):
 			display_name = driver_names[entry["name"]]
 		else:
-			display_name = random_names[name_i]
-			name_i += 1
+			display_name = entry["placeholder_driver"]
 		result.append({
 			"place": i + 1,
 			"name": display_name,
