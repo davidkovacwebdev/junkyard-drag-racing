@@ -353,7 +353,9 @@ func objective_text(quest: QuestData) -> String:
 	if quest.item_goals.size() > 0:
 		var items := goal_items(quest)
 		var owned := items.filter(func(item: ItemData) -> bool: return Inventory.has_item(item.id)).size()
-		bits.append("%d / %d bought" % [owned, items.size()])
+		# Shop stock is bought; anything priceless is found out in the world.
+		var bought := items.any(func(item: ItemData) -> bool: return item.price > 0)
+		bits.append("%d / %d %s" % [owned, items.size(), "bought" if bought else "found"])
 	if quest.horn_goal_seconds > 0.0:
 		# Whole seconds, rounded down, so it only ticks over once each is done.
 		bits.append("%d / %d s honked" % [int(minf(horn_time_of(quest.id), quest.horn_goal_seconds)),

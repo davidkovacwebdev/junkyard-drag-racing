@@ -78,6 +78,12 @@ func _unhandled_input(event: InputEvent) -> void:
 func set_traveler(traveling: bool) -> void:
 	_traveler_zoom = TRAVELER_ZOOM if traveling else 0.0
 
+## Holds the view at `value` (Grandpa's helicopter pulls it back to see the
+## ground from up there), or gives it back to the player's zoom with 0. The
+## wheel still nudges it, like in traveler mode.
+func set_zoom_override(value: float) -> void:
+	_traveler_zoom = value
+
 func _zoom_by(factor: float) -> void:
 	if _traveler_zoom > 0.0:
 		_traveler_zoom = clampf(_traveler_zoom * factor, TRAVELER_MIN_ZOOM, max_zoom)

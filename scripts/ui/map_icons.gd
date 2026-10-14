@@ -198,6 +198,21 @@ static func draw_landmark(canvas: CanvasItem, kind: MinimapMarker.Kind, at: Vect
 					at + Vector2(-unit * flip, -unit * 0.75), at + Vector2(-unit * 0.6 * flip, -unit),
 					at + Vector2(unit * flip, unit * 0.75), at + Vector2(unit * 0.6 * flip, unit),
 				]), UiPalette.DANGER_RED)
+		MinimapMarker.Kind.HELICOPTER:
+			# The crashed helicopter: a fat cabin, a tail boom off the back
+			# and the rotor blade across the top.
+			canvas.draw_colored_polygon(PackedVector2Array([
+				at + Vector2(unit * 0.1, -unit * 0.2), at + Vector2(unit * 1.3, -unit * 0.35),
+				at + Vector2(unit * 1.3, 0), at + Vector2(unit * 0.1, unit * 0.3),
+			]), CrashedHelicopter.BOOM)
+			canvas.draw_colored_polygon(PackedVector2Array([
+				at + Vector2(-unit, unit * 0.1), at + Vector2(-unit * 0.6, -unit * 0.5), at + Vector2(unit * 0.3, -unit * 0.5),
+				at + Vector2(unit * 0.4, unit * 0.7), at + Vector2(-unit * 0.7, unit * 0.7),
+			]), CrashedHelicopter.BODY)
+			canvas.draw_colored_polygon(PackedVector2Array([
+				at + Vector2(-unit * 1.1, -unit * 1.05), at + Vector2(unit * 0.9, -unit * 0.85),
+				at + Vector2(unit * 0.9, -unit * 0.5), at + Vector2(-unit * 1.1, -unit * 0.7),
+			]), HILL_ROCK)
 		MinimapMarker.Kind.GARBAGE_TRUCK:
 			# The big green box, the cab in front of it, and the wheels under both.
 			canvas.draw_colored_polygon(PackedVector2Array([

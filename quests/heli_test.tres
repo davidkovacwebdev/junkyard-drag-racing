@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Resource" uid="uid://c1atelu75brau" path="res://quests/hill_climb_debut.tres" id="2_next"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"heli_test"
+title = "Test Pilot"
+giver = "Grandpa"
+description = "Grandpa built a one-man helicopter out of the engine and tail rotor you brought him, and a tin bathtub. Super safe, he says. Same as riding a bicycle.
+
+Climb in and take it up for a spin."
+objective = "Climb into Grandpa's helicopter (E) and take it up for a spin"
+objective_place = "Grandpa"
+follow_ups = Array[ExtResource("1_script")]([ExtResource("2_next")])
+cutscene_ids = Array[StringName]([&"mini_heli_crash"])
+start_cutscene = "res://cutscenes/grandpa_mini_heli.tres"
+reminder_line = "Well? Climb in, {player}. It don't bite."
+turn_in_cutscene = "res://cutscenes/grandpa_mini_heli_report.tres"

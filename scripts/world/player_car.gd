@@ -298,6 +298,9 @@ var _under_bridge := false
 var _default_collision_layer: int = 1
 var _traveling: bool = false
 var _ramp_jump: RampJump = null
+## Grandpa's homemade helicopter while the player's up in it (MiniHeliFlight):
+## it moves the car, and the car keeps out of its way. Null on the ground.
+var _flight: Node = null
 
 const TOW_RESCUE := preload("res://cutscenes/tow_truck_rescue.tres")
 const SCRAP_PICKUP := preload("res://scenes/world/scrap_pickup.tscn")
@@ -466,6 +469,37 @@ func set_traveling(traveling: bool) -> void:
 	collision_mask = _default_collision_mask
 	Sfx.play(&"gravel_crunch", -2.0, 0.05)
 
+func is_flying() -> bool:
+	return _flight != null
+
+## Hands the car over to a flight (MiniHeliFlight, which calls back `fly(delta)`
+## every physics frame and moves the car itself), or takes it back with null.
+## While it's flying the car is out of the picture: no collisions, nothing
+## drawn or heard of it, no E prompts, and its last spot on the ground stays
+## the one a reload comes back to.
+func set_flight(flight: Node) -> void:
+	_flight = flight
+	var flying := flight != null
+	velocity = Vector2.ZERO
+	collision_layer = 0 if flying else _default_collision_layer
+	collision_mask = 0 if flying else _default_collision_mask
+	_visual.visible = not flying
+	# The beams would stay down on the ground under it.
+	var lights := get_node_or_null(^"Headlights") as CanvasItem
+	if lights != null:
+		lights.visible = not flying
+	if _engine_sound != null:
+		_engine_sound.master_level = 0.0 if flying else 1.0
+	_tire_screech.set_level(0.0)
+	_horn.set_active(false)
+	_tooltip_label.visible = false
+	_holding_target = null
+	_hide_hold_bar()
+
+## The arrow keys / WASD as a direction, for whatever's flying the car.
+func drive_input() -> Vector2:
+	return _read_input_dir()
+
 ## Sends the car up `ramp`'s launch deck and off the lip (see RampJump),
 ## steering locked until it's down and clear of the ramp. Ignored while the
 ## car can't drive or is already mid-jump.
@@ -542,6 +576,12 @@ func _find_landing_spot(origin: Vector2) -> Vector2:
 		radius += traveler_landing_step
 	return origin
 
+## Whether the car could be set down at `spot`: on land, overlapping nothing.
+func can_park_at(spot: Vector2) -> bool:
+	if _terrain != null and _terrain.is_in_water(_terrain.to_local(spot)):
+		return false
+	return _is_spot_clear(spot)
+
 func _is_spot_clear(spot: Vector2) -> bool:
 	var space := get_world_2d().direct_space_state
 	for shape_node in [_collision, _walker_collision]:
@@ -559,6 +599,9 @@ func _is_spot_clear(spot: Vector2) -> bool:
 	return true
 
 func _physics_process(delta: float) -> void:
+	if _flight != null:
+		_flight.call(&"fly", delta)
+		return
 	if _traveling:
 		_travel(delta)
 		return

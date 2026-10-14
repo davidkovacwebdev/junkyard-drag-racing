@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" uid="uid://cxd3visl7vxub" path="res://scripts/quests/quest_data.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://b4kssi28o6a3g" path="res://scripts/items/item_data.gd" id="2_item_script"]
+[ext_resource type="Resource" path="res://items/heli_engine.tres" id="3_engine"]
+[ext_resource type="Resource" path="res://items/tail_rotor.tres" id="4_rotor"]
+[ext_resource type="Resource" uid="uid://5r3j5dnmtdgj" path="res://quests/pay_respects.tres" id="5_next"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"heli_parts"
+title = "Up, Up and Away"
+giver = "Grandpa"
+description = "Grandpa was staring at the sky, wondering what it'd be like if humans could fly. You told him they can. He had an idea.
+
+He's riding shotgun, wheelchair in the back. Drive him to the helicopter crash site down south and do what he says."
+objective = "Drive Grandpa to the Helicopter Crash Site and do what he says"
+objective_place = "Helicopter Crash Site"
+unlocks = Array[ExtResource("1_script")]([ExtResource("5_next")])
+cutscene_ids = Array[StringName]([&"heli_crash_site"])
+start_cutscene = "res://cutscenes/grandpa_fly.tres"
+item_goals = Array[ExtResource("2_item_script")]([ExtResource("3_engine"), ExtResource("4_rotor")])
+turn_in_cutscene = "res://cutscenes/grandpa_heli_home.tres"
