@@ -171,6 +171,16 @@ func pick_rivals(count: int) -> Array[Dictionary]:
 func pick_rivals_for_tier(count: int, tier: int, course: Course = Course.DRAG) -> Array[Dictionary]:
 	return _pick_rivals_at_par(count, par_time_for_tier(tier, course), course)
 
+## Every roster car a tier's headliner can be drawn from, best score first.
+func tier_pool(tier: int, course: Course = Course.DRAG) -> Array[Dictionary]:
+	var par := par_time_for_tier(tier, course)
+	var key := score_key(course)
+	var pool: Array[Dictionary] = _rosters[course].filter(func(entry: Dictionary) -> bool:
+		var score := float(entry[key])
+		return score >= par * HEADLINER_WINDOW.x and score <= par * HEADLINER_WINDOW.y)
+	pool.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return float(a[key]) < float(b[key]))
+	return pool
+
 func _pick_rivals_at_par(count: int, par: float, course: Course) -> Array[Dictionary]:
 	var rivals: Array[Dictionary] = []
 	var roster: Array[Dictionary] = _rosters[course]

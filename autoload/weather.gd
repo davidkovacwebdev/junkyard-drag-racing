@@ -128,6 +128,16 @@ func is_raining() -> bool:
 func is_wet() -> bool:
 	return wetness > 0.15
 
+## The rain, cloud and soaking right now, for restore() to put back (the
+## random race popup replays a race in the weather it first ran in).
+func snapshot() -> Dictionary:
+	return {"rain_intensity": rain_intensity, "wetness": wetness, "cloud_cover": cloud_cover}
+
+func restore(state: Dictionary) -> void:
+	rain_intensity = state.get("rain_intensity", rain_intensity)
+	wetness = state.get("wetness", wetness)
+	cloud_cover = state.get("cloud_cover", cloud_cover)
+
 ## Force the weather (for tests or the debug key). -1 lets the schedule decide,
 ## 0 forces it dry, 1 forces rain. The visible fade and the soak/dry ramp still
 ## run, so forcing rain doesn't teleport puddles onto the road.

@@ -129,6 +129,10 @@ func reset_progress() -> void:
 	Funeral.reset()
 	Drunk.reset()
 
+## True on `-- --no-save` runs, where nothing should write to user://.
+func is_saving_disabled() -> bool:
+	return _saving_disabled
+
 func has_save() -> bool:
 	return slot_has_save(current_slot)
 
