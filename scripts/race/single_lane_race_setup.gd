@@ -193,9 +193,22 @@ const TOUCH_COOLDOWN := 0.8
 ## the one ahead, so it pays more.
 const REAR_CAR_SPEED_KEPT := 0.55
 const FRONT_CAR_SPEED_KEPT := 0.85
-## Share of a part's full durability that one touch knocks off a random part
-## of each car.
+## Share of a part's full durability that one touch knocks off the touching
+## part of each car (the nose of the one behind, the tail of the one ahead), at
+## TOUCH_REFERENCE_SPEED. Faster cars trading paint hurt more, up to
+## MAX_TOUCH_SPEED_FACTOR times as much.
 const TOUCH_DAMAGE_FRACTION := 0.2
+## Forward speed (px/s, the two cars' average plus how fast they're closing)
+## at which a touch costs exactly TOUCH_DAMAGE_FRACTION.
+const TOUCH_REFERENCE_SPEED := 450.0
+const MIN_TOUCH_SPEED_FACTOR := 0.25
+const MAX_TOUCH_SPEED_FACTOR := 3.0
+## Cars still overlapping after a touch keep grinding: this share of the
+## touching parts' durability per second, scaled by speed like a touch.
+const RUB_DAMAGE_FRACTION_PER_SECOND := 0.15
+## Sparks and a scrape every this many seconds while two cars rub.
+const RUB_SPARK_INTERVAL := 0.25
+const RUB_SCRAPE_VOLUME_DB := -8.0
 
 ## --- Puddles ------------------------------------------------------------------
 
@@ -261,6 +274,7 @@ class LaneState:
 	var target := 0.0
 	var hold := 0.0
 	var cooldown := 0.0
+	var rub_spark_timer := 0.0
 	var in_puddle := false
 	var fall_speed := 0.0
 	var landing_cooldown := 0.0
@@ -362,8 +376,9 @@ func _physics_process(delta: float) -> void:
 		return
 	for state in _states:
 		state.cooldown = maxf(state.cooldown - delta, 0.0)
+		state.rub_spark_timer = maxf(state.rub_spark_timer - delta, 0.0)
 		_steer(state, delta)
-	_check_touches()
+	_check_touches(delta)
 
 ## The drift is drawn here rather than in _physics_process so the offsets are
 ## computed from the transforms the physics step just produced and applied
@@ -628,16 +643,19 @@ func _bend_road(state: LaneState) -> void:
 		points[columns * 2 - 1 - i] = Vector2(x, state.road_bottom + offset)
 	state.road.polygon = points
 
-func _check_touches() -> void:
+## A fresh contact is a touch; two cars still overlapping from one rub.
+func _check_touches(delta: float) -> void:
 	for i in _states.size():
 		var a := _states[i]
-		if not _is_racing(a) or a.cooldown > 0.0:
+		if not _is_racing(a):
 			continue
 		for j in range(i + 1, _states.size()):
 			var b := _states[j]
-			if not _is_racing(b) or b.cooldown > 0.0:
+			if not _is_racing(b) or not _would_touch(a, b):
 				continue
-			if _would_touch(a, b):
+			if a.cooldown > 0.0 or b.cooldown > 0.0:
+				_rub(a, b, delta)
+			else:
 				_touch(a, b)
 
 func _is_racing(state: LaneState) -> bool:
@@ -660,10 +678,36 @@ func _touch(a: LaneState, b: LaneState) -> void:
 	_spawn_sparks(contact, SPARK_COLOR)
 	RaceCarAudio.play(self, &"metal_scrape", contact)
 	var a_is_behind := a.car.body.global_position.x < b.car.body.global_position.x
+	var speed_factor := _touch_speed_factor(a, b)
 	_slow_down(a.car, REAR_CAR_SPEED_KEPT if a_is_behind else FRONT_CAR_SPEED_KEPT)
 	_slow_down(b.car, FRONT_CAR_SPEED_KEPT if a_is_behind else REAR_CAR_SPEED_KEPT)
-	_damage_random_part(a.car)
-	_damage_random_part(b.car)
+	_damage_touching_part(a, b, TOUCH_DAMAGE_FRACTION * speed_factor)
+	_damage_touching_part(b, a, TOUCH_DAMAGE_FRACTION * speed_factor)
+
+## Two cars grinding side by side: wear on the touching parts, sparks and a
+## scrape every RUB_SPARK_INTERVAL.
+func _rub(a: LaneState, b: LaneState, delta: float) -> void:
+	var fraction := RUB_DAMAGE_FRACTION_PER_SECOND * _touch_speed_factor(a, b) * delta
+	_damage_touching_part(a, b, fraction)
+	_damage_touching_part(b, a, fraction)
+	if a.rub_spark_timer > 0.0 or b.rub_spark_timer > 0.0:
+		return
+	a.rub_spark_timer = RUB_SPARK_INTERVAL
+	b.rub_spark_timer = RUB_SPARK_INTERVAL
+	if _is_racing(a) and _is_racing(b):
+		var contact := (a.visual_position() + b.visual_position()) * 0.5
+		_spawn_sparks(contact, SPARK_COLOR)
+		RaceCarAudio.play(self, &"metal_scrape", contact, RUB_SCRAPE_VOLUME_DB)
+
+## How much harder than a TOUCH_REFERENCE_SPEED touch this one is: the faster
+## the two are going and the faster one is catching the other, the worse.
+func _touch_speed_factor(a: LaneState, b: LaneState) -> float:
+	if not _is_racing(a) or not _is_racing(b):
+		return MIN_TOUCH_SPEED_FACTOR
+	var speed_a := a.car.body.linear_velocity.x
+	var speed_b := b.car.body.linear_velocity.x
+	var speed := absf(speed_a + speed_b) * 0.5 + absf(speed_a - speed_b)
+	return clampf(speed / TOUCH_REFERENCE_SPEED, MIN_TOUCH_SPEED_FACTOR, MAX_TOUCH_SPEED_FACTOR)
 
 ## Cuts the whole car's forward speed: body, wheels and their motors together, or
 ## the joints would fight it.
@@ -678,10 +722,20 @@ func _slow_down(car: CarAssembler.AssembledCar, speed_kept: float) -> void:
 		if tracker != null:
 			tracker.resync()
 
-func _damage_random_part(car: CarAssembler.AssembledCar) -> void:
-	var tracker := CarPartDamage.of(_car_parts(car).pick_random())
+## Knocks `fraction` of its full durability off whichever of `state`'s parts
+## is nearest `other` along the road: the nose of the car behind, the tail of
+## the one ahead.
+func _damage_touching_part(state: LaneState, other: LaneState, fraction: float) -> void:
+	if not _is_racing(state) or not _is_racing(other):
+		return
+	var toward_x := other.car.body.global_position.x
+	var nearest: RigidBody2D = null
+	for part in _car_parts(state.car):
+		if nearest == null or absf(part.global_position.x - toward_x) < absf(nearest.global_position.x - toward_x):
+			nearest = part
+	var tracker := CarPartDamage.of(nearest)
 	if tracker != null:
-		tracker.apply_damage(tracker.max_durability * TOUCH_DAMAGE_FRACTION)
+		tracker.apply_damage(tracker.max_durability * fraction)
 
 func _car_parts(car: CarAssembler.AssembledCar) -> Array[RigidBody2D]:
 	var parts: Array[RigidBody2D] = [car.body]

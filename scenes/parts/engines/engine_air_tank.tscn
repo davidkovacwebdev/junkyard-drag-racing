@@ -9,9 +9,12 @@ id = &"engine_air_tank"
 display_name = "Compressed-Air Tank"
 mass = 7.0
 durability = 65.0
-speed = 3.6
+speed = 5.1
 material_type = 0
-power = 3.6
+power = 5.1
+torque = 4.32
+drive_pattern = 3
+drive_time = 3.0
 
 [node name="EngineAirTank" type="Node2D"]
 script = ExtResource("1")

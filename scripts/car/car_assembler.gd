@@ -10,8 +10,16 @@ extends RefCounted
 const LOOSE_WHEEL_DAMP := 1.5
 ## Each wheel motor's stall torque per point of engine power.
 const STALL_TORQUE_PER_POWER := 300000.0
+## A wheel motor's torque is capped at this many times what its share of the
+## car's weight can grip (friction 1). Past grip, torque only spins the wheel
+## and twists the body, which takes the reaction, onto its roof.
+const TRACTION_TORQUE_MARGIN := 1.25
 ## Global buff on every engine's power, so all cars get faster together.
 const ENGINE_POWER_MULTIPLIER := 2.0
+## The standard wheel: the radius and speed stat whose top spin is exactly the
+## engine's power. Every other wheel is geared against it.
+const REFERENCE_WHEEL_RADIUS := 36.0
+const REFERENCE_WHEEL_SPEED := 5.0
 ## Gap left under a car's lowest point at spawn: enough to not start inside
 ## the ground, small enough that it settles instead of dropping.
 const SPAWN_GAP := 1.0
@@ -97,6 +105,7 @@ static func assemble_parts(body_instance: CarBody, wheel_instances: Array[CarWhe
 			wheels[i].add_collision_exception_with(wheels[j])
 
 	var engine_power := 0.0
+	var engine_torque := 0.0
 	var engine_data: EnginePartData = null
 	if engine_instance != null:
 		body_instance.add_child(engine_instance)
@@ -105,18 +114,36 @@ static func assemble_parts(body_instance: CarBody, wheel_instances: Array[CarWhe
 		body_instance.place_engine(engine_instance)
 		engine_data = engine_instance.get("part_data")
 		if engine_data != null:
-			engine_power = engine_data.power * ENGINE_POWER_MULTIPLIER * speed_multiplier
+			var body_multiplier := body_instance.part_data.speed_multiplier() if body_instance.part_data != null else 1.0
+			engine_power = engine_data.power * ENGINE_POWER_MULTIPLIER * speed_multiplier * body_multiplier
+			engine_torque = engine_data.torque * ENGINE_POWER_MULTIPLIER
+
+	var wheelie_control := CarWheelieControl.new()
+	wheelie_control.body = body_instance
+	wheelie_control.wheels = wheels
+	body_instance.add_child(wheelie_control)
 
 	var autosteer := CarAutosteer.new()
 	autosteer.body = body_instance
 	body_instance.add_child(autosteer)
 
-	# Engine power is each wheel's top spin speed (rad/s) and scales its
-	# torque. The car's ground speed comes only from how well each wheel's
-	# shape grips the ground under that torque.
+	var car_weight := _total_mass(body_instance, wheels) * float(ProjectSettings.get_setting("physics/2d/default_gravity"))
+	# Engine power sets each wheel's top ground speed (geared by the wheel's
+	# speed stat), engine torque how hard it pulls getting there. How much of
+	# that the car actually gets comes from how well each wheel's shape grips
+	# the ground.
 	for wheel in wheels:
-		wheel.target_angular_velocity = engine_power
-		wheel.stall_torque = engine_power * STALL_TORQUE_PER_POWER
+		wheel.target_angular_velocity = wheel_target_spin(engine_power, wheel)
+		wheel.stall_torque = engine_torque * STALL_TORQUE_PER_POWER
+		wheel.max_torque = TRACTION_TORQUE_MARGIN * car_weight / wheels.size() * wheel.drive_radius()
+
+	var engine_drive: CarEngineDrive = null
+	if engine_data != null:
+		engine_drive = CarEngineDrive.new()
+		engine_drive.engine = engine_data
+		engine_drive.body = body_instance
+		engine_drive.wheels = wheels
+		body_instance.add_child(engine_drive)
 
 	RaceCarAudio.register(root)
 	var engine_sound_profile := EngineSoundProfile.for_engine(engine_data)
@@ -124,19 +151,21 @@ static func assemble_parts(body_instance: CarBody, wheel_instances: Array[CarWhe
 		var engine_audio := CarEngineAudio.new()
 		engine_audio.profile = engine_sound_profile
 		engine_audio.wheels = wheels
-		engine_audio.engine_power = engine_power
+		engine_audio.drive = engine_drive
 		body_instance.add_child(engine_audio)
 
 	# Damage/shatter: a wheel breaking detaches just its own joint (the
 	# rest of the car keeps going, lopsided). The body breaking detaches
 	# every joint — there's nothing left to hold the wheels on, so they
 	# carry on rolling riderless.
+	var knock_gate := CarKnockGate.new()
 	var suspension_wheel_protection: float = body_instance.part_data.suspension_wheel_protection if body_instance.part_data != null else 0.0
 	for i in wheels.size():
 		var wheel: CarWheel = wheels[i]
 		var wheel_joints: Array = joints_by_wheel[i]
 		var wheel_damage := CarPartDamage.new()
 		wheel_damage.target = wheel
+		wheel_damage.knock_gate = knock_gate
 		wheel_damage.part_data = wheel.part_data
 		wheel_damage.durability_multiplier = durability_multiplier
 		wheel_damage.absorption = wheel.part_data.absorption if wheel.part_data != null else 0.0
@@ -157,6 +186,7 @@ static func assemble_parts(body_instance: CarBody, wheel_instances: Array[CarWhe
 
 	var body_damage := CarPartDamage.new()
 	body_damage.target = body_instance
+	body_damage.knock_gate = knock_gate
 	body_damage.part_data = body_instance.part_data
 	body_damage.durability_multiplier = durability_multiplier
 	body_damage.impact_sound = body_impact_sound
@@ -281,6 +311,19 @@ static func _lowest_collision_y(car_root: Node2D) -> float:
 			var bounds := shape_node.global_transform * shape_node.shape.get_rect()
 			lowest = maxf(lowest, bounds.end.y)
 	return lowest if lowest > -INF else car_root.global_position.y
+
+## The spin (rad/s) `wheel` is driven to: the reference wheel's top ground
+## speed for this engine, scaled by the wheel's speed stat and turned back into
+## a spin for the wheel's own radius.
+static func wheel_target_spin(engine_power: float, wheel: CarWheel) -> float:
+	var gearing := wheel.part_data.speed / REFERENCE_WHEEL_SPEED if wheel.part_data != null else 1.0
+	return engine_power * gearing * REFERENCE_WHEEL_RADIUS / wheel.drive_radius()
+
+static func _total_mass(body: CarBody, wheels: Array[CarWheel]) -> float:
+	var total := body.mass
+	for wheel in wheels:
+		total += wheel.mass
+	return total
 
 static func _average_absorption(wheels: Array[CarWheel]) -> float:
 	var total := 0.0

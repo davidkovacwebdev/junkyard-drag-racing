@@ -12,6 +12,9 @@ durability = 60.0
 speed = 2.0
 material_type = 0
 power = 2.0
+torque = 1.4
+drive_pattern = 2
+drive_time = 2.0
 
 [node name="EngineIndustrialFan" type="Node2D"]
 script = ExtResource("1")

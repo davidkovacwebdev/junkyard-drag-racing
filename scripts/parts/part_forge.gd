@@ -158,11 +158,14 @@ static func _mix_stats(result: PartData, ingredients: Array[PartData], category:
 	var same := ingredients.filter(func(part: PartData) -> bool: return part.category == category)
 	if result is EnginePartData:
 		var power := 0.0
+		var torque := 0.0
 		for engine: EnginePartData in same:
 			power += engine.power
+			torque += engine.torque
 		var engine_result := result as EnginePartData
 		engine_result.power = clampf(power / same.size() * (1.0 + 0.08 * extra) * rng.randf_range(0.9, 1.12),
 				0.5, _max_catalog_power())
+		engine_result.torque = torque / same.size() * (1.0 + 0.08 * extra) * rng.randf_range(0.9, 1.12)
 		# By convention an engine's speed rating is its power.
 		engine_result.speed = engine_result.power
 	elif result is WheelPartData:

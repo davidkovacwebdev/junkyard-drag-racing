@@ -12,6 +12,9 @@ durability = 30.0
 speed = 2.5
 material_type = 0
 power = 2.5
+torque = 1.75
+drive_pattern = 5
+drive_time = 0.3
 
 [node name="EnginePaintSprayer" type="Node2D"]
 script = ExtResource("1")

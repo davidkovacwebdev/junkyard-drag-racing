@@ -9,9 +9,12 @@ id = &"engine_pressure_washer"
 display_name = "Pressure Washer"
 mass = 7.0
 durability = 45.0
-speed = 3.5
+speed = 4.8
 material_type = 0
-power = 3.5
+power = 4.8
+torque = 3.5
+drive_pattern = 2
+drive_time = 1.0
 
 [node name="EnginePressureWasher" type="Node2D"]
 script = ExtResource("1")

@@ -9,9 +9,12 @@ id = &"engine_co2_tank"
 display_name = "CO2 Tank"
 mass = 6.0
 durability = 60.0
-speed = 3.8
+speed = 5.7
 material_type = 0
-power = 3.8
+power = 5.7
+torque = 4.94
+drive_pattern = 3
+drive_time = 2.5
 
 [node name="EngineCo2Tank" type="Node2D"]
 script = ExtResource("1")

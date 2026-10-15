@@ -13,6 +13,9 @@ durability = 65.0
 speed = 2.0
 material_type = 0
 power = 2.0
+torque = 3.0
+drive_pattern = 6
+drive_time = 3.0
 
 [node name="EngineGenerator" type="Node2D"]
 script = ExtResource("1")

@@ -25,6 +25,9 @@ const REAR_REACH := 18.0
 const WHEEL_RADIUS_GUESS := 36.0
 ## Distance covered by one full stride, in runner pixels. Short: little legs.
 const STRIDE_LENGTH := 70.0
+## Little legs never cycle faster than this (strides per second), however fast
+## the car is going: past it they'd only blur.
+const MAX_STRIDES_PER_SECOND := 4.5
 ## Speed (runner pixels/s) at which he's flat out.
 const FULL_GAIT_SPEED := 300.0
 ## How far a leg swings forward and back from the hip, radians.
@@ -171,7 +174,8 @@ func _process(delta: float) -> void:
 	var travelled := _forward_travel()
 	var speed := absf(travelled) / delta
 	_gait_blend = lerpf(_gait_blend, clampf(speed / FULL_GAIT_SPEED, 0.0, 1.0), clampf(6.0 * delta, 0.0, 1.0))
-	_gait_phase = wrapf(_gait_phase + travelled / STRIDE_LENGTH * TAU * gait_rate, 0.0, TAU)
+	var strides := minf(absf(travelled) / STRIDE_LENGTH * gait_rate, MAX_STRIDES_PER_SECOND * delta)
+	_gait_phase = wrapf(_gait_phase + signf(travelled) * strides * TAU, 0.0, TAU)
 	_idle_time += delta
 	_animate()
 	_update_lead()

@@ -9,9 +9,11 @@ id = &"engine_electric_scooter_motor"
 display_name = "Electric Scooter Motor"
 mass = 3.5
 durability = 40.0
-speed = 3.0
+speed = 3.6
 material_type = 0
-power = 3.0
+power = 3.6
+torque = 4.2
+drive_pattern = 0
 
 [node name="EngineElectricScooterMotor" type="Node2D"]
 script = ExtResource("1")

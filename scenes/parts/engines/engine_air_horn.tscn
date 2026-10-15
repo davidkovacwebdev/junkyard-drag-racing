@@ -12,6 +12,9 @@ durability = 35.0
 speed = 2.0
 material_type = 0
 power = 2.0
+torque = 2.0
+drive_pattern = 3
+drive_time = 1.5
 
 [node name="EngineAirHorn" type="Node2D"]
 script = ExtResource("1")

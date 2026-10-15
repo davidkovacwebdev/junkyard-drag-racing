@@ -4,11 +4,12 @@ extends Node
 ## fires `broken` once its durability runs out.
 ##
 ## Damage per hit is proportional to the momentum the part just absorbed
-## (mass * |Δv| in a single physics step) — a plain, physically honest
-## stand-in for impact force that needs no collision-shape math: heavier
-## parts deal and take harder hits, faster impacts deal and take harder
-## hits, both for free from the one formula. Small jostles from normal
-## driving stay under the threshold; slamming into the end wall does not.
+## beyond the threshold (mass * (|Δv| - threshold) in a single physics step) —
+## a plain stand-in for impact force that needs no collision-shape math:
+## heavier parts and faster impacts both hit harder, for free from the one
+## formula. Counting only the excess keeps knocks just over the line (a
+## suspension bottoming out at the foot of the ramp) as chip damage, while
+## slamming into the end wall still wrecks.
 
 signal broken
 ## Every knock over the impact threshold, before it's turned into damage
@@ -22,9 +23,12 @@ const GROUP := &"car_part_damage"
 
 const IMPACT_VELOCITY_THRESHOLD := 200.0
 const DAMAGE_PER_MOMENTUM := 0.006
-## A hit this hard (Δv) or harder knocks at full volume.
+## A hit this hard (Δv) or harder knocks at the top of KNOCK_VOLUME_DB, one
+## just over the threshold at the bottom. A knock is a small detail in the mix
+## (see the sound-design skill's levels): kept well under a part breaking
+## (-2 dB) so stacked knocks never push the master limiter into pumping.
 const LOUDEST_IMPACT_VELOCITY := 900.0
-const IMPACT_SOUND_COOLDOWN := 0.15
+const KNOCK_VOLUME_DB := Vector2(-22.0, -8.0)
 
 ## 0..1 share of impact damage soaked up before it counts. Only bumps and
 ## landings: apply_damage() from anything else is taken in full.
@@ -36,6 +40,9 @@ var ground_absorption: float = 0.0
 var durability_multiplier: float = 1.0
 ## Replaces the part's own knock when set.
 var impact_sound: StringName = &""
+## Which knocks get heard. CarAssembler gives every part of a car the same one,
+## so the car knocks as one thing rather than once per part.
+var knock_gate := CarKnockGate.new()
 ## Other parts whose contacts also count when telling a ground hit from a car
 ## hit (the body lands through its wheels, so it checks them too).
 var linked_contact_parts: Array = []
@@ -44,7 +51,6 @@ var current_durability: float = 100.0
 var is_broken: bool = false
 
 var _prev_velocity := Vector2.ZERO
-var _impact_sound_cooldown := 0.0
 
 func _ready() -> void:
 	add_to_group(GROUP)
@@ -68,8 +74,7 @@ func resync() -> void:
 	if is_instance_valid(target):
 		_prev_velocity = target.linear_velocity
 
-func _physics_process(delta: float) -> void:
-	_impact_sound_cooldown -= delta
+func _physics_process(_delta: float) -> void:
 	# is_instance_valid, not a plain null check: target is a dangling
 	# reference (not nulled out) once queue_free()'d, which a `== null`
 	# check doesn't catch — surfaced by chaotic multi-car pileups where
@@ -82,18 +87,18 @@ func _physics_process(delta: float) -> void:
 	if delta_v < IMPACT_VELOCITY_THRESHOLD:
 		return
 	impacted.emit(delta_v)
-	var momentum := target.mass * delta_v
+	var momentum := target.mass * (delta_v - IMPACT_VELOCITY_THRESHOLD)
 	var total_absorption := absorption
 	if ground_absorption > 0.0 and _is_ground_hit():
 		total_absorption = 1.0 - (1.0 - absorption) * (1.0 - ground_absorption)
 	apply_damage(momentum * DAMAGE_PER_MOMENTUM * (1.0 - total_absorption))
-	if not is_broken and _impact_sound_cooldown <= 0.0:
-		_impact_sound_cooldown = IMPACT_SOUND_COOLDOWN
-		var loudness := clampf(delta_v / LOUDEST_IMPACT_VELOCITY, 0.25, 1.0)
+	var strength := clampf(inverse_lerp(IMPACT_VELOCITY_THRESHOLD, LOUDEST_IMPACT_VELOCITY, delta_v), 0.0, 1.0)
+	var knock_db := lerpf(KNOCK_VOLUME_DB.x, KNOCK_VOLUME_DB.y, strength)
+	if not is_broken and knock_gate.allow(db_to_linear(knock_db)):
 		var knock := impact_sound
 		if knock == &"":
 			knock = part_data.impact_sound if part_data != null else &"bump"
-		RaceCarAudio.play(self, knock, target.global_position, linear_to_db(loudness))
+		RaceCarAudio.play(self, knock, target.global_position, knock_db)
 
 func _is_ground_hit() -> bool:
 	for part in [target] + linked_contact_parts:

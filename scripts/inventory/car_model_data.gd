@@ -106,9 +106,13 @@ func average_durability() -> float:
 		total += part.durability
 	return total / parts.size() * durability_multiplier()
 
-## What the engine spins the wheels to, with the accessories' bonus on top.
+## What the engine spins the wheels to, with the body's and accessories'
+## bonuses on top.
 func engine_power() -> float:
-	return engine.power * speed_multiplier() if engine != null else 0.0
+	if engine == null:
+		return 0.0
+	var body_multiplier := body.speed_multiplier() if body != null else 1.0
+	return engine.power * speed_multiplier() * body_multiplier
 
 ## How well the wheels turn that spin into ground speed.
 func average_wheel_speed() -> float:

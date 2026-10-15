@@ -9,9 +9,12 @@ id = &"engine_firework_rocket"
 display_name = "Rocket-Shaped Firework Tube"
 mass = 2.0
 durability = 20.0
-speed = 6.5
+speed = 16.1
 material_type = 1
-power = 6.5
+power = 16.1
+torque = 6.5
+drive_pattern = 3
+drive_time = 1.8
 
 [node name="EngineFireworkRocket" type="Node2D"]
 script = ExtResource("1")

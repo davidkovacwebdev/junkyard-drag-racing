@@ -48,6 +48,11 @@ var _excluded_bodies: Array[RID] = []
 var _visual_phase: float = 0.0
 var _visual_amp: float = 0.0
 
+## Steps or strokes at a cadence tuned to the engine's raw power rather than
+## rolling on a radius, so it takes the reference wheel's gearing as is.
+func drive_radius() -> float:
+	return CarAssembler.REFERENCE_WHEEL_RADIUS
+
 func _ready() -> void:
 	super()
 	_rng.randomize()
@@ -68,7 +73,7 @@ func _integrate_forces(state: PhysicsDirectBodyState2D) -> void:
 		return
 
 	_intro = move_toward(_intro, 1.0, step / maxf(intro_time, 0.001))
-	var power := absf(target_angular_velocity)
+	var power := absf(driven_target())
 	var drive_direction := signf(target_angular_velocity)
 
 	# Each half swing is one stroke: re-roll its cadence so no two strokes
@@ -80,7 +85,7 @@ func _integrate_forces(state: PhysicsDirectBodyState2D) -> void:
 		_splashed_this_stroke = false
 	_rate_mul = lerpf(_rate_mul, _rate_mul_target, clampf(4.0 * step, 0.0, 1.0))
 
-	var rate := power * stroke_rate_per_power * _rate_mul
+	var rate := gait_power(power) * stroke_rate_per_power * _rate_mul
 	_phase = fmod(_phase + rate * step, TAU)
 	var swing := swing_angle * _intro
 	var angle := sin(_phase) * swing
@@ -107,7 +112,7 @@ func _integrate_forces(state: PhysicsDirectBodyState2D) -> void:
 
 	if not _splashed_this_stroke:
 		_splashed_this_stroke = true
-		RaceCarAudio.play(self, &"paddle_splash", blade_world, -6.0)
+		RaceCarAudio.play(self, &"paddle_splash", blade_world, -10.0)
 
 ## How far below `from` the nearest thing is, or `blade_reach + 1.0` (a
 ## guaranteed miss) if nothing is within blade_reach.

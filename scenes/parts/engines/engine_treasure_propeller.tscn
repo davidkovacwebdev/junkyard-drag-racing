@@ -10,9 +10,12 @@ id = &"engine_treasure_propeller"
 display_name = "Treasure Boat Engine"
 mass = 14.0
 durability = 80.0
-speed = 6.0
+speed = 13.8
 material_type = 0
-power = 6.0
+power = 13.8
+torque = 6.0
+drive_pattern = 1
+gear_count = 3
 
 [node name="EngineTreasurePropeller" type="Node2D"]
 script = ExtResource("1")

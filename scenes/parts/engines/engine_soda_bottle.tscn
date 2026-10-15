@@ -9,9 +9,12 @@ id = &"engine_soda_bottle"
 display_name = "Soda Bottle Under Pressure"
 mass = 2.0
 durability = 18.0
-speed = 4.0
+speed = 6.3
 material_type = 2
-power = 4.0
+power = 6.3
+torque = 4.0
+drive_pattern = 3
+drive_time = 1.0
 
 [node name="EngineSodaBottle" type="Node2D"]
 script = ExtResource("1")
