@@ -71,6 +71,8 @@ var _upper: Array[Node2D] = []
 var _arms: Array = [[Vector2.ZERO, []], [Vector2.ZERO, []]]
 var _character_scale: Vector2
 var _previous_position: Vector2
+## Set once hitched to a body, so the walker hangs off the rope.
+var _slack: RopeWalkerSlack
 var _has_previous_position := false
 var _gait_phase := 0.0
 var _gait_blend := 0.0
@@ -166,11 +168,14 @@ func attach_to_body(body: CarBody) -> void:
 	var stand_in_body := Vector2(nose + lead_length + REAR_REACH * _runner.scale.x, ground)
 	_runner.position = transform.affine_inverse() * stand_in_body
 	_runner.rotation = -rotation
+	_slack = RopeWalkerSlack.new(_runner)
 	_update_lead()
 
 func _process(delta: float) -> void:
 	if delta <= 0.0:
 		return
+	if _slack != null:
+		_slack.update(delta)
 	var travelled := _forward_travel()
 	var speed := absf(travelled) / delta
 	_gait_blend = lerpf(_gait_blend, clampf(speed / FULL_GAIT_SPEED, 0.0, 1.0), clampf(6.0 * delta, 0.0, 1.0))

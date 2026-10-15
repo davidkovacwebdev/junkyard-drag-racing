@@ -74,6 +74,8 @@ const _LEG_PHASE_OFFSETS := [0.0, 0.0, PI, PI]
 const _GALLOP_PHASE_OFFSETS := [0.0, PI + 0.4, 0.4, PI]
 
 var _previous_position: Vector2
+## Set once hitched to a body, so the walker hangs off the rope.
+var _slack: RopeWalkerSlack
 var _has_previous_position := false
 var _gait_phase := 0.0
 var _gait_blend := 0.0
@@ -118,11 +120,14 @@ func attach_to_body(body: CarBody) -> void:
 	var stand_in_body := Vector2(nose + GAP_TO_BODY + REAR_REACH * _horse.scale.x, ground)
 	_horse.position = transform.affine_inverse() * stand_in_body
 	_horse.rotation = -rotation
+	_slack = RopeWalkerSlack.new(_horse)
 	_update_lead()
 
 func _process(delta: float) -> void:
 	if delta <= 0.0:
 		return
+	if _slack != null:
+		_slack.update(delta)
 	var travelled := _forward_travel()
 	var speed := absf(travelled) / delta
 	_gait_blend = lerpf(_gait_blend, clampf(speed / FULL_GAIT_SPEED, 0.0, 1.0), clampf(6.0 * delta, 0.0, 1.0))

@@ -40,10 +40,6 @@ color = Color(0.62, 0.5, 0.3, 1)
 position = Vector2(100, 0)
 scale = Vector2(0.85, 0.85)
 
-[node name="Shadow" type="Polygon2D" parent="Harness/Horse"]
-color = Color(0, 0, 0, 0.18)
-polygon = PackedVector2Array(-70, 0, -50, -5, 50, -5, 72, 0, 50, 5, -50, 5)
-
 [node name="Torso" type="Node2D" parent="Harness/Horse"]
 
 [node name="LegFarRear" type="Node2D" parent="Harness/Horse/Torso"]

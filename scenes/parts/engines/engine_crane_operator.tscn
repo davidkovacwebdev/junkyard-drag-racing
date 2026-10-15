@@ -43,10 +43,6 @@ color = Color(0.62, 0.5, 0.3, 1)
 [node name="Runner" type="Node2D" parent="Harness"]
 position = Vector2(60, 0)
 
-[node name="Shadow" type="Polygon2D" parent="Harness/Runner"]
-color = Color(0, 0, 0, 0.18)
-polygon = PackedVector2Array(-22, 0, -15, -4, 15, -4, 22, 0, 15, 4, -15, 4)
-
 [node name="Character" type="Node2D" parent="Harness/Runner"]
 scale = Vector2(0.5, 0.5)
 script = ExtResource("3")

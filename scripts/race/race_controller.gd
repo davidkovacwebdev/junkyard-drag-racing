@@ -20,7 +20,7 @@ signal race_ended(winner_name: String)
 ## finish, so the race is hard-capped regardless of how far anyone got.
 @export var max_duration: float = 60.0
 @export var camera_path: NodePath
-@export var finish_boost_force: float = 180000.0
+@export var finish_boost_force: float = 280000.0
 ## Y the camera locks to (at x = finish_x) once the first car crosses —
 ## should sit roughly centered across the lanes.
 @export var camera_focus_y: float = 575.0

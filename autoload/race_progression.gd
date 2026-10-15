@@ -34,8 +34,8 @@ const DID_NOT_FINISH := 999.0
 ## win, and then needs better parts to keep up.
 const STARTING_PAR_TIME := 32.7
 const PAR_TIME_PER_WIN := 0.93
-## Roughly the quickest thing in the roster; par never asks for more.
-const FASTEST_PAR_TIME := 18.6
+## Tier 4's par: near the top of the roster; par never asks for more.
+const FASTEST_PAR_TIME := 9.0
 ## Headliner's time range, as multiples of par.
 const HEADLINER_WINDOW := Vector2(0.85, 1.15)
 ## Filler rivals' time range, as multiples of the headliner's time.
@@ -44,16 +44,16 @@ const FILLER_WINDOW := Vector2(1.05, 1.6)
 ## Manual tiers offered at the drag strip's pre-race menu (DragStripMenu) —
 ## independent of `races_won`, so the player can pick how much to risk
 ## rather than always racing whatever the campaign ladder currently hands
-## out. Tier par times bracket the whole `races_won` range above (32.7 down
-## to the 18.6 floor), and entry fees roughly triple each step.
-const TIER_PAR_TIMES := { 1: 47.0, 2: 33.0, 3: 22.5, 4: 17.5 }
+## out. Tier par times span the whole `races_won` range above (32.7 down
+## to the 9.0 floor), and entry fees roughly triple each step.
+const TIER_PAR_TIMES := { 1: 32.0, 2: 22.0, 3: 14.0, 4: 9.0 }
 ## The hill's tier pars, at the same spots in the hill roster as the drag
 ## pars sit in the drag one.
 ## Tier 4's window only holds cars that reach the summit.
 const HILL_TIER_PAR_TIMES := { 1: 150.0, 2: 98.0, 3: 75.0, 4: 30.0 }
 ## The derby's tier pars, in weakness, at the same spots in the derby roster
 ## as the drag pars sit in the drag one.
-const DERBY_TIER_PAR_WEAKNESS := { 1: 1.2, 2: 0.74, 3: 0.55, 4: 0.45 }
+const DERBY_TIER_PAR_WEAKNESS := { 1: 1.2, 2: 0.64, 3: 0.5, 4: 0.4 }
 const TIER_ENTRY_FEES := { 1: 40, 2: 100, 3: 220, 4: 450 }
 ## Winning a paid-entry race pays back this many times the entry fee (so a
 ## win nets 3x the fee on top of getting it back); winning a bet (see
