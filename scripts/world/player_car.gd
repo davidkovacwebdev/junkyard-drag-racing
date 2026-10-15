@@ -1332,7 +1332,7 @@ func _process_interaction(delta: float) -> void:
 
 	# T at a race entrance starts a debug race with random cars (see DebugRace).
 	var test_pressed := _is_key_held(KEY_T)
-	if target != null and test_pressed and not _test_pressed_last:
+	if target != null and test_pressed and not _test_pressed_last and Cheats.enabled:
 		_enter_debug_race(target)
 	_test_pressed_last = test_pressed
 

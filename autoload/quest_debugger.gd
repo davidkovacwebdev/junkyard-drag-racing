@@ -1,5 +1,6 @@
 extends CanvasLayer
-## Developer quest board (autoload `QuestDebugger`): F5 lists every quest
+## Developer quest board (autoload `QuestDebugger`), only while cheats are on
+## (see `Cheats`): F5 lists every quest
 ## under res://quests with where it stands, so any one can be tried without
 ## playing up to it.
 ##
@@ -51,7 +52,7 @@ func _input(event: InputEvent) -> void:
 	if _open and (key == KEY_F5 or key == KEY_ESCAPE):
 		close()
 		get_viewport().set_input_as_handled()
-	elif not _open and key == KEY_F5 and not get_tree().paused and not Cutscenes.is_active():
+	elif not _open and key == KEY_F5 and Cheats.enabled and not get_tree().paused and not Cutscenes.is_active():
 		open()
 		get_viewport().set_input_as_handled()
 

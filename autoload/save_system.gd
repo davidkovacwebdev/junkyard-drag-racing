@@ -71,7 +71,7 @@ func _exit_tree() -> void:
 func _shortcut_input(event: InputEvent) -> void:
 	if not (event is InputEventKey and event.pressed and not event.echo):
 		return
-	if not (event.is_command_or_control_pressed() and event.shift_pressed):
+	if not (event.is_command_or_control_pressed() and event.shift_pressed) or not Cheats.enabled:
 		return
 	if event.physical_keycode == KEY_R:
 		get_viewport().set_input_as_handled()

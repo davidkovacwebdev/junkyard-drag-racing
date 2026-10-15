@@ -116,6 +116,7 @@ const NAMES: Array[StringName] = [
 	&"cart_rattle",
 	&"anchor_clonk",
 	&"anvil_clang",
+	&"pan_bonk",
 	&"bicycle_rattle",
 	&"tractor_thud",
 	&"hamster_squeak",
@@ -468,6 +469,7 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"cart_rattle": return _cart_rattle(rng)
 		&"anchor_clonk": return _anchor_clonk(rng)
 		&"anvil_clang": return _anvil_clang(rng)
+		&"pan_bonk": return _pan_bonk(rng)
 		&"bicycle_rattle": return _bicycle_rattle(rng)
 		&"tractor_thud": return _tractor_thud(rng)
 		&"hamster_squeak": return _hamster_squeak(rng)
@@ -1132,6 +1134,16 @@ static func _anchor_clonk(rng: RandomNumberGenerator) -> PackedFloat32Array:
 	for i in 3:
 		out = Synth.mix_into(out, _metal_ring(0.08, rng.randf_range(1900.0, 2800.0), 14.0, 0.025, rng),
 				0.05 + i * 0.04, 0.3 - i * 0.07)
+	return Synth.finish(out)
+
+## A hammer whacking sheet metal at the pan factory: a flat smack, then the
+## cheap tin wobbling out a hollow cartoon-frying-pan "BONNNG". Played higher
+## for the small hammer and lower for the sledge.
+static func _pan_bonk(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.thump(0.25, 380.0, 0.001, 0.05, rng)
+	Synth.mix_into(out, _metal_ring(0.9, 540.0, 70.0, 0.32, rng), 0.0, 0.6)
+	Synth.mix_into(out, _metal_ring(0.7, 1385.0, 60.0, 0.2, rng), 0.0, 0.35)
+	Synth.mix_into(out, _metal_ring(0.4, 2330.0, 45.0, 0.09, rng), 0.0, 0.2)
 	return Synth.finish(out)
 
 ## An anvil dropped on something: a dead, heavy thud, then the face singing

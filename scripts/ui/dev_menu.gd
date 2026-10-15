@@ -17,8 +17,8 @@ extends CanvasLayer
 ## world. In a menu or a building interior the list still browses; it just cannot
 ## drop anything, and says so.
 ##
-## Registered as the `DevMenu` autoload. On in every build, exports included, so
-## players can use the cheats too.
+## Registered as the `DevMenu` autoload. Every shortcut here does nothing until
+## cheats are switched on (see the `Cheats` autoload).
 
 ## The five things the menu hands out. Scrap is not a part, so it gets a tab of
 ## its own rather than a fake PartData.
@@ -124,7 +124,7 @@ func toggle() -> void:
 ## open rather than kept around: a part is a live catalogue Resource, and this is
 ## the cheapest way to be sure the menu agrees with the game about what exists.
 func open() -> void:
-	if not _enabled:
+	if not _enabled or not Cheats.enabled:
 		return
 	visible = true
 	_show_tab(_tab)
@@ -133,7 +133,7 @@ func close() -> void:
 	visible = false
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not _enabled:
+	if not _enabled or not Cheats.enabled:
 		return
 	if not (event is InputEventKey and event.pressed and not event.echo):
 		return
