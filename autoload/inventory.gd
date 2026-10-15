@@ -36,11 +36,11 @@ var garage_capacity: int = BASE_GARAGE_CAPACITY
 var garage_layout_seed: int = 0
 var owned_cars: Array[CarModelData] = []
 var selected_index: int = 0
-## Loose trash hauled out of roadside bins. Sold to the scrap dealer at the
-## junkyard for cash; until you sell it, it's just weight in the trunk.
+## Loose trash hauled out of roadside bins (or shredded parts). Spent at the
+## pan factory, or swapped for cash at the junkyard's recycler.
 var scrap: int = 0
-## Cash, from selling scrap. The junkyard's crane charges for a grab, and this
-## is what parts, repairs and race entry fees will draw on.
+## Cash, from races and the recycler. The junkyard's crane charges for a grab,
+## and this is what parts, repairs and race entry fees draw on.
 var money: int = 0
 ## Parts pulled out of the junkyard heap by the crane: owned, but not fitted to
 ## anything. Keeping them here (rather than only in the catalog) is what makes
@@ -230,15 +230,22 @@ func spend_money(amount: int) -> bool:
 func can_afford(amount: int) -> bool:
 	return amount <= 0 or money >= amount
 
-## Sell the whole scrap pile at `rate` cash per scrap. Empties `scrap`, banks
-## the cash, and returns what was earned so the caller can show it.
-func sell_scrap(rate: int = 1) -> int:
-	if scrap <= 0:
-		return 0
-	var earned := scrap * rate
-	scrap = 0
-	money += earned
-	return earned
+## Swaps scrap for cash, `scrap_per_dollar` scrap to the dollar, in whole
+## dollars only: at most `amount` scrap goes (rounded down to a whole dollar's
+## worth), never more than the pile. Returns the dollars earned.
+func sell_scrap(amount: int, scrap_per_dollar: int) -> int:
+	var dollars := mini(amount, scrap) / scrap_per_dollar
+	scrap -= dollars * scrap_per_dollar
+	money += dollars
+	return dollars
+
+## Buys `amount` scrap at `dollars_per_scrap` each. False (and nothing spent)
+## when the cash doesn't cover it.
+func buy_scrap(amount: int, dollars_per_scrap: int) -> bool:
+	if amount <= 0 or not spend_money(amount * dollars_per_scrap):
+		return false
+	scrap += amount
+	return true
 
 func _ready() -> void:
 	reset()

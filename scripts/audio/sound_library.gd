@@ -115,6 +115,7 @@ const NAMES: Array[StringName] = [
 	&"anchor_clonk",
 	&"anvil_clang",
 	&"pan_bonk",
+	&"shredder_grind",
 	&"bicycle_rattle",
 	&"tractor_thud",
 	&"hamster_squeak",
@@ -464,6 +465,7 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"anchor_clonk": return _anchor_clonk(rng)
 		&"anvil_clang": return _anvil_clang(rng)
 		&"pan_bonk": return _pan_bonk(rng)
+		&"shredder_grind": return _shredder_grind(rng)
 		&"bicycle_rattle": return _bicycle_rattle(rng)
 		&"tractor_thud": return _tractor_thud(rng)
 		&"hamster_squeak": return _hamster_squeak(rng)
@@ -1114,6 +1116,28 @@ static func _pan_bonk(rng: RandomNumberGenerator) -> PackedFloat32Array:
 	Synth.mix_into(out, _metal_ring(0.7, 1385.0, 60.0, 0.2, rng), 0.0, 0.35)
 	Synth.mix_into(out, _metal_ring(0.4, 2330.0, 45.0, 0.09, rng), 0.0, 0.2)
 	return Synth.finish(out)
+
+## The junkyard recycler eating a part: a buzzy motor revving up under a
+## grinding rasp, a rattle of metal crunches as the teeth bite, then it winds
+## down with a last clunk of scrap dropping out the bottom.
+static func _shredder_grind(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var duration := 1.2
+	var out := Synth.tones(duration, [[[0.0, 70.0], [0.2, 110.0], [0.9, 105.0], [duration, 60.0]]], {
+		square = 0.7,
+		amp = [[0.0, 0.0], [0.1, 0.5], [0.9, 0.5], [duration, 0.0]],
+	})
+	Synth.mix_into(out, Synth.noise_sweep(duration, {
+		freq = [[0.0, 900.0], [0.25, 2200.0], [0.85, 1800.0], [duration, 700.0]],
+		q = [[0.0, 1.4]],
+		amp = [[0.0, 0.0], [0.15, 0.9], [0.85, 0.7], [duration, 0.0]],
+	}, rng), 0.0, 0.6)
+	for i in 10:
+		var at := 0.15 + i * 0.07 + rng.randf_range(0.0, 0.03)
+		Synth.mix_into(out, Synth.thump(0.1, rng.randf_range(500.0, 1400.0), 0.001, 0.03, rng), at, 0.45)
+		if i % 3 == 0:
+			Synth.mix_into(out, _metal_ring(0.2, rng.randf_range(900.0, 1900.0), 25.0, 0.05, rng), at, 0.25)
+	Synth.mix_into(out, Synth.thump(0.2, 300.0, 0.002, 0.08, rng), 0.95, 0.6)
+	return Synth.finish(out, 0.75)
 
 ## An anvil dropped on something: a dead, heavy thud, then the face singing
 ## out a long high "tiiing" the way only an anvil does.

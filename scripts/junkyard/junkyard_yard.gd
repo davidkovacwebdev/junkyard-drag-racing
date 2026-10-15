@@ -29,9 +29,21 @@ extends Node2D
 @export var fence_color: Color = Color(0.4, 0.31, 0.22, 1)
 @export var fence_top_color: Color = Color(0.47, 0.37, 0.25, 1)
 
+const RECYCLER_SCENE := preload("res://scenes/junkyard/recycler.tscn")
+
 const RAIL_HEIGHTS: Array[float] = [20.0, 54.0, 86.0]
 const RAIL_THICKNESS := 5.0
 const POST_WIDTH := 10.0
+
+## The recycler goes in from here rather than junkyard.tscn, so an open copy
+## of the scene in the editor can't save over it.
+func _ready() -> void:
+	var yard := get_node_or_null(^"Yard")
+	if yard == null:
+		return
+	var recycler := RECYCLER_SCENE.instantiate() as Node2D
+	recycler.position = Recycler.SPOT
+	yard.add_child(recycler)
 
 func _draw() -> void:
 	var margin_vec := Vector2.ONE * margin

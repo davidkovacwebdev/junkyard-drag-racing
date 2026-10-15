@@ -278,7 +278,7 @@ func _expand_tooltip() -> String:
 		"Room for one more car, and a new shed by the garage.",
 	]
 	if not Inventory.can_afford(price):
-		lines.append("You have $%d. Sell scrap at the junkyard." % Inventory.money)
+		lines.append("You have $%d. Trade scrap at the junkyard recycler." % Inventory.money)
 	elif Inventory.garage_capacity + 1 < Inventory.MAX_GARAGE_CAPACITY:
 		lines.append("The one after costs $%d." % (price + Inventory.GARAGE_BAY_PRICE_STEP))
 	else:

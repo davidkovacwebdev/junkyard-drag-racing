@@ -15,8 +15,7 @@ extends RigidBody2D
 ## bank) works on them unchanged; the pen only has to notice it was one
 ## (`is PenBystander`) and call `claim()`. Once claimed they never come back to
 ## the pen on that save (WorldState's claimed set, the same one the hangar's
-## flying saucer uses). The man at the yard's counter stays where he is, so
-## there's still someone to sell scrap to.
+## flying saucer uses). The man at the yard's counter stays where he is.
 ##
 ## A real body standing upright (rotation locked), heavy and flat-footed so a
 ## glancing shell barely shifts them, and they yelp when it does. An oil drum

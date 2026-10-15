@@ -120,7 +120,7 @@ theme_override_constants/separation = 6
 layout_mode = 2
 mouse_filter = 1
 tooltip_text = "SCRAP
-Sell it to the scrap dealer at the Junkyard."
+Trade it for cash at the recycler in the Junkyard."
 theme_override_constants/separation = 6
 
 [node name="ScrapIcon" type="Control" parent="UI/Resources/ScrapReadout"]
@@ -219,6 +219,7 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 5
 theme_override_font_sizes/font_size = 22
+autowrap_mode = 3
 horizontal_alignment = 1
 vertical_alignment = 1
 visible = false

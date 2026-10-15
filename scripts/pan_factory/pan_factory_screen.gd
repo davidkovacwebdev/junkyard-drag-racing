@@ -10,13 +10,12 @@ extends CanvasLayer
 ## can only be squashed so far (PartDent.MIN_SHAPE); the status line shows how
 ## much metal is left, and at the floor the hammer just bounces off for free.
 ##
-## Only loose parts (Inventory.spare_parts) go on the bench; a part has to come
-## off the car in the garage first. Each blow is paid and saved the moment it
-## lands, so closing the screen can't lose anything.
+## Only loose parts go on the bench (LoosePartsPicker, shared with the
+## recycler). Each blow is paid and saved the moment it lands, so closing the
+## screen can't lose anything.
 
 signal closed
 
-const _PART_SLOT_SCENE := preload("res://scenes/garage/part_slot.tscn")
 const _HAMMER_KEYS := [KEY_1, KEY_2, KEY_3]
 const _HAMMERS := [PartDent.Hammer.TACK, PartDent.Hammer.CLAW, PartDent.Hammer.SLEDGE]
 ## Higher for the little hammer, lower for the sledge.
@@ -26,15 +25,6 @@ const BOARD_SIZE := Vector2(1060, 610)
 const BLOW_COOLDOWN := 0.18
 ## How far Q / E and the turn buttons turn the part.
 const TURN_DEGREES := 45.0
-const _CATEGORIES := [PartData.Category.BODY, PartData.Category.ENGINE, PartData.Category.WHEEL, PartData.Category.ACCESSORY]
-## The garage's filter tab names.
-const _CATEGORY_TABS := ["Car Body", "Engines", "Wheels", "Extras"]
-const _EMPTY_HINTS := {
-	PartData.Category.BODY: "No loose car bodies.\nTake one off in the garage,\nor dig one up at the junkyard.",
-	PartData.Category.ENGINE: "No loose engines.\nTake one off in the garage,\nor dig one up at the junkyard.",
-	PartData.Category.WHEEL: "No loose wheels.\nTake some off in the garage,\nor dig some up at the junkyard.",
-	PartData.Category.ACCESSORY: "No loose extras.\nTake some off in the garage,\nor dig some up at the junkyard.",
-}
 ## Which side the hammer's coming in from, by DentBench.swing_side.
 const _SWING_SIDE_NAMES := ["from above", "from the left", "from below", "from the right"]
 
@@ -56,22 +46,17 @@ const _SWING_SIDE_NAMES := ["from above", "from the left", "from below", "from t
 	"Keep goin', it's your scrap.",
 ])
 
-var _stash_rows: Dictionary = {}
 var _hammer: PartDent.Hammer = PartDent.Hammer.CLAW
-var _category: PartData.Category = PartData.Category.BODY
 var _blow_ready_at := 0
 
 var _line_label: Label
-var _stash_list: VBoxContainer
-var _stash_empty_label: Label
-var _stash_sort_button: SortButton
+var _picker: LoosePartsPicker
 var _bench: DentBench
 var _bench_label: Label
 var _stats_label: Label
 var _hammer_buttons: Array[ScrapButton] = []
 var _turn_buttons: Array[ScrapButton] = []
 var _side_button: ScrapButton
-var _category_buttons: Array[ScrapButton] = []
 var _leave_button: ScrapButton
 
 func _ready() -> void:
@@ -80,7 +65,7 @@ func _ready() -> void:
 	visible = false
 
 func open() -> void:
-	_clear_stash_rows()
+	_picker.clear_rows()
 	_bench.set_part(null)
 	_line_label.text = greet_line % hit_scrap
 	_refresh()
@@ -152,10 +137,6 @@ func _mirror_hammer() -> void:
 		clunk.pitch_scale *= 1.3
 	_refresh()
 
-func _show_category(category: PartData.Category) -> void:
-	_category = category
-	_refresh()
-
 ## A ratchety vice crank as the part's turned on the bench.
 func _turn_sound() -> void:
 	Sfx.play(&"part_unbolt", -12.0)
@@ -195,15 +176,16 @@ func _strike(point: Vector2, direction: Vector2) -> void:
 	_bench.set_part(part)
 	_line_label.text = hit_lines[randi() % hit_lines.size()]
 	# The part's icon is stale now, and its first dent gives it a new id.
-	_drop_stash_row(old_id)
-	_drop_stash_row(part.id)
+	_picker.drop_row(old_id)
+	_picker.drop_row(part.id)
 	SaveSystem.save_game()
 	_refresh()
 
 # --- Refreshing ----------------------------------------------------------------
 
 func _refresh() -> void:
-	_refresh_stash()
+	_picker.pinned = _bench.part()
+	_picker.refresh()
 	for i in _hammer_buttons.size():
 		_hammer_buttons[i].selected = _HAMMERS[i] == _hammer
 	var part := _bench.part()
@@ -211,8 +193,6 @@ func _refresh() -> void:
 			else "THE BENCH:  %s  (click to whack, wheel to turn)" % part.display_name.to_upper()
 	for button in _turn_buttons:
 		button.disabled = part == null
-	for i in _category_buttons.size():
-		_category_buttons[i].selected = _CATEGORIES[i] == _category
 	var metal := ""
 	if part != null:
 		var left := PartDent.shape_left(part)
@@ -221,65 +201,6 @@ func _refresh() -> void:
 	_stats_label.text = "%s %s%s: %d scrap a whack. You have %d.%s" % [
 		PartDent.NAMES[_hammer], _SWING_SIDE_NAMES[_bench.swing_side], ", mirrored" if _bench.mirrored else "",
 		hit_scrap, Inventory.scrap, metal]
-
-## One row per part id with how many loose copies are left, like the forge.
-func _refresh_stash() -> void:
-	var loose_by_id := _loose_by_id()
-	for id in _stash_rows.keys():
-		if not loose_by_id.has(id):
-			_stash_rows[id].visible = false
-	var ids := loose_by_id.keys()
-	ids.sort_custom(func(a: StringName, b: StringName) -> bool:
-		return PartSort.comes_before(loose_by_id[a][0], loose_by_id[b][0], _stash_sort_button.key))
-	for id in ids:
-		var copies: Array = loose_by_id[id]
-		var slot: PartSlot = _stash_rows.get(id)
-		if slot == null:
-			slot = _PART_SLOT_SCENE.instantiate()
-			_stash_list.add_child(slot)
-			slot.category = copies[0].category
-			slot.set_part(copies[0], copies.size())
-			slot.gui_input.connect(_on_stash_slot_input.bind(id))
-			_stash_rows[id] = slot
-		else:
-			slot.set_count(copies.size())
-		slot.visible = true
-	for i in ids.size():
-		_stash_list.move_child(_stash_rows[ids[i]], i)
-	_stash_empty_label.visible = ids.is_empty()
-	_stash_empty_label.text = _EMPTY_HINTS[_category]
-
-func _drop_stash_row(id: StringName) -> void:
-	var slot: PartSlot = _stash_rows.get(id)
-	if slot != null:
-		slot.queue_free()
-		_stash_rows.erase(id)
-
-func _clear_stash_rows() -> void:
-	for slot in _stash_rows.values():
-		slot.queue_free()
-	_stash_rows.clear()
-
-## Loose parts of the picked kind grouped as {id: [PartData, ...]}, the one on
-## the bench first.
-func _loose_by_id() -> Dictionary:
-	var grouped := {}
-	for part in Inventory.spare_parts:
-		if part == null or part.category != _category:
-			continue
-		if not grouped.has(part.id):
-			grouped[part.id] = []
-		if part == _bench.part():
-			grouped[part.id].push_front(part)
-		else:
-			grouped[part.id].append(part)
-	return grouped
-
-func _on_stash_slot_input(event: InputEvent, id: StringName) -> void:
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		var copies: Array = _loose_by_id().get(id, [])
-		if not copies.is_empty():
-			_put_on_bench(copies[0])
 
 # --- Layout --------------------------------------------------------------------
 
@@ -321,39 +242,12 @@ func _build() -> void:
 	_line_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	board.add_child(_line_label)
 
-	var tabs := HBoxContainer.new()
-	tabs.position = Vector2(26, 82)
-	tabs.add_theme_constant_override("separation", 8)
-	board.add_child(tabs)
-	for i in _CATEGORIES.size():
-		var tab := _button(_CATEGORY_TABS[i], Vector2(104, 42), [-2.0, 1.5, -1.0, 2.0][i], 101 + i)
-		tab.font_size = 17
-		tab.pressed.connect(_show_category.bind(_CATEGORIES[i]))
-		tabs.add_child(tab)
-		_category_buttons.append(tab)
-	var stash_title := _label("LOOSE PARTS (click to bench)", 16, UiPalette.TEXT_LIGHT)
-	stash_title.position = Vector2(28, 142)
-	board.add_child(stash_title)
-	_stash_sort_button = SortButton.new()
-	_stash_sort_button.font_size = 15
-	_stash_sort_button.tilt_degrees = -1.0
-	_stash_sort_button.jitter_seed = 93
-	_stash_sort_button.position = Vector2(296, 132)
-	_stash_sort_button.size = Vector2(170, 34)
-	_stash_sort_button.sort_changed.connect(func(_key: PartSort.Key) -> void: _refresh_stash())
-	board.add_child(_stash_sort_button)
-	var scroll := ScrollContainer.new()
-	scroll.position = Vector2(26, 174)
-	scroll.size = Vector2(440, BOARD_SIZE.y - 204)
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	board.add_child(scroll)
-	_stash_list = VBoxContainer.new()
-	_stash_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_stash_list.add_theme_constant_override("separation", 12)
-	scroll.add_child(_stash_list)
-	_stash_empty_label = _label("No loose parts.\nTake some off in the garage,\nor dig some up at the junkyard.", 18, UiPalette.TEXT_LIGHT)
-	_stash_empty_label.position = Vector2(40, 196)
-	board.add_child(_stash_empty_label)
+	_picker = LoosePartsPicker.new()
+	_picker.title = "LOOSE PARTS (click to bench)"
+	_picker.position = Vector2(26, 82)
+	_picker.size = Vector2(440, BOARD_SIZE.y - 112)
+	_picker.part_picked.connect(_put_on_bench)
+	board.add_child(_picker)
 
 	var right := VBoxContainer.new()
 	right.position = Vector2(496, 88)

@@ -1,13 +1,11 @@
 class_name ScrapDealer
 extends StaticBody2D
-## The junkyard's buyer, who also runs the crane: Vern, Grandpa's old crane
+## The man at the junkyard counter, who runs the crane: Vern, Grandpa's old crane
 ## buddy, or once the claw has had him, whichever crane worker is on shift
 ## (CraneWorkerGenerator.current_operator(), the same guy standing in the pen). Drive up to him and press E (or left-click) for the dialog,
-## which is where the two things worth doing at the yard live:
-##
-##   1. sell the whole scrap pile for cash,
-##   2. point the player at the crane pen behind the yard, where they drive the
-##      crane themselves and keep whatever the jaws come up with.
+## which points the player at the crane pen behind the yard, where they drive
+## the crane themselves and keep whatever the jaws come up with. Scrap isn't
+## his business any more: the Recycler in the yard swaps it for cash.
 ##
 ## The digging itself doesn't happen here: he's the man with the money, the pen
 ## is the machine. His crane button is a door to
@@ -40,8 +38,6 @@ extends StaticBody2D
 ## still one `instantiate()` for anyone building a second yard.
 
 @export var display_name: String = "Scrap Dealer"
-## Cash paid per unit of scrap. 1 keeps the loot numbers readable.
-@export var money_per_scrap: int = 1
 
 @export_group("Crane")
 ## What his sign says a dig costs. Advertising only — the pen's own crane
@@ -55,9 +51,7 @@ extends StaticBody2D
 @export var dialog_range: float = 300.0
 
 @export_group("Lines")
-@export var empty_line: String = "Nothin' worth sellin', friend."
-@export var sold_line: String = "That's %d scrap - here's $%d."
-@export var greet_line: String = "Buyin' scrap. Or take the crane out back and dig for somethin' better yourself."
+@export var greet_line: String = "Scrap goes in the recycler over there. Or take the crane out back and dig for somethin' better yourself."
 ## Said while the crane is still locked (no "Claw Machine" yet).
 @export var locked_line: String = "Buyin' scrap. The crane? Not for rent, pal. Not to strangers."
 ## Said while the crane is down after it came down on Grandpa (CraneWreck).
@@ -90,11 +84,6 @@ const DIGGER_SCENE_PATH := "res://cutscenes/digger_reveal.tres"
 ## Once the treasure's dug up, the digger's his to lend: this much a go.
 @export var digger_rent: int = 100
 
-const POPUP_RISE := 54.0
-const POPUP_LIFETIME := 1.4
-
-## Where the Popup label rests, captured from the scene in _ready().
-var _popup_home: Vector2 = Vector2.ZERO
 ## The car that opened the dialog, so it can be closed when that car drives off.
 var _actor: Node2D = null
 
@@ -105,9 +94,6 @@ func _ready() -> void:
 	var operator := CraneWorkerGenerator.current_operator()
 	_character.set_character(operator)
 	display_name = operator.display_name
-	var popup := get_node_or_null("Popup") as Label
-	if popup != null:
-		_popup_home = popup.position
 	_close()
 
 func _process(_delta: float) -> void:
@@ -124,16 +110,11 @@ func get_interact_prompt() -> String:
 	return "%s: E or left-click to talk (%d scrap, $%d)" % [
 		display_name, Inventory.scrap, Inventory.money]
 
-## Called by PlayerCar on E or a left-click. Opens the dialog rather than
-## trading straight away, because there are two things to do here now.
+## Called by PlayerCar on E or a left-click. Opens the dialog.
 func interact(actor: Node = null) -> void:
 	if actor != null:
 		_actor = actor as Node2D
 	_open()
-
-func _on_sell_pressed() -> void:
-	sell()
-	_refresh()
 
 ## Send the player to the crane. Nothing is charged here — the pen's crane bills
 ## per dig, and the money is no good to the player standing in this yard
@@ -178,15 +159,10 @@ func _close() -> void:
 	if is_instance_valid(_dialog):
 		_dialog.close()
 
-## Reflect the world in the dialog: what he'd pay for the scrap, what a dig
-## costs, and what the player is carrying.
+## Reflect the world in the dialog: what a dig costs, and what the player is
+## carrying.
 func _refresh(animate: bool = false) -> void:
-	var options := [
-		CharacterDialog.Option.new("Sell scrap (%d) for $%d" % [
-				Inventory.scrap, Inventory.scrap * money_per_scrap],
-				_on_sell_pressed, Inventory.scrap <= 0),
-		_crane_option(),
-	]
+	var options := [_crane_option()]
 	if TreasureRumors.can_ask():
 		options.append(TreasureRumors.option(_dialog, TreasureRumors.SCRAP_DEALER))
 	if Quests.has_quest(DETECTOR_QUEST):
@@ -274,33 +250,3 @@ func _hand_back_detector() -> void:
 
 func _set_line(text: String) -> void:
 	_dialog.say(text)
-
-## Turn the player's whole scrap pile into cash. Returns the money earned.
-func sell() -> int:
-	if Inventory.scrap <= 0:
-		Sfx.play(&"denied", -6.0, 0.0)
-		_show_popup(empty_line)
-		_set_line(empty_line)
-		return 0
-	var sold := Inventory.scrap
-	var earned := Inventory.sell_scrap(money_per_scrap)
-	Sfx.play(&"cash_register", -4.0, 0.0)
-	_show_popup(sold_line % [sold, earned])
-	_set_line(sold_line % [sold, earned])
-	return earned
-
-## Floating text over his head, same drift-and-fade as a looted trash prop.
-func _show_popup(text: String) -> void:
-	var popup := get_node_or_null("Popup") as Label
-	if popup == null:
-		return
-	popup.text = text
-	popup.visible = true
-	popup.position = _popup_home
-	popup.modulate.a = 1.0
-	var tween := create_tween()
-	tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	tween.tween_property(popup, "position:y", _popup_home.y - POPUP_RISE, POPUP_LIFETIME)
-	tween.parallel().tween_property(
-			popup, "modulate:a", 0.0, POPUP_LIFETIME * 0.6).set_delay(POPUP_LIFETIME * 0.35)
-	tween.tween_callback(func() -> void: popup.visible = false)
