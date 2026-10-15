@@ -28,6 +28,8 @@ const BACK_LAYER := &"ForgeScrapBack"
 ## follow the bent art, by path from the root.
 @export var marker_paths: PackedStringArray = PackedStringArray()
 @export var marker_positions: PackedVector2Array = PackedVector2Array()
+## How many hammer blows the pan factory has dented in (see PartDent).
+@export var dents: int = 0
 ## Replaces the root's CollisionPolygon2D when set (a mashed wheel rolls on
 ## its new silhouette).
 @export var collision_polygon: PackedVector2Array = PackedVector2Array()

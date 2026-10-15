@@ -22,6 +22,7 @@ enum Kind {
 	BRIDGE,
 	DIG_SPOT,
 	HELICOPTER,
+	PAN_FACTORY,
 }
 
 @export var kind: Kind = Kind.HOME

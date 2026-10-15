@@ -253,7 +253,7 @@ static func nickname(part: PartData) -> String:
 
 static func _mash_look(base: PartData, donors: Array[PartData], category: int, rng: RandomNumberGenerator) -> ForgedLook:
 	var root := PartFactory.instantiate(base)
-	var anchor := _find_anchor(root, base)
+	var anchor := find_anchor(root, base)
 	var collision: CollisionPolygon2D = null
 	var rolls_on_art: bool = category == PartData.Category.WHEEL and root.get_script() == _CAR_WHEEL_SCRIPT
 	if anchor == root and (rolls_on_art or category == PartData.Category.BODY):
@@ -457,7 +457,7 @@ static func _root_collision(root: Node) -> CollisionPolygon2D:
 ## The node the base's art is gathered around: the one holding the most art
 ## directly (a wheel's root, a horse's torso). Scrap layers from an earlier
 ## forging are left out, and a forged base keeps the anchor it already had.
-static func _find_anchor(root: Node, part: PartData) -> Node:
+static func find_anchor(root: Node, part: PartData) -> Node:
 	if part.forge != null:
 		var kept := root.get_node_or_null(part.forge.anchor_path)
 		if kept != null:

@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/pan_factory.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/world/minimap_marker.gd" id="2"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pan"]
+resource_local_to_scene = true
+size = Vector2(280, 190)
+
+[node name="PanFactory" type="StaticBody2D"]
+script = ExtResource("1")
+size = Vector2(280, 190)
+display_name = "Pan Factory"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_pan")
+
+[node name="MinimapMarker" type="Node2D" parent="."]
+script = ExtResource("2")
+kind = 16

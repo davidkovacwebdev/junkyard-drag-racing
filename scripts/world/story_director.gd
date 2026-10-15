@@ -24,6 +24,9 @@ const SMOKER_SPOT := OPENING_CAR_SPOT + Vector2(-450.0, 120.0)
 const CHAD_HOUSE := preload("res://buildings/house_06.tres")
 const CHAD_HOUSE_SPOT := Vector2(-17700.0, 1640.0)
 const CHAD_SPOT := Vector2(-17380.0, 1760.0)
+## The pan factory, down the shore south of where the bridge lands.
+const PAN_FACTORY_SCENE := preload("res://scenes/world/pan_factory.tscn")
+const PAN_FACTORY_SPOT := Vector2(-17450.0, 2750.0)
 const BUILDING_SCENE := preload("res://scenes/world/composed_building.tscn")
 ## The beggar sits outside the graveyard's front fence, right of its gate.
 const BEGGAR_FROM_GATE := Vector2(170.0, 46.0)
@@ -65,7 +68,8 @@ func _ready() -> void:
 	await get_tree().process_frame
 	Cutscenes.play_once(_make_opening())
 
-## Chad's house on the island past the west bridge, and Chad. Added from here
+## Chad's house on the island past the west bridge, Chad, and the pan
+## factory down the shore. Added from here
 ## rather than placed in main.tscn.
 func _place_chad(sortables: Node) -> void:
 	var house := BUILDING_SCENE.instantiate() as ComposedBuilding
@@ -77,6 +81,9 @@ func _place_chad(sortables: Node) -> void:
 	chad.name = "Chad"
 	chad.position = CHAD_SPOT
 	sortables.add_child.call_deferred(chad)
+	var factory := PAN_FACTORY_SCENE.instantiate() as Node2D
+	factory.position = PAN_FACTORY_SPOT
+	sortables.add_child.call_deferred(factory)
 
 ## The beggar by the graveyard gate (BeggarNpc), once the gate is in the tree.
 func _place_beggar(sortables: Node) -> void:

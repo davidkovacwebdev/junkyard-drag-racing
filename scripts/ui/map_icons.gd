@@ -213,6 +213,12 @@ static func draw_landmark(canvas: CanvasItem, kind: MinimapMarker.Kind, at: Vect
 				at + Vector2(-unit * 1.1, -unit * 1.05), at + Vector2(unit * 0.9, -unit * 0.85),
 				at + Vector2(unit * 0.9, -unit * 0.5), at + Vector2(-unit * 1.1, -unit * 0.7),
 			]), HILL_ROCK)
+		MinimapMarker.Kind.PAN_FACTORY:
+			# A frying pan: the round pan, its handle off to the right, a yolk.
+			canvas.draw_colored_polygon(FlatProps.sliver(at + Vector2(unit * 0.5, 0.0),
+					at + Vector2(unit * 1.4, -unit * 0.4), unit * 0.4), PanFactory.PAN_HANDLE)
+			canvas.draw_colored_polygon(FlatProps.octagon(at + Vector2(-unit * 0.2, 0.0), unit * 0.85, unit * 0.75), PanFactory.PAN)
+			canvas.draw_colored_polygon(FlatProps.octagon(at + Vector2(-unit * 0.2, 0.0), unit * 0.35, unit * 0.32), PanFactory.YOLK)
 		MinimapMarker.Kind.GARBAGE_TRUCK:
 			# The big green box, the cab in front of it, and the wheels under both.
 			canvas.draw_colored_polygon(PackedVector2Array([
