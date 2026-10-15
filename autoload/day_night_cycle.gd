@@ -16,11 +16,11 @@ const TRANSITION := 60.0    ## 1 minute either side of each night boundary.
 const NIGHT_START := 21.0 * SECONDS_PER_HOUR ## 9 PM.
 const NIGHT_END := 8.0 * SECONDS_PER_HOUR    ## 8 AM, the following morning.
 
-## Testing aid: hold K to fast-forward the clock 24x so a full day/night
+## Testing aid (only while `Cheats` are on): hold K to fast-forward the clock 24x so a full day/night
 ## cycle takes 30 seconds instead of 12 minutes.
 const DEBUG_FAST_FORWARD_KEY := KEY_K
 const DEBUG_FAST_FORWARD_SCALE := 24.0
-## Testing aid: Ctrl+K skips straight to the next morning (START_TIME).
+## Testing aid (only while `Cheats` are on): Ctrl+K skips straight to the next morning (START_TIME).
 const DEBUG_SKIP_TO_MORNING_KEY := KEY_K
 
 ## Opening hours, [BUSINESS_OPEN_HOUR, BUSINESS_CLOSE_HOUR), kept by every
@@ -41,7 +41,8 @@ var day: int = 1
 var time_of_day: float = START_TIME ## Seconds into the current day, [0, DAY_LENGTH).
 
 func _process(delta: float) -> void:
-	var fast_forwarding := Input.is_physical_key_pressed(DEBUG_FAST_FORWARD_KEY) and not Input.is_physical_key_pressed(KEY_CTRL)
+	var fast_forwarding := Cheats.enabled and Input.is_physical_key_pressed(DEBUG_FAST_FORWARD_KEY) \
+			and not Input.is_physical_key_pressed(KEY_CTRL)
 	var scale := DEBUG_FAST_FORWARD_SCALE if fast_forwarding else 1.0
 	time_of_day += delta * scale
 	if time_of_day >= DAY_LENGTH:
@@ -51,7 +52,7 @@ func _process(delta: float) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	var key_event := event as InputEventKey
-	if key_event != null and key_event.pressed and not key_event.echo and key_event.ctrl_pressed \
+	if key_event != null and Cheats.enabled and key_event.pressed and not key_event.echo and key_event.ctrl_pressed \
 			and key_event.physical_keycode == DEBUG_SKIP_TO_MORNING_KEY:
 		skip_to_next_morning()
 		get_viewport().set_input_as_handled()

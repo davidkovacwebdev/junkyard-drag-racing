@@ -60,7 +60,7 @@ const FAIR_COVER_MAX := 0.45
 ## new day's fair-weather roll at midnight).
 const COVER_FADE_TIME := 6.0
 
-## Testing/authoring aid: hold J to cycle the weather auto -> raining -> dry.
+## Testing/authoring aid (only while `Cheats` are on): hold J to cycle the weather auto -> raining -> dry.
 ## Same idea as DayNightCycle's K fast-forward.
 const DEBUG_TOGGLE_KEY := KEY_J
 
@@ -212,7 +212,7 @@ func _cloud_cover_target() -> float:
 
 ## Hold J to step the override auto -> forced dry -> forced rain -> auto.
 func _handle_debug_toggle() -> void:
-	var held := Input.is_physical_key_pressed(DEBUG_TOGGLE_KEY)
+	var held := Cheats.enabled and Input.is_physical_key_pressed(DEBUG_TOGGLE_KEY)
 	if held and not _toggle_held:
 		_override = ((_override + 1) + 1) % 3 - 1
 	_toggle_held = held

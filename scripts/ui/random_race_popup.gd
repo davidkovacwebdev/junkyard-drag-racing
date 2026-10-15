@@ -96,7 +96,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		else:
 			_close()
 		return
-	if not event.is_command_or_control_pressed() or event.shift_pressed or event.alt_pressed:
+	if not Cheats.enabled or not event.is_command_or_control_pressed() or event.shift_pressed or event.alt_pressed:
 		return
 	match event.physical_keycode:
 		OPEN_KEY:
