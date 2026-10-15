@@ -212,6 +212,8 @@ func _snapshot() -> SaveData:
 	data.funeral_window_left = Funeral.window_left
 	data.funeral_held = Funeral.held
 	data.races_won = RaceProgression.races_won
+	data.ramp_best_distance = RaceProgression.ramp_best_distance
+	data.ramp_best_silhouette = RaceProgression.ramp_best_silhouette.duplicate()
 	data.day = DayNightCycle.day
 	data.time_of_day = DayNightCycle.time_of_day
 	data.seen_cutscenes = Cutscenes.get_seen()
@@ -288,6 +290,7 @@ func _apply_save(data: SaveData) -> void:
 	Funeral.restore(data.funeral_at, data.funeral_attended, data.funeral_window_left,
 			data.funeral_held)
 	RaceProgression.races_won = data.races_won
+	RaceProgression.set_ramp_best(data.ramp_best_distance, data.ramp_best_silhouette)
 	DayNightCycle.day = data.day
 	DayNightCycle.time_of_day = data.time_of_day
 	Cutscenes.restore_seen(data.seen_cutscenes)

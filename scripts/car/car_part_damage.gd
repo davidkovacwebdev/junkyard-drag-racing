@@ -23,6 +23,10 @@ const GROUP := &"car_part_damage"
 
 const IMPACT_VELOCITY_THRESHOLD := 200.0
 const DAMAGE_PER_MOMENTUM := 0.006
+## Scales every part's durability in play, leaving its rated stat untouched.
+const GLOBAL_DURABILITY_MULTIPLIER := 1.25
+## Landings and ground knocks hurt this much of a car-on-car hit of the same force.
+const GROUND_HIT_DAMAGE_SCALE := 0.6
 ## A hit this hard (Δv) or harder knocks at the top of KNOCK_VOLUME_DB, one
 ## just over the threshold at the bottom. A knock is a small detail in the mix
 ## (see the sound-design skill's levels): kept well under a part breaking
@@ -55,7 +59,7 @@ var _prev_velocity := Vector2.ZERO
 func _ready() -> void:
 	add_to_group(GROUP)
 	if part_data != null:
-		max_durability = part_data.durability * durability_multiplier
+		max_durability = part_data.durability * durability_multiplier * GLOBAL_DURABILITY_MULTIPLIER
 	current_durability = max_durability
 
 ## The tracker on `part`, or null if it has none.
@@ -89,9 +93,11 @@ func _physics_process(_delta: float) -> void:
 	impacted.emit(delta_v)
 	var momentum := target.mass * (delta_v - IMPACT_VELOCITY_THRESHOLD)
 	var total_absorption := absorption
-	if ground_absorption > 0.0 and _is_ground_hit():
+	var damage_scale := 1.0
+	if _is_ground_hit():
 		total_absorption = 1.0 - (1.0 - absorption) * (1.0 - ground_absorption)
-	apply_damage(momentum * DAMAGE_PER_MOMENTUM * (1.0 - total_absorption))
+		damage_scale = GROUND_HIT_DAMAGE_SCALE
+	apply_damage(momentum * DAMAGE_PER_MOMENTUM * damage_scale * (1.0 - total_absorption))
 	var strength := clampf(inverse_lerp(IMPACT_VELOCITY_THRESHOLD, LOUDEST_IMPACT_VELOCITY, delta_v), 0.0, 1.0)
 	var knock_db := lerpf(KNOCK_VOLUME_DB.x, KNOCK_VOLUME_DB.y, strength)
 	if not is_broken and knock_gate.allow(db_to_linear(knock_db)):

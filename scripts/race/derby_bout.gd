@@ -37,7 +37,7 @@ const STUCK_SPEED := 30.0
 const STUCK_TIME := 7.0
 ## Share of each part's durability it enters the pit with. Head-on hits in
 ## one line are slow, so at full strength nothing ever breaks.
-const DERBY_DURABILITY := 0.3
+const DERBY_DURABILITY := 0.18
 const KILL_CREDIT_TIME := 5.0
 
 class Driver:

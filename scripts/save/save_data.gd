@@ -24,6 +24,8 @@ extends Resource
 ## looted ids here and are upgraded on load.
 @export var looted: Dictionary = {}
 @export var races_won: int = 0
+@export var ramp_best_distance: float = 0.0
+@export var ramp_best_silhouette: Array[PackedVector2Array] = []
 @export var day: int = 1
 @export var time_of_day: float = 0.0
 ## One-time cutscenes already played (see Cutscenes.play_once()).

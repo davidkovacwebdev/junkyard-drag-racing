@@ -134,6 +134,11 @@ var menu_course: Course = Course.DRAG
 var menu_venue_rules: String = ""
 
 var races_won: int = 0
+## The ramp jump's personal best in metres past the lip (0 = none yet), and
+## the car that set it, as its drawn polygons where it came to rest, relative
+## to its body.
+var ramp_best_distance: float = 0.0
+var ramp_best_silhouette: Array[PackedVector2Array] = []
 var _rosters := {}
 
 func _ready() -> void:
@@ -143,6 +148,15 @@ func _ready() -> void:
 
 func reset() -> void:
 	races_won = 0
+	clear_ramp_best()
+
+func set_ramp_best(distance: float, silhouette: Array[PackedVector2Array]) -> void:
+	ramp_best_distance = distance
+	ramp_best_silhouette = silhouette
+
+func clear_ramp_best() -> void:
+	ramp_best_distance = 0.0
+	ramp_best_silhouette = []
 
 func record_race(player_won: bool) -> void:
 	if player_won:
