@@ -5,8 +5,12 @@ extends Control
 ## the shape it'll actually bump with. A yellow blob under the mouse shows the
 ## picked hammer's reach; clicking swings it (`struck`, in the part's space).
 ##
-## The hammer always comes straight down on screen, so turning the part (`turn`,
-## or the mouse wheel over the bench) picks which side of it gets dented.
+## The hammer swings in from one side of the screen (`swing_side`: from above
+## at first, `turn_hammer` moves it a quarter turn round), handle off to the
+## right so the head lands a little leftward; `mirrored` puts the handle on the
+## other side and the blow lands the other way. Turning the part (`turn`, or the
+## mouse wheel over the bench) and the hammer picks which side of it gets dented
+## and which way.
 
 signal struck(point: Vector2, direction: Vector2)
 ## The mouse wheel turned the part.
@@ -15,6 +19,14 @@ signal turned
 ## How far one notch of the mouse wheel turns the part.
 const WHEEL_TURN_DEGREES := 15.0
 const TURN_TIME := 0.15
+## Which way the hammer pushes on screen for each `swing_side` (from above,
+## from the left, from below, from the right), and how far round the hammer
+## art is turned to come in from there.
+const SWING_PUSH: Array[Vector2] = [Vector2.DOWN, Vector2.RIGHT, Vector2.UP, Vector2.LEFT]
+const SWING_ANGLE: Array[float] = [0.0, -PI / 2.0, PI, PI / 2.0]
+## How far off straight the blow lands, toward the side away from the handle
+## (the head's still travelling round its arc when it hits).
+const SWING_TILT := deg_to_rad(30.0)
 
 const FIT := 0.78
 const MAX_ZOOM := 4.0
@@ -32,6 +44,18 @@ const HEAD_SIZE := {
 var hammer: PartDent.Hammer = PartDent.Hammer.CLAW:
 	set(value):
 		hammer = value
+		queue_redraw()
+
+## Which side the hammer comes in from, an index into SWING_PUSH.
+var swing_side := 0:
+	set(value):
+		swing_side = posmod(value, SWING_PUSH.size())
+		queue_redraw()
+
+## The handle's on the left instead, and the blow lands the other way.
+var mirrored := false:
+	set(value):
+		mirrored = value
 		queue_redraw()
 
 var _part: PartData
@@ -96,6 +120,18 @@ func turn(degrees: float) -> void:
 	_turn_tween.tween_property(self, "_angle", _target_angle, TURN_TIME) \
 			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
+## Moves the hammer a quarter turn round to the next side.
+func turn_hammer() -> void:
+	swing_side += 1
+
+## Swaps the handle to the other side.
+func mirror_hammer() -> void:
+	mirrored = not mirrored
+
+## Which way the blow pushes, on screen.
+func screen_push() -> Vector2:
+	return SWING_PUSH[swing_side].rotated(-SWING_TILT if mirrored else SWING_TILT)
+
 func _stop_turning() -> void:
 	if _turn_tween != null:
 		_turn_tween.kill()
@@ -115,7 +151,8 @@ func swing(point: Vector2) -> void:
 func _jolt() -> void:
 	var size_kick: float = HEAD_SIZE[hammer].x / 6.0
 	var tween := create_tween()
-	tween.tween_property(self, "_shake", Vector2(randf_range(-0.4, 0.4), 1.0) * size_kick, 0.03)
+	var kick := (screen_push() + screen_push().orthogonal() * randf_range(-0.3, 0.3)) * size_kick
+	tween.tween_property(self, "_shake", kick, 0.03)
 	tween.tween_property(self, "_shake", Vector2.ZERO, 0.18).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
 
 func _process(_delta: float) -> void:
@@ -129,8 +166,8 @@ func _gui_input(event: InputEvent) -> void:
 		match event.button_index:
 			MOUSE_BUTTON_LEFT:
 				accept_event()
-				var down := _xform.affine_inverse().basis_xform(Vector2.DOWN).normalized()
-				struck.emit(_xform.affine_inverse() * event.position, down)
+				var push := _xform.affine_inverse().basis_xform(screen_push()).normalized()
+				struck.emit(_xform.affine_inverse() * event.position, push)
 			MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN:
 				accept_event()
 				turn(WHEEL_TURN_DEGREES * (1.0 if event.button_index == MOUSE_BUTTON_WHEEL_DOWN else -1.0))
@@ -169,7 +206,8 @@ func _draw() -> void:
 
 ## The hammer from the side: a handle running off to the right and the head
 ## across its end, face down on the spot it lands. It pivots on the hand end,
-## raised while idle and coming down as `_swing` falls to 0.
+## raised while idle and coming down as `_swing` falls to 0. The whole thing
+## is turned to come in from `swing_side`, and flipped when `mirrored`.
 func _draw_hammer() -> void:
 	if _swing_at == Vector2.ZERO and not _hovering:
 		return
@@ -177,7 +215,8 @@ func _draw_hammer() -> void:
 	var lift := _swing if _swing_at != Vector2.ZERO else 1.0
 	var head: Vector2 = HEAD_SIZE[hammer]
 	var hand := Vector2(head.x * 2.2, -head.x / 2.0)
-	draw_set_transform(at + hand, 0.9 * lift)
+	var flip := Transform2D(0.0, Vector2(-1.0 if mirrored else 1.0, 1.0), 0.0, Vector2.ZERO)
+	draw_set_transform_matrix(Transform2D(SWING_ANGLE[swing_side], at) * flip * Transform2D(0.9 * lift, hand))
 	draw_colored_polygon(FlatProps.sliver(Vector2(0.0, -head.x / 2.0) - hand, Vector2.ZERO,
 			maxf(6.0, head.y * 0.45)), HANDLE)
 	draw_rect(Rect2(Vector2(-head.y / 2.0, -head.x) - hand, Vector2(head.y, head.x)), UiPalette.STEEL_BASE)

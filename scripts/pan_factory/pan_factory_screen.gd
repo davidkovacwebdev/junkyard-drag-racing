@@ -1,10 +1,14 @@
 class_name PanFactoryScreen
 extends CanvasLayer
-## Inside the pan factory: the player's loose parts on the left, the workbench
-## on the right. Click a part to put it on the bench, turn it (Q / E, the
-## buttons or the mouse wheel) so the side to bend faces up, pick one of three
-## hammers and click the part to whack a dent into it (PartDent), $50 a blow. Dents bend
-## the part's collision outline too, so a bashed part handles differently.
+## Inside the pan factory: the player's loose parts on the left, filtered by
+## kind and sorted like the garage's, the workbench on the right. Click a part
+## to put it on the bench, turn it (Q / E, the buttons or the mouse wheel), pick
+## which side the hammer comes in from (R), which way it swings (T, mirrors it)
+## and which of three hammers, and click
+## the part to whack a dent into it (PartDent), 20 scrap a blow. Dents bend the
+## part's collision outline too, so a bashed part handles differently. A part
+## can only be squashed so far (PartDent.MIN_SHAPE); the status line shows how
+## much metal is left, and at the floor the hammer just bounces off for free.
 ##
 ## Only loose parts (Inventory.spare_parts) go on the bench; a part has to come
 ## off the car in the garage first. Each blow is paid and saved the moment it
@@ -22,25 +26,39 @@ const BOARD_SIZE := Vector2(1060, 610)
 const BLOW_COOLDOWN := 0.18
 ## How far Q / E and the turn buttons turn the part.
 const TURN_DEGREES := 45.0
+const _CATEGORIES := [PartData.Category.BODY, PartData.Category.ENGINE, PartData.Category.WHEEL, PartData.Category.ACCESSORY]
+## The garage's filter tab names.
+const _CATEGORY_TABS := ["Car Body", "Engines", "Wheels", "Extras"]
+const _EMPTY_HINTS := {
+	PartData.Category.BODY: "No loose car bodies.\nTake one off in the garage,\nor dig one up at the junkyard.",
+	PartData.Category.ENGINE: "No loose engines.\nTake one off in the garage,\nor dig one up at the junkyard.",
+	PartData.Category.WHEEL: "No loose wheels.\nTake some off in the garage,\nor dig some up at the junkyard.",
+	PartData.Category.ACCESSORY: "No loose extras.\nTake some off in the garage,\nor dig some up at the junkyard.",
+}
+## Which side the hammer's coming in from, by DentBench.swing_side.
+const _SWING_SIDE_NAMES := ["from above", "from the left", "from below", "from the right"]
 
-@export var hit_price: int = 50
+## Scrap each blow costs.
+@export var hit_scrap: int = 20
 
 @export_group("Lines")
-@export var greet_line: String = "Pan factory. We bend metal for a living. Pick a part, pick a hammer, and every whack is $%d."
+@export var greet_line: String = "Pan factory. We bend metal for a living. Pick a part, pick a hammer, and every whack is %d scrap."
 @export var pick_line: String = "On the bench it goes. Click where you want it bent."
 @export var empty_bench_line: String = "Put somethin' on the bench first, pal."
-@export var broke_line: String = "That's $%d a whack. Come back with money."
+@export var broke_line: String = "That's %d scrap a whack. Come back with more junk."
 @export var miss_line: String = "You missed the whole thing. That one's free."
+@export var too_flat_line: String = "That thing's flat as it gets. Any more and there'd be nothin' left. That one's free."
 @export var hit_lines: PackedStringArray = PackedStringArray([
 	"BONK. Beautiful.",
 	"Now that's a dent.",
 	"Ooh, that changed the shape alright.",
 	"Like a pan after a bar fight.",
-	"Keep goin', it's your money.",
+	"Keep goin', it's your scrap.",
 ])
 
 var _stash_rows: Dictionary = {}
 var _hammer: PartDent.Hammer = PartDent.Hammer.CLAW
+var _category: PartData.Category = PartData.Category.BODY
 var _blow_ready_at := 0
 
 var _line_label: Label
@@ -52,6 +70,8 @@ var _bench_label: Label
 var _stats_label: Label
 var _hammer_buttons: Array[ScrapButton] = []
 var _turn_buttons: Array[ScrapButton] = []
+var _side_button: ScrapButton
+var _category_buttons: Array[ScrapButton] = []
 var _leave_button: ScrapButton
 
 func _ready() -> void:
@@ -62,7 +82,7 @@ func _ready() -> void:
 func open() -> void:
 	_clear_stash_rows()
 	_bench.set_part(null)
-	_line_label.text = greet_line % hit_price
+	_line_label.text = greet_line % hit_scrap
 	_refresh()
 	visible = true
 
@@ -88,6 +108,14 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		_turn(TURN_DEGREES * (1.0 if event.keycode == KEY_E else -1.0))
 		return
+	if event.keycode == KEY_R:
+		get_viewport().set_input_as_handled()
+		_turn_hammer()
+		return
+	if event.keycode == KEY_T:
+		get_viewport().set_input_as_handled()
+		_mirror_hammer()
+		return
 	var index := _HAMMER_KEYS.find(event.keycode)
 	if index != -1:
 		get_viewport().set_input_as_handled()
@@ -112,6 +140,22 @@ func _turn(degrees: float) -> void:
 	_bench.turn(degrees)
 	_turn_sound()
 
+func _turn_hammer() -> void:
+	_bench.turn_hammer()
+	Sfx.play(&"wrench_clunk", -12.0)
+	_refresh()
+
+func _mirror_hammer() -> void:
+	_bench.mirror_hammer()
+	var clunk := Sfx.play(&"wrench_clunk", -12.0)
+	if clunk != null:
+		clunk.pitch_scale *= 1.3
+	_refresh()
+
+func _show_category(category: PartData.Category) -> void:
+	_category = category
+	_refresh()
+
 ## A ratchety vice crank as the part's turned on the bench.
 func _turn_sound() -> void:
 	Sfx.play(&"part_unbolt", -12.0)
@@ -124,17 +168,26 @@ func _strike(point: Vector2, direction: Vector2) -> void:
 	if Time.get_ticks_msec() < _blow_ready_at:
 		return
 	_blow_ready_at = Time.get_ticks_msec() + int(BLOW_COOLDOWN * 1000.0)
-	if not Inventory.can_afford(hit_price):
+	if Inventory.scrap < hit_scrap:
 		Sfx.play(&"denied", -6.0, 0.0)
-		_line_label.text = broke_line % hit_price
+		_line_label.text = broke_line % hit_scrap
 		return
 	var old_id := part.id
-	if not PartDent.hit(part, point, _hammer, direction):
-		Sfx.play(&"axe_whoosh", -8.0)
-		_bench.swing(point)
-		_line_label.text = miss_line
-		return
-	Inventory.spend_money(hit_price)
+	match PartDent.hit(part, point, _hammer, direction):
+		PartDent.Result.MISSED:
+			Sfx.play(&"axe_whoosh", -8.0)
+			_bench.swing(point)
+			_line_label.text = miss_line
+			return
+		PartDent.Result.TOO_FLAT:
+			# The hammer bounces off metal that won't give any more.
+			var clank := Sfx.play(&"anvil_clang", -8.0)
+			if clank != null:
+				clank.pitch_scale *= 1.2
+			_bench.swing(point)
+			_line_label.text = too_flat_line
+			return
+	Inventory.add_scrap(-hit_scrap)
 	var bonk := Sfx.play(&"pan_bonk", -4.0, 0.06)
 	if bonk != null:
 		bonk.pitch_scale *= _HAMMER_PITCH[_hammer]
@@ -158,7 +211,16 @@ func _refresh() -> void:
 			else "THE BENCH:  %s  (click to whack, wheel to turn)" % part.display_name.to_upper()
 	for button in _turn_buttons:
 		button.disabled = part == null
-	_stats_label.text = "%s: $%d a whack. You have $%d." % [PartDent.NAMES[_hammer], hit_price, Inventory.money]
+	for i in _category_buttons.size():
+		_category_buttons[i].selected = _CATEGORIES[i] == _category
+	var metal := ""
+	if part != null:
+		var left := PartDent.shape_left(part)
+		metal = "  Metal left: %d%%%s." % [roundi(minf(left, 1.0) * 100.0),
+				" (can't go flatter)" if left <= PartDent.MIN_SHAPE + 0.005 else ""]
+	_stats_label.text = "%s %s%s: %d scrap a whack. You have %d.%s" % [
+		PartDent.NAMES[_hammer], _SWING_SIDE_NAMES[_bench.swing_side], ", mirrored" if _bench.mirrored else "",
+		hit_scrap, Inventory.scrap, metal]
 
 ## One row per part id with how many loose copies are left, like the forge.
 func _refresh_stash() -> void:
@@ -185,6 +247,7 @@ func _refresh_stash() -> void:
 	for i in ids.size():
 		_stash_list.move_child(_stash_rows[ids[i]], i)
 	_stash_empty_label.visible = ids.is_empty()
+	_stash_empty_label.text = _EMPTY_HINTS[_category]
 
 func _drop_stash_row(id: StringName) -> void:
 	var slot: PartSlot = _stash_rows.get(id)
@@ -197,11 +260,12 @@ func _clear_stash_rows() -> void:
 		slot.queue_free()
 	_stash_rows.clear()
 
-## Loose parts grouped as {id: [PartData, ...]}, the one on the bench first.
+## Loose parts of the picked kind grouped as {id: [PartData, ...]}, the one on
+## the bench first.
 func _loose_by_id() -> Dictionary:
 	var grouped := {}
 	for part in Inventory.spare_parts:
-		if part == null:
+		if part == null or part.category != _category:
 			continue
 		if not grouped.has(part.id):
 			grouped[part.id] = []
@@ -257,20 +321,30 @@ func _build() -> void:
 	_line_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	board.add_child(_line_label)
 
+	var tabs := HBoxContainer.new()
+	tabs.position = Vector2(26, 82)
+	tabs.add_theme_constant_override("separation", 8)
+	board.add_child(tabs)
+	for i in _CATEGORIES.size():
+		var tab := _button(_CATEGORY_TABS[i], Vector2(104, 42), [-2.0, 1.5, -1.0, 2.0][i], 101 + i)
+		tab.font_size = 17
+		tab.pressed.connect(_show_category.bind(_CATEGORIES[i]))
+		tabs.add_child(tab)
+		_category_buttons.append(tab)
 	var stash_title := _label("LOOSE PARTS (click to bench)", 16, UiPalette.TEXT_LIGHT)
-	stash_title.position = Vector2(28, 88)
+	stash_title.position = Vector2(28, 142)
 	board.add_child(stash_title)
 	_stash_sort_button = SortButton.new()
 	_stash_sort_button.font_size = 15
 	_stash_sort_button.tilt_degrees = -1.0
 	_stash_sort_button.jitter_seed = 93
-	_stash_sort_button.position = Vector2(296, 76)
+	_stash_sort_button.position = Vector2(296, 132)
 	_stash_sort_button.size = Vector2(170, 34)
 	_stash_sort_button.sort_changed.connect(func(_key: PartSort.Key) -> void: _refresh_stash())
 	board.add_child(_stash_sort_button)
 	var scroll := ScrollContainer.new()
-	scroll.position = Vector2(26, 116)
-	scroll.size = Vector2(440, BOARD_SIZE.y - 150)
+	scroll.position = Vector2(26, 174)
+	scroll.size = Vector2(440, BOARD_SIZE.y - 204)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	board.add_child(scroll)
 	_stash_list = VBoxContainer.new()
@@ -278,7 +352,7 @@ func _build() -> void:
 	_stash_list.add_theme_constant_override("separation", 12)
 	scroll.add_child(_stash_list)
 	_stash_empty_label = _label("No loose parts.\nTake some off in the garage,\nor dig some up at the junkyard.", 18, UiPalette.TEXT_LIGHT)
-	_stash_empty_label.position = Vector2(40, 140)
+	_stash_empty_label.position = Vector2(40, 196)
 	board.add_child(_stash_empty_label)
 
 	var right := VBoxContainer.new()
@@ -287,6 +361,8 @@ func _build() -> void:
 	right.add_theme_constant_override("separation", 12)
 	board.add_child(right)
 	_bench_label = _label("", 16, UiPalette.TEXT_LIGHT)
+	_bench_label.clip_text = true
+	_bench_label.custom_minimum_size = Vector2(120, 0)
 	right.add_child(_bench_label)
 	_bench = DentBench.new()
 	_bench.custom_minimum_size = Vector2(0, 262)
@@ -294,14 +370,22 @@ func _build() -> void:
 	_bench.turned.connect(_turn_sound)
 	right.add_child(_bench)
 	var turns := HBoxContainer.new()
-	turns.add_theme_constant_override("separation", 12)
+	turns.add_theme_constant_override("separation", 10)
 	right.add_child(turns)
 	for i in 2:
-		var button := _button(["Q. Turn Left", "E. Turn Right"][i], Vector2(166, 40), [-1.0, 1.4][i], 98 + i)
-		button.font_size = 18
+		var button := _button(["Q. Turn Left", "E. Turn Right"][i], Vector2(124, 40), [-1.0, 1.4][i], 98 + i)
+		button.font_size = 15
 		button.pressed.connect(_turn.bind(TURN_DEGREES * (1.0 if i == 1 else -1.0)))
 		turns.add_child(button)
 		_turn_buttons.append(button)
+	_side_button = _button("R. Turn Hammer", Vector2(124, 40), -0.6, 105)
+	_side_button.font_size = 15
+	_side_button.pressed.connect(_turn_hammer)
+	turns.add_child(_side_button)
+	var mirror_button := _button("T. Mirror", Vector2(124, 40), 1.1, 106)
+	mirror_button.font_size = 15
+	mirror_button.pressed.connect(_mirror_hammer)
+	turns.add_child(mirror_button)
 	var hammers := HBoxContainer.new()
 	hammers.add_theme_constant_override("separation", 12)
 	right.add_child(hammers)
@@ -320,6 +404,9 @@ func _build() -> void:
 	_stats_label = _label("", 16, UiPalette.TEXT_LIGHT)
 	_stats_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_stats_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	# Wraps rather than widening the column past the board's edge.
+	_stats_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_stats_label.custom_minimum_size = Vector2(120, 0)
 	bottom.add_child(_stats_label)
 	_leave_button = _button("4. Walk Away", Vector2(190, 46), -1.2, 97)
 	_leave_button.pressed.connect(close)

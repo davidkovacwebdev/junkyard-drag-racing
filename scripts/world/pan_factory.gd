@@ -25,7 +25,8 @@ const PAN_RADIUS := Vector2(46.0, 30.0)
 
 ## Drive further than this and the screen closes itself.
 @export var dialog_range: float = 420.0
-@export var hit_price: int = 50
+## Scrap each hammer blow costs.
+@export var hit_scrap: int = 20
 
 var _screen: PanFactoryScreen
 var _actor: Node2D = null
@@ -35,7 +36,7 @@ func _ready() -> void:
 	if Engine.is_editor_hint():
 		return
 	_screen = PanFactoryScreen.new()
-	_screen.hit_price = hit_price
+	_screen.hit_scrap = hit_scrap
 	add_child(_screen)
 	_screen.closed.connect(func() -> void: _actor = null)
 	var banging := AmbientCall.new()
@@ -54,7 +55,7 @@ func _process(_delta: float) -> void:
 		_screen.close()
 
 func get_interact_prompt() -> String:
-	return "%s: Press E to bend parts ($%d a whack)" % [display_name, hit_price]
+	return "%s: Press E to bend parts (%d scrap a whack)" % [display_name, hit_scrap]
 
 func interact(actor: Node = null) -> void:
 	if _screen.is_open() or Cutscenes.is_active():

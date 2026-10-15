@@ -9,6 +9,11 @@ extends RefCounted
 ## point and fading to nothing at the edge of the reach. Long edges near the
 ## hit get extra points first so a flat panel can cave in rather than just tilt.
 ##
+## A part can only be squashed so far: it keeps at least MIN_SHAPE of the art
+## and collision area it had before its first dent. The metal stiffens on the
+## way there (each blow pushes less once it's below STIFF_FROM), and a blow that
+## would take it under the floor just bounces off (`Result.TOO_FLAT`).
+##
 ## The part stays in one piece: pieces that touched before the blow still touch
 ## after it. A piece the blow knocked loose is pulled back against the piece it
 ## was attached to, working out from the biggest piece (the main body).
@@ -19,6 +24,7 @@ extends RefCounted
 ## gets dented on top.
 
 enum Hammer { TACK, CLAW, SLEDGE }
+enum Result { MISSED, DENTED, TOO_FLAT }
 
 ## How far a hammer reaches from where it lands, and how deep it pushes at the
 ## centre, in the part's own pixels for a part of REFERENCE_SIZE across.
@@ -36,16 +42,28 @@ const TOUCH_GAP := 1.5
 ## How far a knocked-loose piece is pulled back into the piece it came off.
 const REATTACH_OVERLAP := 2.0
 const NAME_PREFIX := "Dented "
+## The least of its first area a part can be squashed down to.
+const MIN_SHAPE := 0.6
+## Below this much of its first area the metal starts to stiffen, down to
+## MIN_GIVE of a full blow right at the floor.
+const STIFF_FROM := 0.85
+const MIN_GIVE := 0.2
 
 ## Whacks `hammer` into `part` at `point`, swinging along `direction` (both in
-## the part's own space, as PartFactory builds it). Changes `part` in place and
-## returns true; returns false (and changes nothing) when the hammer missed.
-static func hit(part: PartData, point: Vector2, hammer: Hammer, direction: Vector2 = Vector2.DOWN) -> bool:
+## the part's own space, as PartFactory builds it). Changes `part` in place
+## only when it returns DENTED; MISSED and TOO_FLAT leave it as it was.
+static func hit(part: PartData, point: Vector2, hammer: Hammer, direction: Vector2 = Vector2.DOWN) -> Result:
 	var root := PartFactory.instantiate(part)
 	if root == null:
-		return false
+		return Result.MISSED
+	var original := _original_area(part, root)
+	var left := _shape_left(_area(root), original)
+	if left <= MIN_SHAPE + 0.005:
+		root.free()
+		return Result.TOO_FLAT
+	var give := clampf(inverse_lerp(MIN_SHAPE, STIFF_FROM, left), MIN_GIVE, 1.0)
 	var reach := reach_for(art_size(root), hammer)
-	var push: Vector2 = direction.normalized() * DEPTH[hammer] * _size_scale(art_size(root))
+	var push: Vector2 = direction.normalized() * DEPTH[hammer] * _size_scale(art_size(root)) * give
 	var polygons := _drawn_polygons(root)
 	var links := _links(_outlines(polygons, root))
 	var moved := false
@@ -62,10 +80,49 @@ static func hit(part: PartData, point: Vector2, hammer: Hammer, direction: Vecto
 		var outline := _dented(collision.polygon, point, reach, push, true)
 		if PolygonMorph.is_drawable(outline):
 			collision.polygon = outline
-	if moved:
-		_bake(part, root, collision)
+	if not moved:
+		root.free()
+		return Result.MISSED
+	if _shape_left(_area(root), original) < MIN_SHAPE:
+		root.free()
+		return Result.TOO_FLAT
+	_bake(part, root, collision, original)
 	root.free()
-	return moved
+	return Result.DENTED
+
+## How much of its first area `part` still has (1 for a part never dented;
+## it can go over 1 when blows push metal outward).
+static func shape_left(part: PartData) -> float:
+	var root := PartFactory.instantiate(part)
+	if root == null:
+		return 1.0
+	var left := _shape_left(_area(root), _original_area(part, root))
+	root.free()
+	return left
+
+## How squashed the part is: the lesser of its art and collision areas, each
+## as a share of what it had before its first dent.
+static func _shape_left(area: Vector2, original: Vector2) -> float:
+	var art := area.x / original.x if original.x > 0.0 else 1.0
+	var body := area.y / original.y if original.y > 0.0 else 1.0
+	return minf(art, body)
+
+## The art and collision areas the part had before its first dent: stored on
+## its look once dented, otherwise what it has now.
+static func _original_area(part: PartData, root: Node) -> Vector2:
+	if part.forge != null and part.forge.dents > 0 and part.forge.original_art_area > 0.0:
+		return Vector2(part.forge.original_art_area, part.forge.original_collision_area)
+	return _area(root)
+
+## (total area of the drawn pieces, area of the collision outline) in the
+## root's space. Overlapping pieces count twice; only the ratio matters.
+static func _area(root: Node) -> Vector2:
+	var art := 0.0
+	for outline in _outlines(_drawn_polygons(root), root):
+		art += absf(PartForge.signed_area(outline))
+	var collision := _root_collision(root)
+	var body := absf(PartForge.signed_area(collision.polygon)) if collision != null else 0.0
+	return Vector2(art, body)
 
 ## How far `hammer` reaches on a part whose art is `art_diagonal` across.
 static func reach_for(art_diagonal: float, hammer: Hammer) -> float:
@@ -284,7 +341,7 @@ static func _root_collision(root: Node) -> CollisionPolygon2D:
 ## anchor the forge put it on), every marker keeps its new spot, and the
 ## collision outline is stored. The first dent gives the part its own id, so
 ## it no longer stacks with clean copies in the garage.
-static func _bake(part: PartData, root: Node, collision: CollisionPolygon2D) -> void:
+static func _bake(part: PartData, root: Node, collision: CollisionPolygon2D, original: Vector2) -> void:
 	var old := part.forge
 	var look := ForgedLook.new()
 	look.base_part_id = part.catalog_id()
@@ -292,6 +349,8 @@ static func _bake(part: PartData, root: Node, collision: CollisionPolygon2D) -> 
 	# Where the scrap forge would graft onto this part later (a horse's torso).
 	look.anchor_path = old.anchor_path if old != null else root.get_path_to(PartForge.find_anchor(root, part))
 	look.dents = (old.dents if old != null else 0) + 1
+	look.original_art_area = original.x
+	look.original_collision_area = original.y
 	for polygon_node in _polygons(root):
 		var parent := polygon_node.get_parent()
 		if parent != null and parent.name == ForgedLook.FRONT_LAYER:
