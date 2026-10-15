@@ -11,9 +11,12 @@ found_fishing = true
 display_name = "Jet Engine"
 mass = 16.0
 durability = 90.0
-speed = 8.0
+speed = 24.2
 material_type = 0
-power = 8.0
+power = 24.2
+torque = 6.4
+drive_pattern = 2
+drive_time = 1.2
 
 [node name="EngineJet" type="Node2D"]
 script = ExtResource("1")

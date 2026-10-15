@@ -12,6 +12,9 @@ durability = 55.0
 speed = 2.0
 material_type = 0
 power = 2.0
+torque = 6.0
+drive_pattern = 5
+drive_time = 0.5
 
 [node name="EnginePneumaticJack" type="Node2D"]
 script = ExtResource("1")

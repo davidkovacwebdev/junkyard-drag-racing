@@ -52,6 +52,11 @@ var _plunger_rest_positions: Dictionary = {}
 @onready var _spring_length: float = _measure_height(_spring.polygon)
 @onready var _plunger_parts: Array[Polygon2D] = [$Plunger, $Foot]
 
+## Steps or strokes at a cadence tuned to the engine's raw power rather than
+## rolling on a radius, so it takes the reference wheel's gearing as is.
+func drive_radius() -> float:
+	return CarAssembler.REFERENCE_WHEEL_RADIUS
+
 func _ready() -> void:
 	super()
 	for part in _plunger_parts:
@@ -62,7 +67,7 @@ func _integrate_forces(state: PhysicsDirectBodyState2D) -> void:
 		return
 	var step := state.get_step()
 	var drive_direction := signf(target_angular_velocity)
-	var top_speed := absf(target_angular_velocity) * top_speed_per_power
+	var top_speed := absf(driven_target()) * top_speed_per_power
 	var forward_speed := chassis.linear_velocity.x * drive_direction
 	var lean_amount := clampf(1.0 - forward_speed / maxf(top_speed, 1.0), -1.0, 1.0)
 	var angle := chassis.rotation * (1.0 - self_righting) + lean * lean_amount * drive_direction
@@ -80,7 +85,7 @@ func _integrate_forces(state: PhysicsDirectBodyState2D) -> void:
 		_deepest_compression = maxf(_deepest_compression, _compression)
 		var push := stiffness * _compression + spring_damping * compression_speed
 		if compression_speed < 0.0:
-			push += pump_force * pow(absf(target_angular_velocity), power_exponent)
+			push += pump_force * pow(absf(driven_target()), power_exponent)
 		push *= chassis.mass / reference_chassis_mass
 		chassis.apply_force(-down * maxf(push, 0.0), mount - chassis.global_position)
 	elif previous_compression > 0.0:
@@ -109,7 +114,7 @@ func _boing() -> void:
 	if depth < 3.0:
 		return
 	var loudness := clampf(depth / loudest_compression, 0.25, 1.0)
-	RaceCarAudio.play(self, &"pogo_boing", global_position, linear_to_db(loudness))
+	RaceCarAudio.play(self, &"pogo_boing", global_position, linear_to_db(loudness) - 6.0)
 
 ## Slides the plunger and foot up the stick and squashes the coil to match.
 func _show_compression(compression: float) -> void:

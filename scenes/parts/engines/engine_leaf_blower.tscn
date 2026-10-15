@@ -9,9 +9,12 @@ id = &"engine_leaf_blower"
 display_name = "Leaf Blower"
 mass = 3.5
 durability = 35.0
-speed = 3.5
+speed = 4.8
 material_type = 2
-power = 3.5
+power = 4.8
+torque = 2.1
+drive_pattern = 2
+drive_time = 0.8
 
 [node name="EngineLeafBlower" type="Node2D"]
 script = ExtResource("1")

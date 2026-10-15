@@ -24,6 +24,18 @@ const WHEEL_RADIUS_GUESS := 36.0
 const STRIDE_LENGTH := 150.0
 ## Speed (horse pixels/s) at which the gait is at full swing.
 const FULL_GAIT_SPEED := 420.0
+## Past this many strides a second the legs stop quickening and each stride
+## stretches longer instead, like a real gallop, so a horse at a jet's pace
+## doesn't blur into a scribble.
+const MAX_STRIDES_PER_SECOND := 3.2
+## Speed (horse pixels/s) by which the trot has fully turned into a gallop:
+## front legs together, rear legs together, a wider reach, a long flat body,
+## neck stretched forward and tail streaming out behind.
+const FULL_GALLOP_SPEED := 900.0
+const GALLOP_LEG_SWING := 0.85
+const GALLOP_BOUNCE := 9.0
+const GALLOP_NECK_REACH := -0.35
+const GALLOP_TAIL_STREAM := 1.35
 const LEG_SWING := 0.55
 const KNEE_FOLD := 1.1
 const TROT_BOUNCE := 5.0
@@ -58,11 +70,14 @@ var grazing := false
 	$Harness/Horse/Torso/LegFarFront, $Harness/Horse/Torso/LegNearRear,
 ]
 const _LEG_PHASE_OFFSETS := [0.0, 0.0, PI, PI]
+## Same legs at a gallop: the fronts land a beat apart, then the rears.
+const _GALLOP_PHASE_OFFSETS := [0.0, PI + 0.4, 0.4, PI]
 
 var _previous_position: Vector2
 var _has_previous_position := false
 var _gait_phase := 0.0
 var _gait_blend := 0.0
+var _gallop_blend := 0.0
 var _idle_time := 0.0
 var _next_ear_flick := 2.0
 
@@ -111,7 +126,10 @@ func _process(delta: float) -> void:
 	var travelled := _forward_travel()
 	var speed := absf(travelled) / delta
 	_gait_blend = lerpf(_gait_blend, clampf(speed / FULL_GAIT_SPEED, 0.0, 1.0), clampf(6.0 * delta, 0.0, 1.0))
-	_gait_phase = wrapf(_gait_phase + travelled / STRIDE_LENGTH * TAU * gait_rate, 0.0, TAU)
+	var gallop := clampf(inverse_lerp(FULL_GAIT_SPEED, FULL_GALLOP_SPEED, speed), 0.0, 1.0)
+	_gallop_blend = lerpf(_gallop_blend, gallop, clampf(3.0 * delta, 0.0, 1.0))
+	var strides := minf(absf(travelled) / STRIDE_LENGTH * gait_rate, MAX_STRIDES_PER_SECOND * delta)
+	_gait_phase = wrapf(_gait_phase + signf(travelled) * strides * TAU, 0.0, TAU)
 	_idle_time += delta
 	_animate_legs()
 	_animate_body()
@@ -135,23 +153,24 @@ func _forward_travel() -> float:
 
 func _animate_legs() -> void:
 	for i in _legs.size():
-		var step: float = _gait_phase + _LEG_PHASE_OFFSETS[i]
+		var step: float = _gait_phase + lerpf(_LEG_PHASE_OFFSETS[i], _GALLOP_PHASE_OFFSETS[i], _gallop_blend)
 		var leg := _legs[i]
-		leg.rotation = -sin(step) * LEG_SWING * _gait_blend
+		leg.rotation = -sin(step) * lerpf(LEG_SWING, GALLOP_LEG_SWING, _gallop_blend) * _gait_blend
 		var knee := leg.get_node("Knee") as Node2D
 		knee.rotation = maxf(0.0, cos(step)) * KNEE_FOLD * _gait_blend
 
 func _animate_body() -> void:
 	var breathing := sin(_idle_time * 2.2) * 0.8 * (1.0 - _gait_blend)
-	var bounce := -absf(sin(_gait_phase)) * TROT_BOUNCE * _gait_blend
+	var bounce := -absf(sin(_gait_phase)) * lerpf(TROT_BOUNCE, GALLOP_BOUNCE, _gallop_blend) * _gait_blend
 	_torso.position.y = bounce + breathing
 	var idle_nod := sin(_idle_time * 0.7) * 0.06
-	var trot_nod := sin(_gait_phase * 2.0) * 0.08
+	var trot_nod := sin(_gait_phase * 2.0) * 0.08 + GALLOP_NECK_REACH * _gallop_blend
 	if grazing:
 		idle_nod = GRAZE_DIP + sin(_idle_time * GRAZE_CHEWS) * GRAZE_CHEW_NOD
 	_neck.rotation = lerpf(idle_nod, trot_nod, _gait_blend)
 	var swish := sin(_idle_time * 1.6) * 0.18
-	_tail.rotation = lerpf(swish, 0.9 + sin(_gait_phase * 2.0) * 0.1, _gait_blend)
+	var trailing := lerpf(0.9, GALLOP_TAIL_STREAM, _gallop_blend) + sin(_gait_phase * 2.0) * 0.1
+	_tail.rotation = lerpf(swish, trailing, _gait_blend)
 
 func _animate_ear(delta: float) -> void:
 	_next_ear_flick -= delta

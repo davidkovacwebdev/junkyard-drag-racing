@@ -28,5 +28,15 @@ extends PartData
 ## Hits from other cars go through in full.
 @export_range(0.0, 0.9) var suspension_wheel_protection: float = 0.3
 
+## Engine power multiplier at the catalog's least and most streamlined body
+## (BODY_SPEED_RANGE): a cardboard box holds its engine back, a saucer lets it
+## fly.
+const SPEED_MULTIPLIER_RANGE := Vector2(0.8, 1.2)
+const BODY_SPEED_RANGE := Vector2(1.2, 5.0)
+
 func _init() -> void:
 	category = Category.BODY
+
+## What this body does to the engine's power, from its speed stat.
+func speed_multiplier() -> float:
+	return lerpf(SPEED_MULTIPLIER_RANGE.x, SPEED_MULTIPLIER_RANGE.y, _normalize(speed, BODY_SPEED_RANGE))

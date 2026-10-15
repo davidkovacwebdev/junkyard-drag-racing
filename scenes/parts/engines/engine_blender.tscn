@@ -9,9 +9,12 @@ id = &"engine_blender"
 display_name = "Blender"
 mass = 2.5
 durability = 25.0
-speed = 3.0
+speed = 3.6
 material_type = 5
-power = 3.0
+power = 3.6
+torque = 2.4
+drive_pattern = 1
+gear_count = 3
 
 [node name="EngineBlender" type="Node2D"]
 script = ExtResource("1")

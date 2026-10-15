@@ -9,9 +9,11 @@ id = &"engine_rc_car_motor"
 display_name = "RC Car Motor"
 mass = 1.0
 durability = 20.0
-speed = 4.5
+speed = 7.9
 material_type = 0
-power = 4.5
+power = 7.9
+torque = 4.5
+drive_pattern = 0
 
 [node name="EngineRcCarMotor" type="Node2D"]
 script = ExtResource("1")

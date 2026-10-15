@@ -61,6 +61,11 @@ var _gait_position: int = 0
 @onready var _shin: Node2D = $Shin
 @onready var _foot_art: Node2D = $Foot
 
+## Steps or strokes at a cadence tuned to the engine's raw power rather than
+## rolling on a radius, so it takes the reference wheel's gearing as is.
+func drive_radius() -> float:
+	return CarAssembler.REFERENCE_WHEEL_RADIUS
+
 func _ready() -> void:
 	super()
 	_rng.randomize()
@@ -82,9 +87,9 @@ func _integrate_forces(state: PhysicsDirectBodyState2D) -> void:
 		_pose(Vector2(0.0, standing_height), 1.0)
 		return
 
-	var power := absf(target_angular_velocity)
+	var power := absf(driven_target())
 	var previous_phase := _phase
-	_advance_phase(power * cadence_per_power * step)
+	_advance_phase(gait_power(power) * cadence_per_power * step)
 	var in_stance := _phase < stance_fraction
 	var stance_started := in_stance and (previous_phase >= stance_fraction or previous_phase > _phase)
 
@@ -151,7 +156,7 @@ func _try_plant(state: PhysicsDirectBodyState2D, hip: Vector2, drive_direction: 
 	_planted_point_on_body = _planted_body.global_transform.affine_inverse() * hit.position
 	_previous_hip_height = hip.distance_to(hit.position)
 	_is_planted = true
-	RaceCarAudio.play(self, part_data.impact_sound, hit.position, -3.0)
+	RaceCarAudio.play(self, part_data.impact_sound, hit.position, -10.0)
 
 func _unplant() -> void:
 	_is_planted = false

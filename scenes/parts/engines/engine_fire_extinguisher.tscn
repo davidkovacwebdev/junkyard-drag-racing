@@ -9,9 +9,12 @@ id = &"engine_fire_extinguisher"
 display_name = "Fire Extinguisher (Nozzle Backward)"
 mass = 3.0
 durability = 25.0
-speed = 3.5
+speed = 4.8
 material_type = 0
-power = 3.5
+power = 4.8
+torque = 3.5
+drive_pattern = 3
+drive_time = 2.0
 
 [node name="EngineFireExtinguisher" type="Node2D"]
 script = ExtResource("1")

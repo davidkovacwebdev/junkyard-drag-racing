@@ -76,7 +76,7 @@ const TIER_COLORS := [
 func performance_score() -> float:
 	return (
 		_normalize(durability, DURABILITY_RANGE)
-		+ _normalize(speed, SPEED_RANGE)
+		+ _normalize(speed, speed_range())
 		+ (1.0 - _normalize(mass, MASS_RANGE))
 	) / 3.0
 
@@ -90,7 +90,11 @@ func durability_rating_fraction() -> float:
 	return _normalize(durability, DURABILITY_RANGE)
 
 func speed_rating_fraction() -> float:
-	return _normalize(speed, SPEED_RANGE)
+	return _normalize(speed, speed_range())
+
+## The spread `speed` is rated against. Engines run far wider than the rest.
+func speed_range() -> Vector2:
+	return SPEED_RANGE
 
 func mass_rating_fraction() -> float:
 	return _normalize(mass, MASS_RANGE)

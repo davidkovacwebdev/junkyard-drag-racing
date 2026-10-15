@@ -9,6 +9,8 @@ extends RefCounted
 ## start and end on the same level with `fade = 0`, or they click every cycle.
 
 const NAMES: Array[StringName] = [
+	&"gear_shift",
+	&"engine_cough",
 	&"ui_click",
 	&"helmet_bwomp",
 	&"loading_crank",
@@ -233,6 +235,8 @@ const LOOPING: Array[StringName] = [
 ]
 
 const CAR_SOUNDS: Array[StringName] = [
+	&"gear_shift",
+	&"engine_cough",
 	&"mini_heli_rotor_loop",
 	&"heli_sputter",
 	&"ignition_click",
@@ -438,6 +442,8 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"cart_squeak": return _cart_squeak(rng)
 		&"engine_stall": return _engine_stall(rng)
 		&"backfire": return _backfire(rng)
+		&"gear_shift": return _gear_shift(rng)
+		&"engine_cough": return _engine_cough(rng)
 		&"race_stalled": return _race_stalled()
 		&"results_fanfare": return _results_fanfare()
 		&"horn_loop": return _horn_loop()
@@ -702,6 +708,31 @@ static func _engine_stall(rng: RandomNumberGenerator) -> PackedFloat32Array:
 		jitter = 0.06, jitter_rate = 40.0,
 		amp = [[0.0, 0.0], [0.06, 0.9], [0.7, 0.7], [1.1, 0.5], [1.6, 0.0]],
 	}, rng)
+
+## A race engine shifting up: the clutch's dull clunk, a tinny click of the
+## lever and a small exhaust pop as the revs drop.
+static func _gear_shift(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.3)
+	out = Synth.mix_into(out, Synth.thump(0.12, 260.0, 0.003, 0.05, rng), 0.0, 1.0)
+	out = Synth.mix_into(out, _metal_ring(0.06, 1900.0, 18.0, 0.015, rng), 0.0, 0.3)
+	out = Synth.mix_into(out, Synth.thump(0.15, 520.0, 0.001, 0.05, rng), 0.07, 0.6)
+	return Synth.finish(out)
+
+## A sputtering engine missing a beat: a wet low pop, a sagging buzz and a
+## sharp little backfire crack.
+static func _engine_cough(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.4)
+	out = Synth.mix_into(out, Synth.tones(0.3, [[[0.0, 95.0], [0.3, 55.0]]], {
+		square = 0.5,
+		amp = [[0.0, 0.0], [0.02, 0.5], [0.3, 0.0]],
+	}), 0.0, 0.4)
+	out = Synth.mix_into(out, Synth.thump(0.14, 340.0, 0.002, 0.06, rng), 0.0, 0.9)
+	out = Synth.mix_into(out, Synth.noise_sweep(0.04, {
+		freq = [[0.0, 2200.0]],
+		q = [[0.0, 1.0]],
+		amp = [[0.0, 1.0], [0.04, 0.0]],
+	}, rng), 0.18, 0.5)
+	return Synth.finish(out)
 
 static func _backfire(rng: RandomNumberGenerator) -> PackedFloat32Array:
 	var lowpass := Synth.LowPass.new()

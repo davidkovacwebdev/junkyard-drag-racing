@@ -9,9 +9,12 @@ id = &"engine_soda_keg"
 display_name = "Soda Keg"
 mass = 8.0
 durability = 45.0
-speed = 3.0
+speed = 3.6
 material_type = 0
-power = 3.0
+power = 3.6
+torque = 3.6
+drive_pattern = 3
+drive_time = 4.0
 
 [node name="EngineSodaKeg" type="Node2D"]
 script = ExtResource("1")

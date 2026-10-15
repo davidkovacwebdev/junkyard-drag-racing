@@ -24,7 +24,7 @@ static func from_catalog(bodies: Array[BodyPartData], engines: Array[EnginePartD
 	var durability_multiplier := _accessory_product(accessories, func(accessory: AccessoryPartData) -> float: return accessory.durability_multiplier)
 	var speed_multiplier := _accessory_product(accessories, func(accessory: AccessoryPartData) -> float: return accessory.speed_multiplier)
 	var accessory_mass := _accessory_sum(accessories, func(accessory: AccessoryPartData) -> float: return accessory.mass)
-	ranges.engine_power = engine_power * speed_multiplier
+	ranges.engine_power = engine_power * speed_multiplier * BodyPartData.SPEED_MULTIPLIER_RANGE
 
 	ranges.durability = Vector2(INF, -INF)
 	ranges.mass = Vector2(INF, -INF)

@@ -40,6 +40,10 @@ var _time: float = 0.0
 @onready var _back_legs: Node2D = $Hamster/BackLegs
 @onready var _hamster_body: Node2D = $Hamster/Body
 
+## The hamster's legs never pump faster than this (strides per second), however
+## fast the wheel spins: past it it's a blur anyway.
+const MAX_STRIDES_PER_SECOND := 8.0
+
 func _ready() -> void:
 	super()
 	_rng.randomize()
@@ -73,14 +77,15 @@ func _current_target_speed() -> float:
 		HamsterMood.RESTING:
 			return 0.0
 		HamsterMood.PANICKING:
-			return target_angular_velocity * panic_speed
-	return target_angular_velocity * _run_effort
+			return driven_target() * panic_speed
+	return driven_target() * _run_effort
 
 func _process(delta: float) -> void:
 	_time += delta
 	var spin_speed := _visual_speed if freeze else angular_velocity
 	var is_running := absf(spin_speed) > 0.3 and (freeze or _mood != HamsterMood.RESTING)
-	_stride_phase += spin_speed * stride_per_radian * delta
+	var stride_rate := spin_speed * stride_per_radian
+	_stride_phase += signf(stride_rate) * minf(absf(stride_rate), MAX_STRIDES_PER_SECOND) * delta
 	_climb = lerpf(_climb, running_climb * signf(spin_speed) if is_running else 0.0, clampf(4.0 * delta, 0.0, 1.0))
 	if absf(spin_speed) > 0.3:
 		_hamster.scale.x = signf(spin_speed)

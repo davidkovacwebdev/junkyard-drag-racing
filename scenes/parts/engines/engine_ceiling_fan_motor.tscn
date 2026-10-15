@@ -12,6 +12,9 @@ durability = 45.0
 speed = 1.2
 material_type = 0
 power = 1.2
+torque = 0.96
+drive_pattern = 1
+gear_count = 3
 
 [node name="EngineCeilingFanMotor" type="Node2D"]
 script = ExtResource("1")

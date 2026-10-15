@@ -21,6 +21,20 @@ var target_angular_velocity: float = 0.0
 
 ## Motor torque at a standstill. CarAssembler sets it from the engine.
 var stall_torque: float = 0.0
+## The engine's power delivery right now (CarEngineDrive): share of
+## target_angular_velocity the motor heads for, and how much its torque is
+## multiplied (a low gear pulls harder).
+var drive_scale: float = 1.0
+var drive_torque_scale: float = 1.0
+## Share of the motor's torque CarWheelieControl lets through right now.
+var torque_scale: float = 1.0
+## Which way is up from the ground this wheel last stood on, so a car can tell
+## a wheelie from a hill (CarWheelieControl).
+var ground_normal: Vector2 = Vector2.UP
+## Most torque the motor ever puts out, set by CarAssembler from what this
+## wheel's grip can actually use. Anything past it would only spin the wheel up
+## and twist the body (it takes the reaction) onto its roof.
+var max_torque: float = INF
 
 ## This wheel's rolling radius in its own authored (local) units, measured
 ## from its artwork the first time it's needed. Negative = not measured yet.
@@ -43,13 +57,43 @@ func _integrate_forces(state: PhysicsDirectBodyState2D) -> void:
 	# fight that.
 	if freeze:
 		return
+	if state.get_contact_count() > 0:
+		ground_normal = state.get_contact_local_normal(0)
 	var target := _current_target_speed()
 	if target == 0.0:
 		return
-	var torque := stall_torque * signf(target) * clampf(1.0 - state.angular_velocity / target, 0.0, 1.0)
+	var torque := minf(stall_torque * drive_torque_scale * clampf(1.0 - state.angular_velocity / target, 0.0, 1.0),
+			max_torque) * torque_scale * signf(target)
 	state.apply_torque(torque)
 	if chassis != null:
 		chassis.apply_torque(-torque)
+
+## Engine power (as a wheel's target spin) past which a gait only quickens with
+## the square root of power: legs, paddles and hamsters keep a pace you can
+## still see at the strongest engines' spin. Their pull still gets the full power.
+const GAIT_POWER_KNEE := 16.0
+
+## How fast a walking or rowing part steps for `power`, see GAIT_POWER_KNEE.
+static func gait_power(power: float) -> float:
+	if power <= GAIT_POWER_KNEE:
+		return power
+	return GAIT_POWER_KNEE * sqrt(power / GAIT_POWER_KNEE)
+
+## The radius (world px) the motor's target spin is geared for: the furthest
+## point of the wheel's collision from its axle. CarAssembler divides by it so a
+## wheel's top speed comes from its speed stat, not from how big it's drawn.
+func drive_radius() -> float:
+	var radius := 0.0
+	for collider in find_children("*", "CollisionPolygon2D", true, false):
+		var polygon_node := collider as CollisionPolygon2D
+		for point in polygon_node.polygon:
+			radius = maxf(radius, (polygon_node.global_transform * point - global_position).length())
+	for collider in find_children("*", "CollisionShape2D", true, false):
+		var shape_node := collider as CollisionShape2D
+		if shape_node.shape is CircleShape2D:
+			var circle_radius: float = (shape_node.shape as CircleShape2D).radius * absf(shape_node.global_scale.x)
+			radius = maxf(radius, (shape_node.global_position - global_position).length() + circle_radius)
+	return maxf(radius, 1.0)
 
 ## Knocks the wheel's spin down to `fraction_kept` of itself.
 func lose_spin(fraction_kept: float) -> void:
@@ -58,7 +102,11 @@ func lose_spin(fraction_kept: float) -> void:
 ## The spin speed the motor is heading for right now. A wheel with a mind of
 ## its own (the hamster wheel) overrides this; 0 lets the wheel roll freely.
 func _current_target_speed() -> float:
-	return target_angular_velocity
+	return driven_target()
+
+## target_angular_velocity as the engine's power delivery has it right now.
+func driven_target() -> float:
+	return target_angular_velocity * drive_scale
 
 ## ---- Physics-free preview --------------------------------------------
 ## The world map's car is pure decoration (see CarView), so its wheels can't

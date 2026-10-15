@@ -9,9 +9,12 @@ id = &"engine_chainsaw"
 display_name = "Chainsaw"
 mass = 4.0
 durability = 45.0
-speed = 5.0
+speed = 9.7
 material_type = 0
-power = 5.0
+power = 9.7
+torque = 5.5
+drive_pattern = 6
+drive_time = 2.5
 
 [node name="EngineChainsaw" type="Node2D"]
 script = ExtResource("1")

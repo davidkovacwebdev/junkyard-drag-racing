@@ -12,6 +12,9 @@ durability = 45.0
 speed = 2.2
 material_type = 2
 power = 2.2
+torque = 1.76
+drive_pattern = 2
+drive_time = 1.0
 
 [node name="EngineShopVacuum" type="Node2D"]
 script = ExtResource("1")

@@ -12,18 +12,23 @@ const BOOST_RPM := 0.95
 
 ## Shared with CarAssembler, which drops a wheel from it when the wheel breaks.
 var wheels: Array[CarWheel] = []
-var engine_power: float = 0.0
+## Where the top of the rev range is for each wheel (a geared engine revs to
+## the top of every gear). Null: each wheel's full target spin.
+var drive: CarEngineDrive
 
 func _process(delta: float) -> void:
-	var total_spin := 0.0
+	var total_spin_ratio := 0.0
 	var spinning_wheels := 0
 	for wheel in wheels:
-		if is_instance_valid(wheel):
-			total_spin += absf(wheel.angular_velocity)
+		if not is_instance_valid(wheel):
+			continue
+		var rev_target := drive.rev_target(wheel) if drive != null else wheel.target_angular_velocity
+		if rev_target != 0.0:
+			total_spin_ratio += minf(absf(wheel.angular_velocity / rev_target), 1.0)
 			spinning_wheels += 1
 	var spin_ratio := 1.0
 	if spinning_wheels > 0:
-		spin_ratio = clampf(total_spin / spinning_wheels / maxf(engine_power, 0.01), 0.0, 1.0)
+		spin_ratio = clampf(total_spin_ratio / spinning_wheels, 0.0, 1.0)
 	rpm = lerpf(RACING_RPM_RANGE.x, RACING_RPM_RANGE.y, spin_ratio)
 	throttle = 0.6
 	var body := get_parent() as CarBody

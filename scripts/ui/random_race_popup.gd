@@ -2,9 +2,10 @@ class_name RandomRacePopup
 extends CanvasLayer
 ## Ctrl+G opens the random race popup: pick a race type, a tier, whose cars
 ## race and what you drive (a random car, your garage car, or one picked from a
-## tier's rival pool in RandomRaceCarPicker), then roll. Ctrl+N replays the last
-## rolled race exactly (same seed, venue, cars and weather) from the map or
-## mid-race, so one race can be rerun until it's right. The race is a DebugRace:
+## tier's rival pool in RandomRaceCarPicker), then roll. Ctrl+N rolls a new race
+## from the current settings and Ctrl+R restarts the last one exactly (same
+## seed, venue, cars and weather), from the map or mid-race, so one race can be
+## rerun until it's right. The race is a DebugRace:
 ## nothing is recorded or paid. The settings, the picked car and the last race
 ## are kept in settings.cfg.
 ##
@@ -44,7 +45,8 @@ const TIERS := [1, 2, 3, 4]
 const ANY := -1
 const MENU_SCENES_DIR := "res://scenes/menu/"
 const OPEN_KEY := KEY_G
-const REPLAY_KEY := KEY_N
+const NEW_RACE_KEY := KEY_N
+const REPLAY_KEY := KEY_R
 const COPY_CODE_KEY := KEY_C
 const TOAST_SECONDS := 3.5
 const SETTINGS_PATH := "user://settings.cfg"
@@ -57,7 +59,7 @@ var _driver_setting := Driver.RANDOM
 ## The roster spec picked in RandomRaceCarPicker, empty until one is.
 var _picked_spec: Dictionary = {}
 var _picked_tier := 1
-## What Ctrl+N replays: {"venue", "tier", "seed", "driver", "picked_spec",
+## What Ctrl+R replays: {"venue", "tier", "seed", "driver", "picked_spec",
 ## "weather"}, empty until a race is rolled.
 var _last_race: Dictionary = {}
 ## The RaceCode of the last race started here.
@@ -105,6 +107,9 @@ func _unhandled_input(event: InputEvent) -> void:
 				_close()
 			elif _can_start():
 				_open()
+		NEW_RACE_KEY:
+			get_viewport().set_input_as_handled()
+			roll_and_start()
 		REPLAY_KEY:
 			get_viewport().set_input_as_handled()
 			replay_last_race()
@@ -268,7 +273,7 @@ func _build() -> void:
 	title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	title_plate.add_child(title)
 
-	var hint := _make_label("Ctrl+N replays the last race. Ctrl+C in a race copies its code.", 15, UiPalette.STEEL_LIGHT)
+	var hint := _make_label("Ctrl+N rolls a new race. Ctrl+R restarts the last one. Ctrl+C copies its code.", 15, UiPalette.STEEL_LIGHT)
 	hint.position = Vector2(280.0, 20.0)
 	hint.size = Vector2(636.0, 24.0)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT

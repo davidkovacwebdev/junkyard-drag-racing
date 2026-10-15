@@ -9,9 +9,12 @@ id = &"engine_v8"
 display_name = "V8 Engine"
 mass = 16.0
 durability = 130.0
-speed = 5.0
+speed = 9.7
 material_type = 0
-power = 5.0
+power = 9.7
+torque = 8.0
+drive_pattern = 1
+gear_count = 5
 
 [node name="EngineV8" type="Node2D"]
 script = ExtResource("1")

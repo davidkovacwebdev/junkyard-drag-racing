@@ -9,9 +9,12 @@ id = &"engine_electric_drill"
 display_name = "Electric Drill"
 mass = 2.0
 durability = 35.0
-speed = 3.0
+speed = 3.6
 material_type = 0
-power = 3.0
+power = 3.6
+torque = 4.5
+drive_pattern = 1
+gear_count = 2
 
 [node name="EngineElectricDrill" type="Node2D"]
 script = ExtResource("1")
