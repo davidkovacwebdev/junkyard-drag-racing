@@ -281,7 +281,7 @@ func _spawn_random_part(rng: RandomNumberGenerator) -> void:
 	pool.append_array(PartDatabase.junk_accessories)
 	if pool.is_empty():
 		return
-	var part: PartData = pool[rng.randi() % pool.size()]
+	var part: PartData = PartData.pick_weighted(pool, rng)
 	var instance := PartFactory.instantiate(part)
 	if instance == null:
 		return

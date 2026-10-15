@@ -542,7 +542,7 @@ func _maybe_drop_loot() -> void:
 		if pool.is_empty():
 			return
 		var part_orb := part_pickup_scene.instantiate() as PartPickup
-		part_orb.configure(pool[_rng.randi_range(0, pool.size() - 1)])
+		part_orb.configure(PartData.pick_weighted(pool, _rng))
 		orb = part_orb
 	else:
 		var scrap_orb := scrap_pickup_scene.instantiate() as ScrapPickup

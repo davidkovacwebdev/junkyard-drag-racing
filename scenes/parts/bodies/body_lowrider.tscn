@@ -1,0 +1,71 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/car_body.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/body_part_data.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/car/headlight_mount.gd" id="headlight_mount"]
+
+[sub_resource type="Resource" id="Resource_lowrider"]
+script = ExtResource("2")
+color = Color(0.5, 0.32, 0.55, 1)
+hydraulic_hop_speed = 620.0
+hydraulic_stroke = 64.0
+hydraulic_recharge_time = 1.4
+id = &"body_lowrider"
+display_name = "Lowrider"
+rarity = 1
+suspension_sag = 10.0
+suspension_travel = 22.0
+suspension_damping_ratio = 0.45
+suspension_wheel_protection = 0.6
+mass = 19.0
+durability = 105.0
+speed = 3.6
+material_type = 0
+
+[node name="BodyLowrider" type="RigidBody2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_lowrider")
+
+[node name="Paint" type="Polygon2D" parent="."]
+color = Color(0.5, 0.32, 0.55, 1)
+polygon = PackedVector2Array(-150, 16, -150, -2, -136, -8, -72, -10, -54, -30, 40, -31, 60, -10, 130, -8, 150, -1, 150, 16)
+
+[node name="SkirtShade" type="Polygon2D" parent="."]
+color = Color(0.38, 0.23, 0.42, 1)
+polygon = PackedVector2Array(-150, 6, 150, 6, 150, 16, -150, 16)
+
+[node name="Window" type="Polygon2D" parent="."]
+color = Color(0.2, 0.24, 0.3, 1)
+polygon = PackedVector2Array(-48, -26, 36, -27, 52, -12, -62, -12)
+
+[node name="FuzzyDie" type="Polygon2D" parent="."]
+color = Color(0.92, 0.9, 0.86, 1)
+polygon = PackedVector2Array(8, -24, 17, -23, 16, -14, 7, -15)
+
+[node name="HydraulicRamRear" type="Polygon2D" parent="."]
+z_index = -1
+position = Vector2(-110, 0)
+color = Color(0.86, 0.7, 0.3, 1)
+polygon = PackedVector2Array(-5, 0, 5, 0, 5, 16, -5, 16)
+
+[node name="HydraulicRamFront" type="Polygon2D" parent="."]
+z_index = -1
+position = Vector2(110, 0)
+color = Color(0.86, 0.7, 0.3, 1)
+polygon = PackedVector2Array(-5, 0, 5, 0, 5, 16, -5, 16)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(-150, 16, -150, -2, -136, -8, -72, -10, -54, -30, 40, -31, 60, -10, 130, -8, 150, -1, 150, 16)
+
+[node name="WheelMount0" type="Marker2D" parent="."]
+position = Vector2(-110, 16)
+
+[node name="WheelMount1" type="Marker2D" parent="."]
+position = Vector2(110, 16)
+
+[node name="EngineMount" type="Marker2D" parent="."]
+position = Vector2(-112, -8)
+
+[node name="HeadlightMount" type="Marker2D" parent="."]
+position = Vector2(150, -1)
+script = ExtResource("headlight_mount")

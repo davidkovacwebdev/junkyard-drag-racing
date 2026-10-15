@@ -123,6 +123,12 @@ static func assemble_parts(body_instance: CarBody, wheel_instances: Array[CarWhe
 	wheelie_control.wheels = wheels
 	body_instance.add_child(wheelie_control)
 
+	if body_instance.part_data != null and body_instance.part_data.hydraulic_hop_speed > 0.0:
+		var hydraulics := CarHydraulics.new()
+		hydraulics.body = body_instance
+		hydraulics.wheels = wheels
+		body_instance.add_child(hydraulics)
+
 	var autosteer := CarAutosteer.new()
 	autosteer.body = body_instance
 	body_instance.add_child(autosteer)
@@ -254,7 +260,8 @@ static func assemble_from_car_data(car_data: CarModelData, parent: Node, spawn_p
 
 ## Hangs `wheel` off the body on a sprung, damped slide along the body's own
 ## up/down axis: a groove keeps the axle in line under its mount, and a spring
-## holds the body up. The body's BodyPartData sets how soft it is. Spring
+## holds the body up. A body with hydraulics lets its wheels drop a further
+## `hydraulic_stroke` below the mount, for the rams to push them out. The body's BodyPartData sets how soft it is. Spring
 ## rates are worked out from the body's weight, so the same settings feel the
 ## same on a light mattress and a heavy radiator.
 static func _suspend_wheel(body: CarBody, wheel: CarWheel, mount: Vector2, wheel_count: int, root: Node2D) -> Array[Joint2D]:
@@ -262,6 +269,7 @@ static func _suspend_wheel(body: CarBody, wheel: CarWheel, mount: Vector2, wheel
 	var sag: float = data.suspension_sag if data != null else 6.0
 	var travel: float = data.suspension_travel if data != null else 14.0
 	var damping_ratio: float = data.suspension_damping_ratio if data != null else 0.7
+	var hydraulic_stroke: float = data.hydraulic_stroke if data != null else 0.0
 	var gravity: float = ProjectSettings.get_setting("physics/2d/default_gravity")
 	var weight_on_wheel := body.mass * gravity * body.gravity_scale / wheel_count
 	var stiffness := weight_on_wheel / maxf(sag, 0.5)
@@ -273,7 +281,7 @@ static func _suspend_wheel(body: CarBody, wheel: CarWheel, mount: Vector2, wheel
 	root.add_child(groove)
 	groove.global_position = top
 	groove.global_rotation = body.global_rotation
-	groove.length = travel * 2.0
+	groove.length = travel * 2.0 + hydraulic_stroke
 	groove.initial_offset = travel
 	groove.node_a = groove.get_path_to(body)
 	groove.node_b = groove.get_path_to(wheel)
@@ -282,7 +290,7 @@ static func _suspend_wheel(body: CarBody, wheel: CarWheel, mount: Vector2, wheel
 	root.add_child(spring)
 	spring.global_position = top
 	spring.global_rotation = body.global_rotation
-	spring.length = travel
+	spring.length = travel + hydraulic_stroke
 	spring.rest_length = travel + sag
 	spring.stiffness = stiffness
 	spring.damping = damping_ratio * 2.0 * sqrt(stiffness * sprung_mass)

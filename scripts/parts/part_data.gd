@@ -9,6 +9,15 @@ enum Category { BODY, WHEEL, ENGINE, ACCESSORY }
 ## Named MaterialType, not Material, because Material is a native Godot class.
 enum MaterialType { METAL, WOOD, PLASTIC, CERAMIC, RUBBER, GLASS, FABRIC }
 
+enum Rarity { COMMON, UNCOMMON, RARE }
+## How often each rarity comes up next to a common part in bins, heaps and the
+## crane pen's loads.
+const RARITY_DROP_WEIGHTS := {
+	Rarity.COMMON: 1.0,
+	Rarity.UNCOMMON: 0.35,
+	Rarity.RARE: 0.1,
+}
+
 @export var id: StringName = &""
 @export var display_name: String = ""
 @export var category: Category = Category.BODY
@@ -21,6 +30,7 @@ enum MaterialType { METAL, WOOD, PLASTIC, CERAMIC, RUBBER, GLASS, FABRIC }
 @export var material_type: MaterialType = MaterialType.METAL
 ## SoundLibrary sound this part makes when it knocks into something.
 @export var impact_sound: StringName = &"bump"
+@export var rarity: Rarity = Rarity.COMMON
 ## Only ever comes up on the fishing line (and never from bins or junk heaps).
 @export var found_fishing: bool = false
 ## Scene this part's actual visual/physics rig lives in — set by whatever
@@ -108,6 +118,22 @@ func effect_summary() -> String:
 ## only has the generic one every part shares.
 func signature_sound() -> StringName:
 	return impact_sound if impact_sound != &"bump" else &""
+
+func drop_weight() -> float:
+	return RARITY_DROP_WEIGHTS[rarity]
+
+## Picks one part from `pool`, rarer parts coming up less often. Null when the
+## pool is empty.
+static func pick_weighted(pool: Array, rng: RandomNumberGenerator) -> PartData:
+	var total_weight := 0.0
+	for part: PartData in pool:
+		total_weight += part.drop_weight()
+	var roll := rng.randf() * total_weight
+	for part: PartData in pool:
+		roll -= part.drop_weight()
+		if roll <= 0.0:
+			return part
+	return pool.back() if not pool.is_empty() else null
 
 static func tier_color(tier_value: int) -> Color:
 	return TIER_COLORS[clampi(tier_value, 1, TIER_COUNT) - 1]

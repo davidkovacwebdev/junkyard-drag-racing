@@ -282,7 +282,7 @@ func _spill_part(rng: RandomNumberGenerator) -> void:
 	var orb := part_pickup_scene.instantiate() as PartPickup
 	if orb == null:
 		return
-	orb.configure(pool[rng.randi_range(0, pool.size() - 1)])
+	orb.configure(PartData.pick_weighted(pool, rng))
 	# A beat after the scrap so the part orb reads as the last, special thing out
 	# of the bin instead of just another orb in the burst, and one rank further
 	# out so it can never share a spot with a scrap orb.

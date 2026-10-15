@@ -69,7 +69,7 @@ func _plan_part_slots(rng: RandomNumberGenerator) -> Array[Dictionary]:
 	if pool.is_empty():
 		return slots
 	for i in part_count:
-		var data: PartData = pool[rng.randi() % pool.size()]
+		var data: PartData = PartData.pick_weighted(pool, rng)
 		var probe := PartFactory.instantiate(data)
 		if probe == null:
 			continue

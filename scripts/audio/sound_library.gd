@@ -107,6 +107,7 @@ const NAMES: Array[StringName] = [
 	&"flat_tire_flop",
 	&"giant_tire_boom",
 	&"robot_stomp",
+	&"hydraulic_hop",
 	&"bigfoot_stomp",
 	&"fuselage_bong",
 	&"bone_clatter",
@@ -258,6 +259,7 @@ const CAR_SOUNDS: Array[StringName] = [
 	&"flat_tire_flop",
 	&"giant_tire_boom",
 	&"robot_stomp",
+	&"hydraulic_hop",
 	&"bigfoot_stomp",
 	&"fuselage_bong",
 	&"bone_clatter",
@@ -462,6 +464,7 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"flat_tire_flop": return _flat_tire_flop(rng)
 		&"giant_tire_boom": return _giant_tire_boom(rng)
 		&"robot_stomp": return _robot_stomp(rng)
+		&"hydraulic_hop": return _hydraulic_hop(rng)
 		&"fuselage_bong": return _fuselage_bong(rng)
 		&"bone_clatter": return _bone_clatter(rng)
 		&"track_clank": return _track_clank(rng)
@@ -966,6 +969,26 @@ static func _robot_stomp(rng: RandomNumberGenerator) -> PackedFloat32Array:
 		highpass = 2500.0,
 	}, rng)
 	Synth.mix_into(out, hiss, 0.12, 0.2)
+	return Synth.finish(out)
+
+## Lowrider hydraulics firing: a buzzy pump whine, a hard valve KA-CHUNK and
+## a spitting hiss as the rams shove the car off the ground.
+static func _hydraulic_hop(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var out := Synth.silence(0.45)
+	var pump := Synth.tones(0.12, [[[0.0, 180.0], [0.12, 420.0]]], {
+		square = 0.6,
+		amp = [[0.0, 0.0], [0.02, 0.8], [0.12, 1.0]],
+	})
+	Synth.mix_into(out, pump, 0.0, 0.25)
+	Synth.mix_into(out, Synth.thump(0.2, 320.0, 0.001, 0.06, rng), 0.11, 1.0)
+	Synth.mix_into(out, _metal_ring(0.25, 380.0, 18.0, 0.08, rng), 0.11, 0.4)
+	var hiss := Synth.noise_sweep(0.3, {
+		freq = [[0.0, 6000.0], [0.3, 2800.0]],
+		q = [[0.0, 1.0]],
+		amp = [[0.0, 0.0], [0.01, 1.0], [0.3, 0.0]],
+		highpass = 2000.0,
+	}, rng)
+	Synth.mix_into(out, hiss, 0.13, 0.35)
 	return Synth.finish(out)
 
 ## An old airplane fuselage knocked: a hollow aluminium tube going bong.

@@ -28,6 +28,16 @@ extends PartData
 ## Hits from other cars go through in full.
 @export_range(0.0, 0.9) var suspension_wheel_protection: float = 0.3
 
+@export_group("Hydraulics")
+## Upward speed (px/s) the lowrider rams kick the whole car to on every hop.
+## 0 means the body has no hydraulics.
+@export var hydraulic_hop_speed: float = 0.0
+## How far (px) the rams can push each wheel out below its mount. The body
+## rises this far off its wheels before it drags them off the ground.
+@export var hydraulic_stroke: float = 0.0
+## Seconds the pump needs to recharge after a hop before the next one.
+@export var hydraulic_recharge_time: float = 1.4
+
 ## Engine power multiplier at the catalog's least and most streamlined body
 ## (BODY_SPEED_RANGE): a cardboard box holds its engine back, a saucer lets it
 ## fly.
@@ -36,6 +46,11 @@ const BODY_SPEED_RANGE := Vector2(1.2, 5.0)
 
 func _init() -> void:
 	category = Category.BODY
+
+func effect_summary() -> String:
+	if hydraulic_hop_speed > 0.0:
+		return "Hydraulics: hops the whole car off the ground every few seconds."
+	return ""
 
 ## What this body does to the engine's power, from its speed stat.
 func speed_multiplier() -> float:

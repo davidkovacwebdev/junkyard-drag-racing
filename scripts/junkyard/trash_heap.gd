@@ -431,7 +431,7 @@ func _random_part(rng: RandomNumberGenerator, tier: int) -> PartData:
 		pool.assign(matching)
 	if pool.is_empty():
 		return null
-	return pool[rng.randi() % pool.size()]
+	return PartData.pick_weighted(pool, rng)
 
 func _instantiate(data: PartData) -> Node2D:
 	return PartFactory.instantiate(data)
