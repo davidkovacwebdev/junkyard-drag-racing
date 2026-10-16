@@ -6,7 +6,7 @@ extends Node2D
 ##
 ## Junk Toy cut-out: shadow, legs, one slab of fur for the body with a shade
 ## strip, a swinging arm and a round head whose pale face patch is the one
-## feature. Once the player has his leg he only has one left and hops. Origin
+## feature. Once the car has knocked his leg off he only has one left and hops. Origin
 ## on the ground under his feet so he Y-sorts against the car.
 
 signal footfall(at: Vector2, heading: Vector2)
@@ -37,6 +37,9 @@ var _moving := false
 func walk_along(points: PackedVector2Array, speed: float) -> void:
 	_path = points
 	_next_index = 0
+	_speed = speed
+
+func set_speed(speed: float) -> void:
 	_speed = speed
 
 func _process(delta: float) -> void:

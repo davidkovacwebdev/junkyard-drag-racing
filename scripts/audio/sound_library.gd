@@ -33,6 +33,7 @@ const NAMES: Array[StringName] = [
 	&"grandpa_cackle",
 	&"car_whack",
 	&"wheelchair_squeak",
+	&"hector_bell",
 	&"beer_crack",
 	&"beer_chug",
 	&"puke",
@@ -131,6 +132,8 @@ const NAMES: Array[StringName] = [
 	&"door_close",
 	&"scrap_pickup",
 	&"part_pickup",
+	&"part_card_slide",
+	&"stat_tick",
 	&"cash_register",
 	&"denied",
 	&"trash_rummage",
@@ -295,6 +298,8 @@ const CAR_SOUNDS: Array[StringName] = [
 
 const UI_SOUNDS: Array[StringName] = [
 	&"ui_click",
+	&"part_card_slide",
+	&"stat_tick",
 	&"loading_crank",
 	&"profile_scrapped",
 	&"ui_hover",
@@ -385,6 +390,7 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"grandpa_cackle": return _grandpa_cackle(rng)
 		&"car_whack": return _car_whack(rng)
 		&"wheelchair_squeak": return _wheelchair_squeak(rng)
+		&"hector_bell": return _hector_bell(rng)
 		&"beer_crack": return _beer_crack(rng)
 		&"beer_chug": return _beer_chug(rng)
 		&"puke": return _puke(rng)
@@ -487,6 +493,8 @@ static func render(sound_name: StringName) -> PackedFloat32Array:
 		&"door_close": return _door_close(rng)
 		&"scrap_pickup": return _scrap_pickup()
 		&"part_pickup": return _part_pickup()
+		&"part_card_slide": return _part_card_slide(rng)
+		&"stat_tick": return _stat_tick()
 		&"cash_register": return _cash_register(rng)
 		&"denied": return _denied()
 		&"trash_rummage": return _trash_rummage(rng)
@@ -1563,6 +1571,18 @@ static func _car_whack(rng: RandomNumberGenerator) -> PackedFloat32Array:
 				0.08 + hit * 0.06, 0.25)
 	return Synth.finish(out)
 
+## Hector's little brass hand bell on his wheelchair: one tinny, impatient
+## "ding" with a clapper tick.
+static func _hector_bell(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var ding := Synth.tones(0.45, [[[0.0, 2050.0]], [[0.0, 4920.0]], [[0.0, 3310.0]]], {
+		square = 0.1,
+		amp = [[0.0, 0.0], [0.002, 1.0], [0.05, 0.4], [0.45, 0.0]],
+	})
+	var out := Synth.silence(0.5)
+	out = Synth.mix_into(out, ding, 0.0, 0.8)
+	out = Synth.mix_into(out, Synth.thump(0.02, 3000.0, 0.001, 0.006, rng), 0.0, 0.35)
+	return Synth.finish(out, 0.6)
+
 ## A rusty wheelchair rolling: dry squeaks off an ungreased axle, one per
 ## turn, over a low rumble of tyres on dirt.
 static func _wheelchair_squeak(rng: RandomNumberGenerator) -> PackedFloat32Array:
@@ -2307,6 +2327,26 @@ static func _part_pickup() -> PackedFloat32Array:
 			amp = [[0.0, 0.0], [0.005, 1.0], [0.07, 0.7], [0.1, 0.0]],
 		})
 	return Synth.concat([note.call(660.0), note.call(880.0), note.call(1320.0)])
+
+## Cardboard sliding onto the HUD: a short papery swish that stops on a soft knock.
+static func _part_card_slide(rng: RandomNumberGenerator) -> PackedFloat32Array:
+	var swish := Synth.noise_sweep(0.16, {
+		freq = [[0.0, 1800.0], [0.16, 900.0]],
+		q = [[0.0, 1.5]],
+		amp = [[0.0, 0.0], [0.03, 0.7], [0.16, 0.0]],
+	}, rng)
+	var knock := Synth.thump(0.08, 500.0, 0.003, 0.05, rng)
+	var out := Synth.mix_into(Synth.silence(0.26), swish, 0.0, 0.6)
+	out = Synth.mix_into(out, knock, 0.15, 1.0)
+	return Synth.finish(out)
+
+## One stat block clicking in; the card raises its pitch per block.
+static func _stat_tick() -> PackedFloat32Array:
+	return Synth.tones(0.05, [[[0.0, 1100.0], [0.05, 1250.0]]], {
+		square = 0.35,
+		amp = [[0.0, 0.0], [0.003, 1.0], [0.05, 0.0]],
+		peak = 0.5,
+	})
 
 ## "Ka-ching": drawer clunk, then a bell pair ringing out.
 static func _cash_register(rng: RandomNumberGenerator) -> PackedFloat32Array:

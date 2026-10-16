@@ -16,9 +16,17 @@ material_type = 0
 script = ExtResource("1")
 part_data = SubResource("Resource_square")
 
-[node name="Polygon2D" type="Polygon2D" parent="."]
-color = Color(0.45, 0.45, 0.5, 1)
-polygon = PackedVector2Array(-42, -42, 42, -42, 42, 42, -42, 42)
+[node name="Tire" type="Polygon2D" parent="."]
+color = Color(0.15, 0.15, 0.16, 1)
+polygon = PackedVector2Array(-36, -42, 36, -42, 42, -36, 42, 36, 36, 42, -36, 42, -42, 36, -42, -36)
+
+[node name="Rim" type="Polygon2D" parent="."]
+color = Color(0.64, 0.65, 0.68, 1)
+polygon = PackedVector2Array(-25, -30, 25, -30, 30, -25, 30, 25, 25, 30, -25, 30, -30, 25, -30, -25)
+
+[node name="Hub" type="Polygon2D" parent="."]
+color = Color(0.36, 0.36, 0.39, 1)
+polygon = PackedVector2Array(0, -12, 12, 0, 0, 12, -12, 0)
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
-polygon = PackedVector2Array(-42, -42, 42, -42, 42, 42, -42, 42)
+polygon = PackedVector2Array(-36, -42, 36, -42, 42, -36, 42, 36, 36, 42, -36, 42, -42, 36, -42, -36)

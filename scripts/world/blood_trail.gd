@@ -13,6 +13,8 @@ const BLOOD := Color(0.55, 0.08, 0.08, 1)
 const HOLD_TIME := 25.0
 const FADE_TIME := 3.0
 
+## How long a drop lies there before it starts to fade.
+var hold_time := HOLD_TIME
 ## Each: {points: PackedVector2Array, age: float}.
 var _drops: Array[Dictionary] = []
 
@@ -21,7 +23,7 @@ func _process(delta: float) -> void:
 		return
 	for drop in _drops:
 		drop.age += delta
-	while not _drops.is_empty() and _drops[0].age > HOLD_TIME + FADE_TIME:
+	while not _drops.is_empty() and _drops[0].age > hold_time + FADE_TIME:
 		_drops.pop_front()
 	queue_redraw()
 
@@ -46,6 +48,6 @@ func add_smear(from: Vector2, to: Vector2, width: float) -> void:
 func _draw() -> void:
 	for drop in _drops:
 		var color := BLOOD
-		if drop.age > HOLD_TIME:
-			color.a = 1.0 - (drop.age - HOLD_TIME) / FADE_TIME
+		if drop.age > hold_time:
+			color.a = 1.0 - (drop.age - hold_time) / FADE_TIME
 		draw_colored_polygon(drop.points, color)

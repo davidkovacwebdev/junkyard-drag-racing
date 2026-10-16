@@ -203,9 +203,7 @@ func collect(by: Node = null) -> void:
 	grant()
 	if collect_sound() != &"":
 		Sfx.play(collect_sound(), -6.0, 0.12)
-	var text := label_text()
-	if not text.is_empty():
-		_spawn_float_text(text)
+	_announce()
 	collected.emit(by)
 	# A quick pop-and-fade on the orb's way out. The text is a separate node (see
 	# `_spawn_float_text`), so it survives this.
@@ -214,6 +212,12 @@ func collect(by: Node = null) -> void:
 	tween.tween_property(self, "scale", Vector2(1.35, 1.35), 0.16)
 	tween.parallel().tween_property(self, "modulate:a", 0.0, 0.2)
 	tween.tween_callback(queue_free)
+
+## How the grab is shown. The base floats `label_text()` up over the orb.
+func _announce() -> void:
+	var text := label_text()
+	if not text.is_empty():
+		_spawn_float_text(text)
 
 ## The line that floats up when this is grabbed. Empty = no text at all.
 func label_text() -> String:

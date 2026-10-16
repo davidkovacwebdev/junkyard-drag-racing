@@ -77,12 +77,13 @@ const LANDOWNER_SCENE_PATH := "res://cutscenes/landowner.tres"
 @export var skid_min_speed: float = 120.0
 @export var skid_mark_color: Color = Color(0.05, 0.05, 0.05, 0.55)
 @export var skid_mark_width: float = 6.0
-## World pixels a wheel has to travel since its last stamp before a new
-## segment is laid down — caps how many mark nodes a long skid spawns
-## without leaving visible gaps in the trail.
-@export var skid_mark_min_gap: float = 14.0
-## A stamped segment sits fully opaque this long, then eases out over
-## fade_time — hold + fade is the mark's total 5-second lifetime.
+## World pixels a wheel has to travel before its streak gets a new point.
+@export var skid_mark_min_gap: float = 8.0
+## Points per streak before it's handed off to a fresh Line2D, so a long
+## skid starts fading from its tail instead of lingering whole.
+@export var skid_mark_max_points: int = 40
+## A finished streak sits fully opaque this long, then eases out over
+## fade_time.
 @export var skid_mark_hold_time: float = 2.0
 @export var skid_mark_fade_time: float = 3.0
 
@@ -245,11 +246,7 @@ var _skid_marks: SkidMarksLayer = null
 ## without a puddle layer — the drag strip races, say — which just means
 ## nothing is ever wet.
 var _puddles: PuddleField = null
-## Last stamped world position per wheel mount index; null means that
-## wheel isn't mid-skid (either never started, or realigned and got
-## cleared) so the next stamp starts fresh instead of drawing a long
-## connector line back to wherever the last skid happened to end.
-var _skid_last_stamp: Array = []
+var _skid_streaks := SkidStreaks.new()
 
 ## Null when the car has no engine — then it rolls around in silence.
 var _engine_sound: EngineSound = null
@@ -331,6 +328,7 @@ func _ready() -> void:
 		readout.mouse_entered.connect(Sfx.play.bind(&"ui_hover", Sfx.UI_HOVER_VOLUME_DB))
 	_road_network = _resolve_in_scene(roads_path, RoadNetwork) as RoadNetwork
 	_skid_marks = _resolve_in_scene(skid_marks_path, SkidMarksLayer) as SkidMarksLayer
+	_skid_streaks.configure(skid_mark_color, skid_mark_width, skid_mark_min_gap, skid_mark_max_points, skid_mark_hold_time, skid_mark_fade_time)
 	_puddles = _resolve_in_scene(puddles_path, PuddleField) as PuddleField
 	_terrain = _resolve_in_scene(terrain_path, TerrainNetwork) as TerrainNetwork
 	_water_line = CarWaterLine.new()
@@ -1194,52 +1192,13 @@ func _is_skidding(input_dir: Vector2, on_puddle: bool = false) -> bool:
 	var threshold := puddle_skid_angle_threshold if on_puddle else skid_angle_threshold
 	return absf(velocity.normalized().angle_to(input_dir.normalized())) > threshold
 
-## Stamps a short mark segment behind each wheel mount while skidding,
-## picking up from wherever that wheel's last stamp landed so a fast
-## skid still reads as one continuous streak rather than dots. Wheels
-## that stop skidding just drop out of _skid_last_stamp (set back to
-## null) so the next skid starts its own fresh trail instead of drawing
-## one long connector across wherever the car drove in between.
 func _update_skid_marks(skidding: bool) -> void:
 	if _skid_marks == null:
 		return
-	var mounts := _visual.get_wheel_mounts()
-	if _skid_last_stamp.size() != mounts.size():
-		_skid_last_stamp.resize(mounts.size())
-	for i in mounts.size():
-		if not skidding:
-			_skid_last_stamp[i] = null
-			continue
-		var world_pos: Vector2 = _visual.to_global(mounts[i])
-		var last: Variant = _skid_last_stamp[i]
-		if last == null:
-			_skid_last_stamp[i] = world_pos
-			continue
-		var last_pos: Vector2 = last
-		if last_pos.distance_to(world_pos) >= skid_mark_min_gap:
-			_spawn_skid_segment(last_pos, world_pos)
-			_skid_last_stamp[i] = world_pos
-
-## One stamped segment: a short dark line from `a` to `b` in world space,
-## fully opaque for skid_mark_hold_time, then eased out over
-## skid_mark_fade_time and freed — a 5-second lifetime by default,
-## matching a real tire mark that lingers before weathering away.
-func _spawn_skid_segment(a: Vector2, b: Vector2) -> void:
-	var line := Line2D.new()
-	line.width = skid_mark_width
-	line.default_color = skid_mark_color
-	line.begin_cap_mode = Line2D.LINE_CAP_ROUND
-	line.end_cap_mode = Line2D.LINE_CAP_ROUND
-	line.antialiased = true
-	if _under_bridge:
-		line.z_index = UNDER_BRIDGE_Z_INDEX
-	line.add_point(_skid_marks.to_local(a))
-	line.add_point(_skid_marks.to_local(b))
-	_skid_marks.add_child(line)
-	var tween := line.create_tween()
-	tween.tween_interval(skid_mark_hold_time)
-	tween.tween_property(line, "modulate:a", 0.0, skid_mark_fade_time)
-	tween.tween_callback(line.queue_free)
+	var wheel_world_positions: Array[Vector2] = []
+	for mount in _visual.get_wheel_mounts():
+		wheel_world_positions.append(_visual.to_global(mount))
+	_skid_streaks.update(_skid_marks, wheel_world_positions, skidding, UNDER_BRIDGE_Z_INDEX if _under_bridge else 0)
 
 ## Nearby buildings are just StaticBody2Ds with a non-empty `display_name`
 ## property (duck-typed, not a shared base class) that overlap this zone.

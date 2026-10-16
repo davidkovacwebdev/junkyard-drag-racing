@@ -32,16 +32,18 @@ func _ready() -> void:
 func _apply_tint() -> void:
 	if part == null:
 		return
-	match part.category:
-		PartData.Category.BODY:
-			orb_color = Color(0.5, 0.72, 0.51, 1.0)
-		PartData.Category.WHEEL:
-			orb_color = Color(0.46, 0.62, 0.79, 1.0)
-		PartData.Category.ENGINE:
-			orb_color = Color(0.83, 0.6, 0.33, 1.0)
-		PartData.Category.ACCESSORY:
-			orb_color = Color(0.7, 0.52, 0.72, 1.0)
+	orb_color = category_color(part.category)
 	queue_redraw()
+
+static func category_color(category: PartData.Category) -> Color:
+	match category:
+		PartData.Category.WHEEL:
+			return Color(0.46, 0.62, 0.79, 1.0)
+		PartData.Category.ENGINE:
+			return Color(0.83, 0.6, 0.33, 1.0)
+		PartData.Category.ACCESSORY:
+			return Color(0.7, 0.52, 0.72, 1.0)
+	return Color(0.5, 0.72, 0.51, 1.0)
 
 func grant() -> void:
 	if part != null:
@@ -50,10 +52,10 @@ func grant() -> void:
 func collect_sound() -> StringName:
 	return &"part_pickup"
 
-func label_text() -> String:
-	if part == null:
-		return ""
-	return "Found %s!" % part.display_name
+## A part gets a HUD card (part, name, stats) instead of a floating line.
+func _announce() -> void:
+	if part != null:
+		PartFoundCard.spawn(self, part, get_global_transform_with_canvas() * _orb_offset)
 
 ## Instance the part's real scene, freeze it, and scale it to sit inside the
 ## orb. The instance is wrapped in a plain `Node2D` and *that* is scaled: a

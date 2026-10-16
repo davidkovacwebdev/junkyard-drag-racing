@@ -50,7 +50,8 @@ extends CharacterBody2D
 @export var skid_angle_threshold: float = deg_to_rad(35.0)
 @export var skid_mark_color: Color = Color(0.05, 0.05, 0.05, 0.55)
 @export var skid_mark_width: float = 7.0
-@export var skid_mark_min_gap: float = 14.0
+@export var skid_mark_min_gap: float = 8.0
+@export var skid_mark_max_points: int = 40
 @export var skid_mark_hold_time: float = 2.0
 @export var skid_mark_fade_time: float = 3.0
 
@@ -149,7 +150,7 @@ var _junction_station: float = 0.0
 var _facing_right: bool = true
 var _tilt: float = 0.0
 var _last_move_dir: Vector2 = Vector2.RIGHT
-var _skid_last_stamp: Array = []
+var _skid_streaks := SkidStreaks.new()
 
 var _collect_timer: float = 0.0
 var _drop_timer: float = 0.0
@@ -165,6 +166,7 @@ func _ready() -> void:
 	_rng.randomize()
 	_road_network = _resolve_roads()
 	_skid_marks = _resolve_skid_marks()
+	_skid_streaks.configure(skid_mark_color, skid_mark_width, skid_mark_min_gap, skid_mark_max_points, skid_mark_hold_time, skid_mark_fade_time)
 	_build_visual()
 	_setup_engine_sound()
 	_drop_timer = _rng.randf_range(drop_check_interval_min, drop_check_interval_max)
@@ -579,37 +581,10 @@ func _roll_distance(delta: float, facing_sign: float) -> float:
 func _update_skid_marks(skidding: bool) -> void:
 	if _skid_marks == null:
 		return
-	var mounts := _visual.get_wheel_mounts()
-	if _skid_last_stamp.size() != mounts.size():
-		_skid_last_stamp.resize(mounts.size())
-	for i in mounts.size():
-		if not skidding:
-			_skid_last_stamp[i] = null
-			continue
-		var world_pos: Vector2 = _visual.to_global(mounts[i])
-		var last: Variant = _skid_last_stamp[i]
-		if last == null:
-			_skid_last_stamp[i] = world_pos
-			continue
-		var last_pos: Vector2 = last
-		if last_pos.distance_to(world_pos) >= skid_mark_min_gap:
-			_spawn_skid_segment(last_pos, world_pos)
-			_skid_last_stamp[i] = world_pos
-
-func _spawn_skid_segment(a: Vector2, b: Vector2) -> void:
-	var line := Line2D.new()
-	line.width = skid_mark_width
-	line.default_color = skid_mark_color
-	line.begin_cap_mode = Line2D.LINE_CAP_ROUND
-	line.end_cap_mode = Line2D.LINE_CAP_ROUND
-	line.antialiased = true
-	line.add_point(_skid_marks.to_local(a))
-	line.add_point(_skid_marks.to_local(b))
-	_skid_marks.add_child(line)
-	var tween := line.create_tween()
-	tween.tween_interval(skid_mark_hold_time)
-	tween.tween_property(line, "modulate:a", 0.0, skid_mark_fade_time)
-	tween.tween_callback(line.queue_free)
+	var wheel_world_positions: Array[Vector2] = []
+	for mount in _visual.get_wheel_mounts():
+		wheel_world_positions.append(_visual.to_global(mount))
+	_skid_streaks.update(_skid_marks, wheel_world_positions, skidding, 0)
 
 ## Same resolution convention as PlayerCar/TrashSpawner: the exported path
 ## first, falling back to searching the scene for any RoadNetwork.

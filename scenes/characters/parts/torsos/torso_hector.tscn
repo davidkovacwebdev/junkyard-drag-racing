@@ -1,0 +1,43 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Resource_torso_hector"]
+script = ExtResource("2")
+id = &"torso_hector"
+display_name = "Hector's Shirt"
+slot = 2
+npc_only = true
+
+[node name="HectorTorso" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_torso_hector")
+
+[node name="Lap" type="Polygon2D" parent="."]
+color = Color(0.42, 0.34, 0.26, 1)
+polygon = PackedVector2Array(-30, -100, 30, -100, 32, -64, -32, -64)
+
+[node name="Shirt" type="Polygon2D" parent="."]
+color = Color(0.74, 0.66, 0.5, 1)
+polygon = PackedVector2Array(-28, -172, 28, -172, 30, -96, -30, -96)
+
+[node name="Collar" type="Polygon2D" parent="."]
+color = Color(0.85, 0.68, 0.55, 1)
+polygon = PackedVector2Array(-10, -172, 10, -172, 0, -154)
+
+[node name="ArmLeft" type="Polygon2D" parent="."]
+color = Color(0.64, 0.56, 0.42, 1)
+polygon = PackedVector2Array(-46, -170, -28, -170, -28, -108, -46, -108)
+
+[node name="ArmRight" type="Polygon2D" parent="."]
+color = Color(0.64, 0.56, 0.42, 1)
+polygon = PackedVector2Array(28, -170, 46, -170, 46, -108, 28, -108)
+
+[node name="HandLeft" type="Polygon2D" parent="."]
+color = Color(0.85, 0.68, 0.55, 1)
+polygon = PackedVector2Array(-46, -108, -28, -108, -28, -100, -46, -100)
+
+[node name="HandRight" type="Polygon2D" parent="."]
+color = Color(0.85, 0.68, 0.55, 1)
+polygon = PackedVector2Array(28, -108, 46, -108, 46, -100, 28, -100)

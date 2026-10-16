@@ -1,0 +1,60 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_part.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/parts/character_part_data.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/character/hector_bell.gd" id="3"]
+
+[sub_resource type="Resource" id="Resource_legs_wheelchair_hector"]
+script = ExtResource("2")
+id = &"legs_wheelchair_hector"
+display_name = "Hector's Wheelchair"
+slot = 0
+npc_only = true
+
+[node name="LegsWheelchairHector" type="Node2D"]
+script = ExtResource("1")
+part_data = SubResource("Resource_legs_wheelchair_hector")
+
+[node name="OxygenTank" type="Polygon2D" parent="."]
+color = Color(0.36, 0.55, 0.38, 1)
+polygon = PackedVector2Array(-88, -100, -72, -100, -70, -96, -70, -34, -90, -34, -90, -96)
+
+[node name="OxygenValve" type="Polygon2D" parent="."]
+color = Color(0.6, 0.62, 0.64, 1)
+polygon = PackedVector2Array(-85, -108, -75, -108, -75, -100, -85, -100)
+
+[node name="Frame" type="Polygon2D" parent="."]
+color = Color(0.3, 0.31, 0.34, 1)
+polygon = PackedVector2Array(-52, -30, 52, -30, 52, -21, -52, -21)
+
+[node name="TyreLeft" type="Polygon2D" parent="."]
+color = Color(0.13, 0.13, 0.15, 1)
+polygon = PackedVector2Array(-60, -100, -54, -100, -48, -94, -48, -6, -54, 0, -60, 0, -66, -6, -66, -94)
+
+[node name="TyreRight" type="Polygon2D" parent="."]
+color = Color(0.13, 0.13, 0.15, 1)
+polygon = PackedVector2Array(54, -100, 60, -100, 66, -94, 66, -6, 60, 0, 54, 0, 48, -6, 48, -94)
+
+[node name="ShinLeft" type="Polygon2D" parent="."]
+color = Color(0.42, 0.34, 0.26, 1)
+polygon = PackedVector2Array(-23, -44, -6, -44, -7, -18, -22, -18)
+
+[node name="ShinRight" type="Polygon2D" parent="."]
+color = Color(0.42, 0.34, 0.26, 1)
+polygon = PackedVector2Array(6, -44, 23, -44, 22, -18, 7, -18)
+
+[node name="Knees" type="Polygon2D" parent="."]
+color = Color(0.5, 0.41, 0.31, 1)
+polygon = PackedVector2Array(-38, -66, -3, -66, 0, -60, 3, -66, 38, -66, 38, -42, 3, -42, 0, -46, -3, -42, -38, -42)
+
+[node name="Bell" type="Node2D" parent="."]
+position = Vector2(59, -100)
+script = ExtResource("3")
+
+[node name="Dome" type="Polygon2D" parent="Bell"]
+color = Color(0.86, 0.7, 0.3, 1)
+polygon = PackedVector2Array(-13, 0, 13, 0, 10, -8, 5, -14, -5, -14, -10, -8)
+
+[node name="Button" type="Polygon2D" parent="Bell"]
+color = Color(0.68, 0.53, 0.2, 1)
+polygon = PackedVector2Array(-3, -14, 3, -14, 3, -20, -3, -20)

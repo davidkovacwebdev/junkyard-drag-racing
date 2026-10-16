@@ -142,6 +142,13 @@ func _can_open() -> bool:
 
 ## The world (or a building) is on screen: not a menu, not a race, no
 ## cutscene. The trunk (I) uses the same rule.
+## Screen y just under the quest tracker while it shows, else 0, so other
+## top-left HUD (the part found card) can sit below it.
+func tracker_bottom() -> float:
+	if not _tracker.visible:
+		return 0.0
+	return _tracker.get_global_rect().end.y
+
 func hud_allowed() -> bool:
 	var scene := get_tree().current_scene
 	if scene == null or Cutscenes.is_active():

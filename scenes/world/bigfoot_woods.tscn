@@ -12,7 +12,6 @@ y_sort_enabled = true
 script = ExtResource("1")
 cross_path = PackedVector2Array(-80, -660, -20, -250, 30, 170)
 flee_path = PackedVector2Array(260, 480, 560, 760, 820, 1080, 1100, 1500)
-leg_drop_index = 2
 
 [node name="Footprints" type="Node2D" parent="."]
 z_index = -1
